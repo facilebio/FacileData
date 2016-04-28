@@ -1,0 +1,6 @@
+* Do not depend on `FacileAtezo` artifacts in this package.
+  - Create a slimmer, examplar database, which FacileDb() connects to
+    (largely for testing)
+  - Change the name of the options in .onLoad
+  - Change the sample-meta-definitions.yaml file to be appropriate for the
+    new mini-test-db that FacileDb creates
