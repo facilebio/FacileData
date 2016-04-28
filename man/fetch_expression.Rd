@@ -4,7 +4,8 @@
 \alias{fetch_expression}
 \title{Helper function creates dplyr query to get expression data of interest.}
 \usage{
-fetch_expression(samples = NULL, feature_ids = NULL, db = FacileDb())
+fetch_expression(db, samples = NULL, feature_ids = NULL,
+  do.collect = FALSE)
 }
 \arguments{
 \item{db}{The db connection to use. Creates and destroys a new one

@@ -83,6 +83,7 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
   x
 }
 
+##' @export
 as.DGEList <- function(x, covariates=c('IC', 'TC', 'BCOR'), db=attr(x, 'db'),
                        cov.def=db[['cov.def']], ...) {
   stopifnot(is.FacileDb(db))

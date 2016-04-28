@@ -4,7 +4,7 @@
 \alias{FacileDb}
 \title{Setup the SQLite connection the TCGA database}
 \usage{
-FacileDb(db.path = getOption("clinx.dbpath", NULL))
+FacileDb(db.path = getOption("fatezo.dbpath", NULL))
 }
 \arguments{
 \item{db.path}{The path to the clinX database.}

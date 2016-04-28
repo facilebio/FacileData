@@ -4,7 +4,7 @@
 \alias{cast_covariate}
 \title{Casts the character values of the covariates to their defined types}
 \usage{
-cast_covariate(covariate, values, cov.defs)
+cast_covariate(covariate, values, cov.def)
 }
 \arguments{
 \item{covariate}{the name of the covariate}

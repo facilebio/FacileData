@@ -4,13 +4,13 @@
 \alias{fetch_sample_statistics}
 \title{Fetch the sample statistics for sets of samples in the warehouse}
 \usage{
-fetch_sample_statistics(samples = NULL, db = FacileDb())
+fetch_sample_statistics(db, samples = NULL, do.collect = FALSE)
 }
 \arguments{
+\item{db}{the connection to the database}
+
 \item{samples}{a data.frame or tbl_sqlite that has dataset and sample_id
 columns}
-
-\item{db}{the connection to the database}
 }
 \value{
 a tbl_df or tbl_sqlite result from the sample_stats table

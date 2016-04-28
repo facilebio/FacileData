@@ -14,7 +14,7 @@
   if (Sys.getenv("HOME") == "/Users/lianogls") {
     dpath <- '/Users/lianogls/workspace/data/facile/atezo/v1'
   } else {
-    dpath <- '/gne/research/workspace/lianogls/data/facile/atezo/v1'
+    dpath <- '/gne/devsci/data/obdroot/PDL1mab/pcd4989g/ngs/intermdata/lianoglou/facile-atezo/v01'
   }
 
   impl.prefix <- 'fatezo'
@@ -22,7 +22,7 @@
 
   pkg.opts <- list(
     datapath=dpath,
-    dbpath=file.path(dpath, 'atezodb.sqlite'),
+    dbpath=file.path(dpath, 'AtezoDb.sqlite'),
     cachedir=file.path(dpath, 'cache'),
     covdef=file.path(dpath, 'sample-meta-definitions.yaml'))
   names(pkg.opts) <- sprintf('%s.%s', impl.prefix, names(pkg.opts))
