@@ -4,7 +4,7 @@
 \alias{createWarehouse}
 \title{Creates the database}
 \usage{
-createWarehouse(db.path, datasets, sample.meta, ...)
+createWarehouse(db.path, datasets, sample.meta, pragma.page_size = 2^12, ...)
 }
 \description{
 Creates the database

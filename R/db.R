@@ -10,7 +10,20 @@ FacileDb <- function(db.path=getOption('fatezo.dbpath', NULL)) {
   if (!file.exists(db.path)) {
     stop("Illegal path to tcga db file")
   }
+
+  ## Update some parameters in the connection for increased speed
+  ## http://stackoverflow.com/questions/1711631
+  ##
+  ## Explains some pragme setting:
+  ##   http://www.codificar.com.br/blog/sqlite-optimization-faq/
+  ##
+  ## The following PRAGMA are of likely interest:
+  ##   1. cache_size  https://www.sqlite.org/pragma.html#pragma_cache_size
+  ##   2. page_size
   out <- src_sqlite(db.path)
+  dbSendQuery(out$con, 'pragma temp_store=MEMORY;')
+  dbSendQuery(out$con, 'pragma cache_size=20000;')
+
   out['cov.def'] <- list(NULL)
   out['cov.def'] <- getOption('fatezo.covdef')
 

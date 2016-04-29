@@ -58,6 +58,7 @@ createWarehouse <- function(db.path, datasets, sample.meta,
   RSQLite::dbWriteTable(db, 'sample_covariate', sample.meta, append=TRUE)
   RSQLite::dbSendQuery(db, 'CREATE INDEX sample_cov_var ON sample_covariate (variable);')
   RSQLite::dbSendQuery(db, 'CREATE INDEX sample_cov_val ON sample_covariate (value);')
+  RSQLite::dbSendQuery(db, 'CREATE INDEX sample_cov_class ON sample_covariate (class);')
 
   dbDisconnect(db)
   db.path

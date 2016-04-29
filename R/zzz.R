@@ -12,7 +12,7 @@
   ## The code below is the same in the FacileAtezo db package, because we will
   ## use that dataset for testing.
   if (Sys.getenv("HOME") == "/Users/lianogls") {
-    dpath <- '/Users/lianogls/workspace/data/facile/atezo/v1'
+    dpath <- '/Users/lianogls/workspace/data/facile/atezo/v01'
   } else {
     dpath <- '/gne/devsci/data/obdroot/PDL1mab/pcd4989g/ngs/intermdata/lianoglou/facile-atezo/v01'
   }
