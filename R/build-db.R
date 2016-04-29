@@ -5,7 +5,7 @@
 ##' @importClassesFrom edgeR DGEList
 ##' @importFrom DBI dbDriver
 ##' @importFrom RSQLite dbConnect dbWriteTable dbSendQuery
-createWarehouse <- function(db.path, datasets, sample.meta, ,
+createWarehouse <- function(db.path, datasets, sample.meta,
                             pragma.page_size=2**12, ...) {
   if (FALSE) {
     ## Run build-db.R in
