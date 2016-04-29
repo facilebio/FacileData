@@ -57,14 +57,14 @@ gene_info_tbl <- function(db=FacileDb()) {
 ##'   columns.
 ##' @return filtered version of \code{x} that only has the desired samples
 filter_samples <- function(x, samples=NULL) {
-  if (is.null(x)) {
+  if (is.null(samples)) {
     return(x)
   }
   assert_sample_subset(samples)
-  internal <- !same_src(samples, x)
+  internalize <- !same_src(samples, x)
 
   ## I think I should be using `semi_join` here, but that is so slow I might
   ## as well be looking things up by hand
   inner_join(x, samples, by=c('dataset', 'sample_id'),
-             copy=internal, auto_index=internal)
+             copy=internalize, auto_index=internalize)
 }

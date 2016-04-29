@@ -5,7 +5,8 @@
 ##' @importClassesFrom edgeR DGEList
 ##' @importFrom DBI dbDriver
 ##' @importFrom RSQLite dbConnect dbWriteTable dbSendQuery
-createWarehouse <- function(db.path, datasets, sample.meta, ...) {
+createWarehouse <- function(db.path, datasets, sample.meta, ,
+                            pragma.page_size=2**12, ...) {
   if (FALSE) {
     ## Run build-db.R in
     ## ~/workspace/projects/CIT/clinx/clinXwarehouse/inst/build-db/2016-04-20
@@ -29,9 +30,14 @@ createWarehouse <- function(db.path, datasets, sample.meta, ...) {
   rownames(gi) <- NULL
 
   ## Setup database skeleton ---------------------------------------------------
+  ## Configure DB connection
   sqlite <- DBI::dbDriver('SQLite')
   db <- RSQLite::dbConnect(sqlite, db.path)
+  RSQLite::dbGetQuery(db, sprintf('pragma page_size=%d', pragma.page_size))
+  RSQLite::dbSendQuery(out$con, 'pragma temp_store=MEMORY;')
+  RSQLite::dbSendQuery(out$con, 'pragme cache_size=20000;')
 
+  ## RSQLite::dbGetQuery(db, 'pragma page_size=4096')
   createGeneTable(db)
   createExpressionTables(db)
   createSampleCovariateTable(db)
@@ -105,6 +111,8 @@ initializeWithExpressionData <- function(db, datasets) {
 
   ## Add index on feature_id (takes about a minue, too)
   RSQLite::dbSendQuery(db, 'CREATE INDEX expression_gene ON expression (feature_id);')
+  ## Add UNIQUE INDEX on what should be the PRIMARY KEY
+  RSQLite::dbSendQuery(db, 'CREATE UNIQUE INDEX expression_sample_gene ON expression (dataset, sample_id, feature_id);')
   invisible(NULL)
 }
 
@@ -112,7 +120,7 @@ createGeneTable <- function(db) {
   table.sql <- paste0(
     "CREATE TABLE gene_info (",
     "feature_id TEXT, feature_type TEXT, symbol TEXT, n_exons INTEGER, length INTEGER, source TEXT,",
-    "PRIMARY KEY (feature_id))")
+    "PRIMARY KEY (feature_id));")
   RSQLite::dbSendQuery(db, table.sql)
 }
 
@@ -120,10 +128,13 @@ createGeneTable <- function(db) {
 ##'
 ##' @importFrom reshape2 melt
 createExpressionTables <- function(db) {
+  ## table.sql <- paste0(
+  ##   "CREATE TABLE expression (",
+  ##   "dataset TEXT, sample_id TEXT, feature_id TEXT, count INTEGER, ",
+  ##   "PRIMARY KEY (dataset, sample_id, feature_id))")
   table.sql <- paste0(
     "CREATE TABLE expression (",
-    "dataset TEXT, sample_id TEXT, feature_id TEXT, count INTEGER, ",
-    "PRIMARY KEY (dataset, sample_id, feature_id))")
+    "dataset TEXT, sample_id TEXT, feature_id TEXT, count INTEGER)")
   dbSendQuery(db, table.sql)
 
   table.sql <- paste0(
