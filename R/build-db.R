@@ -34,8 +34,8 @@ createWarehouse <- function(db.path, datasets, sample.meta,
   sqlite <- DBI::dbDriver('SQLite')
   db <- RSQLite::dbConnect(sqlite, db.path)
   RSQLite::dbGetQuery(db, sprintf('pragma page_size=%d', pragma.page_size))
-  RSQLite::dbSendQuery(out$con, 'pragma temp_store=MEMORY;')
-  RSQLite::dbSendQuery(out$con, 'pragme cache_size=20000;')
+  RSQLite::dbSendQuery(db, 'pragma temp_store=MEMORY;')
+  RSQLite::dbSendQuery(db, 'pragma cache_size=20000;')
 
   ## RSQLite::dbGetQuery(db, 'pragma page_size=4096')
   createGeneTable(db)
