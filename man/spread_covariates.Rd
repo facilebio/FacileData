@@ -13,6 +13,7 @@ spread_covariates(x, cov.def = NULL)
 a wide \code{tbl_df}-like object
 }
 \description{
-Spreads the covariates returned from database into wide data.frame
+Samples that did not have a value for a specific covariate are assigned to
+have NA.
 }
 

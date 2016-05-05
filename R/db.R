@@ -69,7 +69,7 @@ gene_info_tbl <- function(db=FacileDb()) {
 ##'   \code{tbl_sqlite} object) that has \code{"dataset"} and \code{"samle_id"}
 ##'   columns.
 ##' @return filtered version of \code{x} that only has the desired samples
-filter_samples <- function(x, samples=NULL) {
+filter_samples <- function(x, samples=NULL, do.semi=TRUE) {
   if (is.null(samples)) {
     return(x)
   }
@@ -78,6 +78,10 @@ filter_samples <- function(x, samples=NULL) {
 
   ## I think I should be using `semi_join` here, but that is so slow I might
   ## as well be looking things up by hand
+  extra.cols <- setdiff(colnames(samples), c('dataset', 'sample_id'))
+  if (do.semi && length(extra.cols) > 0L) {
+    samples <- select(samples, dataset, sample_id)
+  }
   inner_join(x, samples, by=c('dataset', 'sample_id'),
              copy=internalize, auto_index=internalize)
 }

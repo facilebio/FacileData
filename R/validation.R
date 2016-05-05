@@ -7,8 +7,9 @@
 ##'   2. pass a "loaded up" tbl_sqlite" over the sample_covariate table which
 ##'      has your filters of interest set
 assert_sample_subset <- function(x) {
+  key.cols <- c('dataset', 'sample_id')
   stopifnot(is(x, 'tbl') || is(x, 'data.frame'))
-  assert_columns(x, c('dataset', 'sample_id'))
+  assert_columns(x, key.cols)
 
   if (is.data.frame(x)) {
     ## stopifnot(nrow(x) >= 1L)

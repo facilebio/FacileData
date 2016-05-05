@@ -1,5 +1,13 @@
+##' Fetch rows from sample_covariate table for specified samples and covariates
+##'
+##' @export
+##' @param db a \code{FacileDb} connection
+##' @param samples a samples descriptor \code{tbl_*}
+##' @param covariates character vector of covariate names
+##' @param do.collect for collection of result from database?
+##' @return rows from the \code{sample_covaraite} table
 fetch_sample_covariates <- function(db, samples=NULL, covariates=NULL,
-                                    wide=FALSE, do.collect=FALSE) {
+                                    do.collect=FALSE) {
   stopifnot(is.FacileDb(db))
   dat <- sample_covariate_tbl(db)
   if (is.character(covariates)) {
@@ -14,12 +22,35 @@ fetch_sample_covariates <- function(db, samples=NULL, covariates=NULL,
   out
 }
 
+##' Appends covariate columns to a query result
+##'
+##' Note that this function will force the collection of \code{x}
+##'
+##' @export
+with_sample_covariates <- function(x, covariates=NULL, db=attr(x, 'db'),
+                                   cov.def=db[['cov.def']]) {
+  stopifnot(is.FacileDb(db))
+  stopifnot(is.character(covariates))
+
+  samples <- assert_sample_subset(x) %>%
+    select(dataset, sample_id) %>%
+    distinct
+
+  covs <- fetch_sample_covariates(db, samples, covariates) %>%
+    spread_covariates(cov.def)
+
+  inner_join(collect(x), covs, by=c('dataset', 'sample_id'))
+}
+
 ##' Spreads the covariates returned from database into wide data.frame
+##'
+##' Samples that did not have a value for a specific covariate are assigned to
+##' have NA.
 ##'
 ##' @param x output from \code{fetch_sample_covariates}
 ##' @return a wide \code{tbl_df}-like object
 spread_covariates <- function(x, cov.def=NULL) {
-  if (is.null(cov.def) && is(x, 'tbl_sqlite')) {
+  if (missing(cov.def) && is.null(cov.def) && is(x, 'tbl_sqlite')) {
     db <- attr(x, 'db')
     if (is.FacileDb(db)) {
       cov.def <- db[['cov.def']]

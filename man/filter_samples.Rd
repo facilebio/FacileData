@@ -4,7 +4,7 @@
 \alias{filter_samples}
 \title{Filters the samples down in a dataset to ones specified}
 \usage{
-filter_samples(x, samples = NULL)
+filter_samples(x, samples = NULL, do.semi = TRUE)
 }
 \arguments{
 \item{x}{likely a \code{tbl_sqlite} object, but a \code{tbl_df}-like
