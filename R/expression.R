@@ -55,7 +55,7 @@ cpm.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
 ##' @importFrom edgeR cpm
 ##' @export
 cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
-                       sample.stats=NULL, db=NULL, ...) {
+                       sample.stats=NULL, db=attr(x, 'db'), ...) {
   assert_expression_result(x)
   stopifnot(is.FacileDb(db))
   if (is.null(sample.stats)) {
@@ -83,7 +83,24 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
   x
 }
 
+
+##' Converts a result from `fetch_expression` into a DGEList
+##'
+##' The genes and samples that populate the \code{DGEList} are specified by
+##' \code{x}, and the caller can request addition sample information to be
+##' appended to \code{out$samples} via specification through the
+##' \code{covariates} argument.
+##'
 ##' @export
+##' @param x \code{tbl_sql} result from a call to \code{\link{fetch_expression}}
+##' @param covariates A \code{character} vector specifying the  additional
+##'   covariates to append to \code{out$samples}. Must be valid entries in the
+##'   \code{sample_covariate::variable} column.
+##' @param db The \code{FacilDb} object. This is extracted from \code{x} if
+##'   we are able.
+##' @param cov.def the path to the yaml file that defines what each type of
+##'   variable is. This is also set in and extracted from \code{db}.
+##' @return a \code{\link[edgeR]{DGEList}}
 as.DGEList <- function(x, covariates=c('IC', 'TC', 'BCOR'), db=attr(x, 'db'),
                        cov.def=db[['cov.def']], ...) {
   stopifnot(is.FacileDb(db))

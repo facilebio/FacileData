@@ -32,7 +32,7 @@ test_that("spread_covariates casts (with class) long result to wide & dense tbl"
 })
 
 
-test_that("spread_covariates(..., cov.def=NULL) sets columns as character", {
+test_that("spread_covariates(..., cov.def=NULL) sets column-values as character", {
   vars <- c('BCOR', 'IC', 'TC', 'OS', 'subtype_receptor')
   covs <- fetch_sample_covariates(DB, samples, vars)
   expected <- collect(covs) %>%
