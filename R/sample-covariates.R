@@ -11,7 +11,11 @@ fetch_sample_covariates <- function(db, samples=NULL, covariates=NULL,
   stopifnot(is.FacileDb(db))
   dat <- sample_covariate_tbl(db)
   if (is.character(covariates)) {
-    dat <- filter(dat, variable %in% covariates)
+    if (length(covariates) == 1L) {
+      dat <- filter(dat, variable == covariates)
+    } else if (length(covariates) > 1L) {
+      dat <- filter(dat, variable %in% covariates)
+    }
   }
   out <- filter_samples(dat, samples)
   if (do.collect) {

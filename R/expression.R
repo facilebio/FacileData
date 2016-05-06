@@ -24,7 +24,11 @@ fetch_expression <- function(db, samples=NULL, feature_ids=NULL,
   if (!is.null(feature_ids)) {
     assertCharacter(feature_ids)
     feature_ids <- unique(feature_ids)
-    dat <- filter(dat, feature_id %in% feature_ids)
+    if (length(feature_ids) == 1L) {
+      dat <- filter(dat, feature_id == feature_ids)
+    } else if (length(feature_ids) > 1L) {
+      dat <- filter(dat, feature_id %in% feature_ids)
+    }
   }
 
   dat <- filter_samples(dat, samples)
@@ -101,8 +105,11 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
 ##' @param cov.def the path to the yaml file that defines what each type of
 ##'   variable is. This is also set in and extracted from \code{db}.
 ##' @return a \code{\link[edgeR]{DGEList}}
-as.DGEList <- function(x, covariates=c('IC', 'TC', 'BCOR'), db=attr(x, 'db'),
+as.DGEList <- function(x, covariates=NULL, db=attr(x, 'db'),
                        cov.def=db[['cov.def']], ...) {
+  if (FALSE) {
+    covariates <- c('IC', 'TC', 'BCOR')
+  }
   stopifnot(is.FacileDb(db))
   counts <- assert_expression_result(x) %>%
     collect %>%
@@ -118,20 +125,27 @@ as.DGEList <- function(x, covariates=c('IC', 'TC', 'BCOR'), db=attr(x, 'db'),
 
   y <- edgeR::DGEList(counts, genes=genes)
 
-  sample.stats <- fetch_sample_statistics(db, x) %>%
+  ## Doing the internal filtering seems to be too slow
+  ## sample.stats <- fetch_sample_statistics(db, x) %>%
+  sample.stats <- fetch_sample_statistics(db) %>%
     collect %>%
-    mutate(samid=paste(dataset, sample_id, sep='_'))
+    mutate(samid=paste(dataset, sample_id, sep='_')) %>%
+    rename(lib.size=libsize, norm.factors=normfactor)
 
   xref <- match(colnames(y), sample.stats$samid)
-  y$samples$lib.size <- sample.stats$libsize[xref]
-  y$samples$norm.factors <- sample.stats$normfactor[xref]
-  y$samples <- cbind(y$samples, sample.stats[xref, c('dataset', 'sample_id')])
+  # y$samples$lib.size <- sample.stats$libsize[xref]
+  # y$samples$norm.factors <- sample.stats$normfactor[xref]
+  # y$samples <- cbind(y$samples, sample.stats[xref, c('dataset', 'sample_id')])
+
+  y$samples <- cbind(
+    transform(y$samples, lib.size=NULL, norm.factors=NULL),
+    sample.stats[xref, c('lib.size', 'norm.factors', 'dataset', 'sample_id')])
 
   if (is.character(covariates)) {
     covs <- fetch_sample_covariates(db, y$samples, covariates) %>%
       spread_covariates(cov.def) %>%
       select(-dataset, -sample_id) %>%
-      extract(colnames(y),) %>%
+      extract(colnames(y),,drop=FALSE) %>%
       set_rownames(colnames(y)) ## to fix NA, NA.1, rownames if missing samples
     y$samples <- cbind(y$samples, covs)
   }

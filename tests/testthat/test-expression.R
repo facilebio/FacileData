@@ -23,7 +23,7 @@ test_that("fetch_expression limits samples correctly", {
                        paste0(s.df$dataset, s.df$sample_id)))
 })
 
-test_that("fetchExpression results converted to DGEList", {
+test_that("fetch_expression results converted to DGEList", {
   e <- fetch_expression(DB, samples, genes)
   y <- as.DGEList(e)
   expect_is(y, 'DGEList')
@@ -38,6 +38,15 @@ test_that("fetchExpression results converted to DGEList", {
   expect_is(y$genes, 'data.frame')
   expect_type(y$genes$feature_id, 'character')
   expect_type(y$genes$symbol, 'character')
+})
+
+test_that('as.DGEList assigns correct covariates', {
+  e <- fetch_expression(DB, samples, genes)
+  y <- as.DGEList(e, covariates=c('IC', 'TC', 'BCOR'))
+  expect_is(y, 'DGEList')
+  expect_is(y$samples$IC, 'factor')
+  expect_is(y$samples$TC, 'factor')
+  expect_is(y$samples$BCOR, 'factor')
 })
 
 test_that("cpm on fetch_expression result mimics cpm.DGEList", {
