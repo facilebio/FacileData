@@ -4,7 +4,7 @@
 \alias{as.DGEList}
 \title{Converts a result from `fetch_expression` into a DGEList}
 \usage{
-as.DGEList(x, covariates = c("IC", "TC", "BCOR"), db = attr(x, "db"),
+as.DGEList(x, covariates = NULL, db = attr(x, "db"),
   cov.def = db[["cov.def"]], ...)
 }
 \arguments{
