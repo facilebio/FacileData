@@ -41,10 +41,10 @@ dbi <- AtezoDb('~/workspace/data/facile/atezo/v01/AtezoDb-countingIntersectionSt
 Let's fetch ARG1 (entrez: 383) expression from both modes
 
 ```{r load-arg1}
-arg1.u <- fetch_expression(dbu, feature_ids='383') %>% 
+arg1.u <- fetch_expression(dbu, feature_ids='383') %>%
   cpm(log=TRUE, prior.count=5) %>%
   rename(count.u=count, cpm.u=cpm)
-arg1.i <- fetch_expression(dbi, feature_ids='383') %>% 
+arg1.i <- fetch_expression(dbi, feature_ids='383') %>%
   cpm(log=TRUE, prior.count=5) %>%
   rename(count.i=count, cpm.i=cpm)
 dat <- inner_join(arg1.u, arg1.i) %>%
@@ -55,7 +55,7 @@ And plot via plotly for interactivity
 
 ```{r arg1-plotly, fig.width=3, fig.height=3}
 gg <- ggplot(dat, aes(cpm.u, cpm.i)) +
-  geom_point(aes(text=barcode)) +
+  geom_point(aes(text=barcode, color=dataset)) +
   xlab("Union") +
   ylab("IntersectionStrict") +
   geom_abline(intercept=0, slope=1, color='red') +
