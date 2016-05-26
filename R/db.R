@@ -3,7 +3,8 @@
 ##' @export
 ##' @param db.path The path to the clinX database.
 ##' @return A \code{dplyr::src_sqlite} connection to the database.
-FacileDb <- function(db.path=getOption('fatezo.dbpath', NULL)) {
+FacileDb <- function(db.path=getOption('fatezo.dbpath', NULL),
+                     cache_size=20000) {
   if (!is.character(db.path)) {
     stop("Either set options(facile.dbpath) or pass in path to sqlite.db file")
   }
@@ -22,7 +23,7 @@ FacileDb <- function(db.path=getOption('fatezo.dbpath', NULL)) {
   ##   2. page_size
   out <- src_sqlite(db.path)
   dbSendQuery(out$con, 'pragma temp_store=MEMORY;')
-  dbSendQuery(out$con, 'pragma cache_size=20000;')
+  dbSendQuery(out$con, sprintf('pragma cache_size=%d;', cache_size))
 
   out['cov.def'] <- list(NULL)
   out['cov.def'] <- getOption('fatezo.covdef')

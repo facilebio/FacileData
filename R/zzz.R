@@ -22,7 +22,8 @@
 
   pkg.opts <- list(
     datapath=dpath,
-    dbpath=file.path(dpath, 'AtezoDb.sqlite'),
+    ## dbpath=file.path(dpath, 'AtezoDb-countingUnion.sqlite'),
+    dbpath=file.path(dpath, 'AtezoDb-countingIntersectionStrict.sqlite'),
     cachedir=file.path(dpath, 'cache'),
     covdef=file.path(dpath, 'sample-meta-definitions.yaml'))
   names(pkg.opts) <- sprintf('%s.%s', impl.prefix, names(pkg.opts))
