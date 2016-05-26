@@ -53,7 +53,7 @@ dat <- inner_join(arg1.u, arg1.i) %>%
 
 And plot via plotly for interactivity
 
-```{r arg1-plotly, fig.width=3, fig.height=3}
+```{r arg1-plotly, fig.width=4, fig.height=3}
 gg <- ggplot(dat, aes(cpm.u, cpm.i)) +
   geom_point(aes(text=barcode, color=dataset)) +
   xlab("Union") +
