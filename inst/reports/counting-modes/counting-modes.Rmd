@@ -54,11 +54,11 @@ dat <- inner_join(arg1.u, arg1.i) %>%
 And plot via plotly for interactivity
 
 ```{r arg1-plotly, fig.width=4, fig.height=3}
-gg <- ggplot(dat, aes(cpm.u, cpm.i)) +
+gg <- ggplot(dat, aes(log2(count.u), log2(count.i))) +
   geom_point(aes(text=barcode, color=dataset)) +
-  xlab("Union") +
-  ylab("IntersectionStrict") +
+  xlab("Union [log2(counts)]") +
+  ylab("IntersectionStrict [log2(counts)]") +
   geom_abline(intercept=0, slope=1, color='red') +
-  ggtitle("Unioin vs IntersectionStrict (ARG1)")
+  ggtitle("Union vs IntersectionStrict (ARG1)")
 ggplotly(gg)
 ```

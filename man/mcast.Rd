@@ -2,11 +2,22 @@
 % Please edit documentation in R/utilities.R
 \name{mcast}
 \alias{mcast}
-\title{Like dcast but the first row becomes rownames of a matrix object}
+\title{Cast a data.frame into a matrix.}
 \usage{
 mcast(data, formula, fun.aggregate = NULL, ...)
 }
+\arguments{
+\item{data}{a \code{data.frame} to whip into a matrix}
+
+\item{formula}{the pivot formula}
+
+\item{fun.aggregate}{the aggregate function}
+
+\item{...}{args past down to \code{\link[reshape2]{dcast}}.}
+}
 \description{
-Like dcast but the first row becomes rownames of a matrix object
+This is a simple wrapper to \code{\link[reshape2]{dcast}} which converts
+the \code{data.frame} that call would create into a matrix which uses the
+first column as the rownames.
 }
 
