@@ -12,7 +12,7 @@ Depends:
 Imports:
     magrittr,
     yaml,
-    checkmate,
+    checkmate (>= 1.7.4),
     readxl,
     DBI,
     RSQLite,
