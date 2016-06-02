@@ -1,7 +1,7 @@
 Package: FacileRepo
 Type: Package
 Title: A warehouse for molecular clinical trial data to enable EDA
-Version: 0.1.1
+Version: 0.1.2
 Author: Steve Lianoglou
 Maintainer: Steve Lianoglou <lianoglou.steve@gene.com>
 Description: Supporting code to shuttle individually prepared clinical datasets
@@ -20,4 +20,3 @@ Imports:
 Suggests:
     testthat (>= 1.0.2)
 RoxygenNote: 5.0.1
-

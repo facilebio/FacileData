@@ -26,6 +26,22 @@ fetch_sample_covariates <- function(db, samples=NULL, covariates=NULL,
   out
 }
 
+##' Fetches a sample descriptor that matches filter criterion over covariates.
+##'
+##' @export
+##' @param db A \code{FacileDb}
+##' @param ... filter clause to apply to \code{sample_covariate_tbl(db)}
+##' @return a \code{tbl} sample-descriptor with a \code{FacileDb} connection
+##' @examples
+##' fetch_samples(db, indication %in% c('BRCA', 'COAD'))
+fetch_samples <- function(db, ...) {
+  out <- sample_covariate_tbl(db) %>%
+    filter(...) %>%
+    select(dataset, sample_id)
+  attr(out, 'db') <- db
+  out
+}
+
 ##' Appends covariate columns to a query result
 ##'
 ##' Note that this function will force the collection of \code{x}
@@ -118,7 +134,7 @@ cast_covariate <- function(covariate, values, cov.def) {
       values <- as.numeric(values)
     }
     if (def$type == 'right_censored') {
-      values <- parse_right_censored(values, suffix=covariate)
+      values <- decode_right_censored(values, suffix=covariate)
     }
     if (is.character(def$levels)) {
       values <- factor(values, def$levels)
