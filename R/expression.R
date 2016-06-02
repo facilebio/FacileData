@@ -39,8 +39,7 @@ fetch_expression <- function(db, samples=NULL, feature_ids=NULL,
   }
 
   class(dat) <- c('FacileExpression', class(dat))
-  attr(dat, 'db') <- db
-  dat
+  set_fdb(dat, db)
 }
 
 ##' Append expression values to sample-descriptor
@@ -50,35 +49,33 @@ fetch_expression <- function(db, samples=NULL, feature_ids=NULL,
 ##' @param feature_ids character vector of feature_ids
 ##' @param a \code{FacileDb} object
 ##' @return a tbl-like result
-with_expression <- function(samples, feature_ids, db=attr(samples, 'db')) {
+with_expression <- function(samples, feature_ids, db=fdb(samples)) {
   stopifnot(is.FacileDb(db))
   stopifnot(is.character(feature_ids) && length(feature_ids) > 0)
   samples <- assert_sample_subset(samples)
 
   out <- fetch_expression(db, samples, feature_ids) %>%
     join_samples(samples)
-  attr(out, 'db') <- db
-  out
+  set_fdb(out, db)
 }
 
 ##' @method cpm tbl_sqlite
 ##' @export
 cpm.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
-                           db=attr(x, 'db'), ...) {
+                           db=fdb(x), ...) {
   stopifnot(is.FacileDb(db))
   ## Let's leverage the fact that we're already working in the database
   sample.stats <- fetch_sample_statistics(db, x)
   out <- cpm(collect(x), lib.size=lib.size, log=log, prior.count=prior.count,
              sample.stats=sample.stats, db=db, ...)
-  attr(out, 'db') <- db
-  out
+  set_fdb(out, db)
 }
 
 ##' @method cpm tbl_df
 ##' @importFrom edgeR cpm
 ##' @export
 cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
-                       sample.stats=NULL, db=attr(x, 'db'), ...) {
+                       sample.stats=NULL, db=fdb(x), ...) {
   assert_expression_result(x)
   stopifnot(is.FacileDb(db))
   if (is.null(sample.stats)) {
@@ -124,7 +121,7 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
 ##' @param cov.def the path to the yaml file that defines what each type of
 ##'   variable is. This is also set in and extracted from \code{db}.
 ##' @return a \code{\link[edgeR]{DGEList}}
-as.DGEList <- function(x, covariates=NULL, db=attr(x, 'db'),
+as.DGEList <- function(x, covariates=NULL, db=fdb(x),
                        cov.def=db[['cov.def']], ...) {
   if (FALSE) {
     covariates <- c('IC', 'TC', 'BCOR')
@@ -146,7 +143,7 @@ as.DGEList <- function(x, covariates=NULL, db=attr(x, 'db'),
 
   ## Doing the internal filtering seems to be too slow
   ## sample.stats <- fetch_sample_statistics(db, x) %>%
-  sample.stats <- fetch_sample_statistics(db) %>%
+  sample.stats <- fetch_sample_statistics(db, x) %>%
     collect %>%
     mutate(samid=paste(dataset, sample_id, sep='_')) %>%
     rename(lib.size=libsize, norm.factors=normfactor)

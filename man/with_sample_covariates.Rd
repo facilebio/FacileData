@@ -4,7 +4,7 @@
 \alias{with_sample_covariates}
 \title{Appends covariate columns to a query result}
 \usage{
-with_sample_covariates(x, covariates = NULL, db = attr(x, "db"),
+with_sample_covariates(x, covariates = NULL, db = fdb(x),
   cov.def = db[["cov.def"]])
 }
 \description{

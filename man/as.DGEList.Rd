@@ -4,8 +4,8 @@
 \alias{as.DGEList}
 \title{Converts a result from `fetch_expression` into a DGEList}
 \usage{
-as.DGEList(x, covariates = NULL, db = attr(x, "db"),
-  cov.def = db[["cov.def"]], ...)
+as.DGEList(x, covariates = NULL, db = fdb(x), cov.def = db[["cov.def"]],
+  ...)
 }
 \arguments{
 \item{x}{\code{tbl_sql} result from a call to \code{\link{fetch_expression}}}

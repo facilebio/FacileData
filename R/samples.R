@@ -7,11 +7,10 @@
 ##' @examples
 ##' fetch_samples(db, indication %in% c('BRCA', 'COAD'))
 fetch_samples <- function(db, ...) {
-  out <- sample_covariate_tbl(db) %>%
+  sample_covariate_tbl(db) %>%
     filter(...) %>%
-    select(dataset, sample_id)
-  attr(out, 'db') <- db
-  out
+    select(dataset, sample_id) %>%
+    set_fdb(db)
 }
 
 ##' Filters the samples down in a dataset to ones specified
@@ -45,7 +44,8 @@ join_samples <- function(x, samples=NULL, semi=FALSE) {
   }
 
   inner_join(x, samples, by=c('dataset', 'sample_id'),
-             copy=internalize, auto_index=internalize)
+             copy=internalize, auto_index=internalize) %>%
+    set_fdb(fdb(x))
 }
 
 ##' Filter x down to specific samples

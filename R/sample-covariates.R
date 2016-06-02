@@ -22,15 +22,15 @@ fetch_sample_covariates <- function(db, samples=NULL, covariates=NULL,
     out <- collect(out)
     db <- NULL
   }
-  attr(out, 'db') <- db
-  out
+  set_fdb(out, db)
 }
+
 ##' Appends covariate columns to a query result
 ##'
 ##' Note that this function will force the collection of \code{x}
 ##'
 ##' @export
-with_sample_covariates <- function(x, covariates=NULL, db=attr(x, 'db'),
+with_sample_covariates <- function(x, covariates=NULL, db=fdb(x),
                                    cov.def=db[['cov.def']]) {
   stopifnot(is.FacileDb(db))
   stopifnot(is.character(covariates))
@@ -55,7 +55,7 @@ with_sample_covariates <- function(x, covariates=NULL, db=attr(x, 'db'),
 ##' @return a wide \code{tbl_df}-like object
 spread_covariates <- function(x, cov.def=NULL) {
   if (missing(cov.def) && is.null(cov.def) && is(x, 'tbl_sqlite')) {
-    db <- attr(x, 'db')
+    db <- fdb(x)
     if (is.FacileDb(db)) {
       cov.def <- db[['cov.def']]
     }

@@ -8,20 +8,14 @@
 fetch_sample_statistics <- function(db, samples=NULL, do.collect=FALSE) {
   stopifnot(is.FacileDb(db))
   ss <- sample_stats_tbl(db)
+
   if (is.null(samples)) {
-    return(ss)
+    out <- ss
+  } else {
+    samples <- assert_sample_subset(samples)
+    out <- join_samples(ss, samples)
   }
-  assert_sample_subset(samples)
-  internalize <- !same_src(ss, samples)
-  out <- select(samples, dataset, sample_id) %>%
-    distinct %>%
-    inner_join(ss, ., by=c('dataset', 'sample_id'), copy=internalize,
-                auto_index=internalize)
-  if (do.collect) {
-    out <- collect(out)
-    db <- NULL
-  }
-  attr(out, 'db') <- db
-  out
+
+  set_fdb(out, db)
 }
 

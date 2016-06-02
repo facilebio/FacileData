@@ -56,3 +56,45 @@ sample_covariate_tbl <- function(db=FacileDb()) {
 gene_info_tbl <- function(db=FacileDb()) {
   tbl(db, 'gene_info')
 }
+
+##' Get/set db
+##'
+##' @rdname getsetdb
+##' @export
+##' @param x the object
+##' @param db The \code{FacileDb} object
+fdb <- function(x) {
+ attr(x, 'db')
+}
+
+##' @rdname getsetdb
+##' @export
+"fdb<-" <- function(x, value) {
+  UseMethod("db<-", x)
+}
+
+##' @rdname getsetdb
+##' @export
+"fdb<-.tbl" <- function(x, value) {
+  attr(x, 'db') <- value
+  x
+}
+
+##' @rdname getsetdb
+##' @export
+"fdb<-.data.frame" <- function(x, value) {
+  attr(x, 'db') <- value
+  x
+}
+
+"fdb<-.default" <- function(x, value) {
+  attr(x, 'db') <- value
+  x
+}
+
+##' @rdname getsetdb
+##' @export
+set_fdb <- function(x, value) {
+  attr(x, 'db') <- value
+  x
+}
