@@ -51,6 +51,7 @@ with_sample_covariates <- function(x, covariates=NULL, db=attr(x, 'db'),
 ##' Samples that did not have a value for a specific covariate are assigned to
 ##' have NA.
 ##'
+##' @export
 ##' @param x output from \code{fetch_sample_covariates}
 ##' @return a wide \code{tbl_df}-like object
 spread_covariates <- function(x, cov.def=NULL) {
@@ -68,24 +69,45 @@ spread_covariates <- function(x, cov.def=NULL) {
   out <- bind_rows(x, dummy) %>%
     dcast(dataset + sample_id ~ variable, value.var='value') %>%
     set_rownames(., paste(.$dataset, .$sample_id, sep='_'))
+
   if (!is.null(cov.def)) {
     for (cname in setdiff(colnames(out), c('dataset', 'sample_id'))) {
-      out[[cname]] <- cast_covariate(cname, out[[cname]], cov.def)
+      casted <- cast_covariate(cname, out[[cname]], cov.def)
+      if (is.data.frame(casted)) {
+        out[[cname]] <- NULL
+        out <- bind_cols(out, casted)
+      } else {
+        out[[cname]] <- casted
+      }
+      ## casting a survival covariate will return a two column thing with time
+      ## and censoring information, so we need to account for that.
     }
   }
+
   transform(out, .dummy.=NULL)
 }
 
-##' Casts the character values of the covariates to their defined types
+##' Casts the character values of the covariates to their defined types.
+##'
+##' For most things, a single value will be returned from each cast, but in the
+##' case of "time_to_event" data, the value is expended to a two column
+##' data.frame with a \code{tte_<covariate>} column for time to event, and an
+##' \code{event_<covariate>} column to indicate event (1) or right censored (2).
 ##'
 ##' @importFrom yaml yaml.load_file
 ##' @export
 ##' @param covariate the name of the covariate
-##' @param values the covariate values (likely as a character)
+##' @param values the covariate values (which is a \code{character}) as it is
+##'   pulled from the database.
 ##' @param cov.defs the path to the covariate definition yaml file
+##'
 ##' @return values cast to appropriate type if a valid definition was found for
-##'   \code{covariate}, otherwise values is returned "as is"
+##'   \code{covariate}, otherwise values is returned "as is". Most of the time
+##'   this is a single vector, but others it can be a data.frame (for
+##'   \code{right_censored} data, for instance)
 cast_covariate <- function(covariate, values, cov.def) {
+  stopifnot(is.character(values))
+  stopifnot(is.character(covariate) && length(covariate) == 1L)
   if (is.character(cov.def)) {
     cov.def <- yaml.load_file(assert_file(cov.def, 'r'))
   }
@@ -95,9 +117,17 @@ cast_covariate <- function(covariate, values, cov.def) {
     if (def$type == 'real') {
       values <- as.numeric(values)
     }
+    if (def$type == 'right_censored') {
+      values <- parse_right_censored(values, suffix=covariate)
+    }
     if (is.character(def$levels)) {
       values <- factor(values, def$levels)
     }
+  } else {
+    if (covariate != '.dummy.') {
+      warning("No covariate definition found for: ", covariate, immediate.=TRUE)
+    }
   }
+
   values
 }

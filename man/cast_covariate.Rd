@@ -2,22 +2,28 @@
 % Please edit documentation in R/sample-covariates.R
 \name{cast_covariate}
 \alias{cast_covariate}
-\title{Casts the character values of the covariates to their defined types}
+\title{Casts the character values of the covariates to their defined types.}
 \usage{
 cast_covariate(covariate, values, cov.def)
 }
 \arguments{
 \item{covariate}{the name of the covariate}
 
-\item{values}{the covariate values (likely as a character)}
+\item{values}{the covariate values (which is a \code{character}) as it is
+pulled from the database.}
 
 \item{cov.defs}{the path to the covariate definition yaml file}
 }
 \value{
 values cast to appropriate type if a valid definition was found for
-  \code{covariate}, otherwise values is returned "as is"
+  \code{covariate}, otherwise values is returned "as is". Most of the time
+  this is a single vector, but others it can be a data.frame (for
+  \code{right_censored} data, for instance)
 }
 \description{
-Casts the character values of the covariates to their defined types
+For most things, a single value will be returned from each cast, but in the
+case of "time_to_event" data, the value is expended to a two column
+data.frame with a \code{tte_<covariate>} column for time to event, and an
+\code{event_<covariate>} column to indicate event (1) or right censored (2).
 }
 

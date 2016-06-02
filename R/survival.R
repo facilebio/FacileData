@@ -7,7 +7,7 @@
 ##' @export
 ##' @param x the time to event
 ##' @return two column data.frame
-parse_time_to_event <- function(x, suffix=NULL) {
+parse_right_censored <- function(x, suffix=NULL) {
   x <- as.numeric(x)
   out <- data.frame(tte=abs(x), event=as.integer(x < 0))
   if (is.character(suffix)) {
