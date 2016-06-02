@@ -56,33 +56,3 @@ sample_covariate_tbl <- function(db=FacileDb()) {
 gene_info_tbl <- function(db=FacileDb()) {
   tbl(db, 'gene_info')
 }
-
-##' Filters the samples down in a dataset to ones specified
-##'
-##' Tables like \code{expression} and \code{sample_covariate} house different
-##' datapoints per sample, and we often want to only retreive data points over
-##' a subset of samples.
-##'
-##' @export
-##' @param x likely a \code{tbl_sqlite} object, but a \code{tbl_df}-like
-##'   object should work as well.
-##' @param samples a sample descriptor \code{tbl_df}-like object (likely a
-##'   \code{tbl_sqlite} object) that has \code{"dataset"} and \code{"samle_id"}
-##'   columns.
-##' @return filtered version of \code{x} that only has the desired samples
-filter_samples <- function(x, samples=NULL, do.semi=TRUE) {
-  if (is.null(samples)) {
-    return(x)
-  }
-  assert_sample_subset(samples)
-  internalize <- !same_src(samples, x)
-
-  ## I think I should be using `semi_join` here, but that is so slow I might
-  ## as well be looking things up by hand
-  extra.cols <- setdiff(colnames(samples), c('dataset', 'sample_id'))
-  if (do.semi && length(extra.cols) > 0L) {
-    samples <- select(samples, dataset, sample_id)
-  }
-  inner_join(x, samples, by=c('dataset', 'sample_id'),
-             copy=internalize, auto_index=internalize)
-}

@@ -38,8 +38,27 @@ fetch_expression <- function(db, samples=NULL, feature_ids=NULL,
     db <- NULL
   }
 
+  class(dat) <- c('FacileExpression', class(dat))
   attr(dat, 'db') <- db
   dat
+}
+
+##' Append expression values to sample-descriptor
+##'
+##' @export
+##' @param x a samples descriptor
+##' @param feature_ids character vector of feature_ids
+##' @param a \code{FacileDb} object
+##' @return a tbl-like result
+with_expression <- function(samples, feature_ids, db=attr(samples, 'db')) {
+  stopifnot(is.FacileDb(db))
+  stopifnot(is.character(feature_ids) && length(feature_ids) > 0)
+  samples <- assert_sample_subset(samples)
+
+  out <- fetch_expression(db, samples, feature_ids) %>%
+    join_samples(samples)
+  attr(out, 'db') <- db
+  out
 }
 
 ##' @method cpm tbl_sqlite
