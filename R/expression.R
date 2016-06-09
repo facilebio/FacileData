@@ -127,10 +127,15 @@ as.DGEList <- function(x, covariates=NULL, db=fdb(x),
     covariates <- c('IC', 'TC', 'BCOR')
   }
   stopifnot(is.FacileDb(db))
-  counts <- assert_expression_result(x) %>%
+
+  counts.df <- assert_expression_result(x) %>%
     collect %>%
-    mutate(samid=paste(dataset, sample_id, sep='_')) %>%
-    mcast(feature_id ~ samid, value.var='count')
+    mutate(samid=paste(dataset, sample_id, sep='_'))
+  counts <- mcast(counts.df, feature_id ~ samid, value.var='count')
+
+  samples <- counts.df %>%
+    select(dataset, sample_id) %>%
+    distinct
 
   fids <- rownames(counts)
   genes <- gene_info_tbl(db) %>%
@@ -143,27 +148,23 @@ as.DGEList <- function(x, covariates=NULL, db=fdb(x),
 
   ## Doing the internal filtering seems to be too slow
   ## sample.stats <- fetch_sample_statistics(db, x) %>%
-  sample.stats <- fetch_sample_statistics(db, x) %>%
+  sample.stats <- fetch_sample_statistics(db, samples) %>%
     collect %>%
     mutate(samid=paste(dataset, sample_id, sep='_')) %>%
-    rename(lib.size=libsize, norm.factors=normfactor)
-
-  xref <- match(colnames(y), sample.stats$samid)
-  # y$samples$lib.size <- sample.stats$libsize[xref]
-  # y$samples$norm.factors <- sample.stats$normfactor[xref]
-  # y$samples <- cbind(y$samples, sample.stats[xref, c('dataset', 'sample_id')])
+    rename(lib.size=libsize, norm.factors=normfactor) %>%
+    as.data.frame %>%
+    set_rownames(., .$samid)
 
   y$samples <- cbind(
     transform(y$samples, lib.size=NULL, norm.factors=NULL),
-    sample.stats[xref, c('lib.size', 'norm.factors', 'dataset', 'sample_id')])
+    sample.stats[colnames(y),,drop=FALSE])
 
-  if (is.character(covariates)) {
-    covs <- fetch_sample_covariates(db, y$samples, covariates) %>%
-      spread_covariates(cov.def) %>%
-      select(-dataset, -sample_id) %>%
-      extract(colnames(y),,drop=FALSE) %>%
-      set_rownames(colnames(y)) ## to fix NA, NA.1, rownames if missing samples
-    y$samples <- cbind(y$samples, covs)
+  if (is.character(covariates) && length(covariates)) {
+    covs <- with_sample_covariates(samples, covariates, db) %>%
+      as.data.frame %>%
+      set_rownames(., paste(.$dataset, .$sample_id, sep='_')) %>%
+      select(-dataset, -sample_id)
+    y$samples <- cbind(y$samples, covs[colnames(y),,drop=FALSE])
   }
 
   y

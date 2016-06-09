@@ -4,8 +4,7 @@
 \alias{fetch_sample_covariates}
 \title{Fetch rows from sample_covariate table for specified samples and covariates}
 \usage{
-fetch_sample_covariates(db, samples = NULL, covariates = NULL,
-  do.collect = FALSE)
+fetch_sample_covariates(db, samples = NULL, covariates = NULL)
 }
 \arguments{
 \item{db}{a \code{FacileDb} connection}

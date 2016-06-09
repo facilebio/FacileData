@@ -6,8 +6,7 @@
 ##' @param covariates character vector of covariate names
 ##' @param do.collect for collection of result from database?
 ##' @return rows from the \code{sample_covaraite} table
-fetch_sample_covariates <- function(db, samples=NULL, covariates=NULL,
-                                    do.collect=FALSE) {
+fetch_sample_covariates <- function(db, samples=NULL, covariates=NULL) {
   stopifnot(is.FacileDb(db))
   dat <- sample_covariate_tbl(db)
   if (is.character(covariates)) {
@@ -17,12 +16,9 @@ fetch_sample_covariates <- function(db, samples=NULL, covariates=NULL,
       dat <- filter(dat, variable %in% covariates)
     }
   }
-  out <- filter_samples(dat, samples)
-  if (do.collect) {
-    out <- collect(out)
-    db <- NULL
-  }
-  set_fdb(out, db)
+
+  filter_samples(dat, samples) %>%
+    set_fdb(db)
 }
 
 ##' Appends covariate columns to a query result
@@ -37,12 +33,15 @@ with_sample_covariates <- function(x, covariates=NULL, db=fdb(x),
 
   samples <- assert_sample_subset(x) %>%
     select(dataset, sample_id) %>%
+    collect %>% ## can't call distinct on SQLite backend :-(
     distinct
 
   covs <- fetch_sample_covariates(db, samples, covariates) %>%
     spread_covariates(cov.def)
 
-  inner_join(collect(x), covs, by=c('dataset', 'sample_id'))
+  collect(x) %>%
+    inner_join(covs, by=c('dataset', 'sample_id')) %>%
+    set_fdb(db)
 }
 
 ##' Spreads the covariates returned from database into wide data.frame
@@ -54,6 +53,7 @@ with_sample_covariates <- function(x, covariates=NULL, db=fdb(x),
 ##' @param x output from \code{fetch_sample_covariates}
 ##' @return a wide \code{tbl_df}-like object
 spread_covariates <- function(x, cov.def=NULL) {
+  db <- NULL
   if (missing(cov.def) && is.null(cov.def) && is(x, 'tbl_sqlite')) {
     db <- fdb(x)
     if (is.FacileDb(db)) {
@@ -62,11 +62,16 @@ spread_covariates <- function(x, cov.def=NULL) {
   }
   x <- assert_sample_covariates(x) %>%
     collect
+
+  ## Ensures we get a row for every sample in x, even if it is missing a value
+  ## for the covariate
   dummy <- select(x, dataset, sample_id) %>%
     distinct %>%
     mutate(variable='.dummy.', value=NA)
+
   out <- bind_rows(x, dummy) %>%
     dcast(dataset + sample_id ~ variable, value.var='value') %>%
+    mutate(.dummy.=NULL) %>%
     set_rownames(., paste(.$dataset, .$sample_id, sep='_'))
 
   if (!is.null(cov.def)) {
@@ -83,7 +88,7 @@ spread_covariates <- function(x, cov.def=NULL) {
     }
   }
 
-  transform(out, .dummy.=NULL)
+  set_fdb(out, db)
 }
 
 ##' Casts the character values of the covariates to their defined types.

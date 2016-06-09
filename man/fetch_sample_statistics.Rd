@@ -4,7 +4,7 @@
 \alias{fetch_sample_statistics}
 \title{Fetch the sample statistics for sets of samples in the warehouse}
 \usage{
-fetch_sample_statistics(db, samples = NULL, do.collect = FALSE)
+fetch_sample_statistics(db, samples = NULL, semi = TRUE)
 }
 \arguments{
 \item{db}{the connection to the database}
