@@ -100,7 +100,7 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
     x$cpm <- x$count / mult$lib.size[xref]
   }
 
-  x
+  set_fdb(x, db)
 }
 
 
