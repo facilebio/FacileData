@@ -2,12 +2,28 @@
 % Please edit documentation in R/expression.R
 \name{as.DGEList}
 \alias{as.DGEList}
+\alias{as.ExpressionSet}
 \title{Converts a result from `fetch_expression` into a DGEList}
 \usage{
 as.DGEList(x, covariates = NULL, db = fdb(x), cov.def = db[["cov.def"]],
   ...)
+
+as.ExpressionSet(x, covariates = NULL, db = fdb(x),
+  cov.def = db[["cov.def"]], ...)
 }
 \arguments{
+\item{x}{\code{tbl_sql} result from a call to \code{\link{fetch_expression}}}
+
+\item{covariates}{A \code{character} vector specifying the  additional
+covariates to append to \code{out$samples}. Must be valid entries in the
+\code{sample_covariate::variable} column.}
+
+\item{db}{The \code{FacilDb} object. This is extracted from \code{x} if
+we are able.}
+
+\item{cov.def}{the path to the yaml file that defines what each type of
+variable is. This is also set in and extracted from \code{db}.}
+
 \item{x}{\code{tbl_sql} result from a call to \code{\link{fetch_expression}}}
 
 \item{covariates}{A \code{character} vector specifying the  additional
@@ -22,11 +38,15 @@ variable is. This is also set in and extracted from \code{db}.}
 }
 \value{
 a \code{\link[edgeR]{DGEList}}
+
+a \code{\link[Biobase]{ExpressionSet}}
 }
 \description{
 The genes and samples that populate the \code{DGEList} are specified by
 \code{x}, and the caller can request addition sample information to be
 appended to \code{out$samples} via specification through the
 \code{covariates} argument.
+
+Create an ExpressionSet from `fetch_expression`.
 }
 

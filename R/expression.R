@@ -111,6 +111,7 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
 ##' appended to \code{out$samples} via specification through the
 ##' \code{covariates} argument.
 ##'
+##' @rdname expression-container
 ##' @export
 ##' @param x \code{tbl_sql} result from a call to \code{\link{fetch_expression}}
 ##' @param covariates A \code{character} vector specifying the  additional
@@ -168,4 +169,29 @@ as.DGEList <- function(x, covariates=NULL, db=fdb(x),
   }
 
   y
+}
+
+##' Create an ExpressionSet from `fetch_expression`.
+##'
+##' @rdname expression-container
+##' @export
+##' @param x \code{tbl_sql} result from a call to \code{\link{fetch_expression}}
+##' @param covariates A \code{character} vector specifying the  additional
+##'   covariates to append to \code{out$samples}. Must be valid entries in the
+##'   \code{sample_covariate::variable} column.
+##' @param db The \code{FacilDb} object. This is extracted from \code{x} if
+##'   we are able.
+##' @param cov.def the path to the yaml file that defines what each type of
+##'   variable is. This is also set in and extracted from \code{db}.
+##' @return a \code{\link[Biobase]{ExpressionSet}}
+as.ExpressionSet <- function(x, covariates=NULL, db=fdb(x),
+                             cov.def=db[['cov.def']], ...) {
+  if (!require("Biobase")) {
+    stop("Biobase required")
+  }
+  y <- as.DGEList(x, covariates, db, cov.df, ...)
+  es <- ExpressionSet(y$counts)
+  pData(es) <- y$samples
+  fData(es) <- y$genes
+  es
 }
