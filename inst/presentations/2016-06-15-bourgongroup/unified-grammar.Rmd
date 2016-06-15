@@ -10,7 +10,8 @@ output:
 
 ```{r setup, include=FALSE}
 on.rescomp <- Sys.getenv("HOME") != "/Users/lianogls"
-
+library(rprojroot)
+library(corrplot)
 library(reshape2)
 library(magrittr)
 library(dplyr)
@@ -23,24 +24,25 @@ devtools::load_all('~/workspace/projects/FacileData/apps/signatures/CIWG.SigRefi
 if (on.rescomp) {
   library(GenomicsTools)
 }
+select <- dplyr::select
+rename <- dplyr::rename
 knitr::opts_chunk$set(echo=TRUE, message=FALSE, warning=FALSE)
 
 slim.df.all <- loadSlimRawMaster() %>%
   group_by(name) %>%
   mutate(N=n()) %>%
   ungroup
-slim.df <- slim.df.all %>%
-  select(-sname, -signature_type, -protected) %>%
-  filter(N > 2)
-## gdb <- GeneSetDb(slim.df)
 
-sigs.df <- bind_rows(
+sig.df <- bind_rows(
   filter(slim.df.all, sname == 'ER17 ER stress response') %>%
     mutate(name="ER stress response"),
   filter(slim.df.all, name == 'TGFb response (F-TBRS)'),
   filter(slim.df.all, name == "Cytolytic activity")) %>%
   select(-sname, -signature_type, -protected)
-gdb <- GeneSetDb(sigs.df)
+
+root <- find_root(is_r_package)
+r.dir <- file.path(root, 'inst', 'presentations', '2016-06-15-bourgongroup')
+source(file.path(r.dir, 'utils.R'))
 ```
 
 ## Problem Statement
@@ -66,11 +68,13 @@ samples* across large datasets.
 
 # Assessment of Signature Activity
 
+## Assessment of Signature Activity
+
 We will assess the correlation structure of the following genes across different
 subsets of the TCGA and our atezo clinical trial data:
 
-```{r signature-list, results='asis'}
-sig.info <- sigs.df %>%
+```{r signature-list, echo=FALSE, results='asis'}
+sig.info <- sig.df %>%
   group_by(name) %>%
   summarize(n=n()) %>%
   ungroup
@@ -82,14 +86,149 @@ cat(paste(sprintf('*  %s (%d genes)',sig.info$name,sig.info$n), collapse='\n'))
 We will (of course(!)) us the multiGSEA infrastructure to manage our genesets.
 
 ```{r}
-(gdb <- GeneSetDb(sigs.df))
+(gdb <- GeneSetDb(sig.df))
 ```
 
-## Score Bladder samples in TCGA
+## Score Bladder samples in TCGA (GenomicsTools)
+
+1. Select samples we want
+2. Fetch relevant expression values from samples in (1)
+3. Score gene sets on data above
 
 ```{r, eval=on.rescomp}
-acc.all <- loadRNASeqData('BLCA', data='rpkms')
-acc.tum <- log2(exprs(getTumorData(ac..all)) + 0.1)
-scores.gt <- scoreSingleSamples(gdb, acc.tum, method='svd')
+library(GenomicsTools)
+blca.all <- loadRNASeqData('BLCA', data='rpkms')                 ## 1 & 2
+exprs.gt <- log2(exprs(getTumorData(blca.all)) + 0.1)            ## 1 & 2
+rownames(exprs.gt) <- sub('GeneID:', '', rownames(exprs.gt))
+scores.gt <- scoreSingleSamples(gdb, exprs.gt, method='svd')     ## 3
 ```
+
+## Score Bladder samples in TCGA (FacileTCGA)
+
+1. Select samples we want
+2. Fetch relevant expression values from samples in (1)
+3. Score gene sets on data above
+
+```{r}
+library(FacileTCGA)
+tcga <- TcgaDb(cache_size=200000)
+samples <- tcga %>%                                              ## 1
+  fetch_samples(variable == 'indication' & value == 'BLCA') %>%
+  with_sample_covariates('sample_type') %>%
+  filter(sample_type == 'tumor')
+exprs.ft <- with_expression(samples, sig.df$featureId) %>%       ## 2
+  cpm(log=TRUE, prior.count=5) %>%
+  mcast(feature_id ~ sample_id, value.var='cpm')
+scores.ft <- scoreSingleSamples(gdb, exprs.ft, method='svd')     ## 3
+```
+
+## What the?
+
+Data are imported into a database to allow for "facile" access
+of genes and samples based on gene identity and sample characteristics. Data
+are spread across a number of "long" tables:
+
+* `expression`: stores gene expression counts (`melt(exprs(es))`)
+* `gene_info`: stores metadata about genes (`fData(es)`)
+* `sample_covariate`: stores sample covariate information in a "knowledgable"
+  way.
+* `sample_stats`: library size, norm.factors, things like that.
+
+These tables are queried and joined to get to the specific chunk of data you
+want.
+
+## Tables
+
+```{r}
+head(gene_info_tbl(tcga), n=3)
+head(expression_tbl(tcga), n=3)
+head(sample_stats_tbl(tcga), n=3)
+```
+
+## Covariates endowed with knowledge
+
+Covariates name, value, class, and type are stored into the database:
+
+```{r}
+head(sample_covariate_tbl(tcga))
+```
+
+These are all of the things the database knows about the TCGA
+
+```{r echo=FALSE, results='asis'}
+cov.info <- sample_covariate_tbl(tcga) %>%
+  collect %>%
+  group_by(variable) %>%
+  summarize(n_categories=if (type[1L] == 'categorical') length(unique(value)) else Inf) %>%
+  ungroup
+```
+
+```
+
+
+## Gene Set Correlation in BLCA {.columns-2}
+
+```{r echo=FALSE, fig.height=3.5, fig.width=4.5}
+plot.cor(scores.gt, title="GenomicsTools")
+```
+
+```{r echo=FALSE, fig.height=3.5, fig.width=4.5}
+plot.cor(scores.ft, title="FacileTCGA")
+```
+
+# What about subtypes?
+
+## Scoring subtypes
+
+The datasets in `GenomicsTools` store subtyping information in
+indication-specific columns in their respective `pData` objects.
+
+For instance:
+
+* BLCA: no subtyping data stored here, need to fetch from ExpressionTools
+* BRCA
+  - PAM50 subtypes in `[['pam50_mrna]]` column (Basal-like, HER2-enriched, 
+    Luminal A, Luminal B, Normal-like)
+  - Hormone recepter typing: TNBC, ER+/PR+ 
+    - Need to parse data in `er_status_by_ihc`, `her2_status_by_ihc`, ...
+
+
+
+
+
+
+
+# Evolving Language
+
+## Score Bladder samples in TCGA (FacileTCGA)
+
+1. Select samples we want
+2. Fetch relevant expression values from samples in (1)
+3. Score gene sets on data above
+
+```{r, eval=FALSE}
+scores.ft <- tcga %>%                                              ## 1
+  fetch_samples(variable == 'indication' & value == 'BLCA') %>%
+  with_sample_covariates('sample_type') %>%
+  filter(sample_type == 'tumor') %>%
+  with_expression(sig.df$featureId) %>%                   ## 2
+  cpm(log=TRUE, prior.count=5) %>%
+  mcast(feature_id ~ sample_id, value.var='cpm') %>%
+  scoreSingleSamples(gdb, ., method='svd')                         ## 3
+```
+
+## ... eventually
+
+```{r, eval=FALSE}
+scores.ft <- tcga %>%                                              ## 1
+  filter_samples(indication == 'BLCA' & sample_type == 'tumor') %>%
+  with_expression(sig.df$featureId) %>%                            ## 2
+  cpm(log=TRUE, prior.count=5) %>%
+  mcast(feature_id ~ sample_id, value.var='cpm') %>%
+  scoreSingleSamples(gdb, ., method='svd')                         ## 3
+```
+
+
+  
+
 
