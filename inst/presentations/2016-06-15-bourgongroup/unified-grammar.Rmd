@@ -1,0 +1,95 @@
+---
+title: "A unified langague for the analysis and visualization of data"
+author: "Steve Lianoglou"
+date: "16 June 2016"
+output: 
+  ioslides_presentation:
+    transition: faster
+    smaller: true
+---
+
+```{r setup, include=FALSE}
+on.rescomp <- Sys.getenv("HOME") != "/Users/lianogls"
+
+library(reshape2)
+library(magrittr)
+library(dplyr)
+library(multiGSEA)
+library(DT)
+library("FacileRepo")
+devtools::load_all("~/workspace/projects/FacileData/apps/TCGA/FacileTCGA")
+devtools::load_all("~/workspace/projects/FacileData/apps/atezo/FacileAtezo")
+devtools::load_all('~/workspace/projects/FacileData/apps/signatures/CIWG.SigRefine')
+if (on.rescomp) {
+  library(GenomicsTools)
+}
+knitr::opts_chunk$set(echo=TRUE, message=FALSE, warning=FALSE)
+
+slim.df.all <- loadSlimRawMaster() %>%
+  group_by(name) %>%
+  mutate(N=n()) %>%
+  ungroup
+slim.df <- slim.df.all %>%
+  select(-sname, -signature_type, -protected) %>%
+  filter(N > 2)
+## gdb <- GeneSetDb(slim.df)
+
+sigs.df <- bind_rows(
+  filter(slim.df.all, sname == 'ER17 ER stress response') %>%
+    mutate(name="ER stress response"),
+  filter(slim.df.all, name == 'TGFb response (F-TBRS)'),
+  filter(slim.df.all, name == "Cytolytic activity")) %>%
+  select(-sname, -signature_type, -protected)
+gdb <- GeneSetDb(sigs.df)
+```
+
+## Problem Statement
+
+<div class="centered">
+I routinely want to perform *repeated analyses* over *different subsets of 
+samples* across large datasets.
+</div>
+
+> 1. I want to **remove the mental burden** of querying for **the same information
+     across different datasets** using **dataset specific** identifiers/vocabulary.
+> 2. I want **facile access** to subsets of data (genes, samples, samples with
+     a mutation in a given pathway, etc.) without having to load an 
+     **entire dataset first only to retrieve a small part of it**.
+> 3. I want to more easily present the results of these analysis in a **visual and
+     interactive way**.
+
+## Examples
+
+> * How do the enrichment scores of my favorite gene signatures correlate with
+    each other across a given indication or subtype?
+> * Where does a fibroblast-specific TGFb response have any prognostic value?
+
+# Assessment of Signature Activity
+
+We will assess the correlation structure of the following genes across different
+subsets of the TCGA and our atezo clinical trial data:
+
+```{r signature-list, results='asis'}
+sig.info <- sigs.df %>%
+  group_by(name) %>%
+  summarize(n=n()) %>%
+  ungroup
+cat(paste(sprintf('*  %s (%d genes)',sig.info$name,sig.info$n), collapse='\n'))
+```
+
+## Setup Genesets
+
+We will (of course(!)) us the multiGSEA infrastructure to manage our genesets.
+
+```{r}
+(gdb <- GeneSetDb(sigs.df))
+```
+
+## Score Bladder samples in TCGA
+
+```{r, eval=on.rescomp}
+acc.all <- loadRNASeqData('BLCA', data='rpkms')
+acc.tum <- log2(exprs(getTumorData(ac..all)) + 0.1)
+scores.gt <- scoreSingleSamples(gdb, acc.tum, method='svd')
+```
+

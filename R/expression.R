@@ -179,12 +179,13 @@ as.DGEList <- function(x, covariates=NULL, db=fdb(x),
 ##' @param covariates A \code{character} vector specifying the  additional
 ##'   covariates to append to \code{out$samples}. Must be valid entries in the
 ##'   \code{sample_covariate::variable} column.
+##' @param assay Which column to put in \code{"exprs"}
 ##' @param db The \code{FacilDb} object. This is extracted from \code{x} if
 ##'   we are able.
 ##' @param cov.def the path to the yaml file that defines what each type of
 ##'   variable is. This is also set in and extracted from \code{db}.
 ##' @return a \code{\link[Biobase]{ExpressionSet}}
-as.ExpressionSet <- function(x, covariates=NULL, db=fdb(x),
+as.ExpressionSet <- function(x, covariates=NULL, exprs='counts', db=fdb(x),
                              cov.def=db[['cov.def']], ...) {
   if (!require("Biobase")) {
     stop("Biobase required")
