@@ -7,12 +7,12 @@ plot.cor <- function(dat, ind, sub, cor.method=c('spearman', 'pearson'),
     "#FFFFFF", "#D1E5F0", "#92C5DE", "#4393C3", "#2166AC", "#053061") %>%
     rev %>%
     colorRampPalette
+
   if (!missing(ind) && !missing(sub)) {
-    X <- filter(dat, indication == ind & subtype == sub) %>%
-      mcast(sample ~ name, value.var='score')
-  } else {
-    X <- mcast(dat, sample ~ name, value.var='score')
+    dat <- filter(dat, indication == ind & subtype == sub)
   }
+
+  X <- mcast(dat, sample ~ name, value.var='score')
   XC <- cor(X, method=cor.method)
   colnames(XC) <- NULL
   corrplot(XC, method=method, type=type, order=order, addrect=addrect,

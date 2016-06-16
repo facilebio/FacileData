@@ -1,3 +1,32 @@
+
+##' Creates tbl that associates a sample with all of its indication/subtypes
+##'
+##' @export
+##' @param db a \code{FacileDb} objectg
+##' @return a \code{tbl} with indication and subtype information for all samples
+##'   in the database
+subtype_map <- function(db) {
+  if (missing(db)) on.exit(dbDisconnect(db$con))
+  sample.map <- sample_covariate_tbl(db) %>%
+    filter(class == 'tumor_classification') %>%
+    with_sample_covariates('sample_type', db, db$cov.def)
+
+  main <- sample.map %>%
+    filter(variable == 'indication') %>%
+    transmute(indication=value, subtype='all', dataset=dataset,
+              sample_id=sample_id, sample_type=sample_type)
+
+  subs <- filter(sample.map, variable != 'indication') %>%
+    transmute(subtype=value, dataset=dataset, sample_id=sample_id,
+              sample_type=sample_type) %>% ## add indication
+    left_join(select(main, dataset, sample_id, indication),
+              by=c('dataset', 'sample_id'))
+
+  bind_rows(main, subs) %>%
+    arrange(indication, subtype, dataset) %>%
+    set_fdb(db)
+}
+
 ##' Fetches a sample descriptor that matches filter criterion over covariates.
 ##'
 ##' @export

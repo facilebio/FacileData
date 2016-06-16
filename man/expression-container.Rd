@@ -8,7 +8,7 @@
 as.DGEList(x, covariates = NULL, db = fdb(x), cov.def = db[["cov.def"]],
   ...)
 
-as.ExpressionSet(x, covariates = NULL, db = fdb(x),
+as.ExpressionSet(x, covariates = NULL, exprs = "counts", db = fdb(x),
   cov.def = db[["cov.def"]], ...)
 }
 \arguments{
@@ -29,6 +29,8 @@ variable is. This is also set in and extracted from \code{db}.}
 \item{covariates}{A \code{character} vector specifying the  additional
 covariates to append to \code{out$samples}. Must be valid entries in the
 \code{sample_covariate::variable} column.}
+
+\item{assay}{Which column to put in \code{"exprs"}}
 
 \item{db}{The \code{FacilDb} object. This is extracted from \code{x} if
 we are able.}
