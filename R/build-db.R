@@ -29,6 +29,13 @@ createWarehouse <- function(db.path, datasets, sample.meta,
   stopifnot(all(sapply(datasets, function(x) all.equal(fData(x), gi))))
   rownames(gi) <- NULL
 
+  ## we 'sample_id' and 'dataset' are special names (they will always be column
+  ## names of a tbl returned from the FacileDb) so we can't have variables named
+  ## that way, too.
+  if (any(sample.meta$variable %in% c('dataset', 'sample_id'))) {
+    stop("entries in sample.meta$variable cannot be 'dataset' or 'sample_id'")
+  }
+
   ## Setup database skeleton ---------------------------------------------------
   ## Configure DB connection
   sqlite <- DBI::dbDriver('SQLite')
