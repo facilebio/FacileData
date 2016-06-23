@@ -7,6 +7,9 @@
 with_sample_covariates(x, covariates = NULL, db = fdb(x),
   cov.def = db[["cov.def"]])
 }
+\arguments{
+\item{x}{a "tbl"-like object that is a sample descriptor}
+}
 \description{
 Note that this function will force the collection of \code{x}
 }

@@ -3,13 +3,14 @@
 ##' @export
 ##' @param db.path The path to the clinX database.
 ##' @return A \code{dplyr::src_sqlite} connection to the database.
-FacileDb <- function(db.path=getOption('fatezo.dbpath', NULL),
+FacileDb <- function(db.fn=getOption('ftest.dbpath', NULL),
+                     covdef.fn=getOption('ftest.covdef'),
                      cache_size=20000) {
-  if (!is.character(db.path)) {
-    stop("Either set options(facile.dbpath) or pass in path to sqlite.db file")
+  if (!is.character(db.fn) || !file.exists(db.fn)) {
+    stop("The path to db.fn is not legit")
   }
-  if (!file.exists(db.path)) {
-    stop("Illegal path to tcga db file")
+  if (!is.character(covdef.fn) || !file.exists(covdef.fn)) {
+    stop("The path to covdef.fn is not legit")
   }
 
   ## Update some parameters in the connection for increased speed
@@ -21,12 +22,12 @@ FacileDb <- function(db.path=getOption('fatezo.dbpath', NULL),
   ## The following PRAGMA are of likely interest:
   ##   1. cache_size  https://www.sqlite.org/pragma.html#pragma_cache_size
   ##   2. page_size
-  out <- src_sqlite(db.path)
+  out <- src_sqlite(db.fn)
   dbSendQuery(out$con, 'pragma temp_store=MEMORY;')
   dbSendQuery(out$con, sprintf('pragma cache_size=%d;', cache_size))
 
   out['cov.def'] <- list(NULL)
-  out['cov.def'] <- getOption('fatezo.covdef')
+  out['cov.def'] <- covdef.fn
 
   class(out) <- c('FacileDb', class(out))
   out

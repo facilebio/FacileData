@@ -26,6 +26,7 @@ fetch_sample_covariates <- function(db, samples=NULL, covariates=NULL) {
 ##' Note that this function will force the collection of \code{x}
 ##'
 ##' @export
+##' @param x a "tbl"-like object that is a sample descriptor
 with_sample_covariates <- function(x, covariates=NULL, db=fdb(x),
                                    cov.def=db[['cov.def']]) {
   stopifnot(is.FacileDb(db))

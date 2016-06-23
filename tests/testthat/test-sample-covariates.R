@@ -1,6 +1,6 @@
 context("Sample Covariate")
 
-DB <- FacileDb()
+DB <- TestDb()
 cov.def <- DB[['cov.def']]
 samples <- sample_covariate_tbl(DB) %>%
   filter(value == 'TNBC') %>%

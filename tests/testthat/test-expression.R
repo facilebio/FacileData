@@ -1,6 +1,6 @@
 context("Expression")
 
-DB <- FacileDb()
+DB <- TestDb()
 samples <- sample_covariate_tbl(DB) %>%
   filter(value == 'TNBC') %>%
   select(dataset, sample_id)
