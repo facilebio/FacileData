@@ -12,6 +12,8 @@ fetch_sample_statistics <- function(db, samples=NULL, semi=TRUE) {
   if (is.null(samples)) {
     out <- ss
   } else {
+    ## TODO: Need to write unit tests here to exercise what we want to do with
+    ##       these results when samples are provided
     samples <- assert_sample_subset(samples)
     out <- join_samples(ss, samples, semi)
   }

@@ -64,10 +64,25 @@ with_expression <- function(samples, feature_ids, db=fdb(samples)) {
 cpm.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
                            db=fdb(x), ...) {
   stopifnot(is.FacileDb(db))
+  if (!is.null(lib.size)) {
+    warning("not supporting custom lib.size yet")
+  }
   ## Let's leverage the fact that we're already working in the database
-  sample.stats <- fetch_sample_statistics(db, x)
-  out <- cpm(collect(x), lib.size=lib.size, log=log, prior.count=prior.count,
-             sample.stats=sample.stats, db=db, ...)
+  sample.stats <- fetch_sample_statistics(db)
+
+  if (same_src(x, sample.stats)) {
+    tmp <- inner_join(x, sample.stats, by=c('dataset', 'sample_id'))
+    tmp <- collect(tmp)
+    cpms <- calc.cpm(tmp, lib.size=tmp$libsize * tmp$normfactor,
+                     log=log, prior.count=prior.count)
+    out <- tmp %>%
+      mutate(cpm=cpms) %>%
+      select_(.dots=c(colnames(x), 'cpm'))
+  } else {
+    out <- cpm(collect(x), lib.size=lib.size, log=log, prior.count=prior.count,
+               sample.stats=sample.stats, db=db, ...)
+
+  }
   set_fdb(out, db)
 }
 
@@ -78,31 +93,44 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
                        sample.stats=NULL, db=fdb(x), ...) {
   assert_expression_result(x)
   stopifnot(is.FacileDb(db))
+  if (!is.null(lib.size)) {
+    warning("not supporting custom lib.size yet")
+  }
   if (is.null(sample.stats)) {
-    sample.stats <- fetch_sample_statistics(x, db=db)
+    sample.stats <- fetch_sample_statistics(x)
   }
   sample.stats <- sample.stats %>%
     assert_sample_statistics %>%
-    collect
+    collect %>%
+    distinct(dataset, sample_id)
 
-  ## cpm.DGList functionality unrolled over a data.frame
-  mult <- mutate(sample.stats, lib.size=libsize * normfactor,
-                 pr.count=lib.size / mean(lib.size) * prior.count)
-
-  xref <- match(paste0(x$dataset, x$sample_id),
-                paste0(mult$dataset, mult$sample_id))
-
-  if (log) {
-    mult$lib.size <- 1e-6 * (mult$lib.size + 2*mult$pr.count)
-    x$cpm <- log2((x$count + mult$pr.count[xref]) / mult$lib.size[xref])
-  } else {
-    mult$lib.size <- 1e-6 * mult$lib.size
-    x$cpm <- x$count / mult$lib.size[xref]
-  }
-
-  set_fdb(x, db)
+  tmp <- inner_join(x, sample.stats, by=c('dataset', 'sample_id'))
+  cpms <- calc.cpm(tmp, lib.size=tmp$libsize * tmp$normfactor, log=log,
+                   prior.count=prior.count)
+  tmp %>%
+    mutate(cpm=cpms) %>%
+    select_(.dots=c(colnames(x), 'cpm')) %>%
+    set_fdb(db)
 }
 
+## A helper function to calculate cpm. Expects that x is a tbl-like thing which
+## has a count column, and the appropriate libsize and normfactor columns from
+## the database
+calc.cpm <- function(x, lib.size=NULL, log=FALSE, prior.count=5) {
+  x <- collect(x)
+
+  pr.count <- lib.size / mean(lib.size) * prior.count
+
+  if (log) {
+    lib.size <- 1e-6 * (lib.size + 2*pr.count)
+    cpms <- log2((x$count + pr.count) / lib.size)
+  } else {
+    lib.size <- 1e-6 * lib.size
+    cpms <- x$count / lib.size
+  }
+
+  cpms
+}
 
 ##' Converts a result from `fetch_expression` into a DGEList
 ##'

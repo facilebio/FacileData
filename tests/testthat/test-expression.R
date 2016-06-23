@@ -52,14 +52,22 @@ test_that('as.DGEList assigns correct covariates', {
 test_that("cpm on fetch_expression result mimics cpm.DGEList", {
   e <- fetch_expression(DB, samples, genes)
 
-  EL <- cpm(e, log=TRUE, prior.count=5) %>%
-    mutate(samid=paste(dataset, sample_id, sep='_')) %>%
-    mcast(feature_id ~ samid, value.var='cpm')
-
   E <- cpm(e, log=FALSE, prior.count=5) %>%
     mutate(samid=paste(dataset, sample_id, sep='_')) %>%
     mcast(feature_id ~ samid, value.var='cpm')
 
+  EL <- cpm(e, log=TRUE, prior.count=5) %>%
+    mutate(samid=paste(dataset, sample_id, sep='_')) %>%
+    mcast(feature_id ~ samid, value.var='cpm')
+
+  Etbldf <- cpm(collect(e), log=TRUE, prior.count=5, db=DB) %>%
+    mutate(samid=paste(dataset, sample_id, sep='_')) %>%
+    mcast(feature_id ~ samid, value.var='cpm')
+
+  ## counts from within database or collect should match
+  expect_equal(EL, Etbldf)
+
+  ## Test that cpm's returned with edgeR only code match
   y <- as.DGEList(e)
   YL <- cpm(y, log=TRUE, prior.count=5)
   Y <- cpm(y, log=FALSE, prior.count=5)
