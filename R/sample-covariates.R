@@ -17,8 +17,15 @@ fetch_sample_covariates <- function(db, samples=NULL, covariates=NULL) {
     }
   }
 
-  filter_samples(dat, samples) %>%
-    set_fdb(db)
+  ## if (right.join) {
+  ##   assert_sample_subset(samples)
+  ##   out <- right_join(dat, samples, by=c('dataset', 'sample_id'))
+  ## } else {
+  ##   out <- filter_samples(dat, samples)
+  ## }
+
+  out <- filter_samples(dat, samples)
+  set_fdb(out, db)
 }
 
 ##' Appends covariate columns to a query result
@@ -41,7 +48,7 @@ with_sample_covariates <- function(x, covariates=NULL, db=fdb(x),
     spread_covariates(cov.def)
 
   collect(x, n=Inf) %>%
-    inner_join(covs, by=c('dataset', 'sample_id')) %>%
+    left_join(covs, by=c('dataset', 'sample_id')) %>%
     set_fdb(db)
 }
 

@@ -3,12 +3,12 @@ context("Sample Covariate")
 DB <- TestDb()
 cov.def <- DB[['cov.def']]
 samples <- sample_covariate_tbl(DB) %>%
-  filter(value == 'TNBC') %>%
+  filter(variable == 'stage' & value == 'III') %>%
   select(dataset, sample_id)
 genes <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
 
 test_that("fetch_sample_covariates::samples arg limits samples correctly", {
-  vars <- c('BCOR', 'IC', 'TC', 'OS')
+  vars <- c('stage', 'sex', 'OS')
   covs <- fetch_sample_covariates(DB, samples, vars) %>% collect(n=Inf)
   s.df <- collect(samples, n=Inf)
   expected.samples <- with(s.df, paste(dataset, sample_id, sep='_')) %>% unique
@@ -18,7 +18,7 @@ test_that("fetch_sample_covariates::samples arg limits samples correctly", {
 
 test_that("cast_covariate converts simple variables to correct type", {
   ## Simple covariates are converted to an atomic vector type
-  simple.vars <- c('BCOR'='factor', 'IC'='factor', 'TC'='factor')
+  simple.vars <- c('sex'='factor', 'stage'='character', 'sample_type'='factor')
   for (name in names(simple.vars)) {
     eclass <- simple.vars[[name]]
     info <- sprintf('%s (%s)', name, eclass)
@@ -44,14 +44,14 @@ test_that("cast_covariate converts right_censored data correctly", {
 
 
 test_that("spread_covariates casts simple covariates to correct class", {
-  vars <- c('BCOR', 'IC', 'TC')
-  wide <- fetch_sample_covariates(DB, samples, vars) %>%
+  vars <- c('sex'='factor', 'stage'='character', 'sample_type'='factor')
+  wide <- fetch_sample_covariates(DB, samples, names(vars)) %>%
     spread_covariates
 
-  ## Test presence of columns and class convertec correctly
-  expect_is(wide$BCOR, 'factor')
-  expect_is(wide$IC, 'factor')
-  expect_is(wide$TC, 'factor')
+  ## Test presence of columns and class converted correctly
+  for (cov in names(vars)) {
+    expect_is(wide[[cov]], vars[cov], info=paste("Covariate:", cov))
+  }
 
   ## Ensure that all samples asked for are in wide result
   snames <- with(collect(samples, n=Inf), paste0(dataset, '_', sample_id))
@@ -59,7 +59,7 @@ test_that("spread_covariates casts simple covariates to correct class", {
 })
 
 test_that("spread_covariates works with both simple and complex types", {
-  simple <- c('BCOR', 'IC')
+  simple <- c('sex', 'stage')
   complex <- c('OS', 'PFS')
 
   ## Check values retrieved in uber result with individual results from simple
@@ -75,13 +75,20 @@ test_that("spread_covariates works with both simple and complex types", {
 
   cc <- fetch_sample_covariates(DB, samples, complex) %>%
     spread_covariates
+  ## Some samples don't have complex covariates -- we need to fix this so that
+  ## we get NA's for samples that don't have them from fetch_sample_covariates
+
+  mcheck <- semi_join(mixed, cc, by=c('dataset', 'sample_id'))
   ## check values in same (named) columns are the same
   cols <- intersect(names(mixed), names(cc))
-  expect_equal(mixed[, cols], cc[, cols], check.attributes=FALSE)
+
+  mcheck %<>% arrange(dataset, sample_id)
+  cc %<>% arrange(dataset, sample_id)
+  expect_equal(mcheck[, cols], cc[, cols], check.attributes=FALSE)
 })
 
 test_that("spread_covariates(..., cov.def=NULL) sets column-values as character", {
-  vars <- c('BCOR', 'IC', 'TC', 'OS', 'subtype_receptor')
+  vars <- c('sex', 'stage', 'OS', 'subtype_crc_cms')
   covs <- fetch_sample_covariates(DB, samples, vars)
   expected <- collect(covs, n=Inf) %>%
     dcast(dataset + sample_id ~ variable, value.var='value') %>%
@@ -93,7 +100,7 @@ test_that("spread_covariates(..., cov.def=NULL) sets column-values as character"
 })
 
 test_that('with_sample_covariates returns long input with wide covariates', {
-  covs <- c('BCOR', 'IC', 'TC')
+  covs <- c('stage', 'sex')
 
   ## Setup the individual expression and covariate table to merge into the
   ## expected result
