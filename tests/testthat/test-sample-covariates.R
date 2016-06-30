@@ -9,8 +9,8 @@ genes <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
 
 test_that("fetch_sample_covariates::samples arg limits samples correctly", {
   vars <- c('BCOR', 'IC', 'TC', 'OS')
-  covs <- fetch_sample_covariates(DB, samples, vars) %>% collect
-  s.df <- collect(samples)
+  covs <- fetch_sample_covariates(DB, samples, vars) %>% collect(n=Inf)
+  s.df <- collect(samples, n=Inf)
   expected.samples <- with(s.df, paste(dataset, sample_id, sep='_')) %>% unique
   returned.samples <- with(covs, paste(dataset, sample_id, sep='_')) %>% unique
   expect_true(all(returned.samples %in% expected.samples))
@@ -22,7 +22,7 @@ test_that("cast_covariate converts simple variables to correct type", {
   for (name in names(simple.vars)) {
     eclass <- simple.vars[[name]]
     info <- sprintf('%s (%s)', name, eclass)
-    vals <- fetch_sample_covariates(DB, samples, name) %>% collect
+    vals <- fetch_sample_covariates(DB, samples, name) %>% collect(n=Inf)
     casted <- cast_covariate(name, vals$value, cov.def)
     expect_true(length(casted) == nrow(vals), info=info)
     expect_equal(class(casted)[1L], eclass, info=info)
@@ -35,7 +35,7 @@ test_that("cast_covariate converts right_censored data correctly", {
   vars <- c('OS', 'PFS')
   for (name in vars) {
     ex.names <- paste(c('tte', 'event'), name, sep='_')
-    vals <- fetch_sample_covariates(DB, samples, name) %>% collect
+    vals <- fetch_sample_covariates(DB, samples, name) %>% collect(n=Inf)
     casted <- cast_covariate(name, vals$value, cov.def)
     expect_is(casted, 'data.frame', info=name)
     expect_equal(names(casted), ex.names, info=name)
@@ -54,7 +54,7 @@ test_that("spread_covariates casts simple covariates to correct class", {
   expect_is(wide$TC, 'factor')
 
   ## Ensure that all samples asked for are in wide result
-  snames <- with(collect(samples), paste0(dataset, '_', sample_id))
+  snames <- with(collect(samples, n=Inf), paste0(dataset, '_', sample_id))
   expect_true(setequal(rownames(wide), snames))
 })
 
@@ -83,7 +83,7 @@ test_that("spread_covariates works with both simple and complex types", {
 test_that("spread_covariates(..., cov.def=NULL) sets column-values as character", {
   vars <- c('BCOR', 'IC', 'TC', 'OS', 'subtype_receptor')
   covs <- fetch_sample_covariates(DB, samples, vars)
-  expected <- collect(covs) %>%
+  expected <- collect(covs, n=Inf) %>%
     dcast(dataset + sample_id ~ variable, value.var='value') %>%
     set_rownames(., paste0(.$dataset, '_', .$sample_id))
   result <- spread_covariates(covs, NULL)
@@ -98,7 +98,7 @@ test_that('with_sample_covariates returns long input with wide covariates', {
   ## Setup the individual expression and covariate table to merge into the
   ## expected result
   exprs <- fetch_expression(DB, samples, genes) %>%
-    collect
+    collect(n=Inf)
   wcovs <- fetch_sample_covariates(DB, samples, covs) %>%
     spread_covariates
   expected <- left_join(exprs, wcovs, by=c('dataset', 'sample_id')) %>%

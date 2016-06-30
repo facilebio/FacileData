@@ -1,0 +1,68 @@
+sex:
+  class: clinical
+  type: categorical
+  levels: ['m', 'f']
+stage:
+  class: clinical
+  type: categorical
+sample_type:
+  class: clinical
+  type: categorical
+  levels: ['normal', 'tumor']
+indication:
+  class: tumor_classification
+  type: categorical
+subtype_expression:
+  class: tumor_classification
+  type: categorical
+subtype_breast_receptor_status:
+  class: tumor_classification
+  type: categorical
+subtype_microsatellite_instability:
+  class: tumor_classification
+  type: categorical
+subtype_crc_cms:
+  class: tumor_classification
+  type: categorical
+is_primary:
+  class: tumor_classification
+  type: categorical
+histology:
+  class: tumor_classification
+  type: categorical
+location:
+  class: tumor_classification
+  type: categorical
+cohort:
+  class: clinical
+  type: categorical
+smoking_status:
+  class: clinical
+  type: categorical
+has_lymph_met:
+  class: clinical
+  type: categorical
+has_liver_met:
+  class: clinical
+  type: categorical
+has_bone_met:
+  class: clinical
+  type: categorical
+PFS:
+  class: response
+  type: right_censored
+OS:
+  class: response
+  type: right_censored
+BCOR:
+  class: response
+  type: categorical
+  levels: ["CR", "PR", "SD", "PD", "NE"]
+IC:
+  class: IHC
+  type: categorical
+  levels: ["IC0", "IC1", "IC2", "IC3"]
+TC:
+  class: IHC
+  type: categorical
+  levels: ["TC0", "TC1", "TC2", "TC3"]

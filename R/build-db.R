@@ -164,3 +164,29 @@ createSampleCovariateTable <- function(db) {
   )
   dbSendQuery(db, table.sql)
 }
+
+##' Update or add new sample covariate annotation
+##'
+##' @param db a \code{FacileDb} object
+##' @param covariates the covariate table to insert/replace
+updateSampleCovariates <- function(db, covariates) {
+  if (FALSE) {
+    library(FacileTCGA)
+    db <- TcgaDb()
+  }
+  p.key <- c('dataset', 'sample_id', 'variable')
+  cov.tbl <- sample_covariate_tbl(db) %>% collect(n=Inf)
+  req.cols <- setdiff(colnames(cov.tbl), 'date_entered')
+
+  covariates %<>%
+    assert_columns(req.cols) %>%
+    collect(n=Inf) %>%
+    mutate(date_entered=as.numeric(Sys.time()))
+
+  updated <- cov.tbl %>%
+    anti_join(covariates, by=p.key) %>% ## keep covariates we aren't replacing
+    bind_rows(covariates) %>%
+    arrange(dataset, sample_id, variable, value)
+
+  ## 2. add new ones
+}

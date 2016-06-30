@@ -26,15 +26,8 @@
   ## affraid we can't avoid explicity defining the *.datapath. This is because
   ## the unit tests are run in a "clean" (R --vanilla) environment which doesn't
   ## load the stuff in your .Rprofile
-  home <- Sys.getenv("HOME")
-  dpath <- if (home == '/Users/rouillyv') {
-    "/Users/rouillyv/PUT/YOUR/PATH/HERE"
-  } else if (home == '/Users/lianogls') {
-    '/Users/lianogls/workspace/data/facile/atezo/v01/'
-  } else {
-    '/gne/devsci/data/obdroot/PDL1mab/pcd4989g/ngs/intermdata/lianoglou/facile-atezo/v01'
-  }
-  db.name <- 'AtezoDb-explicit-dataset.sqlite'
+  dpath <- system.file('extdata', 'test', package='FacileRepo')
+  db.name <- 'TcgaDb-test.sqlite'
   dpath <- getOption(sprintf('%s.datapath', impl.prefix), dpath)
 
   pkg.opts <- list(

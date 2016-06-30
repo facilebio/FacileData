@@ -27,7 +27,16 @@ A lazy \code{\link[dplyr]{tbl}} object with the expression
   othwerise a \code{tbl_df} of the results.
 }
 \description{
+Helper function creates dplyr query to get expression data of interest.
+}
+\section{Software Design Caveats}{
+
+
 Note that if \code{db} is not provided, the result will be \code{collect}ed,
 because the database connection will be closed when the function exits.
+
+If a \code{samples} selector is provided, we currently do not make sure that
+each "observation" (dataset,sample_id)-tuple is unique. Not sure if
+duplicated gene expression results will matter downstream ...
 }
 

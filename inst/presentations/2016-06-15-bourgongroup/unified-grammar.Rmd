@@ -158,10 +158,10 @@ For instance:
 
 * BLCA: no subtyping data stored here, need to fetch from ExpressionPlot
 * BRCA
-  - PAM50 subtypes in `[['pam50_mrna]]` column (Basal-like, HER2-enriched, 
-    Luminal A, Luminal B, Normal-like)
-  - Hormone recepter typing: TNBC, ER+/PR+ 
-    - Need to parse data in `er_status_by_ihc`, `her2_status_by_ihc`, ...
+    - PAM50 subtypes in `[['pam50_mrna]]` column (Basal-like, HER2-enriched, 
+      Luminal A, Luminal B, Normal-like)
+    - Hormone recepter typing: TNBC, ER+/PR+ 
+        - Need to parse data in `er_status_by_ihc`, `her2_status_by_ihc`, ...
 * COAD/READ: where to we store MSI/MSS info?
 * OV: Molcular subtypes in `[[Expression.subtype]]`
 
@@ -359,7 +359,7 @@ that the database knows ... and the database knows that you know that it knows .
 
 ```{r echo=FALSE, results='asis'}
 cov.info <- sample_covariate_tbl(tcga) %>%
-  collect %>%
+  collect(n=Inf) %>%
   group_by(variable) %>%
   summarize(n_categories=if (type[1L] == 'categorical') {
     length(unique(value))

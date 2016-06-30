@@ -7,7 +7,7 @@ Maintainer: Steve Lianoglou <lianoglou.steve@gene.com>
 Description: Supporting code to shuttle individually prepared clinical datasets
     into my centralized database vision of the future
 Depends:
-    dplyr (>= 0.4.3),
+    dplyr (>= 0.5.0),
     edgeR
 Imports:
     magrittr,

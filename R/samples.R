@@ -58,11 +58,15 @@ fetch_samples <- function(db, ...) {
 ##'   otherwise does an inner_join between \code{x} and \code{samples}
 ##'   (default \code{FALSE}).
 ##' @return joined result between \code{x} and \code{samples}
-join_samples <- function(x, samples=NULL, semi=FALSE) {
+join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
   if (is.null(samples)) {
     return(x)
   }
   assert_sample_subset(samples)
+
+  ## TODO: Rethink the internalization choice here. If the "external" dataset
+  ##       is huge, then copying it into the database to do the join will be
+  ##       painful
   internalize <- !same_src(samples, x)
 
   ## I think I should be using `semi_join` here, but that is so slow I might

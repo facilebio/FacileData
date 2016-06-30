@@ -9,5 +9,15 @@
 ##'   the covariate definitions
 TestDb <- function(db.fn=getOption('ftest.dbpath', NULL),
                    covdef.fn=getOption('ftest.covdef')) {
-  FacileDb(db.fn, covdef.fn)
+  FacileDb(db.fn, covdef.fn, cache_size=80000)
 }
+
+## This uses GenomicsTools to create a test database
+createTestDb <- function(out.fn) {
+  ## I am farming this out to the FacileTCGA package and creating a smaller
+  ## version of the TCGA -- this is cicrular, I know.
+  ##
+  ## See FacileTCGA/inst/build-test-db
+  stop("This is created in FacileTCGA/inst/build-test-db")
+}
+

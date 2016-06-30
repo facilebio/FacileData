@@ -1,7 +1,13 @@
 ##' Helper function creates dplyr query to get expression data of interest.
 ##'
+##' @section Software Design Caveats:
+##'
 ##' Note that if \code{db} is not provided, the result will be \code{collect}ed,
 ##' because the database connection will be closed when the function exits.
+##'
+##' If a \code{samples} selector is provided, we currently do not make sure that
+##' each "observation" (dataset,sample_id)-tuple is unique. Not sure if
+##' duplicated gene expression results will matter downstream ...
 ##'
 ##' @export
 ##'
@@ -34,7 +40,7 @@ fetch_expression <- function(db, samples=NULL, feature_ids=NULL,
   dat <- filter_samples(dat, samples)
 
   if (do.collect) {
-    dat <- collect(dat)
+    dat <- collect(dat, n=Inf)
     db <- NULL
   }
 
@@ -72,15 +78,16 @@ cpm.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
 
   if (same_src(x, sample.stats)) {
     tmp <- inner_join(x, sample.stats, by=c('dataset', 'sample_id'))
-    tmp <- collect(tmp)
+    tmp <- collect(tmp, n=Inf)
     cpms <- calc.cpm(tmp, lib.size=tmp$libsize * tmp$normfactor,
                      log=log, prior.count=prior.count)
     out <- tmp %>%
       mutate(cpm=cpms) %>%
       select_(.dots=c(colnames(x), 'cpm'))
   } else {
-    out <- cpm(collect(x), lib.size=lib.size, log=log, prior.count=prior.count,
-               sample.stats=sample.stats, db=db, ...)
+
+    out <- cpm(collect(x, n=Inf), lib.size=lib.size, log=log,
+               prior.count=prior.count, sample.stats=sample.stats, db=db, ...)
 
   }
   set_fdb(out, db)
@@ -96,13 +103,16 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
   if (!is.null(lib.size)) {
     warning("not supporting custom lib.size yet")
   }
+
   if (is.null(sample.stats)) {
-    sample.stats <- fetch_sample_statistics(x)
+    samples <- distinct(x, dataset, sample_id)
+    sample.stats <- fetch_sample_statistics(db, samples)
   }
+
   sample.stats <- sample.stats %>%
     assert_sample_statistics %>%
-    collect %>%
-    distinct(dataset, sample_id)
+    collect(n=Inf) %>%
+    distinct(dataset, sample_id, .keep_all=TRUE)
 
   tmp <- inner_join(x, sample.stats, by=c('dataset', 'sample_id'))
   cpms <- calc.cpm(tmp, lib.size=tmp$libsize * tmp$normfactor, log=log,
@@ -117,7 +127,7 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
 ## has a count column, and the appropriate libsize and normfactor columns from
 ## the database
 calc.cpm <- function(x, lib.size=NULL, log=FALSE, prior.count=5) {
-  x <- collect(x)
+  x <- collect(x, n=Inf)
 
   pr.count <- lib.size / mean(lib.size) * prior.count
 
@@ -153,23 +163,24 @@ calc.cpm <- function(x, lib.size=NULL, log=FALSE, prior.count=5) {
 as.DGEList <- function(x, covariates=NULL, db=fdb(x),
                        cov.def=db[['cov.def']], ...) {
   if (FALSE) {
-    covariates <- c('IC', 'TC', 'BCOR')
+    covariates <- c('stage', 'sex')
   }
   stopifnot(is.FacileDb(db))
 
   counts.df <- assert_expression_result(x) %>%
-    collect %>%
+    collect(n=Inf) %>%
+    distinct(dataset, sample_id, feature_id, .keep_all=TRUE) %>%
     mutate(samid=paste(dataset, sample_id, sep='_'))
   counts <- mcast(counts.df, feature_id ~ samid, value.var='count')
 
   samples <- counts.df %>%
     select(dataset, sample_id) %>%
-    distinct
+    distinct(.keep_all=TRUE)
 
   fids <- rownames(counts)
   genes <- gene_info_tbl(db) %>%
     filter(feature_id %in% fids) %>%
-    collect %>%
+    collect(n=Inf) %>%
     as.data.frame %>%
     set_rownames(., .$feature_id)
 
@@ -178,7 +189,7 @@ as.DGEList <- function(x, covariates=NULL, db=fdb(x),
   ## Doing the internal filtering seems to be too slow
   ## sample.stats <- fetch_sample_statistics(db, x) %>%
   sample.stats <- fetch_sample_statistics(db, samples) %>%
-    collect %>%
+    collect(n=Inf) %>%
     mutate(samid=paste(dataset, sample_id, sep='_')) %>%
     rename(lib.size=libsize, norm.factors=normfactor) %>%
     as.data.frame %>%

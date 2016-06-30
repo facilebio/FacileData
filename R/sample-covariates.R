@@ -34,13 +34,13 @@ with_sample_covariates <- function(x, covariates=NULL, db=fdb(x),
 
   samples <- assert_sample_subset(x) %>%
     select(dataset, sample_id) %>%
-    collect %>% ## can't call distinct on SQLite backend :-(
-    distinct
+    collect(n=Inf) %>% ## can't call distinct on SQLite backend :-(
+    distinct(.keep_all=TRUE)
 
   covs <- fetch_sample_covariates(db, samples, covariates) %>%
     spread_covariates(cov.def)
 
-  collect(x) %>%
+  collect(x, n=Inf) %>%
     inner_join(covs, by=c('dataset', 'sample_id')) %>%
     set_fdb(db)
 }
@@ -62,12 +62,12 @@ spread_covariates <- function(x, cov.def=NULL) {
     }
   }
   x <- assert_sample_covariates(x) %>%
-    collect
+    collect(n=Inf)
 
   ## Ensures we get a row for every sample in x, even if it is missing a value
   ## for the covariate
   dummy <- select(x, dataset, sample_id) %>%
-    distinct %>%
+    distinct(.keep_all=TRUE) %>%
     mutate(variable='.dummy.', value=NA)
 
   out <- bind_rows(x, dummy) %>%

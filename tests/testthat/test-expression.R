@@ -2,18 +2,18 @@ context("Expression")
 
 DB <- TestDb()
 samples <- sample_covariate_tbl(DB) %>%
-  filter(value == 'TNBC') %>%
+  filter(value == 'CMS4') %>%
   select(dataset, sample_id)
 samples <- sample_covariate_tbl(DB) %>%
-  filter(value == 'IC3') %>%
+  filter(variable == 'stage' & value == 'III') %>%
   select(dataset, sample_id)
 genes <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
 
 test_that("fetch_expression limits samples correctly", {
-  s.df <- collect(samples)
+  s.df <- collect(samples, n=Inf)
 
-  e.sqlite <- fetch_expression(DB, samples, genes) %>% collect
-  e.df <- fetch_expression(DB, s.df, genes) %>% collect
+  e.sqlite <- fetch_expression(DB, samples, genes) %>% collect(n=Inf)
+  e.df <- fetch_expression(DB, s.df, genes) %>% collect(n=Inf)
 
   ## results are same from tbl_df and tbl_sqlite `samples` parameter
   expect_equal(e.sqlite, e.df)
@@ -42,11 +42,11 @@ test_that("fetch_expression results converted to DGEList", {
 
 test_that('as.DGEList assigns correct covariates', {
   e <- fetch_expression(DB, samples, genes)
-  y <- as.DGEList(e, covariates=c('IC', 'TC', 'BCOR'))
+  y <- as.DGEList(e, covariates=c('stage', 'sex'))
+
   expect_is(y, 'DGEList')
-  expect_is(y$samples$IC, 'factor')
-  expect_is(y$samples$TC, 'factor')
-  expect_is(y$samples$BCOR, 'factor')
+  expect_is(y$samples$sex, 'factor')
+  expect_is(y$samples$stage, 'character')
 })
 
 test_that("cpm on fetch_expression result mimics cpm.DGEList", {
@@ -60,7 +60,7 @@ test_that("cpm on fetch_expression result mimics cpm.DGEList", {
     mutate(samid=paste(dataset, sample_id, sep='_')) %>%
     mcast(feature_id ~ samid, value.var='cpm')
 
-  Etbldf <- cpm(collect(e), log=TRUE, prior.count=5, db=DB) %>%
+  Etbldf <- cpm(collect(e, n=Inf), log=TRUE, prior.count=5, db=DB) %>%
     mutate(samid=paste(dataset, sample_id, sep='_')) %>%
     mcast(feature_id ~ samid, value.var='cpm')
 
