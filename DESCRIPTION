@@ -5,7 +5,7 @@ Version: 0.1.2
 Author: Steve Lianoglou
 Maintainer: Steve Lianoglou <lianoglou.steve@gene.com>
 Description: Supporting code to shuttle individually prepared clinical datasets
-    into my centralized database vision of the future, with MonetDBLite
+    into my centralized database vision of the future, with MonetDBLite, too.
 Depends:
     dplyr (>= 0.5.0),
     edgeR
