@@ -13,18 +13,30 @@ FacileDb <- function(db.fn=getOption('ftest.dbpath', NULL),
     stop("The path to covdef.fn is not legit")
   }
 
-  ## Update some parameters in the connection for increased speed
-  ## http://stackoverflow.com/questions/1711631
-  ##
-  ## Explains some pragme setting:
-  ##   http://www.codificar.com.br/blog/sqlite-optimization-faq/
-  ##
-  ## The following PRAGMA are of likely interest:
-  ##   1. cache_size  https://www.sqlite.org/pragma.html#pragma_cache_size
-  ##   2. page_size
-  out <- src_sqlite(db.fn)
-  dbSendQuery(out$con, 'pragma temp_store=MEMORY;')
-  dbSendQuery(out$con, sprintf('pragma cache_size=%d;', cache_size))
+  db.type <- tail(strsplit(db.fn, '.', fixed=TRUE)[[1]], 1L)
+  if (!db.type %in% c('sqlite', 'monetdblite')) {
+    stop("Unrecognized database type. Must be *.sqlite or *.monetdblite")
+  }
+
+  if (db.type == 'sqlite') {
+    ## Update some parameters in the connection for increased speed
+    ## http://stackoverflow.com/questions/1711631
+    ##
+    ## Explains some pragme setting:
+    ##   http://www.codificar.com.br/blog/sqlite-optimization-faq/
+    ##
+    ## The following PRAGMA are of likely interest:
+    ##   1. cache_size  https://www.sqlite.org/pragma.html#pragma_cache_size
+    ##   2. page_size
+    out <- src_sqlite(db.fn)
+    dbSendQuery(out$con, 'pragma temp_store=MEMORY;')
+    dbSendQuery(out$con, sprintf('pragma cache_size=%d;', cache_size))
+  } else if (db.type == 'monetdblite') {
+    if (!require('MonetDBLite')) {
+      stop("MonetDBLite required to access MonetDBLite database")
+    }
+    out <- src_monetdblite(db.fn)
+  }
 
   out['cov.def'] <- list(NULL)
   out['cov.def'] <- covdef.fn
