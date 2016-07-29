@@ -4,13 +4,16 @@
 \alias{encode_right_censored}
 \title{Encodes time and event status into single numeric vector}
 \usage{
-encode_right_censored(time, event)
+encode_right_censored(time, event, sas.encoding = FALSE)
 }
 \arguments{
 \item{time}{\code{numeric} time to event}
 
 \item{event}{0/1 vector encoded in the "R sense". "1" is an event, "0" is
 right censored.}
+
+\item{sas.encoding}{default \code{FALSE}. If \code{TRUE} 1 means "censored"
+and 0 is an event.}
 }
 \description{
 Encodes time and event status into single numeric vector
