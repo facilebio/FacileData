@@ -4,7 +4,9 @@
 \alias{TestDb}
 \title{Creates a FacileDb connection to a test database}
 \usage{
-TestDb(db.fn = getOption("ftest.dbpath", NULL),
+TestDb(db.type = c("monetdblite", "sqlite"),
+  datapath = getOption("ftest.datapath", NULL),
+  db.fn = getOption("ftest.dbpath", NULL),
   covdef.fn = getOption("ftest.covdef"))
 }
 \arguments{

@@ -3,18 +3,30 @@
 ##' @export
 ##' @importFrom edgeR cpm calcNormFactors
 ##' @importClassesFrom edgeR DGEList
-##' @importFrom DBI dbDriver
+##' @importFrom DBI dbDriver dbGetQuery dbSendQuery dbWriteTable dbDisconnect
 ##' @importFrom RSQLite dbConnect dbWriteTable dbSendQuery
 createWarehouse <- function(db.path, datasets, sample.meta,
-                            pragma.page_size=2**12, ...) {
+                            pragma.page_size=2**12,
+                            db.type='monetdblite', ...) {
   if (FALSE) {
     ## Run build-db.R in
     ## ~/workspace/projects/CIT/clinx/clinXwarehouse/inst/build-db/2016-04-20
     ## to load up db.fn and spiffy
     db.path <- db.fn
-    datasets <- spiffy
-    sample.meta <- smeta
+    datasets <- dat
+    sample.meta <- smeta.all
+    db.type='monetdblite'
   }
+
+  db.type <- match.arg(tolower(db.type), c('monetdblite', 'sqlite'))
+
+  db.path <- sub('\\.(sqlite|monetdblite)$', '', db.path, ignore.case=TRUE)
+  if (db.type == 'sqlite') {
+    db.path <- paste0(db.path, '.sqlite')
+  } else if (db.type == 'monetdblite'){
+    db.path <- paste0(db.path, '.monetdblite')
+  }
+
 
   ## Check arguments -----------------------------------------------------------
   assertPathForOutput(db.path)
@@ -37,12 +49,20 @@ createWarehouse <- function(db.path, datasets, sample.meta,
   }
 
   ## Setup database skeleton ---------------------------------------------------
+  ## Build it on local storage first, then move it to a network NFS if necessary
   ## Configure DB connection
-  sqlite <- DBI::dbDriver('SQLite')
-  db <- RSQLite::dbConnect(sqlite, db.path)
-  RSQLite::dbGetQuery(db, sprintf('pragma page_size=%d', pragma.page_size))
-  RSQLite::dbSendQuery(db, 'pragma temp_store=MEMORY;')
-  RSQLite::dbSendQuery(db, 'pragma cache_size=20000;')
+  if (db.type == 'sqlite') {
+    tmp.fn <- tempfile()
+    db <- dbConnect(RSQLite::SQLite(), tmp.fn)
+    dbGetQuery(db, sprintf('pragma page_size=%d', pragma.page_size))
+    dbSendQuery(db, 'pragma temp_store=MEMORY;')
+    dbSendQuery(db, 'pragma cache_size=20000;')
+  } else if (db.type == 'monetdblite') {
+    tmp.fn <- tempdir()
+    db <- dbConnect(MonetDBLite::MonetDBLite(), tmp.fn)
+  }
+
+  message("tmp.fn: ", tmp.fn)
 
   ## RSQLite::dbGetQuery(db, 'pragma page_size=4096')
   createGeneTable(db)
@@ -51,23 +71,27 @@ createWarehouse <- function(db.path, datasets, sample.meta,
 
   ## Populate tables -----------------------------------------------------------
   ## 1. Gene Info
-  RSQLite::dbWriteTable(db, 'gene_info', gi, append=TRUE)
-  RSQLite::dbSendQuery(db, 'CREATE INDEX gene_symbol ON gene_info (symbol);')
-  RSQLite::dbSendQuery(db, 'CREATE INDEX gene_feature_type ON gene_info (feature_type);')
+  dbWriteTable(db, 'gene_info', gi, append=TRUE)
+  dbSendQuery(db, 'CREATE INDEX gene_symbol ON gene_info (symbol);')
+  dbSendQuery(db, 'CREATE INDEX gene_feature_type ON gene_info (feature_type);')
 
   ## 2. Expression
   initializeWithExpressionData(db, datasets)
+
   ## 3. sample meta (grouping)
   ## Add "now" unix time stame
   sample.meta <- sample.meta %>%
-    transform(date_entered=as.numeric(Sys.time())) %>%
+    transform(date_entered=as.integer(Sys.time())) %>%
     as.data.frame
-  RSQLite::dbWriteTable(db, 'sample_covariate', sample.meta, append=TRUE)
-  RSQLite::dbSendQuery(db, 'CREATE INDEX sample_cov_var ON sample_covariate (variable);')
-  RSQLite::dbSendQuery(db, 'CREATE INDEX sample_cov_val ON sample_covariate (value);')
-  RSQLite::dbSendQuery(db, 'CREATE INDEX sample_cov_class ON sample_covariate (class);')
+  dbWriteTable(db, 'sample_covariate', sample.meta, append=TRUE)
+  dbSendQuery(db, 'CREATE INDEX sample_cov_var ON sample_covariate (variable);')
+  dbSendQuery(db, 'CREATE INDEX sample_cov_val ON sample_covariate (value);')
+  dbSendQuery(db, 'CREATE INDEX sample_cov_class ON sample_covariate (class);')
 
-  dbDisconnect(db)
+  dbDisconnect(db, shutdown=TRUE)
+
+  cmd <- sprintf("cp -Rf %s %s", tmp.fn, db.path)
+  system(cmd)
   db.path
 }
 
@@ -100,27 +124,28 @@ initializeWithExpressionData <- function(db, datasets) {
 
   sample.stats <- Y$samples %>%
     mutate(dataset=unlist(unname(dataset)), sample_id=colnames(Y)) %>%
-    rename(libsize=lib.size, normfactor=norm.factors) %>%
-    select(dataset, sample_id, libsize, normfactor) %>%
+    dplyr::rename(libsize=lib.size, normfactor=norm.factors) %>%
+    dplyr::select(dataset, sample_id, libsize, normfactor) %>%
+    mutate(libsize=as.integer(libsize)) %>%
     as.data.frame
-  RSQLite::dbWriteTable(db, 'sample_stats', sample.stats, append=TRUE)
+  dbWriteTable(db, 'sample_stats', sample.stats, append=TRUE)
 
   count.df <- lapply(names(datasets), function(name) {
     reshape2::melt(exprs(datasets[[name]])) %>%
       setNames(c('feature_id', 'sample_id', 'count')) %>%
       mutate(dataset=name) %>%
-      select(dataset, sample_id, feature_id, count) %>%
+      dplyr::select(dataset, sample_id, feature_id, count) %>%
       mutate(sample_id=as.character(sample_id), feature_id=as.character(feature_id))
   }) %>% bind_rows %>% as.data.frame
 
   ## write out data.frame to `expression` table
   ## takes about 60 seconds for ~ 775 samples
-  RSQLite::dbWriteTable(db, 'expression', count.df, append=TRUE)
+  dbWriteTable(db, 'expression', count.df, append=TRUE)
 
   ## Add index on feature_id (takes about a minue, too)
-  RSQLite::dbSendQuery(db, 'CREATE INDEX expression_gene ON expression (feature_id);')
+  dbSendQuery(db, 'CREATE INDEX expression_gene ON expression (feature_id);')
   ## Add UNIQUE INDEX on what should be the PRIMARY KEY
-  RSQLite::dbSendQuery(db, 'CREATE UNIQUE INDEX expression_sample_gene ON expression (dataset, sample_id, feature_id);')
+  dbSendQuery(db, 'CREATE UNIQUE INDEX expression_sample_gene ON expression (dataset, sample_id, feature_id);')
   invisible(NULL)
 }
 
@@ -129,7 +154,7 @@ createGeneTable <- function(db) {
     "CREATE TABLE gene_info (",
     "feature_id TEXT, feature_type TEXT, symbol TEXT, n_exons INTEGER, length INTEGER, source TEXT,",
     "PRIMARY KEY (feature_id));")
-  RSQLite::dbSendQuery(db, table.sql)
+  dbSendQuery(db, table.sql)
 }
 
 ##' Creates the table that holds gene counts and meta information about data
@@ -147,7 +172,7 @@ createExpressionTables <- function(db) {
 
   table.sql <- paste0(
     "CREATE TABLE sample_stats(",
-    "dataset TEXT, sample_id TEXT, libsize INTEGER, normfactor REAL, ",
+    "dataset TEXT, sample_id TEXT, libsize INTEGER, normfactor DOUBLE PRECISION, ",
     "PRIMARY KEY (dataset, sample_id))")
   dbSendQuery(db, table.sql)
 }
