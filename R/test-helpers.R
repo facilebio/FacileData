@@ -7,8 +7,15 @@
 ##' @param db.fn The path on the filesystem to the facile database
 ##' @param covdef The path on the filesystem to the yaml file that provides
 ##'   the covariate definitions
-TestDb <- function(db.fn=getOption('ftest.dbpath', NULL),
+TestDb <- function(db.type=c('monetdblite', 'sqlite'),
+                   datapath=getOption('ftest.datapath', NULL),
+                   db.fn=getOption('ftest.dbpath', NULL),
                    covdef.fn=getOption('ftest.covdef')) {
+  if (missing(db.fn)) {
+    db.type <- match.arg(db.type)
+    db.fn <- file.path(datapath, paste0('TcgaDb-test.', db.type))
+  }
+
   FacileDb(db.fn, covdef.fn, cache_size=80000)
 }
 
