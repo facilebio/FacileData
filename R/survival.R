@@ -22,6 +22,19 @@ decode_right_censored <- function(x, suffix=NULL) {
 ##' @param time \code{numeric} time to event
 ##' @param event 0/1 vector encoded in the "R sense". "1" is an event, "0" is
 ##'   right censored.
-encode_right_censored <- function(time, event) {
-  ifelse(event == 1, -1 * time, time)
+##' @param sas.encoding default \code{FALSE}. If \code{TRUE} 1 means "censored"
+##'   and 0 is an event.
+encode_right_censored <- function(time, event, sas.encoding=FALSE) {
+  event <- as.integer(event)
+  isna <- is.na(event)
+  event[isna] <- 1L
+  if (!all(event %in% c(0L, 1L))) {
+    stop("values in 'event' that are not 0 or 1")
+  }
+  if (sas.encoding) {
+    event <- ifelse(event == 0L, 1L, 0L)
+  }
+  out <- ifelse(event == 1L, -1L * time, time)
+  out[isna] <- NA
+  out
 }
