@@ -5,9 +5,9 @@
 ##' @importClassesFrom edgeR DGEList
 ##' @importFrom DBI dbDriver dbGetQuery dbSendQuery dbWriteTable dbDisconnect
 ##' @importFrom RSQLite dbConnect dbWriteTable dbSendQuery
-createWarehouse <- function(db.path, datasets, sample.meta,
-                            pragma.page_size=2**12,
-                            db.type='monetdblite', ...) {
+createWarehouse <- function(db.path, datasets, gene.info=fData(dataset[[1]]),
+                            sample.meta, pragma.page_size=2**12,
+                            db.type='sqlite', ...) {
   if (FALSE) {
     ## Run build-db.R in
     ## ~/workspace/projects/CIT/clinx/clinXwarehouse/inst/build-db/2016-04-20
@@ -37,9 +37,8 @@ createWarehouse <- function(db.path, datasets, sample.meta,
   ## Check integrety of `datasets`
   stopifnot(is.list(datasets))
   stopifnot(all(sapply(datasets, is, 'ExpressionSet')))
-  gi <- fData(datasets[[1L]])
-  stopifnot(all(sapply(datasets, function(x) all.equal(fData(x), gi))))
-  rownames(gi) <- NULL
+  stopifnot(all(sapply(datasets, function(x) all.equal(rownames(x), rownames(datasets[[1]])))))
+  stopifnot(all(rownames(datasets[[1]]) %in% gene.info$feature_id))
 
   ## we 'sample_id' and 'dataset' are special names (they will always be column
   ## names of a tbl returned from the FacileDb) so we can't have variables named
@@ -71,7 +70,7 @@ createWarehouse <- function(db.path, datasets, sample.meta,
 
   ## Populate tables -----------------------------------------------------------
   ## 1. Gene Info
-  dbWriteTable(db, 'gene_info', gi, append=TRUE)
+  dbWriteTable(db, 'gene_info', gene.info, append=TRUE)
   dbSendQuery(db, 'CREATE INDEX gene_symbol ON gene_info (symbol);')
   dbSendQuery(db, 'CREATE INDEX gene_feature_type ON gene_info (feature_type);')
 
@@ -88,7 +87,11 @@ createWarehouse <- function(db.path, datasets, sample.meta,
   dbSendQuery(db, 'CREATE INDEX sample_cov_val ON sample_covariate (value);')
   dbSendQuery(db, 'CREATE INDEX sample_cov_class ON sample_covariate (class);')
 
-  dbDisconnect(db, shutdown=TRUE)
+  if (db.type == 'monetdblite') {
+    dbDisconnect(db, shutdown=TRUE)
+  } else {
+    dbDisconnect(db)
+  }
 
   cmd <- sprintf("cp -Rf %s %s", tmp.fn, db.path)
   system(cmd)
