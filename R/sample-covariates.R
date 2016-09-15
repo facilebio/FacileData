@@ -4,6 +4,7 @@
 ##' @param db a \code{FacileDb} connection
 ##' @param samples a samples descriptor \code{tbl_*}
 ##' @param covariates character vector of covariate names
+##' @param type only fetch covariates of a particular type?
 ##' @param do.collect for collection of result from database?
 ##' @return rows from the \code{sample_covaraite} table
 fetch_sample_covariates <- function(db, samples=NULL, covariates=NULL) {
