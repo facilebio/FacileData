@@ -66,6 +66,7 @@ with_expression <- function(samples, feature_ids, db=fdb(samples)) {
 }
 
 ##' @method cpm tbl_sqlite
+##' @importFrom edgeR cpm
 ##' @export
 cpm.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
                            db=fdb(x), ...) {
@@ -94,7 +95,6 @@ cpm.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
 }
 
 ##' @method cpm tbl_df
-##' @importFrom edgeR cpm
 ##' @export
 cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
                        sample.stats=NULL, db=fdb(x), ...) {
@@ -139,6 +139,49 @@ calc.cpm <- function(x, lib.size=NULL, log=FALSE, prior.count=5) {
     cpms <- x$count / lib.size
   }
 
+  cpms
+}
+
+##' @method rpkm tbl_sqlite
+##' @importFrom edgeR rpkm
+##' @export
+rpkm.tbl_sqlite <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
+                            prior.count=5, db=fdb(x), ...) {
+  stopifnot(is.FacileDb(db))
+  if (is.null(gene.length)) {
+    gene.length <- gene_info_tbl(db) %>% collect
+  }
+  stopifnot(all(c('feature_id', 'length') %in% colnames(gene.length)))
+  out <- cpm(x, lib.size=lib.size, log=log, prior.count=prior.count, db=db, ...)
+  calc.rpkm(out, gene.length, log=log)
+}
+
+##' @method rpkm tbl_sqlite
+##' @importFrom edgeR rpkm
+##' @export
+rpkm.tbl_df <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
+                        prior.count=5, db=fdb(x), ...) {
+  assert_expression_result(x)
+  stopifnot(is.FacileDb(db))
+  if (is.null(gene.length)) {
+    gene.length <- gene_info_tbl(db) %>% collect
+  }
+  stopifnot(all(c('feature_id', 'length') %in% colnames(gene.length)))
+  out <- cpm(x, lib.size=lib.size, log=log, prior.count=prior.count, db=db, ...)
+  calc.rpkm(out, gene.length, log=log)
+}
+
+calc.rpkm <- function(cpms, gene.length, log) {
+  assert_expression_result(cpms)
+  stopifnot('cpm' %in% colnames(cpms))
+  stopifnot(all(c('feature_id', 'length') %in% colnames(gene.length)))
+  xref <- match(cpms[['feature_id']], gene.length[['feature_id']])
+  kb <- gene.length[['length']][xref] / 1000
+  if (log) {
+    cpms[['rpkm']] <- cpms[['cpm']] - log2(kb)
+  } else {
+    cpms[['rpkm']] <- cpms[['cpm']] / kb
+  }
   cpms
 }
 

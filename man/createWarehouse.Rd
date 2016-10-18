@@ -4,8 +4,8 @@
 \alias{createWarehouse}
 \title{Creates the database}
 \usage{
-createWarehouse(db.path, datasets, sample.meta, pragma.page_size = 2^12,
-  db.type = "monetdblite", ...)
+createWarehouse(db.path, datasets, gene.info = fData(dataset[[1]]),
+  sample.meta, pragma.page_size = 2^12, db.type = "sqlite", ...)
 }
 \description{
 Creates the database

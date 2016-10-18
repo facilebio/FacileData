@@ -26,7 +26,12 @@
   ## affraid we can't avoid explicity defining the *.datapath. This is because
   ## the unit tests are run in a "clean" (R --vanilla) environment which doesn't
   ## load the stuff in your .Rprofile
-  dpath <- system.file('extdata', 'test', package='FacileRepo')
+  ## dpath <- system.file('extdata', 'test', package='FacileRepo')
+  if (dir.exists('/gne')) {
+    dpath <- '/gne/home/lianogls/workspace/data/facile/test'
+  } else {
+    dpath <- '~/workspace/data/facile/test'
+  }
   db.name <- 'TcgaDb-test.sqlite'
   dpath <- getOption(sprintf('%s.datapath', impl.prefix), dpath)
 

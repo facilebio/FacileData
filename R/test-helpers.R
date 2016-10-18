@@ -7,7 +7,7 @@
 ##' @param db.fn The path on the filesystem to the facile database
 ##' @param covdef The path on the filesystem to the yaml file that provides
 ##'   the covariate definitions
-TestDb <- function(db.type=c('monetdblite', 'sqlite'),
+TestDb <- function(db.type=c('sqlite', 'monetdblite'),
                    datapath=getOption('ftest.datapath', NULL),
                    db.fn=getOption('ftest.dbpath', NULL),
                    covdef.fn=getOption('ftest.covdef')) {

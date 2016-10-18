@@ -79,4 +79,34 @@ test_that("cpm on fetch_expression result mimics cpm.DGEList", {
   expect_equal(EL, YL)
 })
 
+test_that("rpkm on fetch_expression result mimics rpkm.DGEList", {
+  e <- fetch_expression(DB, samples, genes)
+  E <- rpkm(e, log=FALSE, prior.count=5) %>%
+    mutate(samid=paste(dataset, sample_id, sep='_')) %>%
+    mcast(feature_id ~ samid, value.var='rpkm')
+
+  EL <- rpkm(e, log=TRUE, prior.count=5) %>%
+    mutate(samid=paste(dataset, sample_id, sep='_')) %>%
+    mcast(feature_id ~ samid, value.var='rpkm')
+
+  Etbldf <- rpkm(collect(e, n=Inf), log=TRUE, prior.count=5, db=DB) %>%
+    mutate(samid=paste(dataset, sample_id, sep='_')) %>%
+    mcast(feature_id ~ samid, value.var='rpkm')
+
+  ## counts from within database or collect should match
+  expect_equal(EL, Etbldf)
+
+  ## Test that cpm's returned with edgeR only code match
+  y <- as.DGEList(e)
+  Y <- rpkm(y, gene.length=y$genes$length, log=FALSE, prior.count=5)
+  YL <- rpkm(y, gene.length=y$genes$length, log=TRUE, prior.count=5)
+
+  E <- E[rownames(Y), colnames(Y)]
+  EL <- EL[rownames(YL), colnames(YL)]
+
+  expect_equal(E, Y)
+  expect_equal(EL, YL)
+})
+
+
 

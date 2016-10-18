@@ -13,6 +13,8 @@ fetch_sample_covariates(db, samples = NULL, covariates = NULL)
 
 \item{covariates}{character vector of covariate names}
 
+\item{type}{only fetch covariates of a particular type?}
+
 \item{do.collect}{for collection of result from database?}
 }
 \value{
