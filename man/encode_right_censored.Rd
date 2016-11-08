@@ -2,7 +2,7 @@
 % Please edit documentation in R/survival.R
 \name{encode_right_censored}
 \alias{encode_right_censored}
-\title{Encodes time and event status into single numeric vector}
+\title{Encodes time and event status into single numeric vector.}
 \usage{
 encode_right_censored(time, event, sas.encoding = FALSE)
 }
@@ -12,10 +12,15 @@ encode_right_censored(time, event, sas.encoding = FALSE)
 \item{event}{0/1 vector encoded in the "R sense". "1" is an event, "0" is
 right censored.}
 
-\item{sas.encoding}{default \code{FALSE}. If \code{TRUE} 1 means "censored"
-and 0 is an event.}
+\item{sas.encoding}{Is the 'event' vector "SAS encoded"? In the SAS world,
+1 means censored, and 0 is event. This is \code{FALSE} by default.}
+}
+\value{
+returns a numeric vector that componds time-to-event and censoring
+  info (sign of the value).
 }
 \description{
-Encodes time and event status into single numeric vector
+A positive value for the time means that there was an event, negative
+value is "censored".
 }
 

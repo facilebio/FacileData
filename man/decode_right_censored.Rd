@@ -4,7 +4,7 @@
 \alias{decode_right_censored}
 \title{Convert +/- encoding of time to event to time + event.}
 \usage{
-decode_right_censored(x, suffix = NULL)
+decode_right_censored(x, suffix = NULL, sas.encoding = FALSE)
 }
 \arguments{
 \item{x}{the time to event}
@@ -15,6 +15,11 @@ two column data.frame
 \description{
 Time to event (and event labels) are encoded as a single real value in the
 clinical data. The absoulte value of the value is the time to the event, and
-a negative value indicates "event" and a positive value is right censored.
+a positive value indicates an "event", negative is censored.
+}
+\details{
+The encoding was defined by Wei. Positive values mean that there was an
+event at that time, negative values mean censoring (in R, that is 1 and 0,
+respectively).
 }
 
