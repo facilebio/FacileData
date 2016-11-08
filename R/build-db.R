@@ -5,7 +5,7 @@
 ##' @importClassesFrom edgeR DGEList
 ##' @importFrom DBI dbDriver dbGetQuery dbSendQuery dbWriteTable dbDisconnect
 ##' @importFrom RSQLite dbConnect dbWriteTable dbSendQuery
-createWarehouse <- function(db.path, datasets, gene.info=fData(dataset[[1]]),
+createWarehouse <- function(db.path, datasets, gene.info=fData(datasets[[1]]),
                             sample.meta, pragma.page_size=2**12,
                             db.type='sqlite', ...) {
   if (FALSE) {
