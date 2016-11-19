@@ -1,7 +1,7 @@
 Package: FacileRepo
 Type: Package
 Title: A warehouse for molecular clinical trial data to enable EDA
-Version: 0.2.3
+Version: 0.2.4
 Author: Steve Lianoglou
 Maintainer: Steve Lianoglou <lianoglou.steve@gene.com>
 Description: An abstraction of an ExpressionSet-like object into a "tidy data"

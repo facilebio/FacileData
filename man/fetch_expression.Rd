@@ -5,7 +5,7 @@
 \title{Helper function creates dplyr query to get expression data of interest.}
 \usage{
 fetch_expression(db, samples = NULL, feature_ids = NULL,
-  do.collect = FALSE)
+  with_symbols = TRUE, do.collect = FALSE)
 }
 \arguments{
 \item{db}{The db connection to use. Creates and destroys a new one
