@@ -4,7 +4,8 @@
 \alias{with_expression}
 \title{Append expression values to sample-descriptor}
 \usage{
-with_expression(samples, feature_ids, db = fdb(samples))
+with_expression(samples, feature_ids, with_symbols = TRUE,
+  db = fdb(samples))
 }
 \arguments{
 \item{feature_ids}{character vector of feature_ids}

@@ -23,18 +23,35 @@
 ##'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
 ##'   othwerise a \code{tbl_df} of the results.
 fetch_expression <- function(db, samples=NULL, feature_ids=NULL,
-                             do.collect=FALSE) {
+                             with_symbols=TRUE, do.collect=FALSE) {
   stopifnot(is.FacileDb(db))
   dat <- expression_tbl(db)
 
   if (!is.null(feature_ids)) {
     assertCharacter(feature_ids)
     feature_ids <- unique(feature_ids)
+
+    # if (length(feature_ids) == 1L) {
+    #   dat <- filter(dat, feature_id == feature_ids)
+    # } else if (length(feature_ids) > 1L) {
+    #   dat <- filter(dat, feature_id %in% feature_ids)
+    # }
+
     if (length(feature_ids) == 1L) {
-      dat <- filter(dat, feature_id == feature_ids)
+      genes <- gene_info_tbl(db) %>%
+        filter(feature_id == feature_ids)
     } else if (length(feature_ids) > 1L) {
-      dat <- filter(dat, feature_id %in% feature_ids)
+      genes <- gene_info_tbl(db) %>%
+        filter(feature_id %in% feature_ids)
     }
+
+    if (with_symbols) {
+      genes %<>% select(feature_id, symbol)
+    } else {
+      genes %<>% select(feature_id)
+    }
+
+    dat <- inner_join(dat, genes, by='feature_id')
   }
 
   dat <- filter_samples(dat, samples)
@@ -55,14 +72,15 @@ fetch_expression <- function(db, samples=NULL, feature_ids=NULL,
 ##' @param feature_ids character vector of feature_ids
 ##' @param a \code{FacileDb} object
 ##' @return a tbl-like result
-with_expression <- function(samples, feature_ids, db=fdb(samples)) {
+with_expression <- function(samples, feature_ids, with_symbols=TRUE,
+                            db=fdb(samples)) {
   stopifnot(is.FacileDb(db))
   stopifnot(is.character(feature_ids) && length(feature_ids) > 0)
   samples <- assert_sample_subset(samples)
 
-  out <- fetch_expression(db, samples, feature_ids) %>%
-    join_samples(samples)
-  set_fdb(out, db)
+  out <- fetch_expression(db, samples, feature_ids, with_symbols=with_symbols) %>%
+    join_samples(samples) %>%
+    set_fdb(db)
 }
 
 ##' @method cpm tbl_sqlite
