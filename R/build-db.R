@@ -70,6 +70,7 @@ createWarehouse <- function(db.path, datasets, gene.info=fData(datasets[[1]]),
 
   ## Populate tables -----------------------------------------------------------
   ## 1. Gene Info
+  rownames(gene.info) <- NULL
   dbWriteTable(db, 'gene_info', gene.info, append=TRUE)
   dbSendQuery(db, 'CREATE INDEX gene_symbol ON gene_info (symbol);')
   dbSendQuery(db, 'CREATE INDEX gene_feature_type ON gene_info (feature_type);')
