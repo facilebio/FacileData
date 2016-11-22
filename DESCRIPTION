@@ -8,7 +8,8 @@ Description: An abstraction of an ExpressionSet-like object into a "tidy data"
   framework which allows effortless access into any subset of it without loading
   it in its entireity.
 Depends:
-    dplyr (>= 0.5.0)
+    dplyr (>= 0.5.0),
+    dtplyr
 Imports:
     magrittr,
     yaml,
@@ -16,7 +17,9 @@ Imports:
     readxl,
     DBI,
     RSQLite,
-    reshape2
+    reshape2,
+    rhdf5,
+    data.table
 Suggests:
     testthat (>= 1.0.2),
     Biobase

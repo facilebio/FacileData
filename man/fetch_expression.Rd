@@ -5,7 +5,7 @@
 \title{Helper function creates dplyr query to get expression data of interest.}
 \usage{
 fetch_expression(x, samples = NULL, feature_ids = NULL,
-  with_symbols = TRUE, as.matrix = FALSE)
+  with_symbols = !as.matrix, as.matrix = FALSE)
 }
 \arguments{
 \item{x}{A \code{FacileDataSet} object.}

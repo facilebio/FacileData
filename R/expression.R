@@ -295,9 +295,11 @@ calc.rpkm <- function(cpms, gene.length, log) {
   cpms
 }
 
+##' @export
 as.DGEList <- function(x, ...) {
   UseMethod('as.DGEList')
 }
+
 ##' Converts a result from `fetch_expression` into a DGEList
 ##'
 ##' The genes and samples that populate the \code{DGEList} are specified by
@@ -306,7 +308,8 @@ as.DGEList <- function(x, ...) {
 ##' \code{covariates} argument.
 ##'
 ##' @rdname expression-container
-##' @export as.DGEList matrix
+##' @method as.DGEList matrix
+##' @export
 ##' @importFrom edgeR DGEList
 ##' @param x a facile expression-like result
 ##' @param covariates A \code{character} vector specifying the  additional
@@ -360,7 +363,8 @@ as.DGEList.matrix <- function(x, covariates=NULL, .fds=fds(x), samples=NULL,
   set_fds(y, .fds)
 }
 
-##' @export as.DGEList matrix
+##' @method as.DGEList data.frame
+##' @export
 as.DGEList.data.frame <- function(x, covariates=NULL, .fds=fds(x), ...) {
   stopifnot(is(x, 'FacileExpression'))
   .fds <- force(.fds)

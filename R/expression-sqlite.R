@@ -245,7 +245,7 @@ calc.rpkm <- function(cpms, gene.length, log) {
 ##' \code{covariates} argument.
 ##'
 ##' @rdname expression-container
-##' @export
+##' @export as.DGEList.db
 ##' @importFrom edgeR DGEList
 ##' @param x a facile expression-like result
 ##' @param covariates A \code{character} vector specifying the  additional
@@ -303,7 +303,7 @@ as.DGEList.db <- function(x, covariates=NULL, .fds=fds(x), ...) {
 ##' Create an ExpressionSet from `fetch_expression`.
 ##'
 ##' @rdname expression-container
-##' @export
+##' @export as.ExpressionSet.db
 ##' @param x a facile expression-like result
 ##' @param covariates A \code{character} vector specifying the  additional
 ##'   covariates to append to \code{out$samples}. Must be valid entries in the
@@ -311,7 +311,7 @@ as.DGEList.db <- function(x, covariates=NULL, .fds=fds(x), ...) {
 ##' @param assay Which column to put in \code{"exprs"}
 ##' @param .fds The \code{FacileDataSet} that \code{x} was retrieved from.
 ##' @return a \code{\link[Biobase]{ExpressionSet}}
-as.ExpressionSet <- function(x, covariates=NULL, exprs='counts', .fds=fds(x),
+as.ExpressionSet.db <- function(x, covariates=NULL, exprs='counts', .fds=fds(x),
                              ...) {
   if (!require("Biobase")) {
     stop("Biobase required")
