@@ -7,11 +7,14 @@
 ##' @param anno.dir A directory to house custom annotations/sample covariates
 ##' @param cache_size A custom paramter for the SQLite database
 FacileDataSet <- function(path, data.fn=file.path(path, paste0('data.', db.type)),
+                          sqlite.fn=file.path(path, paste0('data.', db.type)),
+                          hdf5.fn=file.path(path, 'data.h5'),
                           covdef.fn=file.path(path, 'sample-covariate-info.yaml'),
                           anno.dir=file.path(path, 'custom-annotation'),
                           cache_size=80000, db.type=c('sqlite', 'monetdblite')) {
   db.type <- match.arg(db.type)
-  paths <- validate.facile.dirs(path, data.fn, covdef.fn, anno.dir, db.type)
+  paths <- validate.facile.dirs(path, data.fn, sqlite.fn, hdf5.fn, covdef.fn,
+                                anno.dir, db.type)
 
   if (db.type == 'sqlite') {
     ## Update some parameters in the connection for increased speed
@@ -39,6 +42,8 @@ FacileDataSet <- function(path, data.fn=file.path(path, paste0('data.', db.type)
   # out['anno.dir'] <- list(NULL)
   out['parent.dir'] <- paths$path
   out['data.fn'] <- paths$data.fn
+  out['sqlite.fn'] <- paths$sqlite.fn
+  out['hdf5.fn'] <- paths$hdf5.fn
   out['cov.def'] <- paths$covdef.fn
   out['anno.dir'] <- paths$anno.dir
 
@@ -143,8 +148,8 @@ set_fds <- function(x, value) {
 
 ## Unexported utility functions ================================================
 
-validate.facile.dirs <- function(path, data.fn, covdef.fn, anno.dir,
-                                 db.type=c('sqlite', 'monetdblite')) {
+validate.facile.dirs <- function(path, data.fn, sqlite.fn, hdf5.fn, covdef.fn,
+                                 anno.dir, db.type=c('sqlite', 'monetdblite')) {
   if (!dir.exists(path)) {
     stop("Top level FacileData directory does not exist: ", path)
   }
@@ -155,6 +160,22 @@ validate.facile.dirs <- function(path, data.fn, covdef.fn, anno.dir,
     data.fn <- normalizePath(data.fn)
     if (dirname(data.fn) != path) {
       warning("Data file is not under parent directory", immediate.=TRUE)
+    }
+  }
+  if (!file.exists(sqlite.fn)) {
+    stop("Database file does not exists", sqlite.fn)
+  } else {
+    sqlite.fn <- normalizePath(sqlite.fn)
+    if (dirname(sqlite.fn) != path) {
+      warning("Database file is not under parent directory", immediate.=TRUE)
+    }
+  }
+  if (!file.exists(hdf5.fn)) {
+    warning("HDF5 file does not exists", hdf5.fn, immediate.=TRUE)
+  } else {
+    hdf5.fn <- normalizePath(hdf5.fn)
+    if (dirname(hdf5.fn) != path) {
+      warning("HDF5 file is not under parent directory", immediate.=TRUE)
     }
   }
   if (!file.exists(covdef.fn)) {
@@ -176,5 +197,6 @@ validate.facile.dirs <- function(path, data.fn, covdef.fn, anno.dir,
   }
   db.type <- match.arg(db.type)
 
-  list(path=path, data.fn=data.fn, covdef.fn=covdef.fn, anno.dir=anno.dir)
+  list(path=path, data.fn=data.fn, sqlite.fn=sqlite.fn, hdf5.fn=hdf5.fn,
+       covdef.fn=covdef.fn, anno.dir=anno.dir)
 }
