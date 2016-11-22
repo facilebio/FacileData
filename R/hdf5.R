@@ -108,6 +108,24 @@ createExpressionHDF5 <- function(x) {
 
 if (FALSE) {
   library(rhdf5)
+  library(rprojroot)
+  devtools::load_all(find_root(is_r_package))
+
+  x <- FacileDataSet('~/workspace/data/facile/FacileDataSets/FacileAtezo-wip')
+  createExpressionHDF5(x)
+}
+
+if (FALSE) {
+  library(rhdf5)
+  library(rprojroot)
+  devtools::load_all(find_root(is_r_package))
+  x <- FacileDataSet('~/workspace/data/facile/FacileDataSets/FacileTCGA-wip')
+  createExpressionHDF5(x)
+}
+
+
+if (FALSE) {
+  library(rhdf5)
   x <- FacileDataSet('/Users/lianogls/workspace/data/facile/FacileDataSets/FacileAtezo-wip')
   cache.dir <- file.path(x$parent.dir, 'count-cache')
 
