@@ -331,18 +331,15 @@ as.DGEList <- function(x, ...) {
 ##'   \code{sample_covariate::variable} column.
 ##' @param .fds The \code{FacileDataSet} that \code{x} was retrieved from.
 ##' @return a \code{\link[edgeR]{DGEList}}
-as.DGEList.matrix <- function(x, covariates=NULL, .fds=fds(x), samples=NULL,
-                              ...) {
+as.DGEList.matrix <- function(x, covariates=NULL, feature_ids=NULL,
+                              .fds=fds(x), ...) {
   stopifnot(is(x, 'FacileExpression'))
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
 
-  if (is.null(samples)) {
-    samples <- tibble(
-      dataset=sub('_.*$', '', colnames(x)),
-      sample_id=sub('^.*?_', '', colnames(x)))
-  }
-  assert_sample_subset(samples)
+  samples <- tibble(
+    dataset=sub('_.*$', '', colnames(x)),
+    sample_id=sub('^.*?_', '', colnames(x)))
 
   fids <- rownames(x)
   genes <- gene_info_tbl(.fds) %>%
@@ -375,34 +372,51 @@ as.DGEList.matrix <- function(x, covariates=NULL, .fds=fds(x), samples=NULL,
     y$samples <- cbind(y$samples, covs[colnames(y),,drop=FALSE])
   }
 
+  if (!is.null(feature_ids) && is.character(feature_ids)) {
+    keep <- feature_ids %in% rownames(y)
+    if (mean(keep) != 1) {
+      warning(sprintf("Only %d / %d feature_ids requested are in dataset",
+                      sum(keep), length(keep)))
+    }
+    y <- y[feature_ids[keep],]
+  }
   set_fds(y, .fds)
 }
 
 ##' @method as.DGEList data.frame
 ##' @export
-as.DGEList.data.frame <- function(x, covariates=NULL, .fds=fds(x), ...) {
-  stopifnot(is(x, 'FacileExpression'))
+as.DGEList.data.frame <- function(x, covariates=NULL, feature_ids=NULL,
+                                  .fds=fds(x), ...) {
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
 
-  counts.dt <- assert_expression_result(x) %>%
-    collect(n=Inf) %>%
-    setDT %>%
-    unique(by=c('dataset', 'sample_id', 'feature_id'))
-  counts.dt[, samid := paste(dataset, sample_id, sep='_')]
+  x <- assert_sample_subset(x)
+  has.count <- 'count' %in% colnames(x)
+  refetch <- is.null(feature_ids) && !has.count
 
-  counts <- local({
-    wide <- dcast.data.table(counts.dt, feature_id ~ samid, value.var='count')
-    out <- as.matrix(wide[, -1, with=FALSE])
-    set_rownames(out, wide[[1]])
-  })
+  if (refetch) {
+    if (has.count) {
+      warning("Ignoring expression in `x` and fetching data for `feature_ids`",
+              immediate.=TRUE)
+    }
+    counts <- fetch_expression(.fds, x, feature_ids=feature_ids, as.matrix=TRUE)
+  }  else {
+    counts.dt <- assert_expression_result(x) %>%
+      collect(n=Inf) %>%
+      setDT %>%
+      unique(by=c('dataset', 'sample_id', 'feature_id'))
+    counts.dt[, samid := paste(dataset, sample_id, sep='_')]
+    counts <- local({
+      wide <- dcast.data.table(counts.dt, feature_id ~ samid, value.var='count')
+      out <- as.matrix(wide[, -1, with=FALSE])
+      rownames(out) <- wide[[1L]]
+      class(out) <- c('FacileExpression', class(out))
+      out
+    })
+  }
 
-  class(counts) <- c('FacileExpression', class(counts))
-  # samples <- counts.dt[, list(dataset, sample_id)] %>%
-  #   unique %>%
-  #   setDF
-
-  as.DGEList(counts, covariates=covariates, .fds=.fds, ...)
+  as.DGEList(counts, covariates=covariates, feature_ids=feature_ids,
+             .fds=.fds, ...)
 }
 
 ##' Create an ExpressionSet from `fetch_expression`.

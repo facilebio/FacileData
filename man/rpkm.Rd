@@ -6,10 +6,10 @@
 \title{Cacluate RPKM from a FacileDataSet}
 \usage{
 \method{rpkm}{tbl_sqlite}(x, gene.length = NULL, lib.size = NULL,
-  log = FALSE, prior.count = 5, .fds = fds(x), ...)
+  log = FALSE, prior.count = 5, sample.stats = NULL, .fds = fds(x), ...)
 
 \method{rpkm}{tbl_sqlite}(x, gene.length = NULL, lib.size = NULL,
-  log = FALSE, prior.count = 5, .fds = fds(x), ...)
+  log = FALSE, prior.count = 5, sample.stats = NULL, .fds = fds(x), ...)
 }
 \arguments{
 \item{x}{an expression-like facile result}

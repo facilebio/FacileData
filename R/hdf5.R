@@ -163,8 +163,9 @@ if (FALSE) {
   genes <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
   samples <- sample_covariate_tbl(fds) %>%
     filter(variable == "indication" && value == 'bladder') %>%
-    select(dataset, sample_id) %>%
-    collect
+    collect(n=Inf) %>%
+    distinct(dataset, sample_id) %>%
+    set_fds(fds)
 
   e.hdf5 <- fetch_expression(fds, samples, genes) %>%
     arrange(dataset, sample_id, feature_id) %>%
@@ -185,4 +186,5 @@ if (FALSE) {
 
   system.time(all.exprs <- fetch_expression(fds, samples, as.matrix=TRUE))
   system.time(all.y <- as.DGEList(all.exprs))
+  system.time(all.y2 <- as.DGEList(samples))
 }

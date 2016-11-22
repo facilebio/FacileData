@@ -9,8 +9,6 @@
 ##' each "observation" (dataset,sample_id)-tuple is unique. Not sure if
 ##' duplicated gene expression results will matter downstream ...
 ##'
-##' @export
-##'
 ##' @param x A \code{FacileDataSet} object.
 ##' @param indication The indication to get data from
 ##' @param subtype The subtype from the desired \code{indication}
@@ -63,7 +61,6 @@ fetch_expression.db <- function(x, samples=NULL, feature_ids=NULL,
 
 ##' Append expression values to sample-descriptor
 ##'
-##' @export
 ##' @param x a samples descriptor
 ##' @param feature_ids character vector of feature_ids
 ##' @param with_symbols Do you want gene symbols returned, too?
@@ -89,7 +86,6 @@ cpmdb <- function(x, ...) UseMethod("cpmdb")
 ##' @method cpmdb tbl_sqlite
 ##' @rdname cpmdb
 ##'
-##' @export
 ##' @importFrom edgeR cpm
 ##'
 ##' @param x an expression-like facile result
@@ -129,7 +125,6 @@ cpmdb.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
 
 ##' @method cpmdb tbl_df
 ##' @rdname cpmdb
-##' @export
 cpmdb.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
                        sample.stats=NULL, .fds=fds(x), ...) {
   assert_expression_result(x)
@@ -157,26 +152,7 @@ cpmdb.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
     set_fds(.fds)
 }
 
-## A helper function to calculate cpm. Expects that x is a tbl-like thing which
-## has a count column, and the appropriate libsize and normfactor columns from
-## the database
-calc.cpm <- function(x, lib.size=NULL, log=FALSE, prior.count=5) {
-  x <- collect(x, n=Inf)
 
-  pr.count <- lib.size / mean(lib.size) * prior.count
-
-  if (log) {
-    lib.size <- 1e-6 * (lib.size + 2*pr.count)
-    cpms <- log2((x$count + pr.count) / lib.size)
-  } else {
-    lib.size <- 1e-6 * lib.size
-    cpms <- x$count / lib.size
-  }
-
-  cpms
-}
-
-##' @export rpkmdb
 rpkmdb <- function(x, ...) UseMethod("cpmdb")
 
 ##' Cacluate RPKM from a FacileDataSet
@@ -184,7 +160,7 @@ rpkmdb <- function(x, ...) UseMethod("cpmdb")
 ##' @method rpkmdb tbl_sqlite
 ##' @rdname rpkmdb
 ##' @importFrom edgeR rpkm
-##' @export
+##'
 ##' @param x an expression-like facile result
 ##' @param lib.size ignored for now, this is fetched from the
 ##'   \code{FacileDataSet}
@@ -207,7 +183,6 @@ rpkmdb.tbl_sqlite <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
 
 ##' @method rpkmdb tbl_sqlite
 ##' @importFrom edgeR rpkm
-##' @export
 ##' @rdname rpkmdb
 rpkmdb.tbl_df <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
                         prior.count=5, .fds=fds(x), ...) {
@@ -221,20 +196,6 @@ rpkmdb.tbl_df <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
               .fds=.fds, ...)
   out <- calc.rpkm(cpms, gene.length, log=log)
   set_fds(out, .fds)
-}
-
-calc.rpkm <- function(cpms, gene.length, log) {
-  assert_expression_result(cpms)
-  stopifnot('cpm' %in% colnames(cpms))
-  stopifnot(all(c('feature_id', 'length') %in% colnames(gene.length)))
-  xref <- match(cpms[['feature_id']], gene.length[['feature_id']])
-  kb <- gene.length[['length']][xref] / 1000
-  if (log) {
-    cpms[['rpkm']] <- cpms[['cpm']] - log2(kb)
-  } else {
-    cpms[['rpkm']] <- cpms[['cpm']] / kb
-  }
-  cpms
 }
 
 ##' Converts a result from `fetch_expression` into a DGEList
@@ -303,7 +264,6 @@ as.DGEList.db <- function(x, covariates=NULL, .fds=fds(x), ...) {
 ##' Create an ExpressionSet from `fetch_expression`.
 ##'
 ##' @rdname expression-container
-##' @export as.ExpressionSet.db
 ##' @param x a facile expression-like result
 ##' @param covariates A \code{character} vector specifying the  additional
 ##'   covariates to append to \code{out$samples}. Must be valid entries in the

@@ -12,8 +12,8 @@
 as.ExpressionSet.db(x, covariates = NULL, exprs = "counts", .fds = fds(x),
   ...)
 
-\method{as.DGEList}{matrix}(x, covariates = NULL, .fds = fds(x),
-  samples = NULL, ...)
+\method{as.DGEList}{matrix}(x, covariates = NULL, feature_ids = NULL,
+  .fds = fds(x), ...)
 
 as.ExpressionSet(x, covariates = NULL, exprs = "counts", .fds = fds(x),
   ...)
