@@ -4,10 +4,10 @@
 \alias{fetch_sample_statistics}
 \title{Fetch the sample statistics for sets of samples in the warehouse}
 \usage{
-fetch_sample_statistics(db, samples = NULL, semi = TRUE)
+fetch_sample_statistics(x, samples = NULL, semi = TRUE)
 }
 \arguments{
-\item{db}{the connection to the database}
+\item{x}{A \code{FacileDataSet} object}
 
 \item{samples}{a data.frame or tbl_sqlite that has dataset and sample_id
 columns}

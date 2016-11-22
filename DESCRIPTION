@@ -1,15 +1,14 @@
-Package: FacileRepo
+Package: FacileDataSet
 Type: Package
 Title: A warehouse for molecular clinical trial data to enable EDA
-Version: 0.2.4
+Version: 0.3.0
 Author: Steve Lianoglou
 Maintainer: Steve Lianoglou <lianoglou.steve@gene.com>
 Description: An abstraction of an ExpressionSet-like object into a "tidy data"
   framework which allows effortless access into any subset of it without loading
   it in its entireity.
 Depends:
-    dplyr (>= 0.5.0),
-    edgeR
+    dplyr (>= 0.5.0)
 Imports:
     magrittr,
     yaml,

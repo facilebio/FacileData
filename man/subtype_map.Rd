@@ -4,10 +4,10 @@
 \alias{subtype_map}
 \title{Creates tbl that associates a sample with all of its indication/subtypes}
 \usage{
-subtype_map(db)
+subtype_map(x)
 }
 \arguments{
-\item{db}{a \code{FacileDb} objectg}
+\item{x}{a \code{FacileDataSet} object}
 }
 \value{
 a \code{tbl} with indication and subtype information for all samples

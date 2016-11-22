@@ -4,20 +4,21 @@
 \alias{fetch_samples}
 \title{Fetches a sample descriptor that matches filter criterion over covariates.}
 \usage{
-fetch_samples(db, ...)
+fetch_samples(x, ...)
 }
 \arguments{
-\item{db}{A \code{FacileDb}}
+\item{x}{A \code{FacileDataSet} object}
 
-\item{...}{filter clause to apply to \code{sample_covariate_tbl(db)}}
+\item{...}{filter clause to apply to \code{sample_covariate_tbl(x)}}
 }
 \value{
-a \code{tbl} sample-descriptor with a \code{FacileDb} connection
+a facile sample descriptor with a \code{FacileDataSet} connection.
 }
 \description{
 Fetches a sample descriptor that matches filter criterion over covariates.
 }
 \examples{
-fetch_samples(db, indication \%in\% c('BRCA', 'COAD'))
+exampleFacileDataSet() \%>\%
+  fetch_samples(indication \%in\% c('BRCA', 'COAD'))
 }
 

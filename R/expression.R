@@ -11,8 +11,7 @@
 ##'
 ##' @export
 ##'
-##' @param db The db connection to use. Creates and destroys a new one
-##'   if not passed in.
+##' @param x A \code{FacileDataSet} object.
 ##' @param indication The indication to get data from
 ##' @param subtype The subtype from the desired \code{indication}
 ##' @param sample_ids The sample_id's (barcodes) to fetch. If specified
@@ -22,10 +21,10 @@
 ##' @return A lazy \code{\link[dplyr]{tbl}} object with the expression
 ##'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
 ##'   othwerise a \code{tbl_df} of the results.
-fetch_expression <- function(db, samples=NULL, feature_ids=NULL,
+fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
                              with_symbols=TRUE, do.collect=FALSE) {
-  stopifnot(is.FacileDb(db))
-  dat <- expression_tbl(db)
+  stopifnot(is.FacileDataSet(x))
+  dat <- expression_tbl(x)
 
   if (!is.null(feature_ids)) {
     assertCharacter(feature_ids)
@@ -38,11 +37,9 @@ fetch_expression <- function(db, samples=NULL, feature_ids=NULL,
     # }
 
     if (length(feature_ids) == 1L) {
-      genes <- gene_info_tbl(db) %>%
-        filter(feature_id == feature_ids)
+      genes <- gene_info_tbl(x) %>% filter(feature_id == feature_ids)
     } else if (length(feature_ids) > 1L) {
-      genes <- gene_info_tbl(db) %>%
-        filter(feature_id %in% feature_ids)
+      genes <- gene_info_tbl(x) %>% filter(feature_id %in% feature_ids)
     }
 
     if (with_symbols) {
@@ -58,11 +55,10 @@ fetch_expression <- function(db, samples=NULL, feature_ids=NULL,
 
   if (do.collect) {
     dat <- collect(dat, n=Inf)
-    db <- NULL
   }
 
   class(dat) <- c('FacileExpression', class(dat))
-  set_fdb(dat, db)
+  set_fds(dat, x)
 }
 
 ##' Append expression values to sample-descriptor
@@ -70,30 +66,45 @@ fetch_expression <- function(db, samples=NULL, feature_ids=NULL,
 ##' @export
 ##' @param x a samples descriptor
 ##' @param feature_ids character vector of feature_ids
-##' @param a \code{FacileDb} object
+##' @param with_symbols Do you want gene symbols returned, too?
+##' @param .fds A \code{FacileDataSet} object
 ##' @return a tbl-like result
 with_expression <- function(samples, feature_ids, with_symbols=TRUE,
-                            db=fdb(samples)) {
-  stopifnot(is.FacileDb(db))
+                            .fds=fds(samples)) {
+  stopifnot(is.FacileDataSet(.fds))
   stopifnot(is.character(feature_ids) && length(feature_ids) > 0)
   samples <- assert_sample_subset(samples)
 
-  out <- fetch_expression(db, samples, feature_ids, with_symbols=with_symbols) %>%
+  .fds %>%
+    fetch_expression(samples, feature_ids, with_symbols=with_symbols) %>%
     join_samples(samples) %>%
-    set_fdb(db)
+    set_fds(.fds)
 }
 
+##' Calculated counts per million from a FacileDataSet
+##'
 ##' @method cpm tbl_sqlite
-##' @importFrom edgeR cpm
+##' @rdname cpm
+##'
 ##' @export
+##' @importFrom edgeR cpm
+##'
+##' @param x an expression-like facile result
+##' @param lib.size ignored for now, this is fetched from the
+##'   \code{FacileDataSet}
+##' @param log log the result?
+##' @param prior.count prior.count to add to observed counts
+##' @param .fds A \code{FacileDataSet} object
+##' @return a modified expression-like result with a \code{cpm} column.
 cpm.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
-                           db=fdb(x), ...) {
-  stopifnot(is.FacileDb(db))
+                           .fds=fds(x), ...) {
+  assert_expression_result(x)
+  stopifnot(is.FacileDataSet(.fds))
   if (!is.null(lib.size)) {
     warning("not supporting custom lib.size yet")
   }
   ## Let's leverage the fact that we're already working in the database
-  sample.stats <- fetch_sample_statistics(db)
+  sample.stats <- fetch_sample_statistics(.fds)
 
   if (same_src(x, sample.stats)) {
     tmp <- inner_join(x, sample.stats, by=c('dataset', 'sample_id'))
@@ -106,25 +117,27 @@ cpm.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
   } else {
 
     out <- cpm(collect(x, n=Inf), lib.size=lib.size, log=log,
-               prior.count=prior.count, sample.stats=sample.stats, db=db, ...)
+               prior.count=prior.count, sample.stats=sample.stats, .fds=.fds,
+               ...)
 
   }
-  set_fdb(out, db)
+  set_fds(out, .fds)
 }
 
 ##' @method cpm tbl_df
+##' @rdname cpm
 ##' @export
 cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
-                       sample.stats=NULL, db=fdb(x), ...) {
+                       sample.stats=NULL, .fds=fds(x), ...) {
   assert_expression_result(x)
-  stopifnot(is.FacileDb(db))
+  stopifnot(is.FacileDataSet(.fds))
   if (!is.null(lib.size)) {
     warning("not supporting custom lib.size yet")
   }
 
   if (is.null(sample.stats)) {
     samples <- distinct(x, dataset, sample_id)
-    sample.stats <- fetch_sample_statistics(db, samples)
+    sample.stats <- fetch_sample_statistics(.fds, samples)
   }
 
   sample.stats <- sample.stats %>%
@@ -138,7 +151,7 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
   tmp %>%
     mutate(cpm=cpms) %>%
     select_(.dots=c(colnames(x), 'cpm')) %>%
-    set_fdb(db)
+    set_fds(.fds)
 }
 
 ## A helper function to calculate cpm. Expects that x is a tbl-like thing which
@@ -160,33 +173,48 @@ calc.cpm <- function(x, lib.size=NULL, log=FALSE, prior.count=5) {
   cpms
 }
 
+##' Cacluate RPKM from a FacileDataSet
+##'
 ##' @method rpkm tbl_sqlite
+##' @rdname rpkm
 ##' @importFrom edgeR rpkm
 ##' @export
+##' @param x an expression-like facile result
+##' @param lib.size ignored for now, this is fetched from the
+##'   \code{FacileDataSet}
+##' @param log log the result?
+##' @param prior.count prior.count to add to observed counts
+##' @param .fds A \code{FacileDataSet} object
+##' @return a modified expression-like result with a \code{rpkm} column.
 rpkm.tbl_sqlite <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
-                            prior.count=5, db=fdb(x), ...) {
-  stopifnot(is.FacileDb(db))
+                            prior.count=5, .fds=fds(x), ...) {
+  stopifnot(is.FacileDataSet(.fds))
   if (is.null(gene.length)) {
-    gene.length <- gene_info_tbl(db) %>% collect
+    gene.length <- gene_info_tbl(.fds) %>% collect
   }
   stopifnot(all(c('feature_id', 'length') %in% colnames(gene.length)))
-  out <- cpm(x, lib.size=lib.size, log=log, prior.count=prior.count, db=db, ...)
-  calc.rpkm(out, gene.length, log=log)
+  cpms <- cpm(x, lib.size=lib.size, log=log, prior.count=prior.count,
+              .fds=.fds, ...)
+  out <- calc.rpkm(cpms, gene.length, log)
+  set_fds(out, .fds)
 }
 
 ##' @method rpkm tbl_sqlite
 ##' @importFrom edgeR rpkm
 ##' @export
+##' @rdname rpkm
 rpkm.tbl_df <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
-                        prior.count=5, db=fdb(x), ...) {
+                        prior.count=5, .fds=fds(x), ...) {
   assert_expression_result(x)
-  stopifnot(is.FacileDb(db))
+  stopifnot(is.FacileDataSet(.fds))
   if (is.null(gene.length)) {
-    gene.length <- gene_info_tbl(db) %>% collect
+    gene.length <- gene_info_tbl(.fds) %>% collect
   }
   stopifnot(all(c('feature_id', 'length') %in% colnames(gene.length)))
-  out <- cpm(x, lib.size=lib.size, log=log, prior.count=prior.count, db=db, ...)
-  calc.rpkm(out, gene.length, log=log)
+  cpms <- cpm(x, lib.size=lib.size, log=log, prior.count=prior.count,
+              .fds=.fds, ...)
+  out <- calc.rpkm(cpms, gene.length, log=log)
+  set_fds(out, .fds)
 }
 
 calc.rpkm <- function(cpms, gene.length, log) {
@@ -212,44 +240,39 @@ calc.rpkm <- function(cpms, gene.length, log) {
 ##'
 ##' @rdname expression-container
 ##' @export
-##' @param x \code{tbl_sql} result from a call to \code{\link{fetch_expression}}
+##' @importFrom edgeR DGEList
+##' @param x a facile expression-like result
 ##' @param covariates A \code{character} vector specifying the  additional
 ##'   covariates to append to \code{out$samples}. Must be valid entries in the
 ##'   \code{sample_covariate::variable} column.
-##' @param db The \code{FacilDb} object. This is extracted from \code{x} if
-##'   we are able.
-##' @param cov.def the path to the yaml file that defines what each type of
-##'   variable is. This is also set in and extracted from \code{db}.
+##' @param .fds The \code{FacileDataSet} that \code{x} was retrieved from.
 ##' @return a \code{\link[edgeR]{DGEList}}
-as.DGEList <- function(x, covariates=NULL, db=fdb(x),
-                       cov.def=db[['cov.def']], ...) {
-  if (FALSE) {
-    covariates <- c('stage', 'sex')
-  }
-  stopifnot(is.FacileDb(db))
+as.DGEList <- function(x, covariates=NULL, .fds=fds(x), ...) {
+  .fds <- force(.fds)
+  stopifnot(is.FacileDataSet(.fds))
 
   counts.df <- assert_expression_result(x) %>%
     collect(n=Inf) %>%
     distinct(dataset, sample_id, feature_id, .keep_all=TRUE) %>%
     mutate(samid=paste(dataset, sample_id, sep='_'))
-  counts <- mcast(counts.df, feature_id ~ samid, value.var='count')
+  counts <- acast(counts.df, feature_id ~ samid, value.var='count')
 
   samples <- counts.df %>%
     select(dataset, sample_id) %>%
     distinct(.keep_all=TRUE)
 
   fids <- rownames(counts)
-  genes <- gene_info_tbl(db) %>%
+  genes <- gene_info_tbl(.fds) %>%
     filter(feature_id %in% fids) %>%
     collect(n=Inf) %>%
     as.data.frame %>%
     set_rownames(., .$feature_id)
 
-  y <- edgeR::DGEList(counts, genes=genes)
+  y <- DGEList(counts, genes=genes)
 
   ## Doing the internal filtering seems to be too slow
   ## sample.stats <- fetch_sample_statistics(db, x) %>%
-  sample.stats <- fetch_sample_statistics(db, samples) %>%
+  sample.stats <- fetch_sample_statistics(.fds, samples) %>%
     collect(n=Inf) %>%
     mutate(samid=paste(dataset, sample_id, sep='_')) %>%
     rename(lib.size=libsize, norm.factors=normfactor) %>%
@@ -261,38 +284,35 @@ as.DGEList <- function(x, covariates=NULL, db=fdb(x),
     sample.stats[colnames(y),,drop=FALSE])
 
   if (is.character(covariates) && length(covariates)) {
-    covs <- with_sample_covariates(samples, covariates, db) %>%
+    covs <- with_sample_covariates(samples, covariates, .fds) %>%
       as.data.frame %>%
       set_rownames(., paste(.$dataset, .$sample_id, sep='_')) %>%
       select(-dataset, -sample_id)
     y$samples <- cbind(y$samples, covs[colnames(y),,drop=FALSE])
   }
 
-  y
+  set_fds(y, .fds)
 }
 
 ##' Create an ExpressionSet from `fetch_expression`.
 ##'
 ##' @rdname expression-container
 ##' @export
-##' @param x \code{tbl_sql} result from a call to \code{\link{fetch_expression}}
+##' @param x a facile expression-like result
 ##' @param covariates A \code{character} vector specifying the  additional
 ##'   covariates to append to \code{out$samples}. Must be valid entries in the
 ##'   \code{sample_covariate::variable} column.
 ##' @param assay Which column to put in \code{"exprs"}
-##' @param db The \code{FacilDb} object. This is extracted from \code{x} if
-##'   we are able.
-##' @param cov.def the path to the yaml file that defines what each type of
-##'   variable is. This is also set in and extracted from \code{db}.
+##' @param .fds The \code{FacileDataSet} that \code{x} was retrieved from.
 ##' @return a \code{\link[Biobase]{ExpressionSet}}
-as.ExpressionSet <- function(x, covariates=NULL, exprs='counts', db=fdb(x),
-                             cov.def=db[['cov.def']], ...) {
+as.ExpressionSet <- function(x, covariates=NULL, exprs='counts', .fds=fds(x),
+                             ...) {
   if (!require("Biobase")) {
     stop("Biobase required")
   }
-  y <- as.DGEList(x, covariates, db, cov.df, ...)
+  y <- as.DGEList(x, covariates, db, .fds=.fds, ...)
   es <- ExpressionSet(y$counts)
   pData(es) <- y$samples
   fData(es) <- y$genes
-  es
+  set_fds(es, .fds)
 }

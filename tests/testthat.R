@@ -1,7 +1,7 @@
 library("testthat")
 library("magrittr")
 library("reshape2")
-library("FacileRepo")
+library("FacileDataSet")
 
-test_check("FacileRepo")
+test_check("FacileDataSet")
 

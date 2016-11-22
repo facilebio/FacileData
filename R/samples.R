@@ -2,21 +2,22 @@
 ##' Creates tbl that associates a sample with all of its indication/subtypes
 ##'
 ##' @export
-##' @param db a \code{FacileDb} objectg
+##' @param x a \code{FacileDataSet} object
 ##' @return a \code{tbl} with indication and subtype information for all samples
 ##'   in the database
-subtype_map <- function(db) {
-  if (missing(db)) on.exit(dbDisconnect(db$con))
-  sample.map <- sample_covariate_tbl(db) %>%
+subtype_map <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  sample.map <- sample_covariate_tbl(x) %>%
     filter(class == 'tumor_classification') %>%
-    with_sample_covariates('sample_type', db, db$cov.def)
+    with_sample_covariates('sample_type', .fds=x)
 
   main <- sample.map %>%
     filter(variable == 'indication') %>%
     transmute(indication=value, subtype='all', dataset=dataset,
               sample_id=sample_id, sample_type=sample_type)
 
-  subs <- filter(sample.map, variable != 'indication') %>%
+  subs <- sample.map %>%
+    filter(variable != 'indication') %>%
     transmute(subtype=value, dataset=dataset, sample_id=sample_id,
               sample_type=sample_type) %>% ## add indication
     left_join(select(main, dataset, sample_id, indication),
@@ -24,22 +25,24 @@ subtype_map <- function(db) {
 
   bind_rows(main, subs) %>%
     arrange(indication, subtype, dataset) %>%
-    set_fdb(db)
+    set_fds(x)
 }
 
 ##' Fetches a sample descriptor that matches filter criterion over covariates.
 ##'
 ##' @export
-##' @param db A \code{FacileDb}
-##' @param ... filter clause to apply to \code{sample_covariate_tbl(db)}
-##' @return a \code{tbl} sample-descriptor with a \code{FacileDb} connection
+##' @param x A \code{FacileDataSet} object
+##' @param ... filter clause to apply to \code{sample_covariate_tbl(x)}
+##' @return a facile sample descriptor with a \code{FacileDataSet} connection.
 ##' @examples
-##' fetch_samples(db, indication %in% c('BRCA', 'COAD'))
-fetch_samples <- function(db, ...) {
-  sample_covariate_tbl(db) %>%
+##' exampleFacileDataSet() %>%
+##'   fetch_samples(indication %in% c('BRCA', 'COAD'))
+fetch_samples <- function(x, ...) {
+  stopifnot(is.FacileDataSet(x))
+  sample_covariate_tbl(x) %>%
     filter(...) %>%
     select(dataset, sample_id) %>%
-    set_fdb(db)
+    set_fds(x)
 }
 
 ##' Filters the samples down in a dataset to ones specified
@@ -78,7 +81,7 @@ join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
 
   inner_join(x, samples, by=c('dataset', 'sample_id'),
              copy=internalize, auto_index=internalize) %>%
-    set_fdb(fdb(x))
+    set_fds(fds(x))
 }
 
 ##' Filter x down to specific samples

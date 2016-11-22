@@ -4,18 +4,14 @@
 \alias{fetch_sample_covariates}
 \title{Fetch rows from sample_covariate table for specified samples and covariates}
 \usage{
-fetch_sample_covariates(db, samples = NULL, covariates = NULL)
+fetch_sample_covariates(x, samples = NULL, covariates = NULL)
 }
 \arguments{
-\item{db}{a \code{FacileDb} connection}
-
 \item{samples}{a samples descriptor \code{tbl_*}}
 
 \item{covariates}{character vector of covariate names}
 
-\item{type}{only fetch covariates of a particular type?}
-
-\item{do.collect}{for collection of result from database?}
+\item{db}{a \code{FacileDataSet} connection}
 }
 \value{
 rows from the \code{sample_covaraite} table

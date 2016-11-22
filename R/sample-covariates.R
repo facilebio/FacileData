@@ -1,15 +1,13 @@
 ##' Fetch rows from sample_covariate table for specified samples and covariates
 ##'
 ##' @export
-##' @param db a \code{FacileDb} connection
+##' @param db a \code{FacileDataSet} connection
 ##' @param samples a samples descriptor \code{tbl_*}
 ##' @param covariates character vector of covariate names
-##' @param type only fetch covariates of a particular type?
-##' @param do.collect for collection of result from database?
 ##' @return rows from the \code{sample_covaraite} table
-fetch_sample_covariates <- function(db, samples=NULL, covariates=NULL) {
-  stopifnot(is.FacileDb(db))
-  dat <- sample_covariate_tbl(db)
+fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL) {
+  stopifnot(is.FacileDataSet(x))
+  dat <- sample_covariate_tbl(x)
   if (is.character(covariates)) {
     if (length(covariates) == 1L) {
       dat <- filter(dat, variable == covariates)
@@ -26,7 +24,7 @@ fetch_sample_covariates <- function(db, samples=NULL, covariates=NULL) {
   ## }
 
   out <- filter_samples(dat, samples)
-  set_fdb(out, db)
+  set_fds(out, x)
 }
 
 ##' Appends covariate columns to a query result
@@ -34,10 +32,12 @@ fetch_sample_covariates <- function(db, samples=NULL, covariates=NULL) {
 ##' Note that this function will force the collection of \code{x}
 ##'
 ##' @export
-##' @param x a "tbl"-like object that is a sample descriptor
-with_sample_covariates <- function(x, covariates=NULL, db=fdb(x),
-                                   cov.def=db[['cov.def']]) {
-  stopifnot(is.FacileDb(db))
+##' @param x a facile sample descriptor
+##' @param covariates character vector of covariate names
+##' @param .fds A \code{FacileDataSet} object
+##' @return The facile \code{x} object, annotated with the specified covariates.
+with_sample_covariates <- function(x, covariates=NULL, .fds=fds(x)) {
+  stopifnot(is.FacileDataSet(.fds))
   stopifnot(is.character(covariates))
 
   samples <- assert_sample_subset(x) %>%
@@ -45,12 +45,12 @@ with_sample_covariates <- function(x, covariates=NULL, db=fdb(x),
     collect(n=Inf) %>% ## can't call distinct on SQLite backend :-(
     distinct(.keep_all=TRUE)
 
-  covs <- fetch_sample_covariates(db, samples, covariates) %>%
-    spread_covariates(cov.def)
+  covs <- fetch_sample_covariates(.fds, samples, covariates) %>%
+    spread_covariates(.fds)
 
   collect(x, n=Inf) %>%
     left_join(covs, by=c('dataset', 'sample_id')) %>%
-    set_fdb(db)
+    set_fds(.fds)
 }
 
 ##' Spreads the covariates returned from database into wide data.frame
@@ -60,15 +60,10 @@ with_sample_covariates <- function(x, covariates=NULL, db=fdb(x),
 ##'
 ##' @export
 ##' @param x output from \code{fetch_sample_covariates}
+##' @param .fds A \code{FacileDataSet} object
 ##' @return a wide \code{tbl_df}-like object
-spread_covariates <- function(x, cov.def=NULL) {
-  db <- NULL
-  if (missing(cov.def) && is.null(cov.def) && is(x, 'tbl_sqlite')) {
-    db <- fdb(x)
-    if (is.FacileDb(db)) {
-      cov.def <- db[['cov.def']]
-    }
-  }
+spread_covariates <- function(x, .fds=fds(x)) {
+  stopifnot(is.FacileDataSet(.fds))
   x <- assert_sample_covariates(x) %>%
     collect(n=Inf)
 
@@ -83,21 +78,22 @@ spread_covariates <- function(x, cov.def=NULL) {
     mutate(.dummy.=NULL) %>%
     set_rownames(., paste(.$dataset, .$sample_id, sep='_'))
 
+  cov.def <- covariate_definitions(.fds)
   if (!is.null(cov.def)) {
     for (cname in setdiff(colnames(out), c('dataset', 'sample_id'))) {
       casted <- cast_covariate(cname, out[[cname]], cov.def)
       if (is.data.frame(casted)) {
+        ## casting a survival covariate will return a two column thing with time
+        ## and censoring information, so we need to account for that.
         out[[cname]] <- NULL
         out <- bind_cols(out, casted)
       } else {
         out[[cname]] <- casted
       }
-      ## casting a survival covariate will return a two column thing with time
-      ## and censoring information, so we need to account for that.
     }
   }
 
-  set_fdb(out, db)
+  set_fds(out, .fds)
 }
 
 ##' Casts the character values of the covariates to their defined types.
@@ -107,24 +103,27 @@ spread_covariates <- function(x, cov.def=NULL) {
 ##' data.frame with a \code{tte_<covariate>} column for time to event, and an
 ##' \code{event_<covariate>} column to indicate event (1) or right censored (2).
 ##'
-##' @importFrom yaml yaml.load_file
 ##' @export
 ##' @param covariate the name of the covariate
 ##' @param values the covariate values (which is a \code{character}) as it is
 ##'   pulled from the database.
-##' @param cov.defs the path to the covariate definition yaml file
-##'
+##' @param cov.def the un-yamled covariate definitions, if missing we rely on
+##'   pulling this out from the \code{FacileDataSet} object \code{.fds}
+##' @param .fds If \code{missing(cov.def)}, this is the \code{FacileDataSet} to
+##'   get the covariate definitions from.
 ##' @return values cast to appropriate type if a valid definition was found for
 ##'   \code{covariate}, otherwise values is returned "as is". Most of the time
 ##'   this is a single vector, but others it can be a data.frame (for
 ##'   \code{right_censored} data, for instance)
-cast_covariate <- function(covariate, values, cov.def) {
+cast_covariate <- function(covariate, values, cov.def, .fds) {
+  if (missing(cov.def)) {
+    stopifnot(is.FacileDataSet(.fds))
+    cov.def <- covariate_definitions(.fds)
+  }
+  stopifnot(is(cov.def, 'CovariateDefinitions'))
   stopifnot(is.character(values))
   stopifnot(is.character(covariate) && length(covariate) == 1L)
-  if (is.character(cov.def)) {
-    cov.def <- yaml.load_file(assert_file(cov.def, 'r'))
-  }
-  stopifnot(is.list(cov.def))
+
   def <- cov.def[[covariate]]
   if (is.list(def)) {
     if (def$type == 'real') {

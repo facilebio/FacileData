@@ -4,12 +4,11 @@
 \alias{fetch_expression}
 \title{Helper function creates dplyr query to get expression data of interest.}
 \usage{
-fetch_expression(db, samples = NULL, feature_ids = NULL,
+fetch_expression(x, samples = NULL, feature_ids = NULL,
   with_symbols = TRUE, do.collect = FALSE)
 }
 \arguments{
-\item{db}{The db connection to use. Creates and destroys a new one
-if not passed in.}
+\item{x}{A \code{FacileDataSet} object.}
 
 \item{indication}{The indication to get data from}
 

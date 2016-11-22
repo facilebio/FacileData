@@ -4,11 +4,17 @@
 \alias{with_sample_covariates}
 \title{Appends covariate columns to a query result}
 \usage{
-with_sample_covariates(x, covariates = NULL, db = fdb(x),
-  cov.def = db[["cov.def"]])
+with_sample_covariates(x, covariates = NULL, .fds = fds(x))
 }
 \arguments{
-\item{x}{a "tbl"-like object that is a sample descriptor}
+\item{x}{a facile sample descriptor}
+
+\item{covariates}{character vector of covariate names}
+
+\item{.fds}{A \code{FacileDataSet} object}
+}
+\value{
+The facile \code{x} object, annotated with the specified covariates.
 }
 \description{
 Note that this function will force the collection of \code{x}

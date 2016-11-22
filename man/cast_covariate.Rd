@@ -4,7 +4,7 @@
 \alias{cast_covariate}
 \title{Casts the character values of the covariates to their defined types.}
 \usage{
-cast_covariate(covariate, values, cov.def)
+cast_covariate(covariate, values, cov.def, .fds)
 }
 \arguments{
 \item{covariate}{the name of the covariate}
@@ -12,7 +12,11 @@ cast_covariate(covariate, values, cov.def)
 \item{values}{the covariate values (which is a \code{character}) as it is
 pulled from the database.}
 
-\item{cov.defs}{the path to the covariate definition yaml file}
+\item{cov.def}{the un-yamled covariate definitions, if missing we rely on
+pulling this out from the \code{FacileDataSet} object \code{.fds}}
+
+\item{.fds}{If \code{missing(cov.def)}, this is the \code{FacileDataSet} to
+get the covariate definitions from.}
 }
 \value{
 values cast to appropriate type if a valid definition was found for

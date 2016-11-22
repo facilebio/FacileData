@@ -4,10 +4,12 @@
 \alias{spread_covariates}
 \title{Spreads the covariates returned from database into wide data.frame}
 \usage{
-spread_covariates(x, cov.def = NULL)
+spread_covariates(x, .fds = fds(x))
 }
 \arguments{
 \item{x}{output from \code{fetch_sample_covariates}}
+
+\item{.fds}{A \code{FacileDataSet} object}
 }
 \value{
 a wide \code{tbl_df}-like object

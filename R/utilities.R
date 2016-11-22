@@ -10,6 +10,7 @@
 ##' @param fun.aggregate the aggregate function
 ##' @param ... args past down to \code{\link[reshape2]{dcast}}.
 mcast <- function(data, formula, fun.aggregate=NULL, ...) {
+  warning("Use acast, not mcast(?)")
   d <- dcast(data, formula, fun.aggregate, ...)
   set_rownames(as.matrix(d[, -1L, drop=FALSE]), d[[1L]])
 }

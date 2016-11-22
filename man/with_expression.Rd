@@ -5,14 +5,16 @@
 \title{Append expression values to sample-descriptor}
 \usage{
 with_expression(samples, feature_ids, with_symbols = TRUE,
-  db = fdb(samples))
+  .fds = fds(samples))
 }
 \arguments{
 \item{feature_ids}{character vector of feature_ids}
 
-\item{x}{a samples descriptor}
+\item{with_symbols}{Do you want gene symbols returned, too?}
 
-\item{a}{\code{FacileDb} object}
+\item{.fds}{A \code{FacileDataSet} object}
+
+\item{x}{a samples descriptor}
 }
 \value{
 a tbl-like result
