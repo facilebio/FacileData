@@ -96,8 +96,11 @@ test_that('with_sample_covariates returns long input with wide covariates', {
   exprs <- fetch_expression(FDS, samples, genes) %>%
     collect(n=Inf)
   wcovs <- fetch_sample_covariates(FDS, samples, covs) %>%
-    spread_covariates
-  expected <- left_join(exprs, wcovs, by=c('dataset', 'sample_id')) %>%
+    spread_covariates %>%
+    as.data.table
+
+  expected <- exprs %>%
+    left_join(wcovs, by=c('dataset', 'sample_id')) %>%
     arrange(dataset, sample_id, feature_id)
 
   ecovs <- fetch_expression(FDS, samples, genes) %>%

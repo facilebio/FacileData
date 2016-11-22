@@ -48,6 +48,10 @@ with_sample_covariates <- function(x, covariates=NULL, .fds=fds(x)) {
   covs <- fetch_sample_covariates(.fds, samples, covariates) %>%
     spread_covariates(.fds)
 
+  if (is.data.table(samples)) {
+    setDT(covs)
+  }
+
   collect(x, n=Inf) %>%
     left_join(covs, by=c('dataset', 'sample_id')) %>%
     set_fds(.fds)

@@ -197,10 +197,14 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
     assert_sample_statistics %>%
     collect(n=Inf) %>%
     distinct(dataset, sample_id, .keep_all=TRUE)
+  if (is.data.table(x)) {
+    setDT(sample.stats)
+  }
 
   tmp <- inner_join(x, sample.stats, by=c('dataset', 'sample_id'))
   cpms <- calc.cpm(tmp, lib.size=tmp$libsize * tmp$normfactor, log=log,
                    prior.count=prior.count)
+
   tmp %>%
     mutate(cpm=cpms) %>%
     select_(.dots=c(colnames(x), 'cpm')) %>%
@@ -213,6 +217,7 @@ cpm.tbl_dt <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
                        sample.stats=NULL, .fds=fds(x), ...) {
   cpm.tbl_df(x, lib.size, log, prior.count, sample.stats, .fds, ...)
 }
+
 
 ## A helper function to calculate cpm. Expects that x is a tbl-like thing which
 ## has a count column, and the appropriate libsize and normfactor columns from
@@ -251,14 +256,15 @@ rpkm <- function(x, ...) UseMethod("rpkm")
 ##' @param .fds A \code{FacileDataSet} object
 ##' @return a modified expression-like result with a \code{rpkm} column.
 rpkm.tbl_sqlite <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
-                            prior.count=5, .fds=fds(x), ...) {
+                            prior.count=5, sample.stats=NULL,
+                            .fds=fds(x), ...) {
   stopifnot(is.FacileDataSet(.fds))
   if (is.null(gene.length)) {
     gene.length <- gene_info_tbl(.fds) %>% collect
   }
   stopifnot(all(c('feature_id', 'length') %in% colnames(gene.length)))
   cpms <- cpm(x, lib.size=lib.size, log=log, prior.count=prior.count,
-              .fds=.fds, ...)
+              sample.stats=sample.stats, .fds=.fds, ...)
   out <- calc.rpkm(cpms, gene.length, log)
   set_fds(out, .fds)
 }
@@ -268,7 +274,7 @@ rpkm.tbl_sqlite <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
 ##' @export
 ##' @rdname rpkm
 rpkm.tbl_df <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
-                        prior.count=5, .fds=fds(x), ...) {
+                        prior.count=5, sample.stats=NULL, .fds=fds(x), ...) {
   assert_expression_result(x)
   stopifnot(is.FacileDataSet(.fds))
   if (is.null(gene.length)) {
@@ -276,9 +282,17 @@ rpkm.tbl_df <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
   }
   stopifnot(all(c('feature_id', 'length') %in% colnames(gene.length)))
   cpms <- cpm(x, lib.size=lib.size, log=log, prior.count=prior.count,
-              .fds=.fds, ...)
+              sample.stats=sample.stats, .fds=.fds, ...)
   out <- calc.rpkm(cpms, gene.length, log=log)
   set_fds(out, .fds)
+}
+
+##' @method rpkm tbl_dt
+##' @export
+rpkm.tbl_dt <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
+                        prior.count=5, sample.stats=NULL, .fds=fds(x), ...) {
+  rpkm.tbl_df(x, gene.length, lib.size, log, prior.count, sample.stats,
+              .fds, ...)
 }
 
 calc.rpkm <- function(cpms, gene.length, log) {
@@ -337,6 +351,7 @@ as.DGEList.matrix <- function(x, covariates=NULL, .fds=fds(x), samples=NULL,
     as.data.frame %>%
     set_rownames(., .$feature_id)
 
+  class(x) <- 'matrix'
   y <- DGEList(x, genes=genes)
 
   ## Doing the internal filtering seems to be too slow

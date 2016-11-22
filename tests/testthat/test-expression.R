@@ -69,15 +69,15 @@ test_that("cpm on fetch_expression result mimics cpm.DGEList", {
   expect_equal(EL, Etbldf)
 
   ## Test that cpm's returned with edgeR only code match
-  y <- as.DGEList(e)
   library(edgeR)
+  y <- as.DGEList(e)
   YL <- cpm(y, log=TRUE, prior.count=5)
   Y <- cpm(y, log=FALSE, prior.count=5)
 
   E <- E[rownames(Y), colnames(Y)]
   EL <- EL[rownames(YL), colnames(YL)]
 
-  expect_equal(E, Y)
+  expect_equal(as.matrix(E), as.matrix(Y))
   expect_equal(EL, YL)
 })
 
