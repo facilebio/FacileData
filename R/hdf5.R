@@ -1,5 +1,9 @@
-##' @importFrom RSQLite dbGetQuery
-createExpressionHDF5 <- function(x) {
+##' Creates an HDF5 enabled FacileDataSet from a completely sqlite-based one.
+##'
+##' This is a convenience function that will be axed eventually.
+createExpressionHDF5 <- function(x, drop.expr.table=TRUE) {
+  library(RSQLite)
+  library(rhdf5)
   stopifnot(is.FacileDataSet(x))
   if (file.exists(x$hdf5.fn)) {
     stop("HDF5 file already exists")
@@ -13,6 +17,13 @@ createExpressionHDF5 <- function(x) {
 
   ## dump counts into hdf5 file and table
   .create_hdf5_expression_matrix(x)
+
+  ## drop expression tables
+  if (drop.expr.table) {
+    dbRemoveTable(x$con, 'expression')
+    dbGetQuery(x$con, 'DROP INDEX IF EXISTS expression_gene')
+    dbGetQuery(x$con, 'DROP INDEX IF EXISTS expressoin_sample_gene')
+  }
 }
 
 .create_hdf5_expression_matrix <- function(x) {
@@ -29,7 +40,7 @@ createExpressionHDF5 <- function(x) {
     for (ds in d.stats$dataset) {
       message("===== caching ", ds, " =====")
       samples <- filter(datasets, dataset == ds)
-      y <- fetch_expression(x, samples) %>% as.DGEList
+      y <- fetch_expression.db(x, samples) %>% as.DGEList
       stopifnot(all.equal(y$genes$hdf5_index, 1:nrow(y)))
       saveRDS(y, file.path(cache, paste0(ds, '-DGEList.rds')))
     }
@@ -47,7 +58,7 @@ createExpressionHDF5 <- function(x) {
     name <- paste0('expression/rnaseq/', ds)
     message("==== creating ", name, " ====")
     h5createDataset(x$hdf5.fn, name, dim(cnts), storage.mode = "integer",
-                    chunk=c(5000,ncol(cnts)), level=4)
+                    chunk=c(min(5000, nrow(cnts)), ncol(cnts)), level=4)
     h5write(cnts, file=x$hdf5.fn, name=name)
     tibble(dataset=ds, sample_id=colnames(cnts), hd5_index=1:ncol(cnts))
   })
@@ -144,4 +155,31 @@ if (FALSE) {
     tibble(dataset=ds, rds.time=sy['elapsed'], hdf5.time=s5['elapsed'], all.equal=eq)
   })
   times <- bind_rows(times)
+}
+
+if (FALSE) {
+  ## Test count equivalency -- seems to work
+  fds <- FacileDataSet('~/workspace/data/facile/FacileDataSets/FacileAtezo-wip')
+  genes <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
+  samples <- sample_covariate_tbl(fds) %>%
+    filter(variable == "indication" && value == 'bladder') %>%
+    select(dataset, sample_id) %>%
+    collect
+
+  e.hdf5 <- fetch_expression(fds, samples, genes) %>%
+    arrange(dataset, sample_id, feature_id) %>%
+    collect
+  e.sqlite <- fetch_expression.db(fds, samples, genes) %>%
+    arrange(dataset, sample_id, feature_id) %>%
+    collect
+  all.equal(e.hdf5, e.sqlite) ## TRUE
+
+  s2 <- samples %>% sample_n(20)
+  e2.hdf5 <- fetch_expression(fds, s2, genes) %>%
+    arrange(dataset, sample_id, feature_id) %>%
+    collect
+  e2.sqlite <- fetch_expression.db(fds, s2, genes) %>%
+    arrange(dataset, sample_id, feature_id) %>%
+    collect
+  all.equal(e.hdf5, e.sqlite) ## TRUE
 }

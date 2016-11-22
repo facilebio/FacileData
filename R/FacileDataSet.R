@@ -84,6 +84,12 @@ gene_info_tbl <- function(x) {
 }
 
 ##' @export
+hdf5_sample_xref_tbl <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  tbl(x, 'hdf5_sample_xref')
+}
+
+##' @export
 covariate_definition_file <- function(x) {
   stopifnot(is.FacileDataSet(x))
   x[['cov.def']]

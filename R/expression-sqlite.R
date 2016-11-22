@@ -1,45 +1,3 @@
-##' Utility functions to get row and column indices of rnaseq hdf5 files.
-##'
-##' @export
-##' @rdname hdf5expression
-hdf5_sample_indices <- function(x, samples=NULL) {
-  stopifnot(is.FacileDataSet(x))
-  if (is.null(samples)) {
-    samples <- sample_stats_tbl(x)
-  }
-  samples <- samples %>%
-    assert_sample_subset %>%
-    collect(n=Inf) %>%
-    distinct(dataset, sample_id)
-
-  idxs <- hdf5_sample_xref_tbl(x) %>%
-    collect(n=Inf) %>%
-    semi_join(samples, by=c('dataset', 'sample_id')) %>%
-    rename(index=hdf5_index)
-}
-
-##' @export
-##' @rdname hdf5expression
-hdf5_gene_indices <- function(x, feature_ids=NULL) {
-  stopifnot(is.FacileDataSet(x))
-  if (is.null(feature_ids)) {
-    feature_ids <- character()
-  }
-  assertCharacter(feature_ids)
-  feature_ids <- unique(feature_ids)
-
-  genes <- gene_info_tbl(x)
-  if (length(feature_ids) == 1L) {
-    genes <- filter(genes, feature_id == feature_ids)
-  } else if (length(feature_ids) > 1L) {
-    genes <- filter(genes, feature_id %in% feature_ids)
-  }
-
-  genes %>%
-    collect(n=Inf) %>%
-    rename(index=hdf5_index)
-}
-
 ##' Helper function creates dplyr query to get expression data of interest.
 ##'
 ##' @section Software Design Caveats:
@@ -52,7 +10,7 @@ hdf5_gene_indices <- function(x, feature_ids=NULL) {
 ##' duplicated gene expression results will matter downstream ...
 ##'
 ##' @export
-##' @importFrom rhdf5 h5read
+##'
 ##' @param x A \code{FacileDataSet} object.
 ##' @param indication The indication to get data from
 ##' @param subtype The subtype from the desired \code{indication}
@@ -63,51 +21,44 @@ hdf5_gene_indices <- function(x, feature_ids=NULL) {
 ##' @return A lazy \code{\link[dplyr]{tbl}} object with the expression
 ##'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
 ##'   othwerise a \code{tbl_df} of the results.
-fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
-                             with_symbols=TRUE, as.matrix=FALSE) {
+fetch_expression.db <- function(x, samples=NULL, feature_ids=NULL,
+                                with_symbols=TRUE, do.collect=FALSE) {
   stopifnot(is.FacileDataSet(x))
+  dat <- expression_tbl(x)
 
-  hdf.sample.idxs <- hdf5_sample_indices(x, samples)
-  hdf.gene.idxs <- hdf5_gene_indices(x, feature_ids)
+  if (!is.null(feature_ids)) {
+    assertCharacter(feature_ids)
+    feature_ids <- unique(feature_ids)
 
-  if (isTRUE(as.matrix) && isTRUE(with_symbols)) {
-    warning("with_symbols ignored when as.matrix=TRUE")
+    # if (length(feature_ids) == 1L) {
+    #   dat <- filter(dat, feature_id == feature_ids)
+    # } else if (length(feature_ids) > 1L) {
+    #   dat <- filter(dat, feature_id %in% feature_ids)
+    # }
+
+    if (length(feature_ids) == 1L) {
+      genes <- gene_info_tbl(x) %>% filter(feature_id == feature_ids)
+    } else if (length(feature_ids) > 1L) {
+      genes <- gene_info_tbl(x) %>% filter(feature_id %in% feature_ids)
+    }
+
+    if (with_symbols) {
+      genes %<>% select(feature_id, symbol)
+    } else {
+      genes %<>% select(feature_id)
+    }
+
+    dat <- inner_join(dat, genes, by='feature_id')
   }
 
-  counts <- hdf.sample.idxs %>%
-    group_by(dataset) %>%
-    do(res={
-      ds <- .$dataset[1L]
-      hd5.name <- paste0('expression/rnaseq/', ds)
-      cnts <- h5read(x$hdf5.fn, hd5.name, list(hdf.gene.idxs$index, .$index))
-      if (isTRUE(as.matrix)) {
-        dimnames(cnts) <- list(hdf.gene.idxs$feature_id,
-                               paste(ds, .$sample_id, sep='_'))
-      } else {
-        dimnames(cnts) <- list(hdf.gene.idxs$feature_id, .$sample_id)
-        cnts <- as.data.table(cnts, keep.rownames=TRUE)
-        cnts <- melt.data.table(cnts, id.vars='rn')
-        cnts[, dataset := ds]
-        cnts[, variable := as.character(variable)]
-        setnames(cnts, c('feature_id', 'sample_id', 'count', 'dataset'))
-        setcolorder(cnts, c('dataset', 'sample_id', 'feature_id', 'count'))
-        if (isTRUE(with_symbols)) {
-          sxref <- match(cnts$feature_id, hdf.gene.idxs$feature_id)
-          cnts[, symbol := hdf.gene.idxs$symbol[sxref]]
-        }
-      }
-      cnts
-    }) %>%
-    ungroup
+  dat <- filter_samples(dat, samples)
 
-  if (isTRUE(as.matrix)) {
-    out <- do.call(cbind, counts$res)
-  } else {
-    out <- as.tbl(rbindlist(counts$res))
+  if (do.collect) {
+    dat <- collect(dat, n=Inf)
   }
 
-  class(out) <- c('FacileExpression', class(out))
-  set_fds(out, x)
+  class(dat) <- c('FacileExpression', class(dat))
+  set_fds(dat, x)
 }
 
 ##' Append expression values to sample-descriptor
@@ -118,29 +69,28 @@ fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
 ##' @param with_symbols Do you want gene symbols returned, too?
 ##' @param .fds A \code{FacileDataSet} object
 ##' @return a tbl-like result
-with_expression <- function(samples, feature_ids, with_symbols=TRUE,
-                            .fds=fds(samples)) {
+with_expression.db <- function(samples, feature_ids, with_symbols=TRUE,
+                               .fds=fds(samples)) {
   stopifnot(is.FacileDataSet(.fds))
   stopifnot(is.character(feature_ids) && length(feature_ids) > 0)
   samples <- assert_sample_subset(samples)
 
   .fds %>%
-    fetch_expression(samples, feature_ids, with_symbols=with_symbols) %>%
+    fetch_expression.db(samples, feature_ids, with_symbols=with_symbols) %>%
     join_samples(samples) %>%
     set_fds(.fds)
 }
 
-##' @importFrom edgeR cpm
 ##' @export
-cpm <- function(x, ...) UseMethod("cpm")
+cpmdb <- function(x, ...) UseMethod("cpmdb")
 
 ##' Calculated counts per million from a FacileDataSet
 ##'
-##' @method cpm tbl_sqlite
-##' @rdname cpm
+##' @method cpmdb tbl_sqlite
+##' @rdname cpmdb
 ##'
-##' @importFrom edgeR cpm
 ##' @export
+##' @importFrom edgeR cpm
 ##'
 ##' @param x an expression-like facile result
 ##' @param lib.size ignored for now, this is fetched from the
@@ -149,7 +99,7 @@ cpm <- function(x, ...) UseMethod("cpm")
 ##' @param prior.count prior.count to add to observed counts
 ##' @param .fds A \code{FacileDataSet} object
 ##' @return a modified expression-like result with a \code{cpm} column.
-cpm.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
+cpmdb.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
                            .fds=fds(x), ...) {
   assert_expression_result(x)
   stopifnot(is.FacileDataSet(.fds))
@@ -177,10 +127,10 @@ cpm.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
   set_fds(out, .fds)
 }
 
-##' @method cpm tbl_df
-##' @rdname cpm
+##' @method cpmdb tbl_df
+##' @rdname cpmdb
 ##' @export
-cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
+cpmdb.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
                        sample.stats=NULL, .fds=fds(x), ...) {
   assert_expression_result(x)
   stopifnot(is.FacileDataSet(.fds))
@@ -207,13 +157,6 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
     set_fds(.fds)
 }
 
-##' @method cpm tbl_dt
-##' @export
-cpm.tbl_dt <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
-                       sample.stats=NULL, .fds=fds(x), ...) {
-  cpm.tbl_df(x, lib.size, log, prior.count, sample.stats, .fds, ...)
-}
-
 ## A helper function to calculate cpm. Expects that x is a tbl-like thing which
 ## has a count column, and the appropriate libsize and normfactor columns from
 ## the database
@@ -233,14 +176,13 @@ calc.cpm <- function(x, lib.size=NULL, log=FALSE, prior.count=5) {
   cpms
 }
 
-##' @importFrom edgeR rpkm
-##' @export
-rpkm <- function(x, ...) UseMethod("rpkm")
+##' @export rpkmdb
+rpkmdb <- function(x, ...) UseMethod("cpmdb")
 
 ##' Cacluate RPKM from a FacileDataSet
 ##'
-##' @method rpkm tbl_sqlite
-##' @rdname rpkm
+##' @method rpkmdb tbl_sqlite
+##' @rdname rpkmdb
 ##' @importFrom edgeR rpkm
 ##' @export
 ##' @param x an expression-like facile result
@@ -250,7 +192,7 @@ rpkm <- function(x, ...) UseMethod("rpkm")
 ##' @param prior.count prior.count to add to observed counts
 ##' @param .fds A \code{FacileDataSet} object
 ##' @return a modified expression-like result with a \code{rpkm} column.
-rpkm.tbl_sqlite <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
+rpkmdb.tbl_sqlite <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
                             prior.count=5, .fds=fds(x), ...) {
   stopifnot(is.FacileDataSet(.fds))
   if (is.null(gene.length)) {
@@ -263,11 +205,11 @@ rpkm.tbl_sqlite <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
   set_fds(out, .fds)
 }
 
-##' @method rpkm tbl_sqlite
+##' @method rpkmdb tbl_sqlite
 ##' @importFrom edgeR rpkm
 ##' @export
-##' @rdname rpkm
-rpkm.tbl_df <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
+##' @rdname rpkmdb
+rpkmdb.tbl_df <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
                         prior.count=5, .fds=fds(x), ...) {
   assert_expression_result(x)
   stopifnot(is.FacileDataSet(.fds))
