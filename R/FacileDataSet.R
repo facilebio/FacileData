@@ -60,12 +60,6 @@ is.FacileDataSet <- function(x) {
 }
 
 ##' @export
-expression_tbl <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  tbl(x, 'expression') %>% set_fds(x)
-}
-
-##' @export
 sample_stats_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
   tbl(x, 'sample_stats') %>% set_fds(x)
