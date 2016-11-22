@@ -182,4 +182,7 @@ if (FALSE) {
     arrange(dataset, sample_id, feature_id) %>%
     collect
   all.equal(e.hdf5, e.sqlite) ## TRUE
+
+  system.time(all.exprs <- fetch_expression(fds, samples, as.matrix=TRUE))
+  system.time(all.y <- as.DGEList(all.exprs))
 }

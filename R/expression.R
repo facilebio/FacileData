@@ -64,7 +64,7 @@ hdf5_gene_indices <- function(x, feature_ids=NULL) {
 ##'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
 ##'   othwerise a \code{tbl_df} of the results.
 fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
-                             with_symbols=TRUE, as.matrix=FALSE) {
+                             with_symbols=!as.matrix, as.matrix=FALSE) {
   stopifnot(is.FacileDataSet(x))
 
   hdf.sample.idxs <- hdf5_sample_indices(x, samples)
@@ -295,6 +295,9 @@ calc.rpkm <- function(cpms, gene.length, log) {
   cpms
 }
 
+as.DGEList <- function(x, ...) {
+  UseMethod('as.DGEList')
+}
 ##' Converts a result from `fetch_expression` into a DGEList
 ##'
 ##' The genes and samples that populate the \code{DGEList} are specified by
@@ -303,7 +306,7 @@ calc.rpkm <- function(cpms, gene.length, log) {
 ##' \code{covariates} argument.
 ##'
 ##' @rdname expression-container
-##' @export
+##' @export as.DGEList matrix
 ##' @importFrom edgeR DGEList
 ##' @param x a facile expression-like result
 ##' @param covariates A \code{character} vector specifying the  additional
@@ -311,28 +314,27 @@ calc.rpkm <- function(cpms, gene.length, log) {
 ##'   \code{sample_covariate::variable} column.
 ##' @param .fds The \code{FacileDataSet} that \code{x} was retrieved from.
 ##' @return a \code{\link[edgeR]{DGEList}}
-as.DGEList <- function(x, covariates=NULL, .fds=fds(x), ...) {
+as.DGEList.matrix <- function(x, covariates=NULL, .fds=fds(x), samples=NULL,
+                              ...) {
+  stopifnot(is(x, 'FacileExpression'))
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
 
-  counts.df <- assert_expression_result(x) %>%
-    collect(n=Inf) %>%
-    distinct(dataset, sample_id, feature_id, .keep_all=TRUE) %>%
-    mutate(samid=paste(dataset, sample_id, sep='_'))
-  counts <- acast(counts.df, feature_id ~ samid, value.var='count')
+  if (is.null(samples)) {
+    samples <- tibble(
+      dataset=sub('_.*$', '', colnames(x)),
+      sample_id=sub('^.*?_', '', colnames(x)))
+  }
+  assert_sample_subset(samples)
 
-  samples <- counts.df %>%
-    select(dataset, sample_id) %>%
-    distinct(.keep_all=TRUE)
-
-  fids <- rownames(counts)
+  fids <- rownames(x)
   genes <- gene_info_tbl(.fds) %>%
     filter(feature_id %in% fids) %>%
     collect(n=Inf) %>%
     as.data.frame %>%
     set_rownames(., .$feature_id)
 
-  y <- DGEList(counts, genes=genes)
+  y <- DGEList(x, genes=genes)
 
   ## Doing the internal filtering seems to be too slow
   ## sample.stats <- fetch_sample_statistics(db, x) %>%
@@ -358,6 +360,32 @@ as.DGEList <- function(x, covariates=NULL, .fds=fds(x), ...) {
   set_fds(y, .fds)
 }
 
+##' @export as.DGEList matrix
+as.DGEList.data.frame <- function(x, covariates=NULL, .fds=fds(x), ...) {
+  stopifnot(is(x, 'FacileExpression'))
+  .fds <- force(.fds)
+  stopifnot(is.FacileDataSet(.fds))
+
+  counts.dt <- assert_expression_result(x) %>%
+    collect(n=Inf) %>%
+    setDT %>%
+    unique(by=c('dataset', 'sample_id', 'feature_id'))
+  counts.dt[, samid := paste(dataset, sample_id, sep='_')]
+
+  counts <- local({
+    wide <- dcast.data.table(counts.dt, feature_id ~ samid, value.var='count')
+    out <- as.matrix(wide[, -1, with=FALSE])
+    set_rownames(out, wide[[1]])
+  })
+
+  class(counts) <- c('FacileExpression', class(counts))
+  # samples <- counts.dt[, list(dataset, sample_id)] %>%
+  #   unique %>%
+  #   setDF
+
+  as.DGEList(counts, covariates=covariates, .fds=.fds, ...)
+}
+
 ##' Create an ExpressionSet from `fetch_expression`.
 ##'
 ##' @rdname expression-container
@@ -371,10 +399,11 @@ as.DGEList <- function(x, covariates=NULL, .fds=fds(x), ...) {
 ##' @return a \code{\link[Biobase]{ExpressionSet}}
 as.ExpressionSet <- function(x, covariates=NULL, exprs='counts', .fds=fds(x),
                              ...) {
-  if (!require("Biobase")) {
-    stop("Biobase required")
-  }
-  y <- as.DGEList(x, covariates, db, .fds=.fds, ...)
+  stopifnot(is(x, 'FacileExpression'))
+  .fds <- force(.fds)
+  stopifnot(is.FacileDataSet(.fds))
+  if (!require("Biobase")) stop("Biobase required")
+  y <- as.DGEList(x, covariates, .fds=.fds, ...)
   es <- ExpressionSet(y$counts)
   pData(es) <- y$samples
   fData(es) <- y$genes

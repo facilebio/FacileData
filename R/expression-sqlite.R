@@ -253,7 +253,7 @@ calc.rpkm <- function(cpms, gene.length, log) {
 ##'   \code{sample_covariate::variable} column.
 ##' @param .fds The \code{FacileDataSet} that \code{x} was retrieved from.
 ##' @return a \code{\link[edgeR]{DGEList}}
-as.DGEList <- function(x, covariates=NULL, .fds=fds(x), ...) {
+as.DGEList.db <- function(x, covariates=NULL, .fds=fds(x), ...) {
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
 
