@@ -23,6 +23,7 @@ createExpressionHDF5 <- function(x, drop.expr.table=TRUE) {
     dbRemoveTable(x$con, 'expression')
     dbGetQuery(x$con, 'DROP INDEX IF EXISTS expression_gene')
     dbGetQuery(x$con, 'DROP INDEX IF EXISTS expressoin_sample_gene')
+    dbGetQuery(x$con, 'VACUUM')
   }
 }
 

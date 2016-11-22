@@ -309,12 +309,7 @@ calc.rpkm <- function(cpms, gene.length, log) {
   cpms
 }
 
-##' @export
-as.DGEList <- function(x, ...) {
-  UseMethod('as.DGEList')
-}
-
-##' Converts a result from `fetch_expression` into a DGEList
+##' Converts a facile result into a DGEList or ExpressionSet, or ...
 ##'
 ##' The genes and samples that populate the \code{DGEList} are specified by
 ##' \code{x}, and the caller can request addition sample information to be
@@ -322,15 +317,25 @@ as.DGEList <- function(x, ...) {
 ##' \code{covariates} argument.
 ##'
 ##' @rdname expression-container
-##' @method as.DGEList matrix
 ##' @export
 ##' @importFrom edgeR DGEList
 ##' @param x a facile expression-like result
 ##' @param covariates A \code{character} vector specifying the  additional
 ##'   covariates to append to \code{out$samples}. Must be valid entries in the
 ##'   \code{sample_covariate::variable} column.
+##' @param feature_ids the features to get expression for (if not specified
+##'   in \code{x} descriptor)
+##' @param assay the \code{assayDataElement} to use for the expression data
+##'   if \code{x} is an \code{ExpressionSet}.
 ##' @param .fds The \code{FacileDataSet} that \code{x} was retrieved from.
 ##' @return a \code{\link[edgeR]{DGEList}}
+as.DGEList <- function(x, ...) {
+  UseMethod('as.DGEList')
+}
+
+##' @export
+##' @method as.DGEList matrix
+##' @rdname expression-container
 as.DGEList.matrix <- function(x, covariates=NULL, feature_ids=NULL,
                               .fds=fds(x), ...) {
   stopifnot(is(x, 'FacileExpression'))
@@ -383,8 +388,9 @@ as.DGEList.matrix <- function(x, covariates=NULL, feature_ids=NULL,
   set_fds(y, .fds)
 }
 
-##' @method as.DGEList data.frame
 ##' @export
+##' @method as.DGEList data.frame
+##' @rdname expression-container
 as.DGEList.data.frame <- function(x, covariates=NULL, feature_ids=NULL,
                                   .fds=fds(x), ...) {
   .fds <- force(.fds)
@@ -419,24 +425,16 @@ as.DGEList.data.frame <- function(x, covariates=NULL, feature_ids=NULL,
              .fds=.fds, ...)
 }
 
-##' Create an ExpressionSet from `fetch_expression`.
-##'
-##' @rdname expression-container
 ##' @export
-##' @param x a facile expression-like result
-##' @param covariates A \code{character} vector specifying the  additional
-##'   covariates to append to \code{out$samples}. Must be valid entries in the
-##'   \code{sample_covariate::variable} column.
-##' @param assay Which column to put in \code{"exprs"}
-##' @param .fds The \code{FacileDataSet} that \code{x} was retrieved from.
-##' @return a \code{\link[Biobase]{ExpressionSet}}
-as.ExpressionSet <- function(x, covariates=NULL, exprs='counts', .fds=fds(x),
+##' @rdname expression-container
+as.ExpressionSet <- function(x, covariates=NULL, feature_ids=NULL,
+                             exprs='counts', .fds=fds(x),
                              ...) {
-  stopifnot(is(x, 'FacileExpression'))
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
+  assert_sample_subset(x)
   if (!require("Biobase")) stop("Biobase required")
-  y <- as.DGEList(x, covariates, .fds=.fds, ...)
+  y <- as.DGEList(x, covariates, feature_ids, .fds=.fds, ...)
   es <- ExpressionSet(y$counts)
   pData(es) <- y$samples
   fData(es) <- y$genes
