@@ -4,13 +4,13 @@
 \alias{fetch_custom_sample_covariates}
 \title{Fetches custom (user) annotations for a given user prefix}
 \usage{
-fetch_custom_sample_covariates(x, samples = NULL, custom.anno.key = NULL,
+fetch_custom_sample_covariates(x, samples = NULL, custom_key = NULL,
   file.prefix = "facile")
 }
 \arguments{
 \item{samples}{the facile sample descriptor}
 
-\item{custom.anno.key}{The key to use for the custom annotation}
+\item{custom_key}{The key to use for the custom annotation}
 
 \item{fds}{The \code{FacileDataSet}}
 }

@@ -5,14 +5,14 @@
 \title{Fetch rows from sample_covariate table for specified samples and covariates}
 \usage{
 fetch_sample_covariates(x, samples = NULL, covariates = NULL,
-  custom.anno.key = NULL)
+  custom_key = NULL)
 }
 \arguments{
 \item{samples}{a samples descriptor \code{tbl_*}}
 
 \item{covariates}{character vector of covariate names}
 
-\item{custom.anno.key}{The key to use to fetch more custom annotations over
+\item{custom_key}{The key to use to fetch more custom annotations over
 the given samples}
 
 \item{db}{a \code{FacileDataSet} connection}

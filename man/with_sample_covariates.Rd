@@ -4,12 +4,18 @@
 \alias{with_sample_covariates}
 \title{Appends covariate columns to a query result}
 \usage{
-with_sample_covariates(x, covariates = NULL, .fds = fds(x))
+with_sample_covariates(x, covariates = NULL, custom_key = NULL,
+  .fds = fds(x))
 }
 \arguments{
 \item{x}{a facile sample descriptor}
 
-\item{covariates}{character vector of covariate names}
+\item{covariates}{character vector of covariate names. If \code{NULL}
+(default), returns all covariates, if is character and length() == 0, then
+this is a no-op (x is returned)}
+
+\item{custom_key}{The key to use to fetch more custom annotations over
+the given samples}
 
 \item{.fds}{A \code{FacileDataSet} object}
 }
