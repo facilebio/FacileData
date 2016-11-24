@@ -4,8 +4,11 @@
 ##' @param db a \code{FacileDataSet} connection
 ##' @param samples a samples descriptor \code{tbl_*}
 ##' @param covariates character vector of covariate names
+##' @param custom.anno.key The key to use to fetch more custom annotations over
+##'   the given samples
 ##' @return rows from the \code{sample_covaraite} table
-fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL) {
+fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
+                                    custom.anno.key=NULL) {
   stopifnot(is.FacileDataSet(x))
   dat <- sample_covariate_tbl(x)
   if (is.character(covariates)) {
@@ -16,16 +19,51 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL) {
     }
   }
 
-  ## if (right.join) {
-  ##   assert_sample_subset(samples)
-  ##   out <- right_join(dat, samples, by=c('dataset', 'sample_id'))
-  ## } else {
-  ##   out <- filter_samples(dat, samples)
-  ## }
-
   out <- filter_samples(dat, samples)
+
+  if (!is.null(custom.anno.key)) {
+    custom <- fetch_custom_sample_covariates(x, samples, custom.anno.key)
+    out <- bind_rows(collect(out, n=Inf), custom)
+  }
+
   set_fds(out, x)
 }
+
+##' Fetches custom (user) annotations for a given user prefix
+##'
+##' @export
+##' @importFrom jsonlite stream_in
+##' @param fds The \code{FacileDataSet}
+##' @param samples the facile sample descriptor
+##' @param custom.anno.key The key to use for the custom annotation
+##' @return covariate tbl
+fetch_custom_sample_covariates <- function(x, samples=NULL,
+                                           custom.anno.key=NULL,
+                                           file.prefix="facile") {
+  stopifnot(is.FacileDataSet(x))
+  out.cols <- colnames(sample_covariate_tbl(x))
+
+  fpat <- paste0('^', file.prefix, '_', custom.anno.key, "_*")
+  annot.files <- list.files(path=x$anno.dir, pattern=fpat, full.names=TRUE)
+
+  if (length(annot.files)) {
+    annos <- lapply(annot.files, function(fn) stream_in(file(fn), verbose=FALSE))
+    out <- bind_rows(annos) %>%
+      mutate(class='user_annotation') %>%
+      select_(.dots=out.cols) %>%
+      set_fds(x) %>%
+      filter_samples(samples)
+  } else {
+    out <- sapply(out.cols, function(x) character(), simplify=FALSE)
+    out$date_entered <- integer()
+    out <- as.data.frame(out, stringsAsFactors=FALSE) %>%
+      as.tbl %>%
+      set_fds(x)
+  }
+
+  out
+}
+
 
 ##' Appends covariate columns to a query result
 ##'
