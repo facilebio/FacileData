@@ -41,7 +41,7 @@ fetch_samples <- function(x, ...) {
   stopifnot(is.FacileDataSet(x))
   sample_covariate_tbl(x) %>%
     filter(...) %>%
-    select(dataset, sample_id) %>%
+    distinct(dataset, sample_id) %>%
     set_fds(x)
 }
 
@@ -76,7 +76,7 @@ join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
   ## as well be looking things up by hand
   extra.cols <- setdiff(colnames(samples), c('dataset', 'sample_id'))
   if (semi && length(extra.cols) > 0L) {
-    samples <- select(samples, dataset, sample_id)
+    samples <- distinct(samples, dataset, sample_id)
   }
 
   inner_join(x, samples, by=c('dataset', 'sample_id'),

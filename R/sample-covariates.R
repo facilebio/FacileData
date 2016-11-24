@@ -54,6 +54,7 @@ fetch_custom_sample_covariates <- function(x, samples=NULL,
       set_fds(x) %>%
       filter_samples(samples)
   } else {
+    ## Make a dummy, 0 row tibble to send back
     out <- sapply(out.cols, function(x) character(), simplify=FALSE)
     out$date_entered <- integer()
     out <- as.data.frame(out, stringsAsFactors=FALSE) %>%
