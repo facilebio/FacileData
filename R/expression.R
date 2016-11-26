@@ -435,6 +435,15 @@ as.DGEList.data.frame <- function(x, covariates=NULL, feature_ids=NULL,
 }
 
 ##' @export
+##' @method as.DGEList tbl_sqlite
+##' @rdname expression-container
+as.DGEList.tbl_sqlite <- function(x, covariates=NULL, feature_ids=NULL,
+                                  .fds=fds(x), custom_key=NULL, ...) {
+  x <- collect(x, n=Inf) %>% set_fds(.fds)
+  as.DGEList(x, covariates, feature_ids, .fds=.fds, custom_key=custom_key, ...)
+}
+
+##' @export
 ##' @rdname expression-container
 as.ExpressionSet <- function(x, covariates=NULL, feature_ids=NULL,
                              exprs='counts', .fds=fds(x), custom_key=NULL,
@@ -450,3 +459,4 @@ as.ExpressionSet <- function(x, covariates=NULL, feature_ids=NULL,
   fData(es) <- y$genes
   set_fds(es, .fds)
 }
+

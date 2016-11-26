@@ -5,6 +5,7 @@
 \alias{as.DGEList.data.frame}
 \alias{as.DGEList.db}
 \alias{as.DGEList.matrix}
+\alias{as.DGEList.tbl_sqlite}
 \alias{as.ExpressionSet}
 \alias{as.ExpressionSet.db}
 \title{Converts a result from `fetch_expression` into a DGEList}
@@ -20,6 +21,9 @@ as.DGEList(x, ...)
   .fds = fds(x), custom_key = NULL, ...)
 
 \method{as.DGEList}{data.frame}(x, covariates = NULL, feature_ids = NULL,
+  .fds = fds(x), custom_key = NULL, ...)
+
+\method{as.DGEList}{tbl_sqlite}(x, covariates = NULL, feature_ids = NULL,
   .fds = fds(x), custom_key = NULL, ...)
 
 as.ExpressionSet(x, covariates = NULL, feature_ids = NULL,

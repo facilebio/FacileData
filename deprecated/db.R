@@ -51,11 +51,6 @@ is.FacileDb <- function(x) {
 }
 
 ##' @export
-expression_tbl <- function(db=FacileDb()) {
-  tbl(db, 'expression')
-}
-
-##' @export
 sample_stats_tbl <- function(db=FacileDb()) {
   tbl(db, 'sample_stats')
 }
