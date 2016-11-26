@@ -19,6 +19,14 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
     }
   }
 
+  ## If the samples descriptor is defined over the sample_covariate table,
+  ## this thing explodes (inner joining within itself, I guess). We defensively
+  ## copy the sample descriptor, but in future maybe better to test if the
+  ## dat and samples sqlite tables are pointing to the same thing
+  if (!is.null(samples)) {
+    assert_sample_subset(samples)
+    samples <- collect(samples, n=Inf) %>% distinct(dataset, sample_id)
+  }
   out <- filter_samples(dat, samples)
 
   if (!is.null(custom_key)) {
@@ -125,9 +133,9 @@ with_sample_covariates <- function(x, covariates=NULL, custom_key=NULL, .fds=fds
   covs <- fetch_sample_covariates(.fds, samples, covariates) %>%
     spread_covariates(.fds)
 
-  if (is.data.table(samples)) {
-    setDT(covs)
-  }
+  # if (is.data.table(samples)) {
+  #   setDT(covs)
+  # }
 
   collect(x, n=Inf) %>%
     left_join(covs, by=c('dataset', 'sample_id')) %>%

@@ -7,6 +7,17 @@ samples <- sample_covariate_tbl(FDS) %>%
   select(dataset, sample_id)
 genes <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
 
+test_that("fetch_sample_covariates retrieves all covariates if not specified", {
+  covs <- fetch_sample_covariates(FDS, samples, custom_key='lianogls') %>%
+    collect(n=Inf) %>%
+    arrange(dataset, sample_id, variable, value)
+  ecovs <- samples %>%
+    inner_join(sample_covariate_tbl(FDS), by=c('dataset', 'sample_id')) %>%
+    collect(n=Inf) %>%
+    arrange(dataset, sample_id, variable, value)
+  expect_equal(covs, ecovs)
+})
+
 test_that("fetch_sample_covariates::samples arg limits samples correctly", {
   vars <- c('stage', 'sex', 'OS')
   covs <- fetch_sample_covariates(FDS, samples, vars) %>% collect(n=Inf)
@@ -96,8 +107,7 @@ test_that('with_sample_covariates returns long input with wide covariates', {
   exprs <- fetch_expression(FDS, samples, genes) %>%
     collect(n=Inf)
   wcovs <- fetch_sample_covariates(FDS, samples, covs) %>%
-    spread_covariates %>%
-    as.data.table
+    spread_covariates
 
   expected <- exprs %>%
     left_join(wcovs, by=c('dataset', 'sample_id')) %>%

@@ -17,13 +17,13 @@ as.ExpressionSet.db(x, covariates = NULL, exprs = "counts", .fds = fds(x),
 as.DGEList(x, ...)
 
 \method{as.DGEList}{matrix}(x, covariates = NULL, feature_ids = NULL,
-  .fds = fds(x), ...)
+  .fds = fds(x), custom_key = NULL, ...)
 
 \method{as.DGEList}{data.frame}(x, covariates = NULL, feature_ids = NULL,
-  .fds = fds(x), ...)
+  .fds = fds(x), custom_key = NULL, ...)
 
 as.ExpressionSet(x, covariates = NULL, feature_ids = NULL,
-  exprs = "counts", .fds = fds(x), ...)
+  exprs = "counts", .fds = fds(x), custom_key = NULL, ...)
 }
 \arguments{
 \item{x}{a facile expression-like result}
@@ -36,6 +36,9 @@ covariates to append to \code{out$samples}. Must be valid entries in the
 
 \item{feature_ids}{the features to get expression for (if not specified
 in \code{x} descriptor)}
+
+\item{custom_key}{the custom key to use to fetch custom annotations from
+\code{.fds}}
 
 \item{x}{a facile expression-like result}
 

@@ -95,6 +95,7 @@ fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
           sxref <- match(cnts$feature_id, hdf.gene.idxs$feature_id)
           cnts[, symbol := hdf.gene.idxs$symbol[sxref]]
         }
+        cnts
       }
       cnts
     }) %>%
@@ -103,7 +104,7 @@ fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
   if (isTRUE(as.matrix)) {
     out <- do.call(cbind, counts$res)
   } else {
-    out <- as.tbl(rbindlist(counts$res))
+    out <- as.tbl(setDF(rbindlist(counts$res)))
   }
 
   class(out) <- c('FacileExpression', class(out))
@@ -197,9 +198,9 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
     assert_sample_statistics %>%
     collect(n=Inf) %>%
     distinct(dataset, sample_id, .keep_all=TRUE)
-  if (is.data.table(x)) {
-    setDT(sample.stats)
-  }
+  # if (is.data.table(x)) {
+  #   setDT(sample.stats)
+  # }
 
   tmp <- inner_join(x, sample.stats, by=c('dataset', 'sample_id'))
   cpms <- calc.cpm(tmp, lib.size=tmp$libsize * tmp$normfactor, log=log,
@@ -211,12 +212,13 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
     set_fds(.fds)
 }
 
-##' @method cpm tbl_dt
-##' @export
-cpm.tbl_dt <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
-                       sample.stats=NULL, .fds=fds(x), ...) {
-  cpm.tbl_df(x, lib.size, log, prior.count, sample.stats, .fds, ...)
-}
+
+## @method cpm tbl_dt
+## @export
+# cpm.tbl_dt <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
+#                        sample.stats=NULL, .fds=fds(x), ...) {
+#   cpm.tbl_df(x, lib.size, log, prior.count, sample.stats, .fds, ...)
+# }
 
 
 ## A helper function to calculate cpm. Expects that x is a tbl-like thing which
@@ -328,6 +330,8 @@ calc.rpkm <- function(cpms, gene.length, log) {
 ##' @param assay the \code{assayDataElement} to use for the expression data
 ##'   if \code{x} is an \code{ExpressionSet}.
 ##' @param .fds The \code{FacileDataSet} that \code{x} was retrieved from.
+##' @param custom_key the custom key to use to fetch custom annotations from
+##'   \code{.fds}
 ##' @return a \code{\link[edgeR]{DGEList}}
 as.DGEList <- function(x, ...) {
   UseMethod('as.DGEList')
@@ -337,7 +341,7 @@ as.DGEList <- function(x, ...) {
 ##' @method as.DGEList matrix
 ##' @rdname expression-container
 as.DGEList.matrix <- function(x, covariates=NULL, feature_ids=NULL,
-                              .fds=fds(x), ...) {
+                              .fds=fds(x), custom_key=NULL, ...) {
   stopifnot(is(x, 'FacileExpression'))
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
@@ -369,8 +373,13 @@ as.DGEList.matrix <- function(x, covariates=NULL, feature_ids=NULL,
     transform(y$samples, lib.size=NULL, norm.factors=NULL),
     sample.stats[colnames(y),,drop=FALSE])
 
-  if (is.character(covariates) && length(covariates)) {
-    covs <- with_sample_covariates(samples, covariates, .fds) %>%
+  if (!is.null(covariates)) {
+    if (is.character(covariates) && length(covariates)) {
+      covariates <- fetch_sample_covariates(.fds, samples, covariates,
+                                            custom_key)
+    }
+    assert_sample_covariates(covariates)
+    covs <- spread_covariates(covariates, .fds) %>%
       as.data.frame %>%
       set_rownames(., paste(.$dataset, .$sample_id, sep='_')) %>%
       select(-dataset, -sample_id)
@@ -392,7 +401,7 @@ as.DGEList.matrix <- function(x, covariates=NULL, feature_ids=NULL,
 ##' @method as.DGEList data.frame
 ##' @rdname expression-container
 as.DGEList.data.frame <- function(x, covariates=NULL, feature_ids=NULL,
-                                  .fds=fds(x), ...) {
+                                  .fds=fds(x), custom_key=NULL, ...) {
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
 
@@ -422,19 +431,20 @@ as.DGEList.data.frame <- function(x, covariates=NULL, feature_ids=NULL,
   }
 
   as.DGEList(counts, covariates=covariates, feature_ids=feature_ids,
-             .fds=.fds, ...)
+             .fds=.fds, custom_key=custom_key, ...)
 }
 
 ##' @export
 ##' @rdname expression-container
 as.ExpressionSet <- function(x, covariates=NULL, feature_ids=NULL,
-                             exprs='counts', .fds=fds(x),
+                             exprs='counts', .fds=fds(x), custom_key=NULL,
                              ...) {
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
   assert_sample_subset(x)
   if (!require("Biobase")) stop("Biobase required")
-  y <- as.DGEList(x, covariates, feature_ids, .fds=.fds, ...)
+  y <- as.DGEList(x, covariates, feature_ids, .fds=.fds, custom_key=custom_key,
+                  ...)
   es <- ExpressionSet(y$counts)
   pData(es) <- y$samples
   fData(es) <- y$genes

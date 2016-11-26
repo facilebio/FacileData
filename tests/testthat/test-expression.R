@@ -7,7 +7,11 @@ samples <- sample_covariate_tbl(FDS) %>%
 samples <- sample_covariate_tbl(FDS) %>%
   filter(variable == 'stage' & value == 'III') %>%
   select(dataset, sample_id)
-genes <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
+genes <- local({
+  out <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
+  intersect(out, collect(gene_info_tbl(FDS))$feature_id)
+})
+
 
 test_that("fetch_expression limits samples correctly", {
   s.df <- collect(samples, n=Inf)
@@ -30,6 +34,7 @@ test_that("fetch_expression results converted to DGEList", {
 
   ## check samples
   expect_is(y$samples, 'data.frame')
+  expect_true(setequal(y$samples$sample_id, collect(samples)$sample_id))
   expect_type(y$samples$norm.factors, 'double')
   expect_type(y$samples$lib.size, 'integer')
   expect_type(y$samples$dataset, 'character')
@@ -37,6 +42,7 @@ test_that("fetch_expression results converted to DGEList", {
 
   expect_is(y$genes, 'data.frame')
   expect_type(y$genes$feature_id, 'character')
+  expect_true(setequal(y$genes$feature_id, genes))
   expect_type(y$genes$symbol, 'character')
 })
 
