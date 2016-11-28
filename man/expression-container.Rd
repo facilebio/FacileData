@@ -18,16 +18,16 @@ as.ExpressionSet.db(x, covariates = NULL, exprs = "counts", .fds = fds(x),
 as.DGEList(x, ...)
 
 \method{as.DGEList}{matrix}(x, covariates = NULL, feature_ids = NULL,
-  .fds = fds(x), custom_key = NULL, ...)
+  .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
 
 \method{as.DGEList}{data.frame}(x, covariates = NULL, feature_ids = NULL,
-  .fds = fds(x), custom_key = NULL, ...)
+  .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
 
 \method{as.DGEList}{tbl_sqlite}(x, covariates = NULL, feature_ids = NULL,
-  .fds = fds(x), custom_key = NULL, ...)
+  .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
 
 as.ExpressionSet(x, covariates = NULL, feature_ids = NULL,
-  exprs = "counts", .fds = fds(x), custom_key = NULL, ...)
+  exprs = "counts", .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
 }
 \arguments{
 \item{x}{a facile expression-like result}

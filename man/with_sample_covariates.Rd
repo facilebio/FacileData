@@ -4,8 +4,8 @@
 \alias{with_sample_covariates}
 \title{Appends covariate columns to a query result}
 \usage{
-with_sample_covariates(x, covariates = NULL, custom_key = NULL,
-  .fds = fds(x))
+with_sample_covariates(x, covariates = NULL,
+  custom_key = Sys.getenv("USER"), .fds = fds(x))
 }
 \arguments{
 \item{x}{a facile sample descriptor}

@@ -5,7 +5,7 @@
 \title{Fetch rows from sample_covariate table for specified samples and covariates}
 \usage{
 fetch_sample_covariates(x, samples = NULL, covariates = NULL,
-  custom_key = NULL)
+  custom_key = Sys.getenv("USER"))
 }
 \arguments{
 \item{samples}{a samples descriptor \code{tbl_*}}

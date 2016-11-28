@@ -4,8 +4,9 @@
 \alias{save_custom_sample_covariates}
 \title{Saves custom sample covariates to a FacileDataSet}
 \usage{
-save_custom_sample_covariates(x, name, annotation, custom_key = "anonymous",
-  file.prefix = "facile", sample_filter_critera = NULL)
+save_custom_sample_covariates(x, name, annotation,
+  custom_key = Sys.getenv("USER"), file.prefix = "facile",
+  sample_filter_critera = NULL)
 }
 \arguments{
 \item{x}{the \code{FacileDataSet}}

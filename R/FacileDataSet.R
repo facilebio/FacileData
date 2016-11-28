@@ -52,6 +52,9 @@ FacileDataSet <- function(path, data.fn=file.path(path, paste0('data.', db.type)
 }
 
 ##' @export
+FacileDataRepository <- FacileDataSet
+
+##' @export
 is.FacileDataSet <- function(x) {
   is(x, 'FacileDataSet') &&
     'con' %in% names(x) && is(x$con, 'DBIObject') &&

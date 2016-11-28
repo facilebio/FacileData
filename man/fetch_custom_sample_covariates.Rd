@@ -4,8 +4,8 @@
 \alias{fetch_custom_sample_covariates}
 \title{Fetches custom (user) annotations for a given user prefix}
 \usage{
-fetch_custom_sample_covariates(x, samples = NULL, custom_key = NULL,
-  file.prefix = "facile")
+fetch_custom_sample_covariates(x, samples = NULL, covariates = NULL,
+  custom_key = Sys.getenv("USER"), file.prefix = "facile")
 }
 \arguments{
 \item{samples}{the facile sample descriptor}

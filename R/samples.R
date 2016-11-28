@@ -28,21 +28,62 @@ subtype_map <- function(x) {
     set_fds(x)
 }
 
-##' Fetches a sample descriptor that matches filter criterion over covariates.
+# ##' Fetches a sample descriptor that matches filter criterion over covariates.
+# ##'
+# ##' @export
+# ##' @param x A \code{FacileDataSet} object
+# ##' @param ... filter clause to apply to \code{sample_covariate_tbl(x)}
+# ##' @return a facile sample descriptor with a \code{FacileDataSet} connection.
+# ##' @examples
+# ##' exampleFacileDataSet() %>%
+# ##'   fetch_samples(indication %in% c('BRCA', 'COAD'))
+# fetch_samples <- function(x, ...) {
+#   stopifnot(is.FacileDataSet(x))
+#   sample_covariate_tbl(x) %>%
+#     filter(...) %>%
+#     collect(n=Inf) %>%
+#     distinct(dataset, sample_id) %>%
+#     set_fds(x)
+# }
+
+##' Fetches a sample descriptor that matches the filter criterion.
+##'
+##' Use \code{...} as if this is a dplyr::filter call, and our
+##' sample_covariate_tbl was "wide".
+##'
+##' This is experimental, so each "term" in the filter criteria should be
+##' just one boolean operation. Multiple terms passed into \code{...} will be
+##' "AND"ed together.
 ##'
 ##' @export
-##' @param x A \code{FacileDataSet} object
-##' @param ... filter clause to apply to \code{sample_covariate_tbl(x)}
-##' @return a facile sample descriptor with a \code{FacileDataSet} connection.
-##' @examples
-##' exampleFacileDataSet() %>%
-##'   fetch_samples(indication %in% c('BRCA', 'COAD'))
+##' @param x A \code{FacileDataRepository}
+##' @param ... the NSE boolean filter criteria
+##' @return a facile sample descriptor
 fetch_samples <- function(x, ...) {
   stopifnot(is.FacileDataSet(x))
-  sample_covariate_tbl(x) %>%
-    filter(...) %>%
-    distinct(dataset, sample_id) %>%
-    set_fds(x)
+  dots <- lazyeval::lazy_dots(...)
+  dots <- lazyeval::auto_name(dots)
+
+  crit <- lapply(names(dots), function(expr) {
+    var <- sub(' .*', '', expr)
+    op <- sub(sprintf('%s ', var), '', expr) %>% sub(' .*', '', .)
+    if (!op %in% c('==', '%in%')) {
+      stop("Only '==' and '%in%' operators allowed: ", expr)
+    }
+    values <- sub(sprintf('.*%s ?', op), '', expr)
+    values <- lazyeval::lazy_eval(values)
+    list(variable=var, value=values)
+  })
+
+  cov.table <- sample_covariate_tbl(x) %>% collect(n=Inf)
+  all.vars <- unique(cov.table$variable)
+  bad.vars <- setdiff(sapply(crit, '[[', 'variable'), all.vars)
+  if (length(bad.vars)) {
+    stop("The following covariates are not defined: ",
+         paste(bad.vars, collapse=','))
+  }
+
+  retrieve_samples_in_memory(crit, cov.table) %>% set_fds(x)
 }
 
 ##' Filters the samples down in a dataset to ones specified
@@ -92,4 +133,71 @@ join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
 ##' @return filtered version of \code{x} that only has the desired samples
 filter_samples <- function(x, samples=NULL) {
  join_samples(x, samples, semi=TRUE)
+}
+
+## FacileExplorer's filter_active_samples ======================================
+
+##' @export
+retrieve_samples_in_memory <- function(criteria, cov.table=NULL) {
+  if(length(criteria)==0){
+    # case where no filters have been defined
+    indiv.results <- list(cov.table %>%
+                            select(dataset, sample_id) %>%
+                            collect)
+  } else {
+    indiv.results <- lapply(criteria, function(crit) {
+      if (!is.null(crit)) {
+        dots <- parse_sample_criterion(variable=crit$variable, value=crit$value)
+        cov.table %>%
+          filter_(.dots=dots) %>%
+          select(dataset, sample_id) %>%
+          collect
+      }
+    })
+  }
+
+  ## Now we go back and take the intersection of the dataset,sample_id pairs
+  ## found in each element of the list above
+  if (length(indiv.results) == 1L) {
+    out <- indiv.results[[1]]
+  } else {
+    rf <- function(x,y) semi_join(x, y, by=c('dataset', 'sample_id'))
+    out <- Reduce(rf, indiv.results[-1], init=indiv.results[[1]])
+  }
+
+  out %>%
+    distinct(dataset, sample_id) %>%
+    arrange(dataset, sample_id)
+}
+
+##' Creates a filter expression to select samples based on value of a covariate
+##'
+##' This leverages dplyr's standard (vs non-standard) evaluation mojo. There is
+##' likely a cleaner way to do this, but to be honest I still find the
+##' \code{\link[lazyeval]{interp}} stuff rather confusing
+##'
+##' @seealso \href{https://cran.r-project.org/web/packages/dplyr/vignettes/nse.html}{dplyr non-standard evaluation}
+##'
+##' @importFrom lazyeval interp
+##'
+##' @param variable the name of the variable to look for in the sample_covariate
+##'   \code{variable} column
+##' @param value \code{character} vector of values for the \code{variable} that
+##'   you want your samples to have.
+##' @return a
+parse_sample_criterion <- function(variable, value) {
+  stopifnot(is.character(variable) && length(variable) == 1L)
+  stopifnot(is.character(value) && length(value) >= 1)
+
+  vals <- paste(sprintf("'%s'", value), collapse=',')
+  if (length(value) == 1L) {
+    crit <- paste0("~ variable == dbvar & value == ", vals)
+  } else if (length(value) > 1) {
+    crit <- paste0('~ variable == dbvar & value %in% c(', vals, ')')
+  } else {
+    stop("length(value) <= 0")
+  }
+
+  dots <- interp(formula(crit), dbvar=variable)
+  dots
 }

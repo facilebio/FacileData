@@ -57,7 +57,7 @@ test_that('as.DGEList assigns correct covariates', {
 
 test_that("as.DGEList accepts character or covariate data.frame", {
   warning("Implement character == assert_sample_covariates test for as.DGEList")
-  expect_true(true)
+  expect_true(TRUE)
 })
 
 test_that("cpm on fetch_expression result mimics cpm.DGEList", {

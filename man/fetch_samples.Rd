@@ -2,23 +2,25 @@
 % Please edit documentation in R/samples.R
 \name{fetch_samples}
 \alias{fetch_samples}
-\title{Fetches a sample descriptor that matches filter criterion over covariates.}
+\title{Fetches a sample descriptor that matches the filter criterion.}
 \usage{
 fetch_samples(x, ...)
 }
 \arguments{
-\item{x}{A \code{FacileDataSet} object}
+\item{x}{A \code{FacileDataRepository}}
 
-\item{...}{filter clause to apply to \code{sample_covariate_tbl(x)}}
+\item{...}{the NSE boolean filter criteria}
 }
 \value{
-a facile sample descriptor with a \code{FacileDataSet} connection.
+a facile sample descriptor
 }
 \description{
-Fetches a sample descriptor that matches filter criterion over covariates.
+Use \code{...} as if this is a dplyr::filter call, and our
+sample_covariate_tbl was "wide".
 }
-\examples{
-exampleFacileDataSet() \%>\%
-  fetch_samples(indication \%in\% c('BRCA', 'COAD'))
+\details{
+This is experimental, so each "term" in the filter criteria should be
+just one boolean operation. Multiple terms passed into \code{...} will be
+"AND"ed together.
 }
 
