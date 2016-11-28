@@ -198,9 +198,6 @@ cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
     assert_sample_statistics %>%
     collect(n=Inf) %>%
     distinct(dataset, sample_id, .keep_all=TRUE)
-  # if (is.data.table(x)) {
-  #   setDT(sample.stats)
-  # }
 
   tmp <- inner_join(x, sample.stats, by=c('dataset', 'sample_id'))
   cpms <- calc.cpm(tmp, lib.size=tmp$libsize * tmp$normfactor, log=log,
@@ -341,10 +338,16 @@ as.DGEList <- function(x, ...) {
 ##' @method as.DGEList matrix
 ##' @rdname expression-container
 as.DGEList.matrix <- function(x, covariates=NULL, feature_ids=NULL,
-                              .fds=fds(x), custom_key=NULL, ...) {
+                              .fds=fds(x), custom_key=Sys.getenv("USER"), ...) {
   stopifnot(is(x, 'FacileExpression'))
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
+
+  if (!is.null(covariates)) {
+    if (!is.character(covariates)) {
+      assert_sample_covariates(covariates)
+    }
+  }
 
   samples <- tibble(
     dataset=sub('_.*$', '', colnames(x)),
@@ -401,11 +404,19 @@ as.DGEList.matrix <- function(x, covariates=NULL, feature_ids=NULL,
 ##' @method as.DGEList data.frame
 ##' @rdname expression-container
 as.DGEList.data.frame <- function(x, covariates=NULL, feature_ids=NULL,
-                                  .fds=fds(x), custom_key=NULL, ...) {
+                                  .fds=fds(x), custom_key=Sys.getenv("USER"),
+                                  ...) {
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
 
   x <- assert_sample_subset(x)
+
+  if (!is.null(covariates)) {
+    if (!is.character(covariates)) {
+      assert_sample_covariates(covariates)
+    }
+  }
+
   has.count <- 'count' %in% colnames(x)
   refetch <- is.null(feature_ids) && !has.count
 
@@ -438,16 +449,22 @@ as.DGEList.data.frame <- function(x, covariates=NULL, feature_ids=NULL,
 ##' @method as.DGEList tbl_sqlite
 ##' @rdname expression-container
 as.DGEList.tbl_sqlite <- function(x, covariates=NULL, feature_ids=NULL,
-                                  .fds=fds(x), custom_key=NULL, ...) {
+                                  .fds=fds(x), custom_key=Sys.getenv("USER"),
+                                  ...) {
   x <- collect(x, n=Inf) %>% set_fds(.fds)
+  if (!is.null(covariates)) {
+    if (!is.character(covariates)) {
+      assert_sample_covariates(covariates)
+    }
+  }
   as.DGEList(x, covariates, feature_ids, .fds=.fds, custom_key=custom_key, ...)
 }
 
 ##' @export
 ##' @rdname expression-container
 as.ExpressionSet <- function(x, covariates=NULL, feature_ids=NULL,
-                             exprs='counts', .fds=fds(x), custom_key=NULL,
-                             ...) {
+                             exprs='counts', .fds=fds(x),
+                             custom_key=Sys.getenv("USER"), ...) {
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
   assert_sample_subset(x)

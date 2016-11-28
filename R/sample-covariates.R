@@ -8,7 +8,7 @@
 ##'   the given samples
 ##' @return rows from the \code{sample_covaraite} table
 fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
-                                    custom_key=NULL) {
+                                    custom_key=Sys.getenv("USER")) {
   stopifnot(is.FacileDataSet(x))
   dat <- sample_covariate_tbl(x)
   if (is.character(covariates)) {
@@ -30,7 +30,9 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
   out <- filter_samples(dat, samples)
 
   if (!is.null(custom_key)) {
-    custom <- fetch_custom_sample_covariates(x, samples, custom_key)
+    custom <- fetch_custom_sample_covariates(x, samples,
+                                             covariates=covariates,
+                                             custom_key)
     out <- bind_rows(collect(out, n=Inf), custom)
   }
 
@@ -45,7 +47,8 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
 ##' @param samples the facile sample descriptor
 ##' @param custom_key The key to use for the custom annotation
 ##' @return covariate tbl
-fetch_custom_sample_covariates <- function(x, samples=NULL, custom_key=NULL,
+fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
+                                           custom_key=Sys.getenv("USER"),
                                            file.prefix="facile") {
   stopifnot(is.FacileDataSet(x))
   out.cols <- colnames(sample_covariate_tbl(x))
@@ -70,12 +73,14 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, custom_key=NULL,
     ## Make a dummy, 0 row tibble to send back
     out <- sapply(out.cols, function(x) character(), simplify=FALSE)
     out$date_entered <- integer()
-    out <- as.data.frame(out, stringsAsFactors=FALSE) %>%
-      as.tbl %>%
-      set_fds(x)
+    out <- as.data.frame(out, stringsAsFactors=FALSE) %>% as.tbl
   }
 
-  out
+  if (!is.null(covariates)) {
+    out <- filter(out, variable %in% covariates)
+  }
+
+  out %>% set_fds(x)
 }
 
 ##' Saves custom sample covariates to a FacileDataSet
@@ -93,10 +98,21 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, custom_key=NULL,
 ##'   used to drill down into the samples we have the \code{annotatino}
 ##'   data.frame for
 save_custom_sample_covariates <- function(x, name, annotation,
-                                          custom_key='anonymous',
+                                          custom_key=Sys.getenv("USER"),
                                           file.prefix="facile",
                                           sample_filter_critera=NULL) {
   stopifnot(is.FacileDataSet(x))
+  stopifnot(is.character(name) && length(name) == 1L)
+  if (is.null(custom_key)) {
+    custom_key <- 'anonymous'
+  }
+  custom_key <- make.names(custom_key)
+  name <- make.names(name)
+  if (annotation$variable[1L] != name) {
+    annotation <- mutate(annotation, variable=name)
+  }
+  annotation <- mutate(annotation, date_entered=as.integer(Sys.time()))
+
   fn <- paste0(file.prefix, '_', custom_key, '_', name, '_', Sys.Date(),'.json')
   fn <- file.path(x$anno.dir, fn)
   ## TODO: figure out how to encode the sample_filter_criteria into the JSON file
@@ -117,7 +133,9 @@ save_custom_sample_covariates <- function(x, name, annotation,
 ##'   the given samples
 ##' @param .fds A \code{FacileDataSet} object
 ##' @return The facile \code{x} object, annotated with the specified covariates.
-with_sample_covariates <- function(x, covariates=NULL, custom_key=NULL, .fds=fds(x)) {
+with_sample_covariates <- function(x, covariates=NULL,
+                                   custom_key=Sys.getenv("USER"), .fds=fds(x)) {
+  assert_sample_subset(x)
   stopifnot(is.FacileDataSet(.fds))
   stopifnot(is.character(covariates) || is.null(covariates))
 
@@ -125,12 +143,13 @@ with_sample_covariates <- function(x, covariates=NULL, custom_key=NULL, .fds=fds
     return(x)
   }
 
-  samples <- assert_sample_subset(x) %>%
+  samples <- x %>%
     select(dataset, sample_id) %>%
     collect(n=Inf) %>% ## can't call distinct on SQLite backend :-(
     distinct(.keep_all=TRUE)
 
-  covs <- fetch_sample_covariates(.fds, samples, covariates) %>%
+  covs <- fetch_sample_covariates(.fds, samples, covariates,
+                                  custom_key=custom_key) %>%
     spread_covariates(.fds)
 
   # if (is.data.table(samples)) {
@@ -169,7 +188,14 @@ spread_covariates <- function(x, .fds=fds(x)) {
 
   cov.def <- covariate_definitions(.fds)
   if (!is.null(cov.def)) {
-    for (cname in setdiff(colnames(out), c('dataset', 'sample_id'))) {
+    do.cast <- setdiff(colnames(out), c('dataset', 'sample_id'))
+    ## Don't decode categorical variables of type 'user_annotation'
+    user.anno <- filter(x, class == 'user_annotation' & type == 'categorical')
+    if (nrow(user.anno)) {
+      do.cast <- setdiff(do.cast, unique(user.anno$variable))
+    }
+
+    for (cname in do.cast) {
       casted <- cast_covariate(cname, out[[cname]], cov.def)
       if (is.data.frame(casted)) {
         ## casting a survival covariate will return a two column thing with time
