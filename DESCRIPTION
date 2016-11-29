@@ -18,6 +18,7 @@ Imports:
     DBI,
     RSQLite,
     reshape2,
+    tidyr,
     rhdf5,
     data.table,
     jsonlite

@@ -5,4 +5,5 @@
 ##' @import dtplyr
 ##' @import reshape2
 ##' @import data.table
+##' @import tidyr
 NULL

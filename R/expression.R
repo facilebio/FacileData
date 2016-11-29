@@ -131,6 +131,63 @@ with_expression <- function(samples, feature_ids, with_symbols=TRUE,
     set_fds(.fds)
 }
 
+##' Takes a result from fetch_expressoi and spreads out genes acorss columns
+##'
+##' This is a convenience function, and will try to guess what you mean if you
+##' don't explicitly specify which columns to spread and what to call them.
+##' With that mind set, if we find a cpm and symbol column, we will use them
+##' because those are the thing you will likely want to use for exploratory
+##' data analysis if they're in the incoming dataset. If those columns aren't
+##' found, then we'll pick the feature_id and count column.
+##'
+##' @export
+##' @param x facile expression result from \code{fetch_expression}
+##' @param key
+##' @return a more stout \code{x} with the expression values spread across
+##'   columns.
+spread_expression <- function(x, key=c('symbol', 'feature_id'),
+                              value=c('cpm', 'count'), .fds=fds(x)) {
+  force(.fds)
+  if (missing(key)) {
+    key <- if ('symbol' %in% colnames(x)) 'symbol' else 'feature_id'
+  }
+  if (missing(value)) {
+    value <- if ('cpm' %in% colnames(x)) 'cpm' else 'count'
+  }
+  key <- match.arg(key, c('symbol', 'feature_id'))
+  value <- match.arg(value, c('count', 'cpm'))
+  assert_expression_result(x)
+  assert_columns(x, c(key, value))
+  x <- collect(x, n=Inf)
+
+  if (key == 'symbol') {
+    f2s <- distinct(x, feature_id, symbol)
+    if (any(is.na(f2s$symbol))) stop("NAs found in symbol column, spread")
+    if (any(duplicated(f2s$symbol))) stop("Duplicate symbols found")
+    x <- select(x, -feature_id)
+  } else {
+    if ('symbol' %in% colnames(x)) {
+      x <- select(x, -symbol)
+    }
+    x <- mutate(x, feature_id=paste0('feature_id_', feature_id))
+  }
+
+  if (value == 'cpm') {
+    x <- select(x, -count)
+  } else if ('cpm' %in% colnames(x)) {
+    x <- select(x, -cpm)
+  }
+
+  out <- spread_(x, key, value) %>% set_fds(.fds)
+  if (nrow(out) >= nrow(x)) {
+    ## You might be tempted to test the width of the outgoing object, too, but
+    ## if you only had to features in this object, then it wouldn't have changed
+    stop("The spread_operation did not make your incoming object more stout, ",
+         "You need to debug this")
+  }
+  out
+}
+
 ##' @importFrom edgeR cpm
 ##' @export
 cpm <- function(x, ...) UseMethod("cpm")

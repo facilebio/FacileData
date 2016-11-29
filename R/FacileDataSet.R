@@ -54,6 +54,31 @@ FacileDataSet <- function(path, data.fn=file.path(path, paste0('data.', db.type)
 ##' @export
 FacileDataRepository <- FacileDataSet
 
+dbfn <- function(x, mustWork=TRUE) {
+  base.fn <- 'data.sqlite'
+  if (is.FacileDataSet(x)) {
+    x$parent.dir
+  }
+  stopifnot(is.character(x), length(x) == 1L)
+  out <- file.path(x, base.fn)
+  if (mustWork && !file.exists(out)) {
+    stop("data.sqlite file not found: ", out)
+  }
+  out
+}
+
+h5fn <- function(x) {
+  base.fn <- 'data.h5'
+  if (is.FacileDataSet(x)) {
+    x$parent.dir
+  }
+  stopifnot(is.character(x), length(x) == 1L)
+  out <- file.path(x, base.fn)
+  if (mustWork && !file.exists(out)) {
+    stop("data.h5 file not found: ", out)
+  }
+  out
+}
 ##' @export
 is.FacileDataSet <- function(x) {
   is(x, 'FacileDataSet') &&

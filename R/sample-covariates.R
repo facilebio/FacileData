@@ -66,7 +66,7 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
     ## We weren't saving the type == 'categorical' column earlier. So if this
     ## column is.na, then we force it to 'categorical', because that's all it
     ## realy could have been
-    if (mean(is.na(out$type)) > 0.5) {
+    if (nrow(out) && mean(is.na(out$type)) > 0.5) {
       out <- mutate(out, type='categorical')
     }
   } else {

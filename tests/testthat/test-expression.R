@@ -27,6 +27,51 @@ test_that("fetch_expression limits samples correctly", {
                        paste0(s.df$dataset, s.df$sample_id)))
 })
 
+test_that("spread_expression works", {
+  exprs <- fetch_expression(FDS, samples, genes) %>%
+    cpm(log=TRUE, prior.count=5) %>%
+    arrange(dataset, sample_id, feature_id)
+
+  sfcnt <- spread_expression(exprs, 'feature_id', 'count')
+  sfcpm <- spread_expression(exprs, 'feature_id', 'cpm')
+
+  ## Check that colnames of spread count and cpm expression have all feature_ids
+  expected_fids <- unique(exprs$feature_id)
+  fids.cnt <- local({
+    tmp <- colnames(sfcnt)[grep('feature_id', colnames(sfcnt))]
+    sub('feature_id_', '', tmp)
+  })
+  fids.cpm <- local({
+    tmp <- colnames(sfcpm)[grep('feature_id', colnames(sfcpm))]
+    sub('feature_id_', '', tmp)
+  })
+  expect_true(setequal(fids.cnt, expected_fids))
+  expect_true(setequal(fids.cpm, expected_fids))
+
+  ## Check that the columns of the spread features are of the correct type
+  for (fid in expected_fids) {
+    cnts <- sfcnt[[paste0('feature_id_', fid)]]
+    cpms <- sfcpm[[paste0('feature_id_', fid)]]
+    expect_true(is(cnts, 'integer'), info=fid)
+    expect_true(is(cpms, 'numeric'), info=fid)
+  }
+
+  ## Check that the spread counts match original values
+  sf.counts <- sfcnt %>%
+    melt(id.vars=c('dataset', 'sample_id'),
+         variable.name='feature_id', value.name='count') %>%
+    mutate(feature_id=sub('feature_id_', '', feature_id)) %>%
+    arrange(dataset, sample_id, feature_id)
+  expect_equal(sf.counts, select(exprs, dataset:count), check.attributes=FALSE)
+
+  ## Less rigorous: check that columns of spread symbols have all the symbols
+  ## in the column names that existed in the original data.
+  sscnt <- spread_expression(exprs, 'symbol', 'count')
+  sscpm <- spread_expression(exprs, 'symbol', 'cpm')
+  expect_true(length(setdiff(exprs$symbol, colnames(sscnt))) == 0)
+  expect_true(length(setdiff(exprs$symbol, colnames(sscpm))) == 0)
+})
+
 test_that("fetch_expression results converted to DGEList", {
   e <- fetch_expression(FDS, samples, genes)
   y <- as.DGEList(e)
@@ -56,8 +101,10 @@ test_that('as.DGEList assigns correct covariates', {
 })
 
 test_that("as.DGEList accepts character or covariate data.frame", {
-  warning("Implement character == assert_sample_covariates test for as.DGEList")
-  expect_true(TRUE)
+  cov.df <- fetch_sample_covariates(FDS, samples, c('sex', 'stage'))
+  y0 <- as.DGEList(samples, c('sex', 'stage'))
+  y <- as.DGEList(samples, cov.df)
+  expect_equal(y$samples, y0$samples)
 })
 
 test_that("cpm on fetch_expression result mimics cpm.DGEList", {
