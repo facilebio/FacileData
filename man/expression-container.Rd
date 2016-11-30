@@ -17,16 +17,16 @@ as.ExpressionSet.db(x, covariates = NULL, exprs = "counts", .fds = fds(x),
 
 as.DGEList(x, ...)
 
-\method{as.DGEList}{matrix}(x, covariates = NULL, feature_ids = NULL,
+\method{as.DGEList}{matrix}(x, covariates = TRUE, feature_ids = NULL,
   .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
 
-\method{as.DGEList}{data.frame}(x, covariates = NULL, feature_ids = NULL,
+\method{as.DGEList}{data.frame}(x, covariates = TRUE, feature_ids = NULL,
   .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
 
-\method{as.DGEList}{tbl_sqlite}(x, covariates = NULL, feature_ids = NULL,
+\method{as.DGEList}{tbl_sqlite}(x, covariates = TRUE, feature_ids = NULL,
   .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
 
-as.ExpressionSet(x, covariates = NULL, feature_ids = NULL,
+as.ExpressionSet(x, covariates = TRUE, feature_ids = NULL,
   exprs = "counts", .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
 }
 \arguments{
@@ -56,9 +56,22 @@ covariates to append to \code{out$samples}. Must be valid entries in the
 
 \item{x}{a facile expression-like result}
 
-\item{covariates}{A \code{character} vector specifying the  additional
-covariates to append to \code{out$samples}. Must be valid entries in the
-\code{sample_covariate::variable} column.}
+\item{covariates}{The covariates the user wants to add to the $samples of
+the DGEList. This can take the following forms:
+\enumerate{
+  \item{TRUE}{
+    All covariates are retrieved from the \code{FacileDataSet}
+  }
+  \item{character}{
+    A vector of covariate names to fetch from the \code{FacileDataSet}
+  }
+  \item{data.frame}{
+    A table that looks like a subset of the sample_covariate table
+  }
+  \item{NULL}{
+    If \code{NULL}, no covariates are retrieved
+  }
+}}
 
 \item{assay}{the \code{assayDataElement} to use for the expression data
 if \code{x} is an \code{ExpressionSet}.}

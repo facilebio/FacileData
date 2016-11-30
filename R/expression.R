@@ -376,9 +376,22 @@ calc.rpkm <- function(cpms, gene.length, log) {
 ##' @export
 ##' @importFrom edgeR DGEList
 ##' @param x a facile expression-like result
-##' @param covariates A \code{character} vector specifying the  additional
-##'   covariates to append to \code{out$samples}. Must be valid entries in the
-##'   \code{sample_covariate::variable} column.
+##' @param covariates The covariates the user wants to add to the $samples of
+##'   the DGEList. This can take the following forms:
+##'   \enumerate{
+##'     \item{TRUE}{
+##'       All covariates are retrieved from the \code{FacileDataSet}
+##'     }
+##'     \item{character}{
+##'       A vector of covariate names to fetch from the \code{FacileDataSet}
+##'     }
+##'     \item{data.frame}{
+##'       A table that looks like a subset of the sample_covariate table
+##'     }
+##'     \item{NULL}{
+##'       If \code{NULL}, no covariates are retrieved
+##'     }
+##'   }
 ##' @param feature_ids the features to get expression for (if not specified
 ##'   in \code{x} descriptor)
 ##' @param assay the \code{assayDataElement} to use for the expression data
@@ -391,24 +404,36 @@ as.DGEList <- function(x, ...) {
   UseMethod('as.DGEList')
 }
 
-##' @export
 ##' @method as.DGEList matrix
 ##' @rdname expression-container
-as.DGEList.matrix <- function(x, covariates=NULL, feature_ids=NULL,
+as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
                               .fds=fds(x), custom_key=Sys.getenv("USER"), ...) {
   stopifnot(is(x, 'FacileExpression'))
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
 
-  if (!is.null(covariates)) {
-    if (!is.character(covariates)) {
-      assert_sample_covariates(covariates)
-    }
-  }
-
+  ## Construct sample table from colnames of the matrix, and make sure this is
+  ## legit
   samples <- tibble(
     dataset=sub('_.*$', '', colnames(x)),
     sample_id=sub('^.*?_', '', colnames(x)))
+  bad.samples <- samples %>%
+    anti_join(sample_stats_tbl(.fds), by=c('dataset', 'sample_id'),
+              copy=TRUE) %>%
+    collect
+  if (nrow(bad.samples)) {
+    stop("Bad sample columns specified in the count matrix")
+  }
+
+  ## Fetch appropriate covariate
+  if (!is.null(covariates)) {
+    if (isTRUE(covariates)) {
+      covariates <- fetch_sample_covariates(.fds, samples)
+    } else if (is.character(covariates)) {
+      covariates <- fetch_sample_covariates(.fds, samples, covariates)
+    }
+    assert_sample_covariates(covariates)
+  }
 
   fids <- rownames(x)
   genes <- gene_info_tbl(.fds) %>%
@@ -434,11 +459,6 @@ as.DGEList.matrix <- function(x, covariates=NULL, feature_ids=NULL,
     sample.stats[colnames(y),,drop=FALSE])
 
   if (!is.null(covariates)) {
-    if (is.character(covariates) && length(covariates)) {
-      covariates <- fetch_sample_covariates(.fds, samples, covariates,
-                                            custom_key)
-    }
-    assert_sample_covariates(covariates)
     covs <- spread_covariates(covariates, .fds) %>%
       as.data.frame %>%
       set_rownames(., paste(.$dataset, .$sample_id, sep='_')) %>%
@@ -460,19 +480,13 @@ as.DGEList.matrix <- function(x, covariates=NULL, feature_ids=NULL,
 ##' @export
 ##' @method as.DGEList data.frame
 ##' @rdname expression-container
-as.DGEList.data.frame <- function(x, covariates=NULL, feature_ids=NULL,
+as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
                                   .fds=fds(x), custom_key=Sys.getenv("USER"),
                                   ...) {
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
 
   x <- assert_sample_subset(x)
-
-  if (!is.null(covariates)) {
-    if (!is.character(covariates)) {
-      assert_sample_covariates(covariates)
-    }
-  }
 
   has.count <- 'count' %in% colnames(x)
   refetch <- is.null(feature_ids) && !has.count
@@ -505,21 +519,16 @@ as.DGEList.data.frame <- function(x, covariates=NULL, feature_ids=NULL,
 ##' @export
 ##' @method as.DGEList tbl_sqlite
 ##' @rdname expression-container
-as.DGEList.tbl_sqlite <- function(x, covariates=NULL, feature_ids=NULL,
+as.DGEList.tbl_sqlite <- function(x, covariates=TRUE, feature_ids=NULL,
                                   .fds=fds(x), custom_key=Sys.getenv("USER"),
                                   ...) {
   x <- collect(x, n=Inf) %>% set_fds(.fds)
-  if (!is.null(covariates)) {
-    if (!is.character(covariates)) {
-      assert_sample_covariates(covariates)
-    }
-  }
   as.DGEList(x, covariates, feature_ids, .fds=.fds, custom_key=custom_key, ...)
 }
 
 ##' @export
 ##' @rdname expression-container
-as.ExpressionSet <- function(x, covariates=NULL, feature_ids=NULL,
+as.ExpressionSet <- function(x, covariates=TRUE, feature_ids=NULL,
                              exprs='counts', .fds=fds(x),
                              custom_key=Sys.getenv("USER"), ...) {
   .fds <- force(.fds)
