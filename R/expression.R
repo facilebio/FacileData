@@ -68,7 +68,31 @@ fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
   stopifnot(is.FacileDataSet(x))
 
   hdf.sample.idxs <- hdf5_sample_indices(x, samples)
+
+  ## DEBUG: Tune chunk size?
+  ## As the number of genes you are fetching increases, only subsetting
+  ## out a few of them intead of first loading the whole matrix gives you little
+  ## value, for instance, over all BRCA tumors (994) these are some timings for
+  ## different numbers of genes:
+  ##
+  ##     Ngenes                   Time (seconds)
+  ##     10                       0.5s
+  ##     100                      0.8s
+  ##     250                      1.2s
+  ##     500                      2.6s
+  ##     750                      6s seconds
+  ##     3000                     112 seconds!
+  ##     unpspecified (all 26.5k) 7 seconds!
+  ##
+  ## I'm using `ridx` as a hack downstream to run around the issue of slowing
+  ## down the data by trying to subset many rows via hdf5 instead of loading
+  ## then subsetting after (this is so weird)
+  ##
+  ## TODO: setup unit tests to ensure that ridx subsetting and remapping back
+  ## to original genes works
+  ridx.all <- hdf5_gene_indices(x, NULL)
   hdf.gene.idxs <- hdf5_gene_indices(x, feature_ids)
+  ridx <- if (nrow(hdf.gene.idxs) > 700) NULL else hdf.gene.idxs$index
 
   if (isTRUE(as.matrix) && isTRUE(with_symbols)) {
     warning("with_symbols ignored when as.matrix=TRUE")
@@ -79,7 +103,10 @@ fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
     do(res={
       ds <- .$dataset[1L]
       hd5.name <- paste0('expression/rnaseq/', ds)
-      cnts <- h5read(x$hdf5.fn, hd5.name, list(hdf.gene.idxs$index, .$index))
+      cnts <- h5read(x$hdf5.fn, hd5.name, list(ridx, .$index))
+      if (nrow(cnts) != nrow(hdf.gene.idxs)) {
+        cnts <- cnts[hdf.gene.idxs$index,]
+      }
       if (isTRUE(as.matrix)) {
         dimnames(cnts) <- list(hdf.gene.idxs$feature_id,
                                paste(ds, .$sample_id, sep='_'))
@@ -382,6 +409,9 @@ calc.rpkm <- function(cpms, gene.length, log) {
 ##'     \item{TRUE}{
 ##'       All covariates are retrieved from the \code{FacileDataSet}
 ##'     }
+##'     \item{FALSE}{
+##'       TODO: Better handle FALSE
+##'     }
 ##'     \item{character}{
 ##'       A vector of covariate names to fetch from the \code{FacileDataSet}
 ##'     }
@@ -489,15 +519,26 @@ as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
   x <- assert_sample_subset(x)
 
   has.count <- 'count' %in% colnames(x)
-  refetch <- is.null(feature_ids) && !has.count
+  fetch.counts <- !has.count
 
-  if (refetch) {
+  ## Do we want to fetch counts from the FacileDataSet?
+  if (has.count) {
+    if (is.character(feature_ids) && !setequal(feature_ids, x$feature_ids)) {
+      fetch.counts <- TRUE
+    }
+    if (!missing(feature_ids) && is.null(feature_ids)) {
+      ## user explicitly wants everythin
+      fetch.counts <- TRUE
+    }
+  }
+
+  if (fetch.counts) {
     if (has.count) {
       warning("Ignoring expression in `x` and fetching data for `feature_ids`",
               immediate.=TRUE)
     }
     counts <- fetch_expression(.fds, x, feature_ids=feature_ids, as.matrix=TRUE)
-  }  else {
+  } else {
     counts.dt <- assert_expression_result(x) %>%
       collect(n=Inf) %>%
       setDT %>%
@@ -505,7 +546,7 @@ as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
     counts.dt[, samid := paste(dataset, sample_id, sep='_')]
     counts <- local({
       wide <- dcast.data.table(counts.dt, feature_id ~ samid, value.var='count')
-      out <- as.matrix(wide[, -1, with=FALSE])
+      out <- as.matrix(wide[, -1L, with=FALSE])
       rownames(out) <- wide[[1L]]
       class(out) <- c('FacileExpression', class(out))
       out

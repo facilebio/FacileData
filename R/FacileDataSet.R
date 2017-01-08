@@ -27,8 +27,8 @@ FacileDataSet <- function(path, data.fn=file.path(path, paste0('data.', db.type)
     ##   1. cache_size  https://www.sqlite.org/pragma.html#pragma_cache_size
     ##   2. page_size
     out <- src_sqlite(paths$data.fn)
-    dbSendQuery(out$con, 'pragma temp_store=MEMORY;')
-    dbSendQuery(out$con, sprintf('pragma cache_size=%d;', cache_size))
+    dbGetQuery(out$con, 'pragma temp_store=MEMORY;')
+    dbGetQuery(out$con, sprintf('pragma cache_size=%d;', cache_size))
   } else if (db.type == 'monetdblite') {
     if (!require('MonetDBLite')) {
       stop("MonetDBLite required to access MonetDBLite database")
