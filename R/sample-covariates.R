@@ -10,7 +10,8 @@
 fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                     custom_key=Sys.getenv("USER")) {
   stopifnot(is.FacileDataSet(x))
-  dat <- sample_covariate_tbl(x)
+  dat <- sample_covariate_tbl(x) %>%
+    collect(n=Inf) ## #dboptimize# remove to exercise db harder
   if (is.character(covariates)) {
     if (length(covariates) == 1L) {
       dat <- filter(dat, variable == covariates)
@@ -18,6 +19,7 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
       dat <- filter(dat, variable %in% covariates)
     }
   }
+  dat <- set_fds(dat, x) ## explicitly added here to do `collect` above
 
   ## If the samples descriptor is defined over the sample_covariate table,
   ## this thing explodes (inner joining within itself, I guess). We defensively
@@ -25,7 +27,8 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
   ## dat and samples sqlite tables are pointing to the same thing
   if (!is.null(samples)) {
     assert_sample_subset(samples)
-    samples <- collect(samples, n=Inf) %>% distinct(dataset, sample_id)
+    samples <- collect(samples, n=Inf) %>%
+      distinct(dataset, sample_id)
   }
   out <- filter_samples(dat, samples)
 

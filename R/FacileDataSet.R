@@ -6,42 +6,48 @@
 ##' @param covdef.fn A custom path to the yaml file that has covariate mapping info
 ##' @param anno.dir A directory to house custom annotations/sample covariates
 ##' @param cache_size A custom paramter for the SQLite database
-FacileDataSet <- function(path, data.fn=file.path(path, paste0('data.', db.type)),
-                          sqlite.fn=file.path(path, paste0('data.', db.type)),
+FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
+                          sqlite.fn=file.path(path, 'data.sqlite'),
                           hdf5.fn=file.path(path, 'data.h5'),
                           covdef.fn=file.path(path, 'sample-covariate-info.yaml'),
                           anno.dir=file.path(path, 'custom-annotation'),
-                          cache_size=80000, db.type=c('sqlite', 'monetdblite')) {
-  db.type <- match.arg(db.type)
+                          cache_size=80000,
+                          db.loc=c('reference', 'temporary', 'memory')) {
   paths <- validate.facile.dirs(path, data.fn, sqlite.fn, hdf5.fn, covdef.fn,
-                                anno.dir, db.type)
-
-  if (db.type == 'sqlite') {
-    ## Update some parameters in the connection for increased speed
-    ## http://stackoverflow.com/questions/1711631
-    ##
-    ## Explains some pragme setting:
-    ##   http://www.codificar.com.br/blog/sqlite-optimization-faq/
-    ##
-    ## The following PRAGMA are of likely interest:
-    ##   1. cache_size  https://www.sqlite.org/pragma.html#pragma_cache_size
-    ##   2. page_size
-    out <- src_sqlite(paths$data.fn)
-    dbGetQuery(out$con, 'pragma temp_store=MEMORY;')
-    dbGetQuery(out$con, sprintf('pragma cache_size=%d;', cache_size))
-  } else if (db.type == 'monetdblite') {
-    if (!require('MonetDBLite')) {
-      stop("MonetDBLite required to access MonetDBLite database")
-    }
-    out <- src_monetdblite(paths$data.fn)
+                                anno.dir)
+  db.loc <- match.arg(db.loc)
+  ## Update some parameters in the connection for increased speed
+  ## http://stackoverflow.com/questions/1711631
+  ##
+  ## Explains some pragme setting:
+  ##   http://www.codificar.com.br/blog/sqlite-optimization-faq/
+  ##
+  ## The following PRAGMA are of likely interest:
+  ##   1. cache_size  https://www.sqlite.org/pragma.html#pragma_cache_size
+  ##   2. page_size
+  if (db.loc == 'reference') {
+    out <- src_sqlite(paths$sqlite.fn)
+  } else if (db.loc == 'temporary') {
+    tmp.fn <- tempfile()
+    file.copy(paths$sqlite.fn, tmp.fn)
+    paths$sqlite.fn <- tmp.fn
+    out <- src_sqlite(paths$sqlite.fn)
+  } else if (db.loc == 'memory') {
+    mcon <- dbConnect(RSQLite::SQLite(), ":memory:")
+    RSQLite::sqliteCopyDatabase(out$con, mcon)
+    RSQLite::dbDisconnect(out$con)
+    out$con <- mcon
   }
+
+  dbGetQuery(out$con, 'pragma temp_store=MEMORY;')
+  dbGetQuery(out$con, sprintf('pragma cache_size=%d;', cache_size))
 
   # out['parent.dir'] <- list(NULL)
   # out['data.fn'] <- list(NULL)
   # out['cov.def'] <- list(NULL)
   # out['anno.dir'] <- list(NULL)
   out['parent.dir'] <- paths$path
-  out['data.fn'] <- paths$data.fn
+  out['data.fn'] <- paths$sqlite.fn ## paths$data.fn
   out['sqlite.fn'] <- paths$sqlite.fn
   out['hdf5.fn'] <- paths$hdf5.fn
   out['cov.def'] <- paths$covdef.fn

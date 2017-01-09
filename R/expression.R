@@ -28,7 +28,10 @@ hdf5_gene_indices <- function(x, feature_ids=NULL) {
   assertCharacter(feature_ids)
   feature_ids <- unique(feature_ids)
 
-  genes <- gene_info_tbl(x)
+  ## We could opt to not collect first before the filter, but loading a
+  ## 25k table is trivial
+  genes <- gene_info_tbl(x) %>% collect(n=Inf)
+
   if (length(feature_ids) == 1L) {
     genes <- filter(genes, feature_id == feature_ids)
   } else if (length(feature_ids) > 1L) {
@@ -439,6 +442,7 @@ as.DGEList <- function(x, ...) {
 as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
                               .fds=fds(x), custom_key=Sys.getenv("USER"), ...) {
   stopifnot(is(x, 'FacileExpression'))
+  requireNamespace("edgeR")
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
 
@@ -447,10 +451,13 @@ as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
   samples <- tibble(
     dataset=sub('_.*$', '', colnames(x)),
     sample_id=sub('^.*?_', '', colnames(x)))
+  ## if you don't want to `collect` first, you could send `samples` in as
+  ## second argument and then copy that into the db.
+  ## #dboptimize
   bad.samples <- samples %>%
-    anti_join(sample_stats_tbl(.fds), by=c('dataset', 'sample_id'),
-              copy=TRUE) %>%
-    collect
+    anti_join(collect(sample_stats_tbl(.fds), n=Inf),
+              by=c('dataset', 'sample_id')) %>%
+    collect(n=Inf)
   if (nrow(bad.samples)) {
     stop("Bad sample columns specified in the count matrix")
   }
@@ -467,8 +474,8 @@ as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
 
   fids <- rownames(x)
   genes <- gene_info_tbl(.fds) %>%
-    filter(feature_id %in% fids) %>%
-    collect(n=Inf) %>%
+    collect(n=Inf) %>% ## #dboptimize# remove this if you want to exercise db
+    semi_join(tibble(feature_id=fids), by='feature_id') %>%
     as.data.frame %>%
     set_rownames(., .$feature_id)
 
