@@ -6,10 +6,11 @@
 \title{Calculated counts per million from a FacileDataSet}
 \usage{
 \method{cpm}{tbl_sqlite}(x, lib.size = NULL, log = FALSE, prior.count = 5,
-  .fds = fds(x), ...)
+  feature_ids = NULL, as.matrix = FALSE, .fds = fds(x), ...)
 
 \method{cpm}{tbl_df}(x, lib.size = NULL, log = FALSE, prior.count = 5,
-  sample.stats = NULL, .fds = fds(x), ...)
+  feature_ids = NULL, sample.stats = NULL, as.matrix = as.matrix,
+  .fds = fds(x), ...)
 }
 \arguments{
 \item{x}{an expression-like facile result}

@@ -6,7 +6,7 @@
 ##' @param covariates character vector of covariate names
 ##' @param custom_key The key to use to fetch more custom annotations over
 ##'   the given samples
-##' @return rows from the \code{sample_covaraite} table
+##' @return rows from the \code{sample_covariate} table
 fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                     custom_key=Sys.getenv("USER")) {
   stopifnot(is.FacileDataSet(x))

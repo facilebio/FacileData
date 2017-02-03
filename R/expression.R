@@ -238,7 +238,8 @@ cpm <- function(x, ...) UseMethod("cpm")
 ##' @param .fds A \code{FacileDataSet} object
 ##' @return a modified expression-like result with a \code{cpm} column.
 cpm.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
-                           .fds=fds(x), ...) {
+                           feature_ids=NULL, as.matrix=FALSE, .fds=fds(x),
+                           ...) {
   assert_expression_result(x)
   stopifnot(is.FacileDataSet(.fds))
   if (!is.null(lib.size)) {
@@ -258,8 +259,8 @@ cpm.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
   } else {
 
     out <- cpm(collect(x, n=Inf), lib.size=lib.size, log=log,
-               prior.count=prior.count, sample.stats=sample.stats, .fds=.fds,
-               ...)
+               prior.count=prior.count, feature_ids=feature_ids,
+               sample.stats=sample.stats, as.matrix=as.matrix, .fds=.fds, ...)
 
   }
   set_fds(out, .fds)
@@ -269,9 +270,16 @@ cpm.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
 ##' @rdname cpm
 ##' @export
 cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
-                       sample.stats=NULL, .fds=fds(x), ...) {
-  assert_expression_result(x)
+                       feature_ids=NULL, sample.stats=NULL,
+                       as.matrix=as.matrix, .fds=fds(x), ...) {
   stopifnot(is.FacileDataSet(.fds))
+  ## TODO: Alter this function to accept `feature_ids` and `as.matrix`
+  ## parameter so they can more fluently work in a data piping chain
+  # if (!is_expression_result(x)) {
+  #   assert_sample_subset(x)
+  #   x <- fetch_expression(.fds, x, feature_ids=feature_ids, as.matrix=TRUE)
+  # }
+  assert_expression_result(x)
   if (!is.null(lib.size)) {
     warning("not supporting custom lib.size yet")
   }

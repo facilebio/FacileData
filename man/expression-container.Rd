@@ -62,6 +62,9 @@ the DGEList. This can take the following forms:
   \item{TRUE}{
     All covariates are retrieved from the \code{FacileDataSet}
   }
+  \item{FALSE}{
+    TODO: Better handle FALSE
+  }
   \item{character}{
     A vector of covariate names to fetch from the \code{FacileDataSet}
   }

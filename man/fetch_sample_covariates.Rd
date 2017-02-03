@@ -18,7 +18,7 @@ the given samples}
 \item{db}{a \code{FacileDataSet} connection}
 }
 \value{
-rows from the \code{sample_covaraite} table
+rows from the \code{sample_covariate} table
 }
 \description{
 Fetch rows from sample_covariate table for specified samples and covariates

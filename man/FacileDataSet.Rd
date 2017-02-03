@@ -4,12 +4,11 @@
 \alias{FacileDataSet}
 \title{Connect to a FacileDataSet repository.}
 \usage{
-FacileDataSet(path, data.fn = file.path(path, paste0("data.", db.type)),
-  sqlite.fn = file.path(path, paste0("data.", db.type)),
-  hdf5.fn = file.path(path, "data.h5"), covdef.fn = file.path(path,
-  "sample-covariate-info.yaml"), anno.dir = file.path(path,
-  "custom-annotation"), cache_size = 80000, db.type = c("sqlite",
-  "monetdblite"))
+FacileDataSet(path, data.fn = file.path(path, "data.sqlite"),
+  sqlite.fn = file.path(path, "data.sqlite"), hdf5.fn = file.path(path,
+  "data.h5"), covdef.fn = file.path(path, "sample-covariate-info.yaml"),
+  anno.dir = file.path(path, "custom-annotation"), cache_size = 80000,
+  db.loc = c("reference", "temporary", "memory"))
 }
 \arguments{
 \item{path}{The path to the FacileData repository}

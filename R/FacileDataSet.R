@@ -25,18 +25,19 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   ## The following PRAGMA are of likely interest:
   ##   1. cache_size  https://www.sqlite.org/pragma.html#pragma_cache_size
   ##   2. page_size
-  if (db.loc == 'reference') {
-    out <- src_sqlite(paths$sqlite.fn)
-  } else if (db.loc == 'temporary') {
+  if (db.loc == 'temporary') {
     tmp.fn <- tempfile()
     file.copy(paths$sqlite.fn, tmp.fn)
     paths$sqlite.fn <- tmp.fn
     out <- src_sqlite(paths$sqlite.fn)
-  } else if (db.loc == 'memory') {
-    mcon <- dbConnect(RSQLite::SQLite(), ":memory:")
-    RSQLite::sqliteCopyDatabase(out$con, mcon)
-    RSQLite::dbDisconnect(out$con)
-    out$con <- mcon
+  } else {
+    out <- src_sqlite(paths$sqlite.fn)
+    if (db.loc == 'memory') {
+      mcon <- dbConnect(RSQLite::SQLite(), ":memory:")
+      RSQLite::sqliteCopyDatabase(out$con, mcon)
+      RSQLite::dbDisconnect(out$con)
+      out$con <- mcon
+    }
   }
 
   dbGetQuery(out$con, 'pragma temp_store=MEMORY;')
