@@ -1,3 +1,6 @@
+## TODO: Investigate why fetching a one gene DGEList across TCGA gives
+##       "library size of zero detected" warning, ie.
+##       y <- as.DGEList(sample_stats_tbl(fds), feature_id="919", covariates=NULL)
 ##' Utility functions to get row and column indices of rnaseq hdf5 files.
 ##'
 ##' @export
@@ -488,7 +491,17 @@ as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
     set_rownames(., .$feature_id)
 
   class(x) <- 'matrix'
-  y <- DGEList(x, genes=genes)
+
+  ## now subset down to only features asked for
+  if (!is.null(feature_ids) && is.character(feature_ids)) {
+    keep <- feature_ids %in% rownames(x)
+    if (mean(keep) != 1) {
+      warning(sprintf("Only %d / %d feature_ids requested are in dataset",
+                      sum(keep), length(keep)))
+    }
+    x <- x[feature_ids[keep],,drop=FALSE]
+    genes <- genes[feature_ids[keep],,drop=FALSE]
+  }
 
   ## Doing the internal filtering seems to be too slow
   ## sample.stats <- fetch_sample_statistics(db, x) %>%
@@ -498,10 +511,14 @@ as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
     rename(lib.size=libsize, norm.factors=normfactor) %>%
     as.data.frame %>%
     set_rownames(., .$samid)
+  sample.stats <- sample.stats[colnames(x),,drop=FALSE]
+
+  y <- DGEList(x, genes=genes, lib.size=sample.stats$lib.size,
+               norm.factors=sample.stats$norm.factors)
 
   y$samples <- cbind(
-    transform(y$samples, lib.size=NULL, norm.factors=NULL),
-    sample.stats[colnames(y),,drop=FALSE])
+    y$samples,
+    sample.stats[colnames(y), c('dataset', 'sample_id'), drop=FALSE])
 
   if (!is.null(covariates)) {
     covs <- spread_covariates(covariates, .fds) %>%
@@ -511,14 +528,6 @@ as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
     y$samples <- cbind(y$samples, covs[colnames(y),,drop=FALSE])
   }
 
-  if (!is.null(feature_ids) && is.character(feature_ids)) {
-    keep <- feature_ids %in% rownames(y)
-    if (mean(keep) != 1) {
-      warning(sprintf("Only %d / %d feature_ids requested are in dataset",
-                      sum(keep), length(keep)))
-    }
-    y <- y[feature_ids[keep],]
-  }
   set_fds(y, .fds)
 }
 

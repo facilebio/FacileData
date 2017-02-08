@@ -9,36 +9,38 @@
 ##' @export
 ##' @rdname assertions
 assert_sample_subset <- function(x) {
-  key.cols <- c('dataset', 'sample_id')
-  stopifnot(is(x, 'tbl') || is(x, 'data.frame'))
-  assert_columns(x, key.cols)
-
-  if (is.data.frame(x)) {
-    ## stopifnot(nrow(x) >= 1L)
-  } else if (is(x, 'tbl_sqlite')) {
-    ## stopifnot(isTRUE(as.character(x$from) == 'sample_covariate'))
-    ## stopifnot(is.list(x$where) && length(x$where) >= 1L)
-    ## stopifnot(is.list(x$select) && length(x$select) == 2L &&
-    ##             setequal(names(x$select), c('dataset', 'sample_id')))
-  }
-
+  stopifnot(is_sample_subset(x))
   invisible(x)
+}
+
+is_sample_subset <- function(x) {
+  if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
+  if (!has_columns(x, c('dataset', 'sample_id'))) return(FALSE)
+  TRUE
 }
 
 ##' @export
 ##' @rdname assertions
 assert_expression_result <- function(x) {
-  stopifnot(is(x, 'tbl') || is(x, 'data.frame'))
-  assert_columns(x, c('dataset', 'sample_id', 'feature_id', 'count'))
+  stopifnot(is_expression_result(x))
   invisible(x)
+}
+
+is_expression_result <- function(x) {
+  if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
+  has_columns(x, c('dataset', 'sample_id', 'feature_id', 'count'))
 }
 
 ##' @export
 ##' @rdname assertions
 assert_sample_statistics <- function(x) {
-  stopifnot(is(x, 'tbl') || is(x, 'data.frame'))
-  assert_columns(x, c('dataset', 'sample_id', 'libsize', 'normfactor'))
+  stopifnot(is_sample_statistics(x))
   invisible(x)
+}
+
+is_sample_statistics <- function(x) {
+  if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
+  has_columns(x, c('dataset', 'sample_id', 'libsize', 'normfactor'))
 }
 
 ##' @export
@@ -52,9 +54,16 @@ assert_sample_covariates <- function(x) {
 ##' @export
 ##' @rdname assertions
 assert_columns <- function(x, req.cols) {
+  stopifnot(has_columns(x, req.cols))
+  invisible(x)
+}
+
+has_columns <- function(x, req.cols) {
   missed <- setdiff(req.cols, colnames(x))
   if (length(missed)) {
-    stop("missing columns: ", paste(missed, collpase=', '))
+    warning("missing columns: ", paste(missed, collpase=', '), immediate.=TRUE)
+    FALSE
+  } else {
+    TRUE
   }
-  invisible(x)
 }
