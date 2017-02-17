@@ -60,30 +60,32 @@ subtype_map <- function(x) {
 ##' @param ... the NSE boolean filter criteria
 ##' @return a facile sample descriptor
 fetch_samples <- function(x, ...) {
+  warning("don't use fetch samples", immediate.=TRUE)
   stopifnot(is.FacileDataSet(x))
   dots <- lazyeval::lazy_dots(...)
-  dots <- lazyeval::auto_name(dots)
 
-  crit <- lapply(names(dots), function(expr) {
-    var <- sub(' .*', '', expr)
-    op <- sub(sprintf('%s ', var), '', expr) %>% sub(' .*', '', .)
+  crit <- lapply(as.list(dots), function(crit) {
+    expr <- as.character(crit$expr)
+    stopifnot(length(expr) == 3L)
+    op <- expr[1]
     if (!op %in% c('==', '%in%')) {
       stop("Only '==' and '%in%' operators allowed: ", expr)
     }
-    values <- sub(sprintf('.*%s ?', op), '', expr)
-    values <- lazyeval::lazy_eval(values)
+    # browser()
+    var <- expr[2L]
+    values <- expr[3]
     list(variable=var, value=values)
   })
 
-  cov.table <- sample_covariate_tbl(x) %>% collect(n=Inf)
-  all.vars <- unique(cov.table$variable)
-  bad.vars <- setdiff(sapply(crit, '[[', 'variable'), all.vars)
-  if (length(bad.vars)) {
-    stop("The following covariates are not defined: ",
-         paste(bad.vars, collapse=','))
+  covs <- unique(sapply(crit, '[[', 'variable'))
+  wcovs <- sample_covariate_tbl(x)
+  if (length(covs) == 1) {
+    wcovs <- filter(wcovs, variable == covs)
+  } else {
+    wcovs <- filter(wcovs, variable %in% covs)
   }
-
-  retrieve_samples_in_memory(crit, cov.table) %>% set_fds(x)
+  out <- spread_covariates(wcovs, x)
+  filter(out, ...)
 }
 
 ##' Filters the samples down in a dataset to ones specified

@@ -4,17 +4,26 @@
 \alias{fetch_sample_statistics}
 \title{Fetch the sample statistics for sets of samples in the warehouse}
 \usage{
-fetch_sample_statistics(x, samples = NULL, semi = TRUE)
+fetch_sample_statistics(x, samples = NULL, semi = TRUE,
+  assay_name = "rnaseq")
 }
 \arguments{
 \item{x}{A \code{FacileDataSet} object}
 
 \item{samples}{a data.frame or tbl_sqlite that has dataset and sample_id
 columns}
+
+\item{semi}{use \code{semi_join}? I've found this to be slow sometimes in
+SQLite for some reason}
+
+\item{assay_name}{parameter added to keep old API same with new "unhinged"
+FacileDataSets.}
 }
 \value{
 a tbl_df or tbl_sqlite result from the sample_stats table
 }
 \description{
-Fetch the sample statistics for sets of samples in the warehouse
+NOTE: this function needs the axe. It has been changed to use the
+assay_sample_info_table, but the way we handle this with the new unhinged
+assay needs to change.
 }

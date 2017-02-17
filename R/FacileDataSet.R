@@ -165,6 +165,35 @@ feature_info_tbl <- function(x, assay_name=NULL) {
   out
 }
 
+##' Mimics the old `gene_info` table.
+##'
+##' This function needs to be removed and the code that relies on gene_info_tbl
+##' be update.
+##' @export
+gene_info_tbl <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  ## Columns:
+  ## feature_id|feature_type|symbol|n_exons|length|source|hdf5_index
+  hdf5.info <- assay_feature_info_tbl(x) %>%
+    filter(assay == 'rnaseq')
+
+  gi <- feature_info_tbl(x) %>%
+    filter(feature_type == 'entrez') %>%
+    select(feature_id, feature_type, symbol=name, n_exons=-1,
+           length=effective_length, source) %>%
+    inner_join(hdf5.info, by='feature_id')
+}
+
+##' Mimics old sample_stats table
+##'
+##' This function needs to be removed and the code that relies on
+##' sample_stats_tbl be updated.
+##' @export
+sample_stats_tbl <- function(x) {
+  assay_sample_info_tbl(x) %>%
+    select(dataset, sample_id, libsize, normfactor)
+}
+
 ##' @export
 sample_covariate_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))

@@ -4,6 +4,13 @@
 ##'
 ##' @importFrom rhdf5 h5createFile h5createGroup H5close
 ##' @export
+##'
+##' @param path the directory to create which will house the
+##'   \code{FacileDataSet}
+##' @param covariate_definition the path to the covariate definition file
+##' @param page_size,cache_size \code{pragma} values to setup the backend SQLite
+##'   database
+##' @return inivisibly returns the \code{FaclieDataSet} you just made
 initializeFacileDataSet <- function(path, covariate_definition,
                                     page_size=2**12, cache_size=2e5) {
   path <- normalizePath(path, mustWork=FALSE)
@@ -116,7 +123,20 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
   TRUE
 }
 
+##' Adds rows to a table in a FacileDataSet
+##'
+##' This function uses \code{\link{conform_data_frame}} to match up
+##' \code{dat} to \code{table_name}.
+##'
 ##' @export
+##'
+##' @param dat the \code{data.frame} of rows to add to the table, which must
+##'   have a superset of columns present in the \code{table_name} that is being
+##'   appended to
+##' @param x the \code{FacileDataSet}
+##' @param table_name the name of the table in \code{x} to add the rows of
+##'   \code{dat} to.
+##' @return invisibly returns the conformed version of \code{dat}.
 append_facile_table <- function(dat, x, table_name) {
   stopifnot(is.FacileDataSet(x))
   target <- try({
@@ -136,8 +156,9 @@ append_facile_table <- function(dat, x, table_name) {
 ##' addFacileAssay
 ##'
 ##' @importFrom rhdf5 h5createFile h5createDataset h5write
+##' @export
 ##'
-##' @param x The \code{FacileDataSeta
+##' @param x The \code{FacileDataSeta}
 ##' @param dat list of ExpressionSet, SummarizedExperiment, or DGELists that
 ##'   have the assay data for the given assay across all of our datasets
 ##' @param assay_name the name of the assay in the source dataset object
@@ -253,12 +274,16 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
 ##' This function only adds features (feature_type, feature_id) that are not
 ##' in the \code{feature_info} table already
 ##'
+##' @export
 ##' @param x The \code{FacileDataSet}
 ##' @param feature_info a table of new features that provides all columns
 ##'   in \code{feature_info_tbl(x)}
-##' @param feature_type If
-##'   in
-##' @param
+##' @param type A way to override (or set) the \code{feature_type} column of the
+##'   \code{feature_info} table
+##' @return invisible returns an annotated version of the \code{feature_info}
+##'   table with an \code{$added} column with \code{TRUE/FALSE} values for the
+##'   features that were new (and added) to the repository or \code{FALSE} to
+##'   indicate that they were already in the database.
 append_facile_feature_info <- function(x, feature_info,
                                        type=feature_info$feature_type) {
   ## Argument Checking
@@ -305,72 +330,3 @@ append_facile_feature_info <- function(x, feature_info,
 
   invisible(added)
 }
-
-
-##' A data.frame of dataset,sample_id, ... to map covariates to samples
-addFacileSampleCovariates <- function(x) {
-
-}
-
-
-##' Create a new FacileDataRepository
-##'
-##' @param path the path to the directory you want to create to put the
-##'   FacileDataRepository into.
-##' @param datas a list of data objects. Currently objects in the list can only
-##'   either be ExpressoinSets or SummarizedExperiments.
-##' @param covariate_definition the YAML file that maps variables that land into
-##'   the sample_covariate table into the R-alike things
-##' @param data.cov.map a YAML file that maps pData elements in the datas list
-##'   to variable/value pairs into the smaple_covariate table.
-##' @return the path to the FacileDataRepository directory
-createFacileDataRepository <- function(path, datas, covariate_definition,
-                                       data.cov.map, page_size=2**12,
-                                       cache_size=2e5) {
-  path <- init.facile.directory(path)
-  file.copy(covariate_definition, file.path(path, 'sample-covariate-info.yaml'))
-
-}
-
-addFacileDataSet <- function(x, cov.map) {
-
-}
-
-init.facile.directory <- function(x) {
-  stopifnot(is.character(x), lenght(x) == 1L)
-  x <- normalizePath(x, mustWork=FALSE)
-  stopifnot(!dir.exists(x))
-  res <- try(dir.create(x), silent=TRUE)
-  if (is(res, 'try-error')) {
-    stop("Cannot create directory for FacileDataRepository: ", x)
-  }
-  dir.create(file.path(x, 'custom-annotation'))
-  init.facile.sqlite(x)
-  init.facile.hdf5(x)
-  x
-}
-
-init.facile.sqlite <- function(x, page_size=2**12, cache_size=2e5) {
-  db.fn <- file.path(x, 'data.sqlite')
-
-  con <- dbConnect(SQLite(), db.fn)
-  on.exit(dbDisconnect(con))
-  dbGetQuery(con, 'pragma temp_store=MEMORY;')
-  dbGetQuery(con, sprintf('pragma page_size=%d', page_size))
-  dbGetQuery(con, sprintf('pragma cache_size=%d;', cache_size))
-
-  sql.fn <- system.file('extdata', 'facile-data-repository-bits',
-                        'facile-db.sql', package='FacileDataSet')
-  sql <- sqlFromFile(sql.fn)
-  dbGetQueries(con, sql)
-}
-
-init.facile.hdf5 <- function(x) {
-  library(hdf5)
-  fn <- file.path(x, 'data.h5')
-  h5createFile(fn)
-  h5createGroup(x$hdf5.fn, 'expression')
-  h5createGroup(x$hdf5.fn, 'expression/rnaseq')
-  H5close()
-}
-

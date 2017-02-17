@@ -70,7 +70,7 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
     ## column is.na, then we force it to 'categorical', because that's all it
     ## realy could have been
     if (nrow(out) && mean(is.na(out$type)) > 0.5) {
-      out <- mutate(out, type='categorical')
+      out <- mutate(out, class='categorical', type='user_annotation')
     }
   } else {
     ## Make a dummy, 0 row tibble to send back
@@ -114,7 +114,9 @@ save_custom_sample_covariates <- function(x, name, annotation,
   if (annotation$variable[1L] != name) {
     annotation <- mutate(annotation, variable=name)
   }
-  annotation <- mutate(annotation, date_entered=as.integer(Sys.time()))
+  annotation <- annotation %>%
+    mutate(type='user_annotation', class='categorical',
+           date_entered=as.integer(Sys.time()))
 
   fn <- paste0(file.prefix, '_', custom_key, '_', name, '_', Sys.Date(),'.json')
   fn <- file.path(x$anno.dir, fn)
@@ -193,7 +195,7 @@ spread_covariates <- function(x, .fds=fds(x)) {
   if (!is.null(cov.def)) {
     do.cast <- setdiff(colnames(out), c('dataset', 'sample_id'))
     ## Don't decode categorical variables of type 'user_annotation'
-    user.anno <- filter(x, class == 'user_annotation' & type == 'categorical')
+    user.anno <- filter(x, type == 'user_annotation' & class == 'categorical')
     if (nrow(user.anno)) {
       do.cast <- setdiff(do.cast, unique(user.anno$variable))
     }
@@ -244,10 +246,10 @@ cast_covariate <- function(covariate, values, cov.def, .fds) {
 
   def <- cov.def[[covariate]]
   if (is.list(def)) {
-    if (def$type == 'real') {
+    if (def$class == 'real') {
       values <- as.numeric(values)
     }
-    if (def$type == 'right_censored') {
+    if (def$class == 'right_censored') {
       values <- decode_right_censored(values, suffix=covariate)
     }
     if (is.character(def$levels)) {

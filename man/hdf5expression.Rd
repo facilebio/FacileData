@@ -5,9 +5,9 @@
 \alias{hdf5_gene_indices}
 \title{Utility functions to get row and column indices of rnaseq hdf5 files.}
 \usage{
-hdf5_sample_indices(x, samples = NULL)
+hdf5_sample_indices(x, assay_name = "rnaseq", samples = NULL)
 
-hdf5_gene_indices(x, feature_ids = NULL)
+hdf5_gene_indices(x, assay_name = "rnaseq", feature_ids = NULL)
 }
 \description{
 Utility functions to get row and column indices of rnaseq hdf5 files.

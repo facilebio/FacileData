@@ -12,8 +12,14 @@ append_facile_feature_info(x, feature_info, type = feature_info$feature_type)
 \item{feature_info}{a table of new features that provides all columns
 in \code{feature_info_tbl(x)}}
 
-\item{feature_type}{If
-in}
+\item{type}{A way to override (or set) the \code{feature_type} column of the
+\code{feature_info} table}
+}
+\value{
+invisible returns an annotated version of the \code{feature_info}
+  table with an \code{$added} column with \code{TRUE/FALSE} values for the
+  features that were new (and added) to the repository or \code{FALSE} to
+  indicate that they were already in the database.
 }
 \description{
 This function only adds features (feature_type, feature_id) that are not

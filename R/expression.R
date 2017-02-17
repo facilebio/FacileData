@@ -5,45 +5,56 @@
 ##'
 ##' @export
 ##' @rdname hdf5expression
-hdf5_sample_indices <- function(x, samples=NULL) {
+hdf5_sample_indices <- function(x, assay_name='rnaseq', samples=NULL) {
   stopifnot(is.FacileDataSet(x))
-  if (is.null(samples)) {
-    samples <- sample_stats_tbl(x)
-  }
-  samples <- samples %>%
-    assert_sample_subset %>%
-    collect(n=Inf) %>%
-    distinct(dataset, sample_id)
+  assert_string(assay_name)
+  stopifnot(assay_name %in% assay_names(x))
 
-  idxs <- hdf5_sample_xref_tbl(x) %>%
-    collect(n=Inf) %>%
-    semi_join(samples, by=c('dataset', 'sample_id')) %>%
-    rename(index=hdf5_index)
+  asi <- assay_sample_info_tbl(x) %>%
+    filter(assay == assay_name) %>%
+    select(assay, dataset, sample_id, hdf5_index) %>%
+    collect(n=Inf)
+
+  if (is.null(samples)) {
+    samples <- asi
+  } else {
+    samples <- samples %>%
+      assert_sample_subset %>%
+      collect(n=Inf) %>%
+      distinct(dataset, sample_id) %>%
+      mutate(assay=assay_name) %>%
+      left_join(asi, by=c('assay', 'dataset', 'sample_id'))
+  }
+
+  samples
 }
 
 ##' @export
 ##' @rdname hdf5expression
-hdf5_gene_indices <- function(x, feature_ids=NULL) {
+hdf5_gene_indices <- function(x, assay_name='rnaseq', feature_ids=NULL) {
   stopifnot(is.FacileDataSet(x))
   if (is.null(feature_ids)) {
     feature_ids <- character()
   }
-  assertCharacter(feature_ids)
+  assert_character(feature_ids)
   feature_ids <- unique(feature_ids)
 
-  ## We could opt to not collect first before the filter, but loading a
-  ## 25k table is trivial
-  genes <- gene_info_tbl(x) %>% collect(n=Inf)
-
-  if (length(feature_ids) == 1L) {
-    genes <- filter(genes, feature_id == feature_ids)
-  } else if (length(feature_ids) > 1L) {
-    genes <- filter(genes, feature_id %in% feature_ids)
+  fi <- feature_info_tbl(x) %>%
+    filter(feature_type == 'entrez')
+  if (length(feature_ids) == 1) {
+    fi <- filter(fi, feature_id == feature_ids)
+  } else if (length(feature_ids) > 1) {
+    fi <- filter(fi, feature_id %in% feature_ids)
   }
+  fi <- collect(fi, n=Inf)
 
-  genes %>%
+  genes <- assay_feature_info_tbl(x) %>%
+    filter(assay == assay_name) %>%
     collect(n=Inf) %>%
-    rename(index=hdf5_index)
+    inner_join(fi, by='feature_id') %>%
+    rename(symbol=name)
+
+  genes
 }
 
 ##' Helper function creates dplyr query to get expression data of interest.
@@ -71,9 +82,10 @@ hdf5_gene_indices <- function(x, feature_ids=NULL) {
 ##'   othwerise a \code{tbl_df} of the results.
 fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
                              with_symbols=!as.matrix, as.matrix=FALSE) {
+  ## In the 'unhinged'/multiassay we force assay='rnaseq'
   stopifnot(is.FacileDataSet(x))
 
-  hdf.sample.idxs <- hdf5_sample_indices(x, samples)
+  hdf.sample.idxs <- hdf5_sample_indices(x, 'rnaseq', samples)
 
   ## DEBUG: Tune chunk size?
   ## As the number of genes you are fetching increases, only subsetting
@@ -96,9 +108,13 @@ fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
   ##
   ## TODO: setup unit tests to ensure that ridx subsetting and remapping back
   ## to original genes works
-  ridx.all <- hdf5_gene_indices(x, NULL)
-  hdf.gene.idxs <- hdf5_gene_indices(x, feature_ids)
-  ridx <- if (nrow(hdf.gene.idxs) > 700) NULL else hdf.gene.idxs$index
+  ridx.all <- hdf5_gene_indices(x, 'rnaseq', NULL)
+  if (is.null(feature_ids)) {
+    hdf.gene.idxs <- ridx.all
+  } else {
+    hdf.gene.idxs <- hdf5_gene_indices(x, 'rnaseq', feature_ids)
+  }
+  ridx <- if (nrow(hdf.gene.idxs) > 700) NULL else hdf.gene.idxs$hdf5_index
 
   if (isTRUE(as.matrix) && isTRUE(with_symbols)) {
     warning("with_symbols ignored when as.matrix=TRUE")
@@ -108,10 +124,10 @@ fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
     group_by(dataset) %>%
     do(res={
       ds <- .$dataset[1L]
-      hd5.name <- paste0('expression/rnaseq/', ds)
-      cnts <- h5read(x$hdf5.fn, hd5.name, list(ridx, .$index))
+      hd5.name <- paste0('assay/rnaseq/', ds)
+      cnts <- h5read(x$hdf5.fn, hd5.name, list(ridx, .$hdf5_index))
       if (nrow(cnts) != nrow(hdf.gene.idxs)) {
-        cnts <- cnts[hdf.gene.idxs$index,]
+        cnts <- cnts[hdf.gene.idxs$hdf5_index,]
       }
       if (isTRUE(as.matrix)) {
         dimnames(cnts) <- list(hdf.gene.idxs$feature_id,
@@ -164,7 +180,7 @@ with_expression <- function(samples, feature_ids, with_symbols=TRUE,
     set_fds(.fds)
 }
 
-##' Takes a result from fetch_expressoi and spreads out genes acorss columns
+##' Takes a result from fetch_expression and spreads out genes acorss columns
 ##'
 ##' This is a convenience function, and will try to guess what you mean if you
 ##' don't explicitly specify which columns to spread and what to call them.
@@ -175,7 +191,11 @@ with_expression <- function(samples, feature_ids, with_symbols=TRUE,
 ##'
 ##' @export
 ##' @param x facile expression result from \code{fetch_expression}
-##' @param key
+##' @param key the column from the long-form \code{fetch_expression} table
+##'   to put in the columns of the outgoing data.frame that the values are
+##'   "spread into"
+##' @param value the value column to spread into the \code{key} columns
+##' @param .fds the \code{FacileDataSet}
 ##' @return a more stout \code{x} with the expression values spread across
 ##'   columns.
 spread_expression <- function(x, key=c('symbol', 'feature_id'),
@@ -357,7 +377,7 @@ rpkm.tbl_sqlite <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
                             .fds=fds(x), ...) {
   stopifnot(is.FacileDataSet(.fds))
   if (is.null(gene.length)) {
-    gene.length <- gene_info_tbl(.fds) %>% collect
+    gene.length <- gene_info_tbl(.fds) %>% collect(n=Inf)
   }
   stopifnot(all(c('feature_id', 'length') %in% colnames(gene.length)))
   cpms <- cpm(x, lib.size=lib.size, log=log, prior.count=prior.count,
@@ -375,7 +395,7 @@ rpkm.tbl_df <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
   assert_expression_result(x)
   stopifnot(is.FacileDataSet(.fds))
   if (is.null(gene.length)) {
-    gene.length <- gene_info_tbl(.fds) %>% collect
+    gene.length <- gene_info_tbl(.fds) %>% collect(n=Inf)
   }
   stopifnot(all(c('feature_id', 'length') %in% colnames(gene.length)))
   cpms <- cpm(x, lib.size=lib.size, log=log, prior.count=prior.count,

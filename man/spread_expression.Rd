@@ -2,13 +2,21 @@
 % Please edit documentation in R/expression.R
 \name{spread_expression}
 \alias{spread_expression}
-\title{Takes a result from fetch_expressoi and spreads out genes acorss columns}
+\title{Takes a result from fetch_expression and spreads out genes acorss columns}
 \usage{
 spread_expression(x, key = c("symbol", "feature_id"), value = c("cpm",
   "count"), .fds = fds(x))
 }
 \arguments{
 \item{x}{facile expression result from \code{fetch_expression}}
+
+\item{key}{the column from the long-form \code{fetch_expression} table
+to put in the columns of the outgoing data.frame that the values are
+"spread into"}
+
+\item{value}{the value column to spread into the \code{key} columns}
+
+\item{.fds}{the \code{FacileDataSet}}
 }
 \value{
 a more stout \code{x} with the expression values spread across

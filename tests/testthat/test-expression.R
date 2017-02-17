@@ -2,14 +2,18 @@ context("Expression")
 
 FDS <- exampleFacileDataSet()
 samples <- sample_covariate_tbl(FDS) %>%
-  filter(value == 'CMS4') %>%
-  select(dataset, sample_id)
-samples <- sample_covariate_tbl(FDS) %>%
-  filter(variable == 'stage' & value == 'III') %>%
-  select(dataset, sample_id)
+  filter(value == 'luminal') %>%
+  select(dataset, sample_id) %>%
+  set_fds(FDS)
+# samples <- sample_covariate_tbl(FDS) %>%
+#   filter(variable == 'stage' & value == 'III') %>%
+#   select(dataset, sample_id)
 genes <- local({
   out <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
-  intersect(out, collect(gene_info_tbl(FDS))$feature_id)
+  feature_info_tbl(FDS) %>%
+    filter(feature_id %in% out) %>%
+    collect %$%
+    feature_id
 })
 
 
@@ -81,7 +85,7 @@ test_that("fetch_expression results converted to DGEList", {
   expect_is(y$samples, 'data.frame')
   expect_true(setequal(y$samples$sample_id, collect(samples)$sample_id))
   expect_type(y$samples$norm.factors, 'double')
-  expect_type(y$samples$lib.size, 'integer')
+  expect_type(y$samples$lib.size, 'double')
   expect_type(y$samples$dataset, 'character')
   expect_type(y$samples$sample_id, 'character')
 
@@ -93,16 +97,16 @@ test_that("fetch_expression results converted to DGEList", {
 
 test_that('as.DGEList assigns correct covariates', {
   e <- fetch_expression(FDS, samples, genes)
-  y <- as.DGEList(e, covariates=c('stage', 'sex'))
+  y <- as.DGEList(e, covariates=c('indication', 'sex'))
 
   expect_is(y, 'DGEList')
   expect_is(y$samples$sex, 'factor')
-  expect_is(y$samples$stage, 'character')
+  expect_is(y$samples$indication, 'character')
 })
 
 test_that("as.DGEList accepts character or covariate data.frame", {
-  cov.df <- fetch_sample_covariates(FDS, samples, c('sex', 'stage'))
-  y0 <- as.DGEList(samples, c('sex', 'stage'))
+  cov.df <- fetch_sample_covariates(FDS, samples, c('sex', 'indication'))
+  y0 <- as.DGEList(samples, c('sex', 'indication'))
   y <- as.DGEList(samples, cov.df)
   expect_equal(y$samples, y0$samples)
 })
