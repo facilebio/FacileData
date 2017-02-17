@@ -8,8 +8,8 @@ FacileDataSet}
 addFacileAssaySet(x, datasets, facile_assay_name,
   facile_assay_type = .assay.types, facile_feature_type = .feature.types,
   facile_assay_description = NULL, facile_feature_info,
-  sorage.mode = .storage.modes, chunk.rows = 5000, chunk.cols = "ncol",
-  chunk.compression = 4, assay_name = NULL)
+  sorage_mode = .storage.modes, chunk_rows = 5000, chunk_cols = "ncol",
+  chunk_compression = 4, assay_name = NULL)
 }
 \arguments{
 \item{facile_assay_name}{the name of the assay to store in the FacileDataSet}
@@ -22,6 +22,6 @@ addFacileAssaySet(x, datasets, facile_assay_name,
 have the assay data for the given assay across all of our datasets}
 }
 \description{
-Adds a complete set of assay data for all samples across datasets in the
-FacileDataSet
+This needs to be busted up into functions Minimally loop over datasets to
+addFacileAssay
 }

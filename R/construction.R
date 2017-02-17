@@ -1,5 +1,9 @@
 ## The code in here builds FacileDataSets from Bioconductor like objects
 
+##' Create an empty FacileDataSet
+##'
+##' @importFrom rhdf5 h5createFile h5createGroup H5close
+##' @export
 initializeFacileDataSet <- function(path, covariate_definition,
                                     page_size=2**12, cache_size=2e5) {
   path <- normalizePath(path, mustWork=FALSE)
@@ -131,6 +135,8 @@ append_facile_table <- function(dat, x, table_name) {
 ##' This needs to be busted up into functions Minimally loop over datasets to
 ##' addFacileAssay
 ##'
+##' @importFrom rhdf5 h5createFile h5createDataset h5write
+##'
 ##' @param x The \code{FacileDataSeta
 ##' @param dat list of ExpressionSet, SummarizedExperiment, or DGELists that
 ##'   have the assay data for the given assay across all of our datasets
@@ -142,15 +148,15 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
                               facile_feature_type=.feature.types,
                               facile_assay_description=NULL,
                               facile_feature_info,
-                              sorage.mode=.storage.modes,
-                              chunk.rows=5000, chunk.cols='ncol',
-                              chunk.compression=4,
+                              storage_mode=.storage.modes,
+                              chunk_rows=5000, chunk_cols='ncol',
+                              chunk_compression=4,
                               assay_name=NULL) {
   ## Parameter Checking --------------------------------------------------------
   stopifnot(is.FacileDataSet(x))
   assert_string(facile_assay_name)
   if (facile_assay_name %in% assay_names(x)) {
-    stop("`", facile_assay_name, "` already stored in FacileDataSet")
+    stop("`", facile_assay_name, "` assay already stored in FacileDataSet")
   }
   facile_assay_type <- match.arg(facile_assay_type, .assay.types)
   if (facile_assay_type %in% assay_types(x)) {
@@ -162,8 +168,8 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
     facile_assay_description <- facile_assay_type
   }
   assert_string(facile_assay_description)
-  storage.mode <- match.arg(storage.mode, .storage.modes)
-  assert_valid_assay_datasets(datasets, facile_feature_info, storage.mode)
+  storage_mode <- match.arg(storage_mode, .storage.modes)
+  assert_valid_assay_datasets(datasets, facile_feature_info, storage_mode)
 
   ## Insert entry into assay_info table ----------------------------------------
   ai <- tibble(assay=facile_assay_name,
@@ -171,7 +177,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
                feature_type=facile_feature_type,
                description=facile_assay_description,
                nfeatures=nrow(datasets[[1]]),
-               storage_mode=storage.mode) %>%
+               storage_mode=storage_mode) %>%
     append_facile_table(x, 'assay_info')
 
   ## Insert Feature Information into FacileDataSet -----------------------------
@@ -185,7 +191,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
     transmute(assay=facile_assay_name, feature_id, hdf5_index=seq(nrow(.))) %>%
     append_facile_table(x, 'assay_feature_info')
 
-  stopifnot(nrow(features) == nrwo(afi))
+  stopifnot(nrow(features) == nrow(afi))
 
   ## Insert assay data and track sample info -----------------------------------
   aname <- paste0('assay/', facile_assay_name)
@@ -219,18 +225,18 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   assay.dat <- lapply(names(dats), function(ds) {
     ## This should be addFacileAssay(x, assay_name, dat, subset(asi, ...))
     dat <- dats[[ds]]
-    if (is.character(chunk.cols) && chunk.cols == 'ncol') {
+    if (is.character(chunk_cols) && chunk_cols == 'ncol') {
       xchunk.cols <- ncol(dat)
-    } else if (is.integer(chunk.cols)) {
-      xchunk.cols <- min(chunk.cols, ncol(dat))
+    } else if (is.integer(chunk_cols)) {
+      xchunk.cols <- min(chunk_cols, ncol(dat))
     } else {
-      stop("Unrecognized value for chunk.cols: ", chunk.cols)
+      stop("Unrecognized value for chunk.cols: ", chunk_cols)
     }
-    xchunk.rows <- min(chunk.rows=5000, nrow(dat))
+    xchunk.rows <- min(chunk_rows=5000, nrow(dat))
     chunk <- c(xchunk.rows, xchunk.cols)
     dname <- sprintf('%s/%s', aname, ds)
-    h5createDataset(hdf5fn(x), dname, dim(dat), storage.mode=storage.mode,
-                    chunk=chunk, level=chunk.compression)
+    h5createDataset(hdf5fn(x), dname, dim(dat), storage.mode=storage_mode,
+                    chunk=chunk, level=chunk_compression)
     h5write(dat, file=hdf5fn(x), dname)
     tibble(assay=facile_assay_name, dataset=ds, sample_id=colnames(dat),
            hdf5_index=seq(ncol(dat)))
