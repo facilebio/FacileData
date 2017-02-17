@@ -23,4 +23,3 @@ This is experimental, so each "term" in the filter criteria should be
 just one boolean operation. Multiple terms passed into \code{...} will be
 "AND"ed together.
 }
-

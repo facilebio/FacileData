@@ -9,4 +9,3 @@ createExpressionTables(db)
 \description{
 Creates the table that holds gene counts and meta information about data
 }
-

@@ -20,4 +20,3 @@ covariate tbl
 \description{
 Fetches custom (user) annotations for a given user prefix
 }
-

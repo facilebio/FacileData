@@ -16,4 +16,3 @@ a \code{tbl} with indication and subtype information for all samples
 \description{
 Creates tbl that associates a sample with all of its indication/subtypes
 }
-

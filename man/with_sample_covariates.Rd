@@ -25,4 +25,3 @@ The facile \code{x} object, annotated with the specified covariates.
 \description{
 Note that this function will force the collection of \code{x}
 }
-

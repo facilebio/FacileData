@@ -22,4 +22,3 @@ The encoding was defined by Wei. Positive values mean that there was an
 event at that time, negative values mean censoring (in R, that is 1 and 0,
 respectively).
 }
-

@@ -17,4 +17,3 @@ filtered version of \code{x} that only has the desired samples
 \description{
 Filter x down to specific samples
 }
-

@@ -10,4 +10,3 @@ createWarehouse(db.path, datasets, gene.info = fData(datasets[[1]]),
 \description{
 Creates the database
 }
-

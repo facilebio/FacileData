@@ -59,12 +59,17 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
 }
 
 ##' @export
-FacileDataRepository <- FacileDataSet
+is.FacileDataSet <- function(x) {
+  is(x, 'FacileDataSet') &&
+    'con' %in% names(x) && is(x$con, 'DBIObject') &&
+    'cov.def' %in% names(x) && file.exists(x$cov.def) &&
+    'anno.dir' %in% names(x) && dir.exists(x$anno.dir)
+}
 
 dbfn <- function(x, mustWork=TRUE) {
   base.fn <- 'data.sqlite'
   if (is.FacileDataSet(x)) {
-    x$parent.dir
+    x <- x$parent.dir
   }
   stopifnot(is.character(x), length(x) == 1L)
   out <- file.path(x, base.fn)
@@ -74,10 +79,10 @@ dbfn <- function(x, mustWork=TRUE) {
   out
 }
 
-h5fn <- function(x) {
+hdf5fn <- function(x, mustWork=TRUE) {
   base.fn <- 'data.h5'
   if (is.FacileDataSet(x)) {
-    x$parent.dir
+    x <- x$parent.dir
   }
   stopifnot(is.character(x), length(x) == 1L)
   out <- file.path(x, base.fn)
@@ -85,37 +90,6 @@ h5fn <- function(x) {
     stop("data.h5 file not found: ", out)
   }
   out
-}
-##' @export
-is.FacileDataSet <- function(x) {
-  is(x, 'FacileDataSet') &&
-    'con' %in% names(x) && is(x$con, 'DBIObject') &&
-    'cov.def' %in% names(x) && file.exists(x$cov.def) &&
-    'anno.dir' %in% names(x) && dir.exists(x$anno.dir)
-}
-
-##' @export
-sample_stats_tbl <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  tbl(x, 'sample_stats') %>% set_fds(x)
-}
-
-##' @export
-sample_covariate_tbl <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  tbl(x, 'sample_covariate') %>% set_fds(x)
-}
-
-##' @export
-gene_info_tbl <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  tbl(x, 'gene_info') %>% set_fds(x)
-}
-
-##' @export
-hdf5_sample_xref_tbl <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  tbl(x, 'hdf5_sample_xref')
 }
 
 ##' @export
@@ -133,6 +107,74 @@ covariate_definitions <- function(x) {
   out <- yaml.load_file(cov.def)
   class(out) <- c('CovariateDefinitions', class(out))
   out %>% set_fds(x)
+}
+
+##' @export
+assay_types <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  assay_info_tbl(x) %>% collect %$% assay_type
+}
+
+assay_names <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  assay_info_tbl(x) %>% collect %$% assay
+}
+
+##' @export
+available_assay_types <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  assay_info_tbl(x) %>% collect %$% assay
+}
+
+## Database Table Accessors ====================================================
+
+##' @export
+assay_info_tbl <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  tbl(x, 'assay_info')
+}
+
+##' @export
+assay_feature_info_tbl <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  tbl(x, 'assay_feature_info')
+}
+
+##' @export
+assay_sample_info_tbl <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  tbl(x, 'assay_sample_info')
+}
+
+##' @export
+feature_info_tbl <- function(x, assay_name=NULL) {
+  stopifnot(is.FacileDataSet(x))
+  out <- tbl(x, 'feature_info')
+  if (!is.null(assay_name)) {
+    assert_string(assay_name)
+    assay.info <- assay_info_tbl(x) %>%
+      filter(assay == assay_name) %>%
+      collect()
+    if (nrow(assay.info) == 0) {
+      stop("Unknown assay: ", assay_name)
+    }
+    afi <- assay_feature_info_tbl(x) %>%
+      filter(assay == assay_name)
+    out <- semi_join(out, afi, by=c('feature_type', 'feature_id'))
+  }
+  out
+}
+
+##' @export
+sample_covariate_tbl <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  tbl(x, 'sample_covariate')
+}
+
+##' @export
+sample_info_tbl <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  tbl(x, 'sample_info')
 }
 
 ##' Get/set db

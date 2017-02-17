@@ -18,4 +18,3 @@ a tbl_df or tbl_sqlite result from the sample_stats table
 \description{
 Fetch the sample statistics for sets of samples in the warehouse
 }
-

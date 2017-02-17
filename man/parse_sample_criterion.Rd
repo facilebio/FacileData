@@ -24,4 +24,3 @@ likely a cleaner way to do this, but to be honest I still find the
 \seealso{
 \href{https://cran.r-project.org/web/packages/dplyr/vignettes/nse.html}{dplyr non-standard evaluation}
 }
-

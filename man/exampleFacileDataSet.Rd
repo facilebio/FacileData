@@ -16,4 +16,3 @@ the covariate definitions}
 TODO: This function currently uses the Atezo database as a test. We need to
       create a REAL testing database.
 }
-

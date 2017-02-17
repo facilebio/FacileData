@@ -20,4 +20,3 @@ This is a simple wrapper to \code{\link[reshape2]{dcast}} which converts
 the \code{data.frame} that call would create into a matrix which uses the
 first column as the rownames.
 }
-

@@ -22,4 +22,3 @@ a tbl-like result
 \description{
 Append expression values to sample-descriptor
 }
-

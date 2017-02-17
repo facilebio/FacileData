@@ -26,4 +26,3 @@ the path to the FacileDataRepository directory
 \description{
 Create a new FacileDataRepository
 }
-

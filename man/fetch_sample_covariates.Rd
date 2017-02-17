@@ -23,4 +23,3 @@ rows from the \code{sample_covariate} table
 \description{
 Fetch rows from sample_covariate table for specified samples and covariates
 }
-

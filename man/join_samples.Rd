@@ -26,4 +26,3 @@ Tables like \code{expression} and \code{sample_covariate} house different
 datapoints per sample, and we often want to only retreive data points over
 a subset of samples.
 }
-

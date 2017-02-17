@@ -3,8 +3,8 @@
 \name{fds}
 \alias{fds}
 \alias{fds<-}
-\alias{fds<-.data.frame}
 \alias{fds<-.tbl}
+\alias{fds<-.data.frame}
 \alias{set_fds}
 \title{Get/set db}
 \usage{
@@ -26,4 +26,3 @@ set_fds(x, value)
 \description{
 Get/set db
 }
-

@@ -14,4 +14,3 @@ updateSampleCovariates(db, covariates)
 \description{
 Update or add new sample covariate annotation
 }
-

@@ -27,4 +27,3 @@ data.frame for}
 \description{
 Saves custom sample covariates to a FacileDataSet
 }
-

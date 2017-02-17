@@ -24,4 +24,3 @@ FacileDataSet(path, data.fn = file.path(path, "data.sqlite"),
 \description{
 Connect to a FacileDataSet repository.
 }
-

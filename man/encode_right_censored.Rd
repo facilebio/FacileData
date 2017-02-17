@@ -23,4 +23,3 @@ returns a numeric vector that componds time-to-event and censoring
 A positive value for the time means that there was an event, negative
 value is "censored".
 }
-

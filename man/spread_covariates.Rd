@@ -18,4 +18,3 @@ a wide \code{tbl_df}-like object
 Samples that did not have a value for a specific covariate are assigned to
 have NA.
 }
-

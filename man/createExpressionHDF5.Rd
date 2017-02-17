@@ -9,4 +9,3 @@ createExpressionHDF5(x, drop.expr.table = TRUE)
 \description{
 This is a convenience function that will be axed eventually.
 }
-

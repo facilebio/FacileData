@@ -30,4 +30,3 @@ case of "time_to_event" data, the value is expended to a two column
 data.frame with a \code{tte_<covariate>} column for time to event, and an
 \code{event_<covariate>} column to indicate event (1) or right censored (2).
 }
-

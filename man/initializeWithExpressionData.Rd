@@ -14,4 +14,3 @@ initializeWithExpressionData(db, datasets)
 \description{
 Creates the expression and sample_stats table, initialize with all data.
 }
-
