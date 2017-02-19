@@ -123,31 +123,6 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
   TRUE
 }
 
-##' Adds rows to a table in a FacileDataSet
-##'
-##' This function uses \code{\link{conform_data_frame}} to match up
-##' \code{dat} to \code{table_name}.
-##'
-##' @export
-##'
-##' @param dat the \code{data.frame} of rows to add to the table, which must
-##'   have a superset of columns present in the \code{table_name} that is being
-##'   appended to
-##' @param x the \code{FacileDataSet}
-##' @param table_name the name of the table in \code{x} to add the rows of
-##'   \code{dat} to.
-##' @return invisibly returns the conformed version of \code{dat}.
-append_facile_table <- function(dat, x, table_name) {
-  stopifnot(is.FacileDataSet(x))
-  target <- try({
-    tmp <- tbl(x, table_name)
-    suppressWarnings(collect(tmp, n=1))
-  }, silent=TRUE)
-  if (is(target, 'try-error')) stop("Unknown table to append to: ", table_name)
-  dat <- conform_data_frame(dat, target)
-  dbWriteTable(x$con, table_name, dat, append=TRUE)
-  invisible(dat)
-}
 
 ##' Adds a complete set of assay data for all samples across datasets in the
 ##' FacileDataSet
@@ -267,6 +242,12 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   ## Can check that asi == assay.dat
   chk <- inner_join(asi, assay.dat, by=c('assay', 'dataset', 'sample_id'))
   stopifnot(nrow(chk) == nrow(asi), all(chk$hdf5_index.x == chk$hdf5_index.y))
+
+  ## add samples to sample_info table if they're not there.
+  samples <- asi %>%
+    mutate(parent_id=NA_character_) %>%
+    append_facile_table(x, 'sample_info')
+  invisible(samples)
 }
 
 ##' Appends new features to \code{feature_info} table
@@ -299,34 +280,8 @@ append_facile_feature_info <- function(x, feature_info,
             immediate.=TRUE)
   }
   stopifnot(all(ftypes %in% .feature.types))
-
-  ## We will be using the feature_info_tbl, so let's get the version we need
-  ## here and use it downstream
-  if (length(ftypes) == 1) {
-    x.fi <- feature_info_tbl(x) %>% filter(feature_type == ftypes)
-  } else {
-    x.fi <- feature_info_tbl(x) %>% filter(feature_type %in% ftypes)
-  }
-  x.fi <- collect(x.fi, n=Inf)
-  dat <- facile_feature_info %>%
-    conform_data_frame(x.fi) %>%
-    distinct(feature_type, feature_id, .keep_all=TRUE)
-
-  ## Only add the feature_type,feature_id rows that are not in the
-  ## feature_info table already
-  added <- dat %>%
-    anti_join(x.fi, by=c('feature_type', 'feature_id')) %>%
-    append_facile_table(x, 'feature_info') %>%
-    mutate(added=TRUE)
-  ignored <- dat %>%
-    anti_join(added, by=c('feature_type', 'feature_id')) %>%
-    mutate(added=FALSE)
-
-  if (nrow(ignored)) {
-    warning(nrow(ignored), "/", nrow(dat),
-            " features already in database", immediate.=TRUE)
-    added <- bind_rows(added, ignored)
-  }
-
+  added <- facile_feature_info %>%
+    distinct(feature_type, feature_id, .keep_all=TRUE) %>%
+    append_facile_table(x, 'feature_info')
   invisible(added)
 }
