@@ -96,8 +96,11 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
   }
   stopifnot(smodes == storage_mode)
 
+  ## Should we enforce valid variable names in sample columns?
+  ## biobroom says yes, but for now we just force that first character is a
+  ## letter
   valid.colnames <- sapply(datasets, function(d) {
-    all(colnames(d) == make.names(colnames(d)))
+    all(substring(colnames(d), 1, 1) == make.names(substring(colnames(d), 1, 1)))
   })
   bad.ds <- which(!valid.colnames)
   if (length(bad.ds)) {
