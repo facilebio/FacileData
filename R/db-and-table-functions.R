@@ -66,19 +66,19 @@ append_facile_table <- function(dat, x, table_name) {
 ##' @export
 assay_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x, 'assay_info')
+  tbl(x, 'assay_info') %>% set_fds(x)
 }
 
 ##' @export
 assay_feature_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x, 'assay_feature_info')
+  tbl(x, 'assay_feature_info') %>% set_fds(x)
 }
 
 ##' @export
 assay_sample_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x, 'assay_sample_info')
+  tbl(x, 'assay_sample_info') %>% set_fds(x)
 }
 
 ##' @export
@@ -97,7 +97,7 @@ feature_info_tbl <- function(x, assay_name=NULL) {
       filter(assay == assay_name)
     out <- semi_join(out, afi, by=c('feature_type', 'feature_id'))
   }
-  out
+  out %>% set_fds(x)
 }
 
 ##' Mimics the old `gene_info` table.
@@ -116,7 +116,8 @@ gene_info_tbl <- function(x) {
     filter(feature_type == 'entrez') %>%
     select(feature_id, feature_type, symbol=name, n_exons=-1,
            length=effective_length, source) %>%
-    inner_join(hdf5.info, by='feature_id')
+    inner_join(hdf5.info, by='feature_id') %>%
+    set_fds(x)
 }
 
 ##' Mimics old sample_stats table
@@ -126,19 +127,20 @@ gene_info_tbl <- function(x) {
 ##' @export
 sample_stats_tbl <- function(x) {
   assay_sample_info_tbl(x) %>%
-    select(dataset, sample_id, libsize, normfactor)
+    select(dataset, sample_id, libsize, normfactor) %>%
+    set_fds(x)
 }
 
 ##' @export
 sample_covariate_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x, 'sample_covariate')
+  tbl(x, 'sample_covariate') %>% set_fds(x)
 }
 
 ##' @export
 sample_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x, 'sample_info')
+  tbl(x, 'sample_info') %>% set_fds(x)
 }
 
 ##' Get/set db

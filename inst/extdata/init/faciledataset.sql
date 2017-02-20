@@ -32,6 +32,13 @@ CREATE INDEX feature_info__feature_id ON feature_info (feature_id);
 CREATE INDEX feature_info__name ON feature_info (name);
 CREATE INDEX feature_info__feature_type ON feature_info (feature_type);
 
+-- The `dataset_info` provides meta information for each dataset in a
+-- FacileDataSet
+-- CREATE TABLE dataset_info (
+--   dataset TEXT,
+--   organism TEXT,
+--   PRIMARY KEY (dataset));
+
 -- This `sample_info` table feels too slim. I wanted to put hd5_index into here
 -- but we have occasions where we don't run the same assays over the same
 -- samples, ie. fluidigm and rnaseq assays don't have 1:1 coverage over our
@@ -41,7 +48,7 @@ CREATE TABLE sample_info (
   dataset TEXT,
   sample_id TEXT,
   parent_id TEXT, -- patient_id or something similar; imagine multiple samples from the same "animal"
-  PRIMARY KEY (dataset, sample_id, parent_id));
+  PRIMARY KEY (dataset, sample_id));
 CREATE INDEX sample_info__dataset_parent_id ON sample_info (dataset, parent_id);
 
 -- an element of the pData

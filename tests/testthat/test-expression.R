@@ -2,12 +2,8 @@ context("Expression")
 
 FDS <- exampleFacileDataSet()
 samples <- sample_covariate_tbl(FDS) %>%
-  filter(value == 'luminal') %>%
-  select(dataset, sample_id) %>%
-  set_fds(FDS)
-# samples <- sample_covariate_tbl(FDS) %>%
-#   filter(variable == 'stage' & value == 'III') %>%
-#   select(dataset, sample_id)
+  filter(variable == 'stage' & value == 'III') %>%
+  select(dataset, sample_id)
 genes <- local({
   out <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
   feature_info_tbl(FDS) %>%
@@ -106,8 +102,8 @@ test_that('as.DGEList assigns correct covariates', {
 
 test_that("as.DGEList accepts character or covariate data.frame", {
   cov.df <- fetch_sample_covariates(FDS, samples, c('sex', 'indication'))
-  y0 <- as.DGEList(samples, c('sex', 'indication'))
-  y <- as.DGEList(samples, cov.df)
+  y0 <- as.DGEList(samples, c('sex', 'indication'), .fds=FDS)
+  y <- as.DGEList(samples, cov.df, .fds=FDS)
   expect_equal(y$samples, y0$samples)
 })
 

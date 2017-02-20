@@ -85,6 +85,12 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
     bad <- sapply(datasets[idxs], function(d) class(d)[1L]) %>% unique
     stop("Unsupported assay container(s):", paste(bad, collapse=","))
   }
+  dnames <- names(datasets)
+  if (is.null(dnames) ||
+      all(dnames != make.names(dnames)) ||
+      length(unique(dnames)) != length(dnames)) {
+    stop("names(datasets) must be valid varnames and all unique")
+  }
 
   smodes <- sapply(datasets, function(d) {
     class(extract.assay(d, assay_name)[1L])
