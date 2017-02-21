@@ -108,13 +108,13 @@ fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
   ##
   ## TODO: setup unit tests to ensure that ridx subsetting and remapping back
   ## to original genes works
-  ridx.all <- hdf5_gene_indices(x, 'rnaseq', NULL)
-  if (is.null(feature_ids)) {
-    hdf.gene.idxs <- ridx.all
-  } else {
-    hdf.gene.idxs <- hdf5_gene_indices(x, 'rnaseq', feature_ids)
-  }
-  ridx <- if (nrow(hdf.gene.idxs) > 700) NULL else hdf.gene.idxs$hdf5_index
+  ask.some <- is.character(feature_ids)
+  fetch.all <- !ask.some || length(feature_ids) > 700
+
+  gene.info <- hdf5_gene_indices(x, feature_ids=feature_ids)
+  gene.info <- arrange(gene.info, hdf5_index)
+
+  ridx <- if (fetch.all) NULL else gene.info$hdf5_index
 
   if (isTRUE(as.matrix) && isTRUE(with_symbols)) {
     warning("with_symbols ignored when as.matrix=TRUE")
@@ -126,14 +126,15 @@ fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
       ds <- .$dataset[1L]
       hd5.name <- paste0('assay/rnaseq/', ds)
       cnts <- h5read(x$hdf5.fn, hd5.name, list(ridx, .$hdf5_index))
-      if (nrow(cnts) != nrow(hdf.gene.idxs)) {
-        cnts <- cnts[hdf.gene.idxs$hdf5_index,]
+      stopifnot(nrow(cnts) == nrow(gene.info))
+      if (ask.some && fetch.all) {
+        cnts <- cnts[gene.info$hdf5_index,,drop=FALSE]
       }
       if (isTRUE(as.matrix)) {
-        dimnames(cnts) <- list(hdf.gene.idxs$feature_id,
+        dimnames(cnts) <- list(gene.info$feature_id,
                                paste(ds, .$sample_id, sep='_'))
       } else {
-        dimnames(cnts) <- list(hdf.gene.idxs$feature_id, .$sample_id)
+        dimnames(cnts) <- list(gene.info$feature_id, .$sample_id)
         cnts <- as.data.table(cnts, keep.rownames=TRUE)
         cnts <- melt.data.table(cnts, id.vars='rn')
         cnts[, dataset := ds]
@@ -141,8 +142,8 @@ fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
         setnames(cnts, c('feature_id', 'sample_id', 'count', 'dataset'))
         setcolorder(cnts, c('dataset', 'sample_id', 'feature_id', 'count'))
         if (isTRUE(with_symbols)) {
-          sxref <- match(cnts$feature_id, hdf.gene.idxs$feature_id)
-          cnts[, symbol := hdf.gene.idxs$symbol[sxref]]
+          sxref <- match(cnts$feature_id, gene.info$feature_id)
+          cnts[, symbol := gene.info$symbol[sxref]]
         }
         cnts
       }
