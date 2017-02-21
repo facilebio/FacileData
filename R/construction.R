@@ -128,7 +128,6 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
   if (!ffi.equal) {
     stop("facile_feature_info$feature_id is not seteqaul to datasets")
   }
-
   TRUE
 }
 
@@ -176,6 +175,12 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   storage_mode <- match.arg(storage_mode, .storage.modes)
   assert_valid_assay_datasets(datasets, facile_feature_info, storage_mode)
 
+  ## Ensure no redunancy in facile_feature_info
+  nf <- facile_feature_info %>% distinct(feature_type, feature_id) %>% nrow
+  if (nrow(facile_feature_info) != nf) {
+    stop("Redunant features in facile_feature_info")
+  }
+
   ## Insert entry into assay_info table ----------------------------------------
   ai <- tibble(assay=facile_assay_name,
                assay_type=facile_assay_type,
@@ -188,15 +193,21 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   ## Insert Feature Information into FacileDataSet -----------------------------
   ## Insert new features into global feature_info table
   features <- append_facile_feature_info(x, facile_feature_info,
-                                         type=facile_feature_type)
+                                         type=facile_feature_type) %>%
+    select(feature_type, feature_id, added)
 
   ## Create entries in `assay_feature_info` table to track hdf5 indices for
   ## the features in this assay
-  afi <- features %>%
-    transmute(assay=facile_assay_name, feature_id, hdf5_index=seq(nrow(.))) %>%
-    append_facile_table(x, 'assay_feature_info')
-
-  stopifnot(nrow(features) == nrow(afi))
+  afi <- feature_info_tbl(x) %>%
+    semi_join(select(features, -added),
+              by=c('feature_type', 'feature_id'),
+              copy=TRUE, auto_index=TRUE) %>%
+    collect(n=Inf) %>%
+    transmute(., assay=facile_assay_name, feature_id,
+              hdf5_index=seq(nrow(.))) %>%
+    append_facile_table(x, 'assay_feature_info') %>%
+    arrange(hdf5_index)
+  stopifnot(nf == nrow(afi), all(afi$hdf5_index == seq(nf)))
 
   ## Insert assay data and track sample info -----------------------------------
   aname <- paste0('assay/', facile_assay_name)
