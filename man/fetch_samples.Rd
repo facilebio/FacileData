@@ -4,7 +4,7 @@
 \alias{fetch_samples}
 \title{Fetches a sample descriptor that matches the filter criterion.}
 \usage{
-fetch_samples(x, ...)
+fetch_samples(x, samples = NULL, assay = "rnaseq", ...)
 }
 \arguments{
 \item{x}{A \code{FacileDataRepository}}

@@ -46,9 +46,16 @@ is_sample_statistics <- function(x) {
 ##' @export
 ##' @rdname assertions
 assert_sample_covariates <- function(x) {
-  stopifnot(is(x, 'tbl') || is(x, 'data.frame'))
-  assert_columns(x, c('dataset', 'sample_id', 'variable', 'value'))
+  stopifnot(is_sample_covariates(x))
   invisible(x)
+}
+
+##' @export
+##' @rdname assertions
+is_sample_covariates <- function(x) {
+  if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
+  req.cols <- c('dataset', 'sample_id', 'variable', 'value', 'class', 'type')
+  has_columns(x, req.cols)
 }
 
 ##' @export

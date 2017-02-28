@@ -4,89 +4,110 @@
 ##' Utility functions to get row and column indices of rnaseq hdf5 files.
 ##'
 ##' @export
-##' @rdname hdf5expression
-hdf5_sample_indices <- function(x, assay_name='rnaseq', samples=NULL) {
+assay_sample_info <- function(x, assay_name, samples=NULL) {
   stopifnot(is.FacileDataSet(x))
-  assert_string(assay_name)
-  stopifnot(assay_name %in% assay_names(x))
+  if (!is.null(samples)) {
+    samples <- assert_sample_subset(samples) %>%
+      collect(n=Inf) %>%
+      distinct(dataset, sample_id)
+  }
+  feature.type <- assay_feature_type(x, assay_name) ## validate assay_name
 
   asi <- assay_sample_info_tbl(x) %>%
     filter(assay == assay_name) %>%
-    select(assay, dataset, sample_id, hdf5_index) %>%
     collect(n=Inf)
 
   if (is.null(samples)) {
     samples <- asi
   } else {
-    samples <- samples %>%
-      assert_sample_subset %>%
-      collect(n=Inf) %>%
-      distinct(dataset, sample_id) %>%
-      mutate(assay=assay_name) %>%
-      left_join(asi, by=c('assay', 'dataset', 'sample_id'))
+    samples <- left_join(samples, asi, by=c('dataset', 'sample_id'))
   }
 
   samples
 }
 
+
+##' Returns the feature_type for a given assay
+##'
+##' The elements of the rows for a given assay all correspond to a particular
+##' feature space (ie. feature_type='entrez')
+##'
 ##' @export
-##' @rdname hdf5expression
-hdf5_gene_indices <- function(x, assay_name='rnaseq', feature_ids=NULL) {
+##' @param x \code{FacileDataSet}
+##' @param assay_name the name of the assay
+assay_feature_type <- function(x, assay_name) {
   stopifnot(is.FacileDataSet(x))
-  if (is.null(feature_ids)) {
-    feature_ids <- character()
-  }
-  assert_character(feature_ids)
-  feature_ids <- unique(feature_ids)
-
-  fi <- feature_info_tbl(x) %>%
-    filter(feature_type == 'entrez')
-  if (length(feature_ids) == 1) {
-    fi <- filter(fi, feature_id == feature_ids)
-  } else if (length(feature_ids) > 1) {
-    fi <- filter(fi, feature_id %in% feature_ids)
-  }
-  fi <- collect(fi, n=Inf)
-
-  genes <- assay_feature_info_tbl(x) %>%
+  assert_string(assay_name)
+  assert_choice(assay_name, assay_types(x))
+  assay_info_tbl(x) %>%
     filter(assay == assay_name) %>%
-    collect(n=Inf) %>%
-    inner_join(fi, by='feature_id') %>%
-    rename(symbol=name)
-
-  genes
+    collect %$%
+    feature_type
 }
 
-##' Helper function creates dplyr query to get expression data of interest.
+##' Materializes a table with all feature information for a given assay.
 ##'
-##' @section Software Design Caveats:
-##'
-##' Note that if \code{db} is not provided, the result will be \code{collect}ed,
-##' because the database connection will be closed when the function exits.
-##'
-##' If a \code{samples} selector is provided, we currently do not make sure that
-##' each "observation" (dataset,sample_id)-tuple is unique. Not sure if
-##' duplicated gene expression results will matter downstream ...
+##' This fetches the hdf5_index for the assays as well
+##' @export
+##' @inheritParams assay_feature_type
+##' @param feature_ids a character vector of feature_ids
+##' @return a \code{tbl_sqlite} result with the feature information for the
+##'   features in a specified assay. This
+assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
+  ftype <- assay_feature_type(x, assay_name)
+  if (!is.null(feature_ids)) {
+    assert_character(feature_ids)
+    if (length(feature_ids) == 0) {
+      feature_ids <- NULL
+    } else {
+      feature_ids <- tibble(assay=assay_name, feature_id=feature_ids)
+    }
+  }
+
+  if (is.null(feature_ids)) {
+    afinfo <- assay_feature_info_tbl(x) %>% filter(assay == assay_name)
+  } else {
+    afinfo <- assay_feature_info_tbl(x) %>%
+      inner_join(feature_ids, by=c('assay', 'feature_id'), copy=TRUE,
+                 auto_index=TRUE)
+  }
+
+  assay.info <- select(assay_info_tbl(x), assay, assay_type, feature_type)
+  out <- afinfo %>%
+    inner_join(assay.info, by='assay') %>%
+    inner_join(feature_info_tbl(x), by=c('feature_type', 'feature_id'))
+  set_fds(out, x)
+}
+
+
+##' Fetch data from single assay of choice
 ##'
 ##' @export
 ##' @importFrom rhdf5 h5read
+##' @inheritParams assay_feature_info
 ##' @param x A \code{FacileDataSet} object.
 ##' @param samples a sample descriptor to specify which samples to return data
 ##'   from.
-##' @param feature_ids character vector of ids, if \code{NULL} returns all
-##'   features
-##' @param with_symbols adds a symbol column to the outgoing result
+##' @param normalized return normalize or raw data values, defaults to
+##'   \code{raw}
 ##' @param as.matrix by default, the data is returned in a long-form tbl-like
 ##'   result. If set to \code{TRUE}, the data is returned as a matrix.
+##' @param ... parameters to pass to normalization methods
 ##' @return A lazy \code{\link[dplyr]{tbl}} object with the expression
 ##'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
 ##'   othwerise a \code{tbl_df} of the results.
-fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
-                             with_symbols=!as.matrix, as.matrix=FALSE) {
-  ## In the 'unhinged'/multiassay we force assay='rnaseq'
+fetch_assay_data <- function(x, assay_name, feature_ids=NULL, samples=NULL,
+                             normalized=TRUE, as.matrix=FALSE, ...,
+                             .subset.threshold=700) {
   stopifnot(is.FacileDataSet(x))
-
-  hdf.sample.idxs <- hdf5_sample_indices(x, 'rnaseq', samples)
+  assert_flag(as.matrix)
+  finfo <- assay_feature_info(x, assay_name, feature_ids=feature_ids) %>%
+    collect(n=Inf) %>%
+    arrange(hdf5_index)
+  atype <- finfo$assay_type[1L]
+  ftype <- finfo$feature_type[1L]
+  sinfo <- assay_sample_info(x, assay_name, samples) %>%
+    mutate(samid=paste(dataset, sample_id, sep="_"))
 
   ## DEBUG: Tune chunk size?
   ## As the number of genes you are fetching increases, only subsetting
@@ -109,57 +130,70 @@ fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
   ##
   ## TODO: setup unit tests to ensure that ridx subsetting and remapping back
   ## to original genes works
-  ask.some <- is.character(feature_ids)
-  fetch.all <- !ask.some || length(feature_ids) > 700
+  fetch.some <- nrow(finfo) < .subset.threshold
+  ridx <- if (fetch.some) finfo$hdf5_index else NULL
 
-  gene.info <- hdf5_gene_indices(x, feature_ids=feature_ids)
-  gene.info <- arrange(gene.info, hdf5_index)
-
-  ridx <- if (fetch.all) NULL else gene.info$hdf5_index
-
-  if (isTRUE(as.matrix) && isTRUE(with_symbols)) {
-    warning("with_symbols ignored when as.matrix=TRUE")
-  }
-
-  counts <- hdf.sample.idxs %>%
+  dat <- sinfo %>%
     group_by(dataset) %>%
     do(res={
       ds <- .$dataset[1L]
-      hd5.name <- paste0('assay/rnaseq/', ds)
-      cnts <- h5read(x$hdf5.fn, hd5.name, list(ridx, .$hdf5_index))
-      stopifnot(nrow(cnts) == nrow(gene.info))
-      if (ask.some && fetch.all) {
-        cnts <- cnts[gene.info$hdf5_index,,drop=FALSE]
+      hd5.name <- paste('assay', assay_name, ds, sep='/')
+      vals <- h5read(hdf5fn(x), hd5.name, list(ridx, .$hdf5_index))
+      if (is.null(ridx)) {
+        vals <- vals[finfo$hdf5_index,,drop=FALSE]
       }
-      if (isTRUE(as.matrix)) {
-        dimnames(cnts) <- list(gene.info$feature_id,
-                               paste(ds, .$sample_id, sep='_'))
-      } else {
-        dimnames(cnts) <- list(gene.info$feature_id, .$sample_id)
-        cnts <- as.data.table(cnts, keep.rownames=TRUE)
-        cnts <- melt.data.table(cnts, id.vars='rn')
-        cnts[, dataset := ds]
-        cnts[, variable := as.character(variable)]
-        setnames(cnts, c('feature_id', 'sample_id', 'count', 'dataset'))
-        setcolorder(cnts, c('dataset', 'sample_id', 'feature_id', 'count'))
-        if (isTRUE(with_symbols)) {
-          sxref <- match(cnts$feature_id, gene.info$feature_id)
-          cnts[, symbol := gene.info$symbol[sxref]]
-        }
-        cnts
+      dimnames(vals) <- list(finfo$feature_id, .$samid)
+      if (normalized) {
+        vals <- normalize.assay.matrix(vals, finfo, ., ...)
       }
-      cnts
+      if (!as.matrix) {
+        vals <- as.data.table(vals, keep.rownames=TRUE)
+        vals <- melt.data.table(vals, id.vars='rn', variable.factor=FALSE,
+                                variable.name='sample_id')
+        setnames(vals, 1L, 'feature_id')
+        vals[, dataset := ds]
+        vals[, assay := assay_name]
+        vals[, assay_type := atype]
+        vals[, feature_type := ftype]
+        xref <- match(vals$feature_id, finfo$feature_id)
+        vals[, feature_name := finfo$name[xref]]
+        corder <- c('dataset', 'sample_id', 'assay', 'assay_type',
+                    'feature_type', 'feature_id', 'feature_name', 'value')
+        setcolorder(vals, corder)
+        vals
+      }
+      vals
     }) %>%
     ungroup
 
-  if (isTRUE(as.matrix)) {
-    out <- do.call(cbind, counts$res)
+  if (as.matrix) {
+    out <- do.call(cbind, dat$res)
   } else {
-    out <- as.tbl(setDF(rbindlist(counts$res)))
+    out <- as.tbl(setDF(rbindlist(dat$res)))
   }
 
   class(out) <- c('FacileExpression', class(out))
   set_fds(out, x)
+}
+
+## helper functino to fetch_assay_data
+normalize.assay.matrix <- function(vals, feature.info, sample.info, ...) {
+  stopifnot(
+    nrow(vals) == nrow(feature.info),
+    all(rownames(vals) == feature.info$feature_id),
+    ncol(vals) == nrow(sample.info),
+    all(colnames(vals) == sample.info$samid),
+    is.character(feature.info$assay_type),
+    length(unique(feature.info$assay_type)) == 1L,
+    is.numeric(sample.info$libsize), is.numeric(sample.info$normfactor))
+  atype <- feature.info$assay_type[1L]
+  libsize <- sample.info$libsize * sample.info$normfactor
+  if (atype == 'rnaseq') {
+    out <- edgeR::cpm(vals, libsize, log=TRUE, prior.count=5)
+  } else {
+    stop("implement normalization for other assay types")
+  }
+  out
 }
 
 ##' Append expression values to sample-descriptor

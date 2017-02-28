@@ -5,6 +5,7 @@
 \alias{assert_expression_result}
 \alias{assert_sample_statistics}
 \alias{assert_sample_covariates}
+\alias{is_sample_covariates}
 \alias{assert_columns}
 \title{Check to see that samples are referenced correctly}
 \usage{
@@ -15,6 +16,8 @@ assert_expression_result(x)
 assert_sample_statistics(x)
 
 assert_sample_covariates(x)
+
+is_sample_covariates(x)
 
 assert_columns(x, req.cols)
 }

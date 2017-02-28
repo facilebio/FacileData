@@ -134,11 +134,15 @@ save_custom_sample_covariates <- function(x, name, annotation,
 ##' @param covariates character vector of covariate names. If \code{NULL}
 ##'   (default), returns all covariates, if is character and length() == 0, then
 ##'   this is a no-op (x is returned)
+##' @param na.rm if \code{TRUE}, filters outgoing result such that only rows
+##'   with nonNA values for the \code{covariates} specified here will be
+##'   returned. Default: \code{FALSE}. Note that this will not check columns
+##'   not specified in \code{covariates} for NA-ness.
 ##' @param custom_key The key to use to fetch more custom annotations over
 ##'   the given samples
 ##' @param .fds A \code{FacileDataSet} object
 ##' @return The facile \code{x} object, annotated with the specified covariates.
-with_sample_covariates <- function(x, covariates=NULL,
+with_sample_covariates <- function(x, covariates=NULL, na.rm=FALSE,
                                    custom_key=Sys.getenv("USER"), .fds=fds(x)) {
   assert_sample_subset(x)
   stopifnot(is.FacileDataSet(.fds))
@@ -154,16 +158,19 @@ with_sample_covariates <- function(x, covariates=NULL,
     distinct(.keep_all=TRUE)
 
   covs <- fetch_sample_covariates(.fds, samples, covariates,
-                                  custom_key=custom_key) %>%
-    spread_covariates(.fds)
+                                  custom_key=custom_key)
+  covs <- spread_covariates(covs, .fds)
 
-  # if (is.data.table(samples)) {
-  #   setDT(covs)
-  # }
-
-  collect(x, n=Inf) %>%
+  out <- collect(x, n=Inf) %>%
     left_join(covs, by=c('dataset', 'sample_id')) %>%
     set_fds(.fds)
+
+  if (na.rm && length(covariates)) {
+    keep <- complete.cases(select_(out, .dots=covariates))
+    out <- out[keep,,drop=FALSE]
+  }
+
+  out
 }
 
 ##' Spreads the covariates returned from database into wide data.frame

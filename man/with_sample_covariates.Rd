@@ -4,7 +4,7 @@
 \alias{with_sample_covariates}
 \title{Appends covariate columns to a query result}
 \usage{
-with_sample_covariates(x, covariates = NULL,
+with_sample_covariates(x, covariates = NULL, na.rm = FALSE,
   custom_key = Sys.getenv("USER"), .fds = fds(x))
 }
 \arguments{
@@ -13,6 +13,11 @@ with_sample_covariates(x, covariates = NULL,
 \item{covariates}{character vector of covariate names. If \code{NULL}
 (default), returns all covariates, if is character and length() == 0, then
 this is a no-op (x is returned)}
+
+\item{na.rm}{if \code{TRUE}, filters outgoing result such that only rows
+with nonNA values for the \code{covariates} specified here will be
+returned. Default: \code{FALSE}. Note that this will not check columns
+not specified in \code{covariates} for NA-ness.}
 
 \item{custom_key}{The key to use to fetch more custom annotations over
 the given samples}

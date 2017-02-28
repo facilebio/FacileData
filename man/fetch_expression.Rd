@@ -10,15 +10,16 @@ fetch_expression(x, samples = NULL, feature_ids = NULL,
 \arguments{
 \item{x}{A \code{FacileDataSet} object.}
 
-\item{indication}{The indication to get data from}
+\item{samples}{a sample descriptor to specify which samples to return data
+from.}
 
-\item{subtype}{The subtype from the desired \code{indication}}
+\item{feature_ids}{character vector of ids, if \code{NULL} returns all
+features}
 
-\item{sample_ids}{The sample_id's (barcodes) to fetch. If specified
-this trumps whatever is specified in \code{indication} and
-\code{subtype}}
+\item{with_symbols}{adds a symbol column to the outgoing result}
 
-\item{entrez_ids}{Restricts the fetch to only these genes}
+\item{as.matrix}{by default, the data is returned in a long-form tbl-like
+result. If set to \code{TRUE}, the data is returned as a matrix.}
 }
 \value{
 A lazy \code{\link[dplyr]{tbl}} object with the expression
