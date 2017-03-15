@@ -1,9 +1,256 @@
-## TODO: Investigate why fetching a one gene DGEList across TCGA gives
-##       "library size of zero detected" warning, ie.
-##       y <- as.DGEList(sample_stats_tbl(fds), feature_id="919", covariates=NULL)
-##' Utility functions to get row and column indices of rnaseq hdf5 files.
+##' Fetch data from single assay of choice
 ##'
 ##' @export
+##' @importFrom rhdf5 h5read
+##' @importFrom multiGSEA eigenWeightedMean
+##' @inheritParams assay_feature_info
+##' @param x A \code{FacileDataSet} object.
+##' @param features a feature descriptor (data.frame with assay and feature_id
+##'   columms)
+##' @param samples a sample descriptor to specify which samples to return data
+##'   from.
+##' @param normalized return normalize or raw data values, defaults to
+##'   \code{raw}
+##' @param as.matrix by default, the data is returned in a long-form tbl-like
+##'   result. If set to \code{TRUE}, the data is returned as a matrix.
+##' @param ... parameters to pass to normalization methods
+##' @param subset.threshold sometimes fetching all the genes is faster than
+##'   trying to subset. We have to figure out why that is, but I've previously
+##'   tested random features of different lengths, and around 700 features was
+##'   the elbow.
+##' @param aggregate.by do you want individual level results or geneset
+##'   scores? Use 'ewm' for eigenWeightedMean, and that's all.
+##' @return A lazy \code{\link[dplyr]{tbl}} object with the expression
+##'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
+##'   othwerise a \code{tbl_df} of the results.
+fetch_assay_data <- function(x, features, samples=NULL, assay_name=NULL,
+                             normalized=FALSE, as.matrix=FALSE, ...,
+                             subset.threshold=700, aggregate.by=NULL) {
+  stopifnot(is.FacileDataSet(x))
+  assert_flag(as.matrix)
+  assert_flag(normalized)
+  assert_number(subset.threshold)
+
+  if (!is.null(assay_name) || is.character(features)) {
+    assert_string(assay_name)
+    assert_choice(assay_name, assay_names(x))
+  }
+
+  if (missing(features)) {
+    assert_string(assay_name)
+    features <- assay_feature_info(x, assay_name) %>% collect(n=Inf)
+  } else {
+    if (is.character(features)) {
+      features <- tibble(feature_id=features, assay=assay_name)
+    }
+    stopifnot(is(features, 'tbl') || is(features, 'data.frame'))
+    if (is.null(features$assay)) {
+      features$assay <- assay_name
+    }
+    assert_assay_feature_descriptor(features)
+  }
+
+  if (is.null(samples)) {
+    samples <- samples(x)
+  }
+  assert_sample_subset(samples)
+
+  assays <- unique(features$assay)
+  n.assays <- length(assays)
+  if (n.assays > 1L && as.matrix) {
+    stop("Fetching from multiple assays requires return in melted form")
+  }
+
+  if (!is.null(aggregate.by)) {
+    assert_string(aggregate.by)
+    assert_choice(aggregate.by, 'ewm')
+    stopifnot(n.assays == 1L)
+    if (!normalized) {
+      warning("You probably don't want to aggregate.by on unnormalized data",
+              immediate.=TRUE)
+    }
+  }
+
+  out <- lapply(assays, function(a) {
+    f <- filter(features, assay == a)
+    .fetch_assay_data(x, a, f$feature_id, samples, normalized, as.matrix,
+                      subset.threshold, aggregate.by)
+  })
+
+  if (length(out) == 1L) {
+    out <- out[[1L]]
+  } else if (!as.matrix) {
+    ## We stop if we are asking for a matrix across multiple assays, but maybe
+    ## we don't have to ... (in the future, I mean)
+    out <- bind_rows(out)
+  }
+
+  out
+}
+
+.fetch_assay_data <- function(x, assay_name, feature_ids, samples,
+                              normalized=FALSE, as.matrix=FALSE,
+                              subset.threshold=700, aggregate.by=NULL, ...) {
+  stopifnot(is.FacileDataSet(x))
+  assert_string(assay_name)
+  assert_character(feature_ids, min.len=1L)
+  samples <- assert_sample_subset(samples)
+  assert_flag(normalized)
+  assert_flag(as.matrix)
+  assert_number(subset.threshold)
+  if (!is.null(aggregate.by)) {
+    assert_string(aggregate.by)
+    assert_choice(aggregate.by, 'ewm')
+  }
+
+  finfo <- assay_feature_info(x, assay_name, feature_ids=feature_ids) %>%
+    collect(n=Inf) %>%
+    arrange(hdf5_index)
+  atype <- finfo$assay_type[1L]
+  ftype <- finfo$feature_type[1L]
+  sinfo <- assay_sample_info(x, assay_name, samples) %>%
+    mutate(samid=paste(dataset, sample_id, sep="__"))
+  bad.samples <- is.na(sinfo$hdf5_index)
+  if (any(bad.samples)) {
+    warning(sum(bad.samples), " not found in `", assay_name, "`assay.",
+            immediate.=TRUE)
+    sinfo <- sinfo[!bad.samples,,drop=FALSE]
+  }
+
+  ## DEBUG: Tune chunk size?
+  ## As the number of genes you are fetching increases, only subsetting
+  ## out a few of them intead of first loading the whole matrix gives you little
+  ## value, for instance, over all BRCA tumors (994) these are some timings for
+  ## different numbers of genes:
+  ##
+  ##     Ngenes                   Time (seconds)
+  ##     10                       0.5s
+  ##     100                      0.8s
+  ##     250                      1.2s
+  ##     500                      2.6s
+  ##     750                      6s seconds
+  ##     3000                     112 seconds!
+  ##     unpspecified (all 26.5k) 7 seconds!
+  ##
+  ## I'm using `ridx` as a hack downstream to run around the issue of slowing
+  ## down the data by trying to subset many rows via hdf5 instead of loading
+  ## then subsetting after (this is so weird)
+  ##
+  ## TODO: setup unit tests to ensure that ridx subsetting and remapping back
+  ## to original genes works
+  fetch.some <- nrow(finfo) < subset.threshold
+  ridx <- if (fetch.some) finfo$hdf5_index else NULL
+
+  dat <- sinfo %>%
+    group_by(dataset) %>%
+    do(res={
+      ds <- .$dataset[1L]
+      hd5.name <- paste('assay', assay_name, ds, sep='/')
+      vals <- h5read(hdf5fn(x), hd5.name, list(ridx, .$hdf5_index))
+      if (is.null(ridx)) {
+        vals <- vals[finfo$hdf5_index,,drop=FALSE]
+      }
+      dimnames(vals) <- list(finfo$feature_id, .$samid)
+      if (normalized) {
+        vals <- normalize.assay.matrix(vals, finfo, ., ...)
+      }
+      vals
+    }) %>%
+    ungroup
+
+  ## NOTE: We can avoid the monster matrix creation if we only want !as.matrix
+  ## returns, but this makes the code easier to reason. We can come back to this
+  ## to optimize for speed later. The problem is introduced when the
+  ## aggregate.by parameter was introduced
+  vals <- do.call(cbind, dat$res)
+  if (nrow(vals) == 1L) {
+    if (!is.null(aggregate.by)) {
+      warning("No assay feature aggregation performed over single feature",
+              immediate.=TRUE)
+    }
+    aggregate.by <- NULL
+  }
+
+  if (!is.null(aggregate.by)) {
+    scores <- eigenWeightedMean(vals)$score
+    vals <- matrix(scores, nrow=1, dimnames=list('score', names(scores)))
+  }
+
+  if (!as.matrix) {
+    vals <- .melt.assay.matrix(vals, assay_name, atype, ftype, finfo)
+    if (!is.null(aggregate.by)) {
+      vals[, feature_type := 'aggregated']
+      vals[, feature_id := 'aggregated']
+      vals[, feature_name := 'aggregated']
+    }
+    vals <- as.tbl(setDF(vals))
+  }
+
+  class(vals) <- c('FacileExpression', class(vals))
+  set_fds(vals, x)
+}
+
+.melt.assay.matrix <- function(vals, assay_name, atype, ftype, finfo) {
+  vals <- as.data.table(vals, keep.rownames=TRUE)
+  vals <- melt.data.table(vals, id.vars='rn', variable.factor=FALSE,
+                          variable.name='sample_id')
+  setnames(vals, 1L, 'feature_id')
+
+  vals[, dataset := sub('__.*$', '', sample_id)]
+  vals[, sample_id := sub('^.*__', '', sample_id)]
+  vals[, assay := assay_name]
+  vals[, assay_type := atype]
+  vals[, feature_type := ftype]
+  xref <- match(vals$feature_id, finfo$feature_id)
+  vals[, feature_name := finfo$name[xref]]
+  corder <- c('dataset', 'sample_id', 'assay', 'assay_type',
+              'feature_type', 'feature_id', 'feature_name', 'value')
+  setcolorder(vals, corder)
+  vals
+}
+
+##' Helper function to get sample assay data from single or aggregate features
+##' @export
+fetch_assay_score <- function(x, features, samples=NULL, assay_name=NULL,
+                              as.matrix=FALSE, ..., subset.threshold=700) {
+  if (is.null(assay_name)) {
+    assay_name <- features$assay
+  }
+  stopifnot(is.character(assay_name), length(unique(asssay_name)) == 1L)
+  dat <- fetch_assay_data(x, features, samples=samples, assay_name=NULL,
+                          as.matrix=TRUE, normalized=TRUE,
+                          subset.threshold=subset.threshold)
+  if (nrow(dat) > 1) {
+    dat <- matrix(eigenWeightedMean(dat)$score, nrow=1)
+  }
+
+}
+##' @export
+assay_types <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  assay_info_tbl(x) %>% collect(n=Inf) %$% assay_type
+}
+
+##' @export
+assay_names <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  assay_info_tbl(x) %>% collect %$% assay
+}
+
+
+##' Utility functions to get row and column indices of rnaseq hdf5 files.
+##'
+##' This is called to get things like hdf5_index and scaling factors for
+##' the samples in a given assay.
+##'
+##' @export
+##' @param x \code{FacileDataSet}
+##' @param assay_name the name of the assay
+##' @param samples a sample descriptor
+##' @return an updated version of \code{samples} decorated with hd5_index,
+##'   scaling factors, etc. Note that rows in \code{samples} that do not appear
+##'   in \code{assay_name} will be returnd here with NA values for hd5_index and
+##'   such.
 assay_sample_info <- function(x, assay_name, samples=NULL) {
   stopifnot(is.FacileDataSet(x))
   if (!is.null(samples)) {
@@ -38,7 +285,7 @@ assay_sample_info <- function(x, assay_name, samples=NULL) {
 assay_feature_type <- function(x, assay_name) {
   stopifnot(is.FacileDataSet(x))
   assert_string(assay_name)
-  assert_choice(assay_name, assay_types(x))
+  assert_choice(assay_name, assay_names(x))
   assay_info_tbl(x) %>%
     filter(assay == assay_name) %>%
     collect %$%
@@ -80,104 +327,10 @@ assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
 }
 
 
-##' Fetch data from single assay of choice
-##'
-##' @export
-##' @importFrom rhdf5 h5read
-##' @inheritParams assay_feature_info
-##' @param x A \code{FacileDataSet} object.
-##' @param samples a sample descriptor to specify which samples to return data
-##'   from.
-##' @param normalized return normalize or raw data values, defaults to
-##'   \code{raw}
-##' @param as.matrix by default, the data is returned in a long-form tbl-like
-##'   result. If set to \code{TRUE}, the data is returned as a matrix.
-##' @param ... parameters to pass to normalization methods
-##' @return A lazy \code{\link[dplyr]{tbl}} object with the expression
-##'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
-##'   othwerise a \code{tbl_df} of the results.
-fetch_assay_data <- function(x, assay_name, feature_ids=NULL, samples=NULL,
-                             normalized=TRUE, as.matrix=FALSE, ...,
-                             .subset.threshold=700) {
-  stopifnot(is.FacileDataSet(x))
-  assert_flag(as.matrix)
-  finfo <- assay_feature_info(x, assay_name, feature_ids=feature_ids) %>%
-    collect(n=Inf) %>%
-    arrange(hdf5_index)
-  atype <- finfo$assay_type[1L]
-  ftype <- finfo$feature_type[1L]
-  sinfo <- assay_sample_info(x, assay_name, samples) %>%
-    mutate(samid=paste(dataset, sample_id, sep="_"))
-
-  ## DEBUG: Tune chunk size?
-  ## As the number of genes you are fetching increases, only subsetting
-  ## out a few of them intead of first loading the whole matrix gives you little
-  ## value, for instance, over all BRCA tumors (994) these are some timings for
-  ## different numbers of genes:
-  ##
-  ##     Ngenes                   Time (seconds)
-  ##     10                       0.5s
-  ##     100                      0.8s
-  ##     250                      1.2s
-  ##     500                      2.6s
-  ##     750                      6s seconds
-  ##     3000                     112 seconds!
-  ##     unpspecified (all 26.5k) 7 seconds!
-  ##
-  ## I'm using `ridx` as a hack downstream to run around the issue of slowing
-  ## down the data by trying to subset many rows via hdf5 instead of loading
-  ## then subsetting after (this is so weird)
-  ##
-  ## TODO: setup unit tests to ensure that ridx subsetting and remapping back
-  ## to original genes works
-  fetch.some <- nrow(finfo) < .subset.threshold
-  ridx <- if (fetch.some) finfo$hdf5_index else NULL
-
-  dat <- sinfo %>%
-    group_by(dataset) %>%
-    do(res={
-      ds <- .$dataset[1L]
-      hd5.name <- paste('assay', assay_name, ds, sep='/')
-      vals <- h5read(hdf5fn(x), hd5.name, list(ridx, .$hdf5_index))
-      if (is.null(ridx)) {
-        vals <- vals[finfo$hdf5_index,,drop=FALSE]
-      }
-      dimnames(vals) <- list(finfo$feature_id, .$samid)
-      if (normalized) {
-        vals <- normalize.assay.matrix(vals, finfo, ., ...)
-      }
-      if (!as.matrix) {
-        vals <- as.data.table(vals, keep.rownames=TRUE)
-        vals <- melt.data.table(vals, id.vars='rn', variable.factor=FALSE,
-                                variable.name='sample_id')
-        setnames(vals, 1L, 'feature_id')
-        vals[, dataset := ds]
-        vals[, assay := assay_name]
-        vals[, assay_type := atype]
-        vals[, feature_type := ftype]
-        xref <- match(vals$feature_id, finfo$feature_id)
-        vals[, feature_name := finfo$name[xref]]
-        corder <- c('dataset', 'sample_id', 'assay', 'assay_type',
-                    'feature_type', 'feature_id', 'feature_name', 'value')
-        setcolorder(vals, corder)
-        vals
-      }
-      vals
-    }) %>%
-    ungroup
-
-  if (as.matrix) {
-    out <- do.call(cbind, dat$res)
-  } else {
-    out <- as.tbl(setDF(rbindlist(dat$res)))
-  }
-
-  class(out) <- c('FacileExpression', class(out))
-  set_fds(out, x)
-}
 
 ## helper functino to fetch_assay_data
-normalize.assay.matrix <- function(vals, feature.info, sample.info, ...) {
+normalize.assay.matrix <- function(vals, feature.info, sample.info,
+                                   log=TRUE, prior.count=5, ...) {
   stopifnot(
     nrow(vals) == nrow(feature.info),
     all(rownames(vals) == feature.info$feature_id),
@@ -189,7 +342,7 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info, ...) {
   atype <- feature.info$assay_type[1L]
   libsize <- sample.info$libsize * sample.info$normfactor
   if (atype == 'rnaseq') {
-    out <- edgeR::cpm(vals, libsize, log=TRUE, prior.count=5)
+    out <- edgeR::cpm(vals, libsize, log=log, prior.count=prior.count)
   } else {
     stop("implement normalization for other assay types")
   }
@@ -204,16 +357,8 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info, ...) {
 ##' @param with_symbols Do you want gene symbols returned, too?
 ##' @param .fds A \code{FacileDataSet} object
 ##' @return a tbl-like result
-with_expression <- function(samples, feature_ids, with_symbols=TRUE,
-                            .fds=fds(samples)) {
+with_assay_data <- function(samples, features,  .fds=fds(samples)) {
   stopifnot(is.FacileDataSet(.fds))
-  stopifnot(is.character(feature_ids) && length(feature_ids) > 0)
-  samples <- assert_sample_subset(samples)
-
-  .fds %>%
-    fetch_expression(samples, feature_ids, with_symbols=with_symbols) %>%
-    join_samples(samples) %>%
-    set_fds(.fds)
 }
 
 ##' Takes a result from fetch_expression and spreads out genes acorss columns
@@ -234,8 +379,9 @@ with_expression <- function(samples, feature_ids, with_symbols=TRUE,
 ##' @param .fds the \code{FacileDataSet}
 ##' @return a more stout \code{x} with the expression values spread across
 ##'   columns.
-spread_expression <- function(x, key=c('symbol', 'feature_id'),
-                              value=c('cpm', 'count'), .fds=fds(x)) {
+spread_assay_data <- function(x, assay_name, key=c('symbol', 'feature_id'),
+                              .fds=fds(x)) {
+
   force(.fds)
   if (missing(key)) {
     key <- if ('symbol' %in% colnames(x)) 'symbol' else 'feature_id'
@@ -276,391 +422,3 @@ spread_expression <- function(x, key=c('symbol', 'feature_id'),
   }
   out
 }
-
-##' @importFrom edgeR cpm
-##' @export
-cpm <- function(x, ...) UseMethod("cpm")
-
-##' Calculated counts per million from a FacileDataSet
-##'
-##' @method cpm tbl_sqlite
-##' @rdname cpm
-##'
-##' @importFrom edgeR cpm
-##' @export
-##'
-##' @param x an expression-like facile result
-##' @param lib.size ignored for now, this is fetched from the
-##'   \code{FacileDataSet}
-##' @param log log the result?
-##' @param prior.count prior.count to add to observed counts
-##' @param .fds A \code{FacileDataSet} object
-##' @return a modified expression-like result with a \code{cpm} column.
-cpm.tbl_sqlite <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
-                           feature_ids=NULL, as.matrix=FALSE, .fds=fds(x),
-                           ...) {
-  assert_expression_result(x)
-  stopifnot(is.FacileDataSet(.fds))
-  if (!is.null(lib.size)) {
-    warning("not supporting custom lib.size yet")
-  }
-  ## Let's leverage the fact that we're already working in the database
-  sample.stats <- fetch_sample_statistics(.fds)
-
-  if (same_src(x, sample.stats)) {
-    tmp <- inner_join(x, sample.stats, by=c('dataset', 'sample_id'))
-    tmp <- collect(tmp, n=Inf)
-    cpms <- calc.cpm(tmp, lib.size=tmp$libsize * tmp$normfactor,
-                     log=log, prior.count=prior.count)
-    out <- tmp %>%
-      mutate(cpm=cpms) %>%
-      select_(.dots=c(colnames(x), 'cpm'))
-  } else {
-
-    out <- cpm(collect(x, n=Inf), lib.size=lib.size, log=log,
-               prior.count=prior.count, feature_ids=feature_ids,
-               sample.stats=sample.stats, as.matrix=as.matrix, .fds=.fds, ...)
-
-  }
-  set_fds(out, .fds)
-}
-
-##' @method cpm tbl_df
-##' @rdname cpm
-##' @export
-cpm.tbl_df <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
-                       feature_ids=NULL, sample.stats=NULL,
-                       as.matrix=as.matrix, .fds=fds(x), ...) {
-  stopifnot(is.FacileDataSet(.fds))
-  ## TODO: Alter this function to accept `feature_ids` and `as.matrix`
-  ## parameter so they can more fluently work in a data piping chain
-  # if (!is_expression_result(x)) {
-  #   assert_sample_subset(x)
-  #   x <- fetch_expression(.fds, x, feature_ids=feature_ids, as.matrix=TRUE)
-  # }
-  assert_expression_result(x)
-  if (!is.null(lib.size)) {
-    warning("not supporting custom lib.size yet")
-  }
-
-  if (is.null(sample.stats)) {
-    samples <- distinct(x, dataset, sample_id)
-    sample.stats <- fetch_sample_statistics(.fds, samples)
-  }
-
-  sample.stats <- sample.stats %>%
-    assert_sample_statistics %>%
-    collect(n=Inf) %>%
-    distinct(dataset, sample_id, .keep_all=TRUE)
-
-  tmp <- inner_join(x, sample.stats, by=c('dataset', 'sample_id'))
-  cpms <- calc.cpm(tmp, lib.size=tmp$libsize * tmp$normfactor, log=log,
-                   prior.count=prior.count)
-
-  tmp %>%
-    mutate(cpm=cpms) %>%
-    select_(.dots=c(colnames(x), 'cpm')) %>%
-    set_fds(.fds)
-}
-
-
-## @method cpm tbl_dt
-## @export
-# cpm.tbl_dt <- function(x, lib.size=NULL, log=FALSE, prior.count=5,
-#                        sample.stats=NULL, .fds=fds(x), ...) {
-#   cpm.tbl_df(x, lib.size, log, prior.count, sample.stats, .fds, ...)
-# }
-
-
-## A helper function to calculate cpm. Expects that x is a tbl-like thing which
-## has a count column, and the appropriate libsize and normfactor columns from
-## the database
-calc.cpm <- function(x, lib.size=NULL, log=FALSE, prior.count=5) {
-  x <- collect(x, n=Inf)
-
-  pr.count <- lib.size / mean(lib.size) * prior.count
-
-  if (log) {
-    lib.size <- 1e-6 * (lib.size + 2*pr.count)
-    cpms <- log2((x$count + pr.count) / lib.size)
-  } else {
-    lib.size <- 1e-6 * lib.size
-    cpms <- x$count / lib.size
-  }
-
-  cpms
-}
-
-##' @importFrom edgeR rpkm
-##' @export
-rpkm <- function(x, ...) UseMethod("rpkm")
-
-##' Cacluate RPKM from a FacileDataSet
-##'
-##' @method rpkm tbl_sqlite
-##' @rdname rpkm
-##' @importFrom edgeR rpkm
-##' @export
-##' @param x an expression-like facile result
-##' @param lib.size ignored for now, this is fetched from the
-##'   \code{FacileDataSet}
-##' @param log log the result?
-##' @param prior.count prior.count to add to observed counts
-##' @param .fds A \code{FacileDataSet} object
-##' @return a modified expression-like result with a \code{rpkm} column.
-rpkm.tbl_sqlite <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
-                            prior.count=5, sample.stats=NULL,
-                            .fds=fds(x), ...) {
-  stopifnot(is.FacileDataSet(.fds))
-  if (is.null(gene.length)) {
-    gene.length <- gene_info_tbl(.fds) %>% collect(n=Inf)
-  }
-  stopifnot(all(c('feature_id', 'length') %in% colnames(gene.length)))
-  cpms <- cpm(x, lib.size=lib.size, log=log, prior.count=prior.count,
-              sample.stats=sample.stats, .fds=.fds, ...)
-  out <- calc.rpkm(cpms, gene.length, log)
-  set_fds(out, .fds)
-}
-
-##' @method rpkm tbl_sqlite
-##' @importFrom edgeR rpkm
-##' @export
-##' @rdname rpkm
-rpkm.tbl_df <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
-                        prior.count=5, sample.stats=NULL, .fds=fds(x), ...) {
-  assert_expression_result(x)
-  stopifnot(is.FacileDataSet(.fds))
-  if (is.null(gene.length)) {
-    gene.length <- gene_info_tbl(.fds) %>% collect(n=Inf)
-  }
-  stopifnot(all(c('feature_id', 'length') %in% colnames(gene.length)))
-  cpms <- cpm(x, lib.size=lib.size, log=log, prior.count=prior.count,
-              sample.stats=sample.stats, .fds=.fds, ...)
-  out <- calc.rpkm(cpms, gene.length, log=log)
-  set_fds(out, .fds)
-}
-
-##' @method rpkm tbl_dt
-##' @export
-rpkm.tbl_dt <- function(x, gene.length=NULL, lib.size=NULL, log=FALSE,
-                        prior.count=5, sample.stats=NULL, .fds=fds(x), ...) {
-  rpkm.tbl_df(x, gene.length, lib.size, log, prior.count, sample.stats,
-              .fds, ...)
-}
-
-calc.rpkm <- function(cpms, gene.length, log) {
-  assert_expression_result(cpms)
-  stopifnot('cpm' %in% colnames(cpms))
-  stopifnot(all(c('feature_id', 'length') %in% colnames(gene.length)))
-  xref <- match(cpms[['feature_id']], gene.length[['feature_id']])
-  kb <- gene.length[['length']][xref] / 1000
-  if (log) {
-    cpms[['rpkm']] <- cpms[['cpm']] - log2(kb)
-  } else {
-    cpms[['rpkm']] <- cpms[['cpm']] / kb
-  }
-  cpms
-}
-
-##' Converts a facile result into a DGEList or ExpressionSet, or ...
-##'
-##' The genes and samples that populate the \code{DGEList} are specified by
-##' \code{x}, and the caller can request addition sample information to be
-##' appended to \code{out$samples} via specification through the
-##' \code{covariates} argument.
-##'
-##' @rdname expression-container
-##' @export
-##' @importFrom edgeR DGEList
-##' @param x a facile expression-like result
-##' @param covariates The covariates the user wants to add to the $samples of
-##'   the DGEList. This can take the following forms:
-##'   \enumerate{
-##'     \item{TRUE}{
-##'       All covariates are retrieved from the \code{FacileDataSet}
-##'     }
-##'     \item{FALSE}{
-##'       TODO: Better handle FALSE
-##'     }
-##'     \item{character}{
-##'       A vector of covariate names to fetch from the \code{FacileDataSet}
-##'     }
-##'     \item{data.frame}{
-##'       A table that looks like a subset of the sample_covariate table
-##'     }
-##'     \item{NULL}{
-##'       If \code{NULL}, no covariates are retrieved
-##'     }
-##'   }
-##' @param feature_ids the features to get expression for (if not specified
-##'   in \code{x} descriptor)
-##' @param assay the \code{assayDataElement} to use for the expression data
-##'   if \code{x} is an \code{ExpressionSet}.
-##' @param .fds The \code{FacileDataSet} that \code{x} was retrieved from.
-##' @param custom_key the custom key to use to fetch custom annotations from
-##'   \code{.fds}
-##' @return a \code{\link[edgeR]{DGEList}}
-as.DGEList <- function(x, ...) {
-  UseMethod('as.DGEList')
-}
-
-##' @method as.DGEList matrix
-##' @rdname expression-container
-as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
-                              .fds=fds(x), custom_key=Sys.getenv("USER"), ...) {
-  stopifnot(is(x, 'FacileExpression'))
-  requireNamespace("edgeR")
-  .fds <- force(.fds)
-  stopifnot(is.FacileDataSet(.fds))
-
-  ## Construct sample table from colnames of the matrix, and make sure this is
-  ## legit
-  samples <- tibble(
-    dataset=sub('_.*$', '', colnames(x)),
-    sample_id=sub('^.*?_', '', colnames(x)))
-  ## if you don't want to `collect` first, you could send `samples` in as
-  ## second argument and then copy that into the db.
-  ## #dboptimize
-  bad.samples <- samples %>%
-    anti_join(collect(sample_stats_tbl(.fds), n=Inf),
-              by=c('dataset', 'sample_id')) %>%
-    collect(n=Inf)
-  if (nrow(bad.samples)) {
-    stop("Bad sample columns specified in the count matrix")
-  }
-
-  ## Fetch appropriate covariate
-  if (!is.null(covariates)) {
-    if (isTRUE(covariates)) {
-      covariates <- fetch_sample_covariates(.fds, samples)
-    } else if (is.character(covariates)) {
-      covariates <- fetch_sample_covariates(.fds, samples, covariates)
-    }
-    assert_sample_covariates(covariates)
-  }
-
-  fids <- rownames(x)
-  genes <- gene_info_tbl(.fds) %>%
-    collect(n=Inf) %>% ## #dboptimize# remove this if you want to exercise db
-    semi_join(tibble(feature_id=fids), by='feature_id') %>%
-    as.data.frame %>%
-    set_rownames(., .$feature_id)
-
-  class(x) <- 'matrix'
-
-  ## now subset down to only features asked for
-  if (!is.null(feature_ids) && is.character(feature_ids)) {
-    keep <- feature_ids %in% rownames(x)
-    if (mean(keep) != 1) {
-      warning(sprintf("Only %d / %d feature_ids requested are in dataset",
-                      sum(keep), length(keep)))
-    }
-    x <- x[feature_ids[keep],,drop=FALSE]
-    genes <- genes[feature_ids[keep],,drop=FALSE]
-  }
-
-  ## Doing the internal filtering seems to be too slow
-  ## sample.stats <- fetch_sample_statistics(db, x) %>%
-  sample.stats <- fetch_sample_statistics(.fds, samples) %>%
-    collect(n=Inf) %>%
-    mutate(samid=paste(dataset, sample_id, sep='_')) %>%
-    rename(lib.size=libsize, norm.factors=normfactor) %>%
-    as.data.frame %>%
-    set_rownames(., .$samid)
-  sample.stats <- sample.stats[colnames(x),,drop=FALSE]
-
-  y <- DGEList(x, genes=genes, lib.size=sample.stats$lib.size,
-               norm.factors=sample.stats$norm.factors)
-
-  y$samples <- cbind(
-    y$samples,
-    sample.stats[colnames(y), c('dataset', 'sample_id', 'samid'), drop=FALSE])
-
-  if (!is.null(covariates)) {
-    covs <- spread_covariates(covariates, .fds) %>%
-      as.data.frame %>%
-      set_rownames(., paste(.$dataset, .$sample_id, sep='_')) %>%
-      select(-dataset, -sample_id)
-    y$samples <- cbind(y$samples, covs[colnames(y),,drop=FALSE])
-  }
-
-  set_fds(y, .fds)
-}
-
-##' @export
-##' @method as.DGEList data.frame
-##' @rdname expression-container
-as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
-                                  .fds=fds(x), custom_key=Sys.getenv("USER"),
-                                  ...) {
-  .fds <- force(.fds)
-  stopifnot(is.FacileDataSet(.fds))
-
-  x <- assert_sample_subset(x)
-
-  has.count <- 'count' %in% colnames(x)
-  fetch.counts <- !has.count
-
-  ## Do we want to fetch counts from the FacileDataSet?
-  if (has.count) {
-    if (is.character(feature_ids) && !setequal(feature_ids, x$feature_ids)) {
-      fetch.counts <- TRUE
-    }
-    if (!missing(feature_ids) && is.null(feature_ids)) {
-      ## user explicitly wants everythin
-      fetch.counts <- TRUE
-    }
-  }
-
-  if (fetch.counts) {
-    if (has.count) {
-      warning("Ignoring expression in `x` and fetching data for `feature_ids`",
-              immediate.=TRUE)
-    }
-    counts <- fetch_expression(.fds, x, feature_ids=feature_ids, as.matrix=TRUE)
-  } else {
-    counts.dt <- assert_expression_result(x) %>%
-      collect(n=Inf) %>%
-      setDT %>%
-      unique(by=c('dataset', 'sample_id', 'feature_id'))
-    counts.dt[, samid := paste(dataset, sample_id, sep='_')]
-    counts <- local({
-      wide <- dcast.data.table(counts.dt, feature_id ~ samid, value.var='count')
-      out <- as.matrix(wide[, -1L, with=FALSE])
-      rownames(out) <- wide[[1L]]
-      class(out) <- c('FacileExpression', class(out))
-      out
-    })
-  }
-
-  as.DGEList(counts, covariates=covariates, feature_ids=feature_ids,
-             .fds=.fds, custom_key=custom_key, ...)
-}
-
-##' @export
-##' @method as.DGEList tbl_sqlite
-##' @rdname expression-container
-as.DGEList.tbl_sqlite <- function(x, covariates=TRUE, feature_ids=NULL,
-                                  .fds=fds(x), custom_key=Sys.getenv("USER"),
-                                  ...) {
-  x <- collect(x, n=Inf) %>% set_fds(.fds)
-  as.DGEList(x, covariates, feature_ids, .fds=.fds, custom_key=custom_key, ...)
-}
-
-##' @export
-##' @rdname expression-container
-as.ExpressionSet <- function(x, covariates=TRUE, feature_ids=NULL,
-                             exprs='counts', .fds=fds(x),
-                             custom_key=Sys.getenv("USER"), ...) {
-  .fds <- force(.fds)
-  stopifnot(is.FacileDataSet(.fds))
-  assert_sample_subset(x)
-  if (!require("Biobase")) stop("Biobase required")
-  y <- as.DGEList(x, covariates, feature_ids, .fds=.fds, custom_key=custom_key,
-                  ...)
-  es <- ExpressionSet(y$counts)
-  pData(es) <- y$samples
-  fData(es) <- y$genes
-  set_fds(es, .fds)
-}
-

@@ -62,7 +62,6 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
   if (length(annot.files)) {
     annos <- lapply(annot.files, function(fn) stream_in(file(fn), verbose=FALSE))
     out <- bind_rows(annos) %>%
-      mutate(class='user_annotation') %>%
       select_(.dots=out.cols) %>%
       set_fds(x) %>%
       filter_samples(samples)

@@ -13,9 +13,40 @@ assert_sample_subset <- function(x) {
   invisible(x)
 }
 
+##' @export
+##' @rdname assertions
 is_sample_subset <- function(x) {
   if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
   if (!has_columns(x, c('dataset', 'sample_id'))) return(FALSE)
+  TRUE
+}
+
+##' @export
+##' @rdname assertions
+assert_facet_descriptor <- function(x) {
+  stopifnot(is_facet_descriptor(x))
+  invisible(x)
+}
+
+##' @export
+##' @rdname assertions
+is_facet_descriptor <- function(x) {
+  if (!is_sample_subset(x)) return(FALSE)
+  has_columns(x, 'facet')
+}
+
+##' @export
+##' @rdname assertions
+assert_assay_feature_descriptor <- function(x) {
+  stopifnot(is_assay_feature_descriptor(x))
+  invisible(x)
+}
+
+##' @export
+##' @rdname assertions
+is_assay_feature_descriptor <- function(x) {
+  if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
+  if (!has_columns(x, c('assay', 'feature_id'))) return(FALSE)
   TRUE
 }
 
@@ -26,6 +57,8 @@ assert_expression_result <- function(x) {
   invisible(x)
 }
 
+##' @export
+##' @rdname assertions
 is_expression_result <- function(x) {
   if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
   has_columns(x, c('dataset', 'sample_id', 'feature_id', 'count'))
@@ -38,6 +71,8 @@ assert_sample_statistics <- function(x) {
   invisible(x)
 }
 
+##' @export
+##' @rdname assertions
 is_sample_statistics <- function(x) {
   if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
   has_columns(x, c('dataset', 'sample_id', 'libsize', 'normfactor'))
@@ -65,6 +100,8 @@ assert_columns <- function(x, req.cols) {
   invisible(x)
 }
 
+##' @export
+##' @rdname assertions
 has_columns <- function(x, req.cols) {
   missed <- setdiff(req.cols, colnames(x))
   if (length(missed)) {

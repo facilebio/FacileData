@@ -1,6 +1,3 @@
-## TODO: Investigate why fetching a one gene DGEList across TCGA gives
-##       "library size of zero detected" warning, ie.
-##       y <- as.DGEList(sample_stats_tbl(fds), feature_id="919", covariates=NULL)
 ##' Utility functions to get row and column indices of rnaseq hdf5 files.
 ##'
 ##' @export

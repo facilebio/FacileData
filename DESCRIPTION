@@ -21,7 +21,8 @@ Imports:
     tidyr,
     rhdf5,
     data.table,
-    jsonlite
+    jsonlite,
+    multiGSEA (>= 0.7.1)
 Suggests:
     testthat (>= 1.0.2),
     Biobase

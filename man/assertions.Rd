@@ -2,24 +2,48 @@
 % Please edit documentation in R/validation.R
 \name{assert_sample_subset}
 \alias{assert_sample_subset}
+\alias{is_sample_subset}
+\alias{assert_facet_descriptor}
+\alias{is_facet_descriptor}
+\alias{assert_assay_feature_descriptor}
+\alias{is_assay_feature_descriptor}
 \alias{assert_expression_result}
+\alias{is_expression_result}
 \alias{assert_sample_statistics}
+\alias{is_sample_statistics}
 \alias{assert_sample_covariates}
 \alias{is_sample_covariates}
 \alias{assert_columns}
+\alias{has_columns}
 \title{Check to see that samples are referenced correctly}
 \usage{
 assert_sample_subset(x)
 
+is_sample_subset(x)
+
+assert_facet_descriptor(x)
+
+is_facet_descriptor(x)
+
+assert_assay_feature_descriptor(x)
+
+is_assay_feature_descriptor(x)
+
 assert_expression_result(x)
 
+is_expression_result(x)
+
 assert_sample_statistics(x)
+
+is_sample_statistics(x)
 
 assert_sample_covariates(x)
 
 is_sample_covariates(x)
 
 assert_columns(x, req.cols)
+
+has_columns(x, req.cols)
 }
 \description{
 Samples have compound keys: dataset,sample_id. If we want to index into

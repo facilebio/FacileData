@@ -110,23 +110,6 @@ covariate_definitions <- function(x) {
 }
 
 ##' @export
-assay_types <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  assay_info_tbl(x) %>% collect %$% assay_type
-}
-
-assay_names <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  assay_info_tbl(x) %>% collect %$% assay
-}
-
-##' @export
-available_assay_types <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  assay_info_tbl(x) %>% collect %$% assay
-}
-
-##' @export
 samples <- function(x) {
   stopifnot(is.FacileDataSet(x))
   sample_info_tbl(x) %>%

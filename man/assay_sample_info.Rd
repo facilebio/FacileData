@@ -6,6 +6,20 @@
 \usage{
 assay_sample_info(x, assay_name, samples = NULL)
 }
+\arguments{
+\item{x}{\code{FacileDataSet}}
+
+\item{assay_name}{the name of the assay}
+
+\item{samples}{a sample descriptor}
+}
+\value{
+an updated version of \code{samples} decorated with hd5_index,
+  scaling factors, etc. Note that rows in \code{samples} that do not appear
+  in \code{assay_name} will be returnd here with NA values for hd5_index and
+  such.
+}
 \description{
-Utility functions to get row and column indices of rnaseq hdf5 files.
+This is called to get things like hdf5_index and scaling factors for
+the samples in a given assay.
 }
