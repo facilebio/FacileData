@@ -294,6 +294,12 @@ assay_feature_type <- function(x, assay_name) {
 
 ##' Materializes a table with all feature information for a given assay.
 ##'
+##' DEBUG: This logic is unnecessarily complex because I make sure to collect
+##' all tables from the database as opposed to copying external tables in and
+##' doing an inner_join in the database. I'm doing this becuase we are getting
+##' name collections on some of the temporary tables. We get erros like:
+##'     Warning: Error in : Table pkdtpohpsu already exists.
+##'
 ##' This fetches the hdf5_index for the assays as well
 ##' @export
 ##' @inheritParams assay_feature_type
@@ -301,29 +307,43 @@ assay_feature_type <- function(x, assay_name) {
 ##' @return a \code{tbl_sqlite} result with the feature information for the
 ##'   features in a specified assay. This
 assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
+  ## NOTE: This is currently limited to a single assay
   ftype <- assay_feature_type(x, assay_name)
   if (!is.null(feature_ids)) {
     assert_character(feature_ids)
     if (length(feature_ids) == 0) {
       feature_ids <- NULL
     } else {
-      feature_ids <- tibble(assay=assay_name, feature_id=feature_ids)
+      feature_ids <- tibble(feature_id=feature_ids)
     }
   }
 
-  if (is.null(feature_ids)) {
-    afinfo <- assay_feature_info_tbl(x) %>% filter(assay == assay_name)
-  } else {
-    afinfo <- assay_feature_info_tbl(x) %>%
-      inner_join(feature_ids, by=c('assay', 'feature_id'), copy=TRUE,
-                 auto_index=TRUE)
+  afinfo <- assay_feature_info_tbl(x) %>%
+    filter(assay == assay_name) %>%
+    collect(n=Inf)
+
+  if (!is.null(feature_ids)) {
+    afinfo <- inner_join(afinfo, feature_ids, by=c('feature_id'))
   }
 
-  assay.info <- select(assay_info_tbl(x), assay, assay_type, feature_type)
-  out <- afinfo %>%
-    inner_join(assay.info, by='assay') %>%
-    inner_join(feature_info_tbl(x), by=c('feature_type', 'feature_id'))
-  set_fds(out, x)
+  assay.info <- assay_info_tbl(x) %>%
+    select(assay, assay_type, feature_type) %>%
+    filter(assay == assay_name) %>%
+    collect(n=Inf)
+
+  out <- afinfo %>% inner_join(assay.info, by='assay')
+  ftype <- out$feature_type[1L]
+  finfo <- feature_info_tbl(x)
+  if (length(ftype == 1L)) {
+    finfo <- filter(finfo, feature_type == ftype)
+  } else {
+    finfo <- filter(finfo, feature_type %in% ftype)
+  }
+  finfo <- collect(finfo, n=Inf)
+
+  out %>%
+    inner_join(finfo, by=c('feature_type', 'feature_id')) %>%
+    set_fds(x)
 }
 
 
