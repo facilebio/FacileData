@@ -15,6 +15,8 @@
 \alias{is_sample_covariates}
 \alias{assert_columns}
 \alias{has_columns}
+\alias{assert_covariate_definitions}
+\alias{is_covariate_definitions}
 \title{Check to see that samples are referenced correctly}
 \usage{
 assert_sample_subset(x)
@@ -44,6 +46,10 @@ is_sample_covariates(x)
 assert_columns(x, req.cols)
 
 has_columns(x, req.cols)
+
+assert_covariate_definitions(x)
+
+is_covariate_definitions(x)
 }
 \description{
 Samples have compound keys: dataset,sample_id. If we want to index into

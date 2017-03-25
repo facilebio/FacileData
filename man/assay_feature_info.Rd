@@ -18,5 +18,12 @@ a \code{tbl_sqlite} result with the feature information for the
   features in a specified assay. This
 }
 \description{
+DEBUG: This logic is unnecessarily complex because I make sure to collect
+all tables from the database as opposed to copying external tables in and
+doing an inner_join in the database. I'm doing this becuase we are getting
+name collections on some of the temporary tables. We get erros like:
+    Warning: Error in : Table pkdtpohpsu already exists.
+}
+\details{
 This fetches the hdf5_index for the assays as well
 }

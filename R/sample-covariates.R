@@ -269,3 +269,28 @@ cast_covariate <- function(covariate, values, cov.def, .fds) {
 
   values
 }
+
+##' Retrieve the meta information about a covariate
+##'
+##' @export
+##' @param covariate the name of the covariate
+##' @param .fds the \code{FacileDataSet}
+##' @param covdefs The \code{covariate_definitions(.fds)} list
+##' @return a list of covariate information with the following elements:
+##'   \code{$name}, \code{$type}, \code{$class}, \code{$description},
+##'   \code{$label}, \code{$is.factor}, (and maybe \code{$levels})
+covariate_meta_info <- function(covariate, .fds, covdefs=NULL) {
+  if (is.null(covdefs)) {
+    stopifnot(is.FacileDataSet(.fds))
+    covdefs <- covariate_definitions(.fds)
+  }
+  assert_covariate_definitions(covdefs)
+  meta <- covdefs[[covariate]]
+  if (!is.list(meta)) {
+    stop("Covariate `", covariate, "` not found in covariate_definition file")
+  }
+  meta$name <- covariate
+  meta$is.factor <- meta$class == 'categorical' && is.character(meta$levels)
+  meta
+}
+
