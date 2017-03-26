@@ -227,18 +227,31 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
     dat[afi$feature_id,,drop=FALSE]
   })
 
-  ## Can create assay_sample_info_table
-  y <- edgeR::DGEList(do.call(cbind, dats)) %>% calcNormFactors
-  asi <- tibble(
-    assay=facile_assay_name,
-    dataset=rep(names(datasets), sapply(dats, ncol)),
-    sample_id=colnames(y),
-    hdf5_index=lapply(dats, function(d) seq(ncol(d))) %>% unlist,
-    libsize=y$samples$lib.size,
-    normfactor=y$samples$norm.factors) %>%
-    append_facile_table(x, 'assay_sample_info')
-  rm(y)
-  gc()
+  ## If rnaseq, do calcnormfactors
+  if (facile_assay_type == 'rnaseq') {
+    ## Can create assay_sample_info_table
+    y <- edgeR::DGEList(do.call(cbind, dats)) %>% calcNormFactors
+    asi <- tibble(
+      assay=facile_assay_name,
+      dataset=rep(names(datasets), sapply(dats, ncol)),
+      sample_id=colnames(y),
+      hdf5_index=lapply(dats, function(d) seq(ncol(d))) %>% unlist,
+      libsize=y$samples$lib.size,
+      normfactor=y$samples$norm.factors)
+    rm(y)
+    gc()
+  } else {
+    asi <- lapply(names(dats), function(ds) {
+      mtrx <- dats[[ds]]
+      tibble(
+        assay=facile_assay_name,
+        dataset=ds,
+        sample_id=colnames(mtrx),
+        hdf5_index=seq(ncol(mtrx)),
+        libsize=-1, normfactor=-1)
+    }) %>% bind_rows
+  }
+  asi <- append_facile_table(asi, x, 'assay_sample_info')
 
   assay.dat <- lapply(names(dats), function(ds) {
     ## This should be addFacileAssay(x, assay_name, dat, subset(asi, ...))
@@ -269,7 +282,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   samples <- asi %>%
     mutate(parent_id=NA_character_) %>%
     append_facile_table(x, 'sample_info')
-  invisible(samples)
+  invisible(list(samples=samples, assay_sample_info=asi))
 }
 
 ##' Appends new features to \code{feature_info} table
