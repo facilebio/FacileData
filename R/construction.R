@@ -52,7 +52,7 @@ initializeFacileDataSet <- function(path, covariate_definition,
 
 supported.assay.container <- function(x) {
   ## Currently only support DGEList
-  is(x, 'DGEList') || is(x, 'eSet') || is(x, 'SummarizedExperiment')
+  is(x, 'DGEList') || is(x, 'eSet') || is(x, 'SummarizedExperiment') || is(x, 'matrix')
 }
 
 extract.assay <- function(x, assay_name=NULL) {
@@ -66,6 +66,8 @@ extract.assay <- function(x, assay_name=NULL) {
   } else if (is(x, 'SummarizedExperiment')) {
     ns <- loadNamespace("SummarizedExperiment")
     out <- if (is.null(assay_name)) assays(x)[[1L]] else assay(x, assay_name)
+  } else if (is(x, 'matrix')) {
+    out <- x
   } else {
     stop("Unsupported assay container: ", class(x)[1L])
   }
@@ -162,7 +164,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   if (facile_assay_name %in% assay_names(x)) {
     stop("`", facile_assay_name, "` assay already stored in FacileDataSet")
   }
-  facile_assay_type <- match.arg(facile_assay_type, .assay.types)
+  # facile_assay_type <- match.arg(facile_assay_type, .assay.types)
   if (facile_assay_type %in% assay_types(x)) {
     warning("assay exists of this type already: ", facile_assay_type,
             immediate.=TRUE)
@@ -294,13 +296,13 @@ append_facile_feature_info <- function(x, feature_info,
     stopifnot(is.character(type), length(type) %in% c(1L, nrow(feature_info)))
     feature_info$feature_type <- type
   }
-  ftypes <- unique(facile_feature_info$feature_type)
+  ftypes <- unique(feature_info$feature_type)
   if (length(ftypes) > 1) {
     warning("Adding more than one feature_type to feature_info table",
             immediate.=TRUE)
   }
   stopifnot(all(ftypes %in% .feature.types))
-  added <- facile_feature_info %>%
+  added <- feature_info %>%
     distinct(feature_type, feature_id, .keep_all=TRUE) %>%
     append_facile_table(x, 'feature_info')
   invisible(added)

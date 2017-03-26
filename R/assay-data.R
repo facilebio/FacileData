@@ -364,7 +364,7 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info,
   if (atype == 'rnaseq') {
     out <- edgeR::cpm(vals, libsize, log=log, prior.count=prior.count)
   } else {
-    stop("implement normalization for other assay types")
+    warning("No normalization procedure for ", atype, " assay", immediate.=TRUE)
   }
   out
 }
