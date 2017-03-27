@@ -50,7 +50,12 @@ fetch_assay_data <- function(x, features, samples=NULL, assay_name=NULL,
     assert_assay_feature_descriptor(features)
   }
 
-  if (is.null(samples)) {
+  ## Adding check for a 0 row data.frame, because there is some chain of
+  ## reactivity that fires in FacileExplorer upon FDS switching that triggers
+  ## this when the previous dataset has sample filters entered. This acts
+  ## as a defense to that, and also works to handle this strange case from the
+  ## backend side, too -- perhaps a user will stumble on this in their analyses?
+  if (is.null(samples) || (is.data.frame(samples) && nrow(samples) == 0L)) {
     samples <- samples(x)
   }
   assert_sample_subset(samples)
@@ -163,6 +168,7 @@ fetch_assay_data <- function(x, features, samples=NULL, assay_name=NULL,
   ## to optimize for speed later. The problem is introduced when the
   ## aggregate.by parameter was introduced
   vals <- do.call(cbind, dat$res)
+  # browser()
   if (nrow(vals) == 1L) {
     if (!is.null(aggregate.by)) {
       warning("No assay feature aggregation performed over single feature",
@@ -237,6 +243,12 @@ assay_names <- function(x) {
   assay_info_tbl(x) %>% collect %$% assay
 }
 
+##' @export
+has_assay <- function(x, assay_name) {
+  stopifnot(is.FacileDataSet(x))
+  assert_character(assay_name)
+  assay_name %in% assay_names(x)
+}
 
 ##' Utility functions to get row and column indices of rnaseq hdf5 files.
 ##'
