@@ -56,7 +56,7 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
   stopifnot(is.FacileDataSet(x))
   out.cols <- colnames(sample_covariate_tbl(x))
 
-  fpat <- paste0('^', file.prefix, '_', custom_key, "_*")
+  fpat <- paste0('^', file.prefix, '_', custom_key, "_.*json")
   annot.files <- list.files(path=x$anno.dir, pattern=fpat, full.names=TRUE)
 
   if (length(annot.files)) {

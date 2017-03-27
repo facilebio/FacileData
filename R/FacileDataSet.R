@@ -93,6 +93,27 @@ hdf5fn <- function(x, mustWork=TRUE) {
 }
 
 ##' @export
+dataset_definition_file <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  fn <- assert_file(file.path(x$parent.dir, 'datasets.yaml'), 'r')
+  fn
+}
+
+##' @export
+dataset_definitions <- function(x, as.list=TRUE) {
+  stopifnot(is.FacileDataSet(x))
+  fn <- dataset_definition_file(x)
+  defs <- yaml.load_file(fn)
+  if (!as.list) {
+    defs <- lapply(names(defs), function(ds) {
+      i <- defs[[ds]]
+      tibble(dataset=ds, url=i$url, description=i$description)
+    }) %>% bind_rows
+  }
+  defs
+}
+
+##' @export
 covariate_definition_file <- function(x) {
   stopifnot(is.FacileDataSet(x))
   x[['cov.def']]
@@ -100,11 +121,21 @@ covariate_definition_file <- function(x) {
 
 ##' @export
 ##' @importFrom yaml yaml.load_file
-covariate_definitions <- function(x) {
+covariate_definitions <- function(x, as.list=TRUE) {
   stopifnot(is.FacileDataSet(x))
   cov.def <- covariate_definition_file(x)
   assert_file(cov.def, 'r')
   out <- yaml.load_file(cov.def)
+  if (!as.list) {
+    out <- lapply(names(out), function(name) {
+      i <- out[[name]]
+      lvls <- i$levels
+      is.factor <- !is.null(lvls)
+      lbl <- if (is.null(i$label)) name else i$label
+      tibble(variable=name, type=i$type, class=i$class, label=i$label,
+             is_factor=is.factor, levels=list(lvls), description=i$description)
+    }) %>% bind_rows
+  }
   class(out) <- c('CovariateDefinitions', class(out))
   out %>% set_fds(x)
 }
