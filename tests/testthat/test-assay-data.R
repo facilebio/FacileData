@@ -55,3 +55,26 @@ test_that("fetch_assay_data(..., aggregate.by='ewm') provides scores", {
   ewm <- eigenWeightedMean(dat)$score[scores$samid]
   expect_equal(scores$value, unname(ewm))
 })
+
+test_that("fetch_assay_data handles missing entries for requested samples", {
+  ## When we have multiple assays for an FDS, we can use a valid sample
+  ## descriptor to retrieve data, but the requested assay may not have data
+  ## for all requested samples, we need to handle this.
+  root <- rprojroot::find_root(rprojroot::is_r_package)
+  devtools::load_all(root)
+  tcga <- FacileDataSet('~/workspace/data/facile/FacileDataSets/FacileTCGADataSet-2017-03-25')
+
+  library(reshape2)
+  samples <- sample_info_tbl(tcga) %>%
+    filter(dataset == 'BRCA') %>%
+    collect
+
+  genes <- c(TIGIT='201633', CD274='29126')
+  rnaseq <- tcga %>%
+    fetch_assay_data(genes, samples, 'rnaseq', normalized=TRUE)
+
+  ## don't have agilent data for all brca samples
+  agilent <- tcga %>%
+    fetch_assay_data(genes, samples, 'agilent', normalized=TRUE)
+
+})

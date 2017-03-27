@@ -4,7 +4,7 @@
 \alias{covariate_meta_info}
 \title{Retrieve the meta information about a covariate}
 \usage{
-covariate_meta_info(covariate, .fds, covdefs = covariate_definitions(.fds))
+covariate_meta_info(covariate, .fds, covdefs = NULL)
 }
 \arguments{
 \item{covariate}{the name of the covariate}

@@ -253,6 +253,11 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   }
   asi <- append_facile_table(asi, x, 'assay_sample_info')
 
+  # "numeric" R storage mode is "double" storage mode in hdf5
+  if (storage_mode == 'numeric') {
+    storage_mode <- 'double'
+  }
+
   assay.dat <- lapply(names(dats), function(ds) {
     ## This should be addFacileAssay(x, assay_name, dat, subset(asi, ...))
     dat <- dats[[ds]]

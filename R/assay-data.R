@@ -112,7 +112,7 @@ fetch_assay_data <- function(x, features, samples=NULL, assay_name=NULL,
     mutate(samid=paste(dataset, sample_id, sep="__"))
   bad.samples <- is.na(sinfo$hdf5_index)
   if (any(bad.samples)) {
-    warning(sum(bad.samples), " not found in `", assay_name, "`assay.",
+    warning(sum(bad.samples), " samples not found in `", assay_name, "`assay.",
             immediate.=TRUE)
     sinfo <- sinfo[!bad.samples,,drop=FALSE]
   }
@@ -346,6 +346,34 @@ assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
     set_fds(x)
 }
 
+##' Identify the number of each assay run across specific samples
+##'
+##' @export
+##' @param x FacileDataSet
+##' @param samples sample descriptor
+##' @param with_count return the number of samples in \code{samples} that are
+##'   assayed over each assay as a column in \code{return}
+##' @return rows from assay_info_tbl that correspond to the assays defined
+##'   over the given samples. If no assays are defined over these samples,
+##'   you're going to get an empty tibble.
+assay_info_over_samples <- function(x, samples, with_count=TRUE) {
+  stopifnot(is.FacileDataSet(x))
+  assert_sample_subset(samples)
+  assays <- assay_sample_info_tbl(x) %>%
+    collect %>%
+    inner_join(samples, by=c('dataset', 'sample_id'))
+  if (with_count) {
+    assays <- group_by(assays, assay) %>%
+      summarize(n=n()) %>%
+      ungroup
+  } else {
+    assays <- distinct(assays, assay) %>% mutate(n=-1L)
+  }
+
+  inner_join(assays, assay_info_tbl(x), by='assay', copy=TRUE) %>%
+    arrange(assay)
+}
+
 
 
 ## helper functino to fetch_assay_data
@@ -365,6 +393,7 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info,
     out <- edgeR::cpm(vals, libsize, log=log, prior.count=prior.count)
   } else {
     warning("No normalization procedure for ", atype, " assay", immediate.=TRUE)
+    out <- vals
   }
   out
 }
