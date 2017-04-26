@@ -9,7 +9,7 @@
 ##'   the covariate definitions
 exampleFacileDataSet <- function(db.type=c('sqlite', 'monetdblite')) {
   fn <- system.file('extdata', 'exampleFacileDataSet', package='FacileDataSet')
-  fn <- '~/workspace/data/facile/FacileDataSets/exampleFacileDataSet-unhinged'
+  fn <- '~/workspace/data/facile/FacileDataSets.bak/exampleFacileDataSet-unhinged'
   FacileDataSet(fn)
 }
 
