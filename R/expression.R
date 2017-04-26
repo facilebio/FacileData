@@ -17,8 +17,8 @@ hdf5_sample_indices <- function(x, assay_name='rnaseq', samples=NULL) {
   } else {
     samples <- samples %>%
       assert_sample_subset %>%
-      collect(n=Inf) %>%
       distinct(dataset, sample_id) %>%
+      collect(n=Inf) %>%
       mutate(assay=assay_name) %>%
       left_join(asi, by=c('assay', 'dataset', 'sample_id'))
   }

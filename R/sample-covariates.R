@@ -26,9 +26,9 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
   ## copy the sample descriptor, but in future maybe better to test if the
   ## dat and samples sqlite tables are pointing to the same thing
   if (!is.null(samples)) {
-    assert_sample_subset(samples)
-    samples <- collect(samples, n=Inf) %>%
-      distinct(dataset, sample_id)
+    samples <- assert_sample_subset(samples) %>%
+      distinct(dataset, sample_id) %>%
+      collect(n=Inf)
   }
   out <- filter_samples(dat, samples)
 
@@ -189,6 +189,7 @@ spread_covariates <- function(x, .fds=fds(x)) {
   ## Ensures we get a row for every sample in x, even if it is missing a value
   ## for the covariate
   dummy <- select(x, dataset, sample_id) %>%
+    collect(n=Inf) %>%
     distinct(.keep_all=TRUE) %>%
     mutate(variable='.dummy.', value=NA)
 

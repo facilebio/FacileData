@@ -267,8 +267,8 @@ assay_sample_info <- function(x, assay_name, samples=NULL) {
   stopifnot(is.FacileDataSet(x))
   if (!is.null(samples)) {
     samples <- assert_sample_subset(samples) %>%
-      collect(n=Inf) %>%
-      distinct(dataset, sample_id)
+      distinct(dataset, sample_id) %>%
+      collect(n=Inf)
   }
   feature.type <- assay_feature_type(x, assay_name) ## validate assay_name
 
