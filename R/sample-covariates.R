@@ -10,8 +10,9 @@
 fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                     custom_key=Sys.getenv("USER")) {
   stopifnot(is.FacileDataSet(x))
-  dat <- sample_covariate_tbl(x) %>%
-    collect(n=Inf) ## #dboptimize# remove to exercise db harder
+  ## db temp table thing shouldn't be an issue here
+  # dat <- sample_covariate_tbl(x) %>% collect(n=Inf) ## #dboptimize# remove to exercise db harder
+  dat <- sample_covariate_tbl(x)
   if (is.character(covariates)) {
     if (length(covariates) == 1L) {
       dat <- filter(dat, variable == covariates)
@@ -19,6 +20,7 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
       dat <- filter(dat, variable %in% covariates)
     }
   }
+  dat <- collect(dat, n=Inf)
   dat <- set_fds(dat, x) ## explicitly added here to do `collect` above
 
   ## If the samples descriptor is defined over the sample_covariate table,
@@ -30,7 +32,8 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
       distinct(dataset, sample_id) %>%
       collect(n=Inf)
   }
-  out <- filter_samples(dat, samples)
+  # out <- filter_samples(dat, samples)
+  out <- join_samples(dat, samples, semi=TRUE)
 
   if (!is.null(custom_key)) {
     custom <- fetch_custom_sample_covariates(x, samples,
@@ -64,7 +67,8 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
     out <- bind_rows(annos) %>%
       select_(.dots=out.cols) %>%
       set_fds(x) %>%
-      filter_samples(samples)
+      # filter_samples(samples)
+      join_samples(samples, semi=TRUE)
     ## We weren't saving the type == 'categorical' column earlier. So if this
     ## column is.na, then we force it to 'categorical', because that's all it
     ## realy could have been
@@ -161,15 +165,14 @@ with_sample_covariates <- function(x, covariates=NULL, na.rm=FALSE,
   covs <- spread_covariates(covs, .fds)
 
   out <- collect(x, n=Inf) %>%
-    left_join(covs, by=c('dataset', 'sample_id')) %>%
-    set_fds(.fds)
+    left_join(covs, by=c('dataset', 'sample_id'))
 
   if (na.rm && length(covariates)) {
     keep <- complete.cases(select_(out, .dots=covariates))
     out <- out[keep,,drop=FALSE]
   }
 
-  out
+  set_fds(out, .fds)
 }
 
 ##' Spreads the covariates returned from database into wide data.frame

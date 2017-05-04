@@ -410,6 +410,27 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info,
   out
 }
 
+create_assay_feature_descriptor <- function(x, features, assay_name=NULL) {
+  ## TODO: Refactor the code inside `fetch_assay_data` to use this.
+  stopifnot(is.FacileDataSet(x))
+
+  if (is.character(features) || missing(features)) {
+    assert_string(assay_name)
+    assert_choice(assay_name, assay_names(x))
+  }
+
+  if (missing(features)) {
+    features <- assay_feature_info(x, assay_name) %>% collect(n=Inf)
+  } else if (is.character(features)) {
+    features <- tibble(feature_id=features, assay=assay_name)
+  } else if (is.data.frame(features) && is.character(assay_name)) {
+    features[['assay']] <- assay_name
+  }
+  features <- collect(features, n=Inf) ## not necessary?
+  assert_assay_feature_descriptor(features, x)
+  features
+}
+
 ##' Append expression values to sample-descriptor
 ##'
 ##' @export
@@ -418,8 +439,29 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info,
 ##' @param with_symbols Do you want gene symbols returned, too?
 ##' @param .fds A \code{FacileDataSet} object
 ##' @return a tbl-like result
-with_assay_data <- function(samples, features,  .fds=fds(samples)) {
+with_assay_data <- function(samples, features, assay_name=NULL,
+                            normalized=FALSE, aggregate.by=NULL, spread=NULL,
+                            ..., .fds=fds(samples)) {
   stopifnot(is.FacileDataSet(.fds))
+  assert_sample_subset(samples)
+  assert_flag(normalized)
+  if (!is.null(spread)) {
+    spread <- assert_choice(spread, c('id', 'name'))
+    spread <- if (spread == 'id') 'feature_id' else 'feature_name'
+  }
+  features <- create_assay_feature_descriptor(.fds, features, assay_name=NULL)
+  assays <- unique(features$assay)
+  if (length(assays) > 1L && !is.null(spread)) {
+    stop("Can only spread assay_data if asking for one assay_name")
+  }
+  adata <- fetch_assay_data(.fds, features, samples, normalized=normalized,
+                            aggregate.by=aggregate.by)
+  if (!is.null(spread)) {
+    adata <- select_(adata, .dots=c('dataset', 'sample_id', spread, 'value'))
+    adata <- tidyr::spread_(adata, spread, 'value') %>% set_fds(.fds)
+  }
+
+  adata %>% join_samples(samples)
 }
 
 ##' Takes a result from fetch_expression and spreads out genes acorss columns
@@ -442,7 +484,7 @@ with_assay_data <- function(samples, features,  .fds=fds(samples)) {
 ##'   columns.
 spread_assay_data <- function(x, assay_name, key=c('symbol', 'feature_id'),
                               .fds=fds(x)) {
-
+  stop("Put spread argument in with_assay_data (is this right?)")
   force(.fds)
   if (missing(key)) {
     key <- if ('symbol' %in% colnames(x)) 'symbol' else 'feature_id'

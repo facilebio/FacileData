@@ -165,15 +165,15 @@ join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
     set_fds(fds(x))
 }
 
-##' Filter x down to specific samples
-##'
-##' @export
-##' @param x something like a \code{tbl_sqlite} object
-##' @param samples a sample descriptor
-##' @return filtered version of \code{x} that only has the desired samples
-filter_samples <- function(x, samples=NULL) {
- join_samples(x, samples, semi=TRUE)
-}
+## Filter x down to specific samples
+##
+## @export
+## @param x something like a \code{tbl_sqlite} object
+## @param samples a sample descriptor
+## @return filtered version of \code{x} that only has the desired samples
+# filter_samples <- function(x, samples=NULL) {
+#  join_samples(x, samples, semi=TRUE)
+# }
 
 ## FacileExplorer's filter_active_samples ======================================
 

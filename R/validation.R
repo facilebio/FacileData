@@ -35,18 +35,30 @@ is_facet_descriptor <- function(x) {
   has_columns(x, 'facet')
 }
 
+##' @section assay_feature_descriptor:
+##' If .fds is provided, it must be a \code{FaclieDataSet} and these functions
+##' will check to ensure that the \code{x[['assay']]} is a valid assay element
+##' in \code{.fds}
 ##' @export
 ##' @rdname assertions
-assert_assay_feature_descriptor <- function(x) {
-  stopifnot(is_assay_feature_descriptor(x))
+assert_assay_feature_descriptor <- function(x, .fds=NULL) {
+  stopifnot(is_assay_feature_descriptor(x, .fds))
   invisible(x)
 }
 
 ##' @export
 ##' @rdname assertions
-is_assay_feature_descriptor <- function(x) {
+is_assay_feature_descriptor <- function(x, .fds=NULL) {
   if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
   if (!has_columns(x, c('assay', 'feature_id'))) return(FALSE)
+  if (!is.null(.fds)) {
+    stopifnot(is.FacileDataSet(.fds))
+    bad.assay <- setdiff(x[['assay']], assay_names(.fds))
+    if (length(bad.assay)) {
+      stop("Assay(s) in assay_feature_descriptor not found: ",
+           paste(bad.assay, collapse=','))
+    }
+  }
   TRUE
 }
 
