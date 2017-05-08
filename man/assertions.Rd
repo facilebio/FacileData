@@ -27,9 +27,9 @@ assert_facet_descriptor(x)
 
 is_facet_descriptor(x)
 
-assert_assay_feature_descriptor(x)
+assert_assay_feature_descriptor(x, .fds = NULL)
 
-is_assay_feature_descriptor(x)
+is_assay_feature_descriptor(x, .fds = NULL)
 
 assert_expression_result(x)
 
@@ -60,3 +60,10 @@ them, we can either:
   2. pass a "loaded up" tbl_sqlite" over the sample_covariate table which
      has your filters of interest set
 }
+\section{assay_feature_descriptor}{
+
+If .fds is provided, it must be a \code{FaclieDataSet} and these functions
+will check to ensure that the \code{x[['assay']]} is a valid assay element
+in \code{.fds}
+}
+

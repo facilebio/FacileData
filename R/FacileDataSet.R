@@ -43,10 +43,6 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   dbGetQuery(out$con, 'pragma temp_store=MEMORY;')
   dbGetQuery(out$con, sprintf('pragma cache_size=%d;', cache_size))
 
-  # out['parent.dir'] <- list(NULL)
-  # out['data.fn'] <- list(NULL)
-  # out['cov.def'] <- list(NULL)
-  # out['anno.dir'] <- list(NULL)
   out['parent.dir'] <- paths$path
   out['data.fn'] <- paths$sqlite.fn ## paths$data.fn
   out['sqlite.fn'] <- paths$sqlite.fn
@@ -92,18 +88,32 @@ hdf5fn <- function(x, mustWork=TRUE) {
   out
 }
 
+##' Path to the meta information file
+##'
+##' @rdname meta-info
 ##' @export
-dataset_definition_file <- function(x) {
+##' @param x \code{FacileDataSet}
+meta_file <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  fn <- assert_file(file.path(x$parent.dir, 'datasets.yaml'), 'r')
+  fn <- assert_file(file.path(x$parent.dir, 'meta.yaml'), 'r')
   fn
 }
 
+##' Get meta information for dataset
+##'
+##' @rdname meta-info
+##' @export
+##' @param x \code{FacileDataSet}
+meta_info <- function(x) {
+  out <- yaml.load_file(meta_file(x))
+  out
+}
+
+
+##' @rdname meta-info
 ##' @export
 dataset_definitions <- function(x, as.list=TRUE) {
-  stopifnot(is.FacileDataSet(x))
-  fn <- dataset_definition_file(x)
-  defs <- yaml.load_file(fn)
+  defs <- meta_info(x)$datasets
   if (!as.list) {
     defs <- lapply(names(defs), function(ds) {
       i <- defs[[ds]]
@@ -114,18 +124,9 @@ dataset_definitions <- function(x, as.list=TRUE) {
 }
 
 ##' @export
-covariate_definition_file <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  x[['cov.def']]
-}
-
-##' @export
 ##' @importFrom yaml yaml.load_file
 covariate_definitions <- function(x, as.list=TRUE) {
-  stopifnot(is.FacileDataSet(x))
-  cov.def <- covariate_definition_file(x)
-  assert_file(cov.def, 'r')
-  out <- yaml.load_file(cov.def)
+  out <- meta_info(x)$sample_covariates
   if (!as.list) {
     out <- lapply(names(out), function(name) {
       i <- out[[name]]
@@ -147,4 +148,3 @@ samples <- function(x) {
     select(dataset, sample_id) %>%
     collect(n=Inf)
 }
-
