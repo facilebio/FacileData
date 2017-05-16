@@ -191,7 +191,7 @@ set_fds <- function(x, value) {
 
 ## Unexported utility functions ================================================
 
-validate.facile.dirs <- function(path, data.fn, sqlite.fn, hdf5.fn, covdef.fn,
+validate.facile.dirs <- function(path, data.fn, sqlite.fn, hdf5.fn, meta.fn,
                                  anno.dir, db.type=c('sqlite', 'monetdblite')) {
   if (!dir.exists(path)) {
     stop("Top level FacileData directory does not exist: ", path)
@@ -221,14 +221,7 @@ validate.facile.dirs <- function(path, data.fn, sqlite.fn, hdf5.fn, covdef.fn,
       warning("HDF5 file is not under parent directory", immediate.=TRUE)
     }
   }
-  if (!file.exists(covdef.fn)) {
-    stop("Covariate information yaml file does not exist: ", covdef.fn)
-  } else {
-    covdef.fn <- normalizePath(covdef.fn)
-    if (dirname(covdef.fn) != path) {
-      warning("Covariate file is not under parent directory", immediate.=TRUE)
-    }
-  }
+  meta.fn <- assert_valid_meta_file(meta.fn) %>% normalizePath
   if (!dir.exists(anno.dir)) {
     stop("Directory for custom annotations does not exist: ", anno.dir)
   } else {
@@ -241,5 +234,5 @@ validate.facile.dirs <- function(path, data.fn, sqlite.fn, hdf5.fn, covdef.fn,
   db.type <- match.arg(db.type)
 
   list(path=path, data.fn=data.fn, sqlite.fn=sqlite.fn, hdf5.fn=hdf5.fn,
-       covdef.fn=covdef.fn, anno.dir=anno.dir)
+       meta.fn=meta.fn, anno.dir=anno.dir)
 }

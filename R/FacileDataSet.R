@@ -9,11 +9,11 @@
 FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
                           sqlite.fn=file.path(path, 'data.sqlite'),
                           hdf5.fn=file.path(path, 'data.h5'),
-                          covdef.fn=file.path(path, 'sample-covariate-info.yaml'),
+                          meta.fn=file.path(path, 'meta.yaml'),
                           anno.dir=file.path(path, 'custom-annotation'),
                           cache_size=80000,
                           db.loc=c('reference', 'temporary', 'memory')) {
-  paths <- validate.facile.dirs(path, data.fn, sqlite.fn, hdf5.fn, covdef.fn,
+  paths <- validate.facile.dirs(path, data.fn, sqlite.fn, hdf5.fn, meta.fn,
                                 anno.dir)
   db.loc <- match.arg(db.loc)
   ## Update some parameters in the connection for increased speed
