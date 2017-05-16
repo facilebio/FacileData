@@ -47,18 +47,23 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   out['data.fn'] <- paths$sqlite.fn ## paths$data.fn
   out['sqlite.fn'] <- paths$sqlite.fn
   out['hdf5.fn'] <- paths$hdf5.fn
-  out['cov.def'] <- paths$covdef.fn
   out['anno.dir'] <- paths$anno.dir
 
+  ## meta information
   class(out) <- c('FacileDataSet', class(out))
+
+  mi <- meta_info(out)
+  out['organism'] <- mi$organism
+  class(out) <- c(mi$name, class(out))
+
   out
 }
 
 ##' @export
 is.FacileDataSet <- function(x) {
+  ## `is` and `validate` funcitonality confused in here.
   is(x, 'FacileDataSet') &&
     'con' %in% names(x) && is(x$con, 'DBIObject') &&
-    'cov.def' %in% names(x) && file.exists(x$cov.def) &&
     'anno.dir' %in% names(x) && dir.exists(x$anno.dir)
 }
 
@@ -109,6 +114,13 @@ meta_info <- function(x) {
   out
 }
 
+##' @rdname meta-info
+##' @export
+##' @param x \code{FacileDataSet}
+organism <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  x$organism
+}
 
 ##' @rdname meta-info
 ##' @export

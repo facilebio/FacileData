@@ -8,7 +8,7 @@
 ##'
 ##' @export
 ##' @param x A \code{FacileDataSet}
-##' @param
+##' @param ... NSE claused to use in \code{\link[dplyr]{filter}} expressions
 filter_features <- function(x, ...) {
   feature_info_tbl(x) %>% filter(...) %>% set_fds(x)
 }

@@ -4,17 +4,17 @@
 \alias{initializeFacileDataSet}
 \title{Create an empty FacileDataSet}
 \usage{
-initializeFacileDataSet(path, covariate_definition, page_size = 2^12,
+initializeFacileDataSet(path, meta_file, page_size = 2^12,
   cache_size = 2e+05)
 }
 \arguments{
 \item{path}{the directory to create which will house the
 \code{FacileDataSet}}
 
-\item{covariate_definition}{the path to the covariate definition file}
-
 \item{page_size, cache_size}{\code{pragma} values to setup the backend SQLite
 database}
+
+\item{covariate_definition}{the path to the covariate definition file}
 }
 \value{
 inivisibly returns the \code{FaclieDataSet} you just made

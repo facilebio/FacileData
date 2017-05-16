@@ -11,8 +11,9 @@
 ##' @param page_size,cache_size \code{pragma} values to setup the backend SQLite
 ##'   database
 ##' @return inivisibly returns the \code{FaclieDataSet} you just made
-initializeFacileDataSet <- function(path, covariate_definition,
+initializeFacileDataSet <- function(path, meta_file,
                                     page_size=2**12, cache_size=2e5) {
+  assert_valid_meta_file(meta_file)
   path <- normalizePath(path, mustWork=FALSE)
   if (file.exists(path) || dir.exists(path)) {
     stop("Collision with file: ", path)
@@ -23,7 +24,8 @@ initializeFacileDataSet <- function(path, covariate_definition,
 
   dir.create(path)
   dir.create(file.path(path, 'custom-annotation'))
-  file.copy(covariate_definition, file.path(path, 'sample-covariate-info.yaml'))
+  ## file.copy(covariate_definition, file.path(path, 'sample-covariate-info.yaml'))
+  file.copy(meta_file, file.path(path, 'meta.yaml'))
 
   ## Create sqlite db
   db.fn <- file.path(path, 'data.sqlite')
@@ -44,6 +46,13 @@ initializeFacileDataSet <- function(path, covariate_definition,
   H5close()
 
   invisible(FacileDataSet(path))
+}
+
+##' @export
+assert_valid_meta_file <- function(fn) {
+  assert_file(fn)
+  warning("TODO: implement `assert_valid_meta_file`")
+  fn
 }
 
 .feature.types <- c('entrez', 'ensgid', 'enstid')

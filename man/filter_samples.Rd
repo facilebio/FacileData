@@ -8,6 +8,8 @@ filter_samples(x, ..., with_covariates = FALSE)
 }
 \arguments{
 \item{x}{A \code{FacileDataSet}}
+
+\item{...}{NSE claused to use in \code{\link[dplyr]{filter}} expressions}
 }
 \description{
 This feature is implemented so poorly. It's only really meant to be used

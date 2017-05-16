@@ -8,7 +8,7 @@
 ##'
 ##' @export
 ##' @param x A \code{FacileDataSet}
-##' @param
+##' @param ... NSE claused to use in \code{\link[dplyr]{filter}} expressions
 filter_samples <- function(x, ..., with_covariates=FALSE) {
   stopifnot(is.FacileDataSet(x))
   dots <- lazyeval::lazy_dots(...)
