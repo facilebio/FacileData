@@ -449,7 +449,7 @@ with_assay_data <- function(samples, features, assay_name=NULL,
     spread <- assert_choice(spread, c('id', 'name'))
     spread <- if (spread == 'id') 'feature_id' else 'feature_name'
   }
-  features <- create_assay_feature_descriptor(.fds, features, assay_name=NULL)
+  features <- create_assay_feature_descriptor(.fds, features, assay_name=assay_name)
   assays <- unique(features$assay)
   if (length(assays) > 1L && !is.null(spread)) {
     stop("Can only spread assay_data if asking for one assay_name")
