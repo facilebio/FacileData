@@ -124,10 +124,10 @@ fetch_expression <- function(x, samples=NULL, feature_ids=NULL,
       ds <- .$dataset[1L]
       hd5.name <- paste0('assay/rnaseq/', ds)
       cnts <- h5read(x$hdf5.fn, hd5.name, list(ridx, .$hdf5_index))
-      stopifnot(nrow(cnts) == nrow(gene.info))
       if (ask.some && fetch.all) {
         cnts <- cnts[gene.info$hdf5_index,,drop=FALSE]
       }
+      stopifnot(nrow(cnts) == nrow(gene.info))
       if (isTRUE(as.matrix)) {
         dimnames(cnts) <- list(gene.info$feature_id,
                                paste(ds, .$sample_id, sep='_'))
