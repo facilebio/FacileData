@@ -6,7 +6,7 @@
 \usage{
 FacileDataSet(path, data.fn = file.path(path, "data.sqlite"),
   sqlite.fn = file.path(path, "data.sqlite"), hdf5.fn = file.path(path,
-  "data.h5"), covdef.fn = file.path(path, "sample-covariate-info.yaml"),
+  "data.h5"), meta.fn = file.path(path, "meta.yaml"),
   anno.dir = file.path(path, "custom-annotation"), cache_size = 80000,
   db.loc = c("reference", "temporary", "memory"))
 }
@@ -15,11 +15,11 @@ FacileDataSet(path, data.fn = file.path(path, "data.sqlite"),
 
 \item{data.fn}{A custom path to the database (probably don't mess with this)}
 
-\item{covdef.fn}{A custom path to the yaml file that has covariate mapping info}
-
 \item{anno.dir}{A directory to house custom annotations/sample covariates}
 
 \item{cache_size}{A custom paramter for the SQLite database}
+
+\item{covdef.fn}{A custom path to the yaml file that has covariate mapping info}
 }
 \description{
 Connect to a FacileDataSet repository.
