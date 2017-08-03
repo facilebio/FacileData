@@ -603,9 +603,9 @@ as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
 ##' @export
 ##' @method as.DGEList tbl_sqlite
 ##' @rdname expression-container
-as.DGEList.tbl_sqlite <- function(x, covariates=TRUE, feature_ids=NULL,
-                                  .fds=fds(x), custom_key=Sys.getenv("USER"),
-                                  ...) {
+as.DGEList.tbl_sql <- function(x, covariates=TRUE, feature_ids=NULL,
+                               .fds=fds(x), custom_key=Sys.getenv("USER"),
+                               ...) {
   x <- collect(x, n=Inf) %>% set_fds(.fds)
   as.DGEList(x, covariates, feature_ids, .fds=.fds, custom_key=custom_key, ...)
 }

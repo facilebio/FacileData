@@ -12,7 +12,6 @@ genes <- local({
     feature_id
 })
 
-
 test_that("fetch_expression limits samples correctly", {
   s.df <- collect(samples, n=Inf)
 
@@ -127,10 +126,10 @@ test_that("cpm on fetch_expression result mimics cpm.DGEList", {
   expect_equal(EL, Etbldf)
 
   ## Test that cpm's returned with edgeR only code match
-  library(edgeR)
+  # library(edgeR)
   y <- as.DGEList(e)
-  YL <- cpm(y, log=TRUE, prior.count=5)
-  Y <- cpm(y, log=FALSE, prior.count=5)
+  YL <- edgeR::cpm(y, log=TRUE, prior.count=5)
+  Y <- edgeR::cpm(y, log=FALSE, prior.count=5)
 
   E <- E[rownames(Y), colnames(Y)]
   EL <- EL[rownames(YL), colnames(YL)]

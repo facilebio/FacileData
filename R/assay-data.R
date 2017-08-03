@@ -482,14 +482,24 @@ with_assay_data <- function(samples, features, assay_name=NULL,
 ##' @param .fds the \code{FacileDataSet}
 ##' @return a more stout \code{x} with the expression values spread across
 ##'   columns.
-spread_assay_data <- function(x, assay_name, key=c('symbol', 'feature_id'),
+spread_assay_data <- function(x, assay_name, key=c('name', 'feature_id'),
+                              value=c('cpm', 'value', 'count'),
                               .fds=fds(x)) {
   stop("Put spread argument in with_assay_data (is this right?)")
   force(.fds)
   if (missing(key)) {
-    key <- if ('symbol' %in% colnames(x)) 'symbol' else 'feature_id'
+    key <- if ('name' %in% colnames(x)) 'symbol' else 'feature_id'
   }
+  key <- match.arg(key, c('name', 'feature_id'))
+  
+  val.opts <- intersect(c('value', 'cpm', 'count'), colnames(x))
+  
   if (missing(value)) {
+    xref <- setNames(match(colnames(x), val.opts), colnames(x))
+    xref <- xref[!is.na(xref)]
+    
+    ## get either of these options in this order
+    vals <- 
     value <- if ('cpm' %in% colnames(x)) 'cpm' else 'count'
   }
   key <- match.arg(key, c('symbol', 'feature_id'))

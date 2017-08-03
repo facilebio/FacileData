@@ -4,8 +4,8 @@
 \alias{spread_assay_data}
 \title{Takes a result from fetch_expression and spreads out genes acorss columns}
 \usage{
-spread_assay_data(x, assay_name, key = c("symbol", "feature_id"),
-  .fds = fds(x))
+spread_assay_data(x, assay_name, key = c("name", "feature_id"),
+  value = c("cpm", "value", "count"), .fds = fds(x))
 }
 \arguments{
 \item{x}{facile expression result from \code{fetch_expression}}
@@ -14,9 +14,9 @@ spread_assay_data(x, assay_name, key = c("symbol", "feature_id"),
 to put in the columns of the outgoing data.frame that the values are
 "spread into"}
 
-\item{.fds}{the \code{FacileDataSet}}
-
 \item{value}{the value column to spread into the \code{key} columns}
+
+\item{.fds}{the \code{FacileDataSet}}
 }
 \value{
 a more stout \code{x} with the expression values spread across

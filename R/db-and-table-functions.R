@@ -30,7 +30,7 @@ primary_key <- function(x, table_name) {
 ##' @return invisibly returns the conformed version of \code{dat}.
 append_facile_table <- function(dat, x, table_name) {
   stopifnot(is.FacileDataSet(x))
-  target <- try(tbl(x, table_name), silent=TRUE)
+  target <- try(tbl(x$con, table_name), silent=TRUE)
   if (is(target, 'try-error')) stop("Unknown table to append to: ", table_name)
   dat <- conform_data_frame(dat, target)
 
@@ -66,25 +66,25 @@ append_facile_table <- function(dat, x, table_name) {
 ##' @export
 assay_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x, 'assay_info') %>% set_fds(x)
+  tbl(x$con, 'assay_info') %>% set_fds(x)
 }
 
 ##' @export
 assay_feature_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x, 'assay_feature_info') %>% set_fds(x)
+  tbl(x$con, 'assay_feature_info') %>% set_fds(x)
 }
 
 ##' @export
 assay_sample_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x, 'assay_sample_info') %>% set_fds(x)
+  tbl(x$con, 'assay_sample_info') %>% set_fds(x)
 }
 
 ##' @export
 feature_info_tbl <- function(x, assay_name=NULL) {
   stopifnot(is.FacileDataSet(x))
-  out <- tbl(x, 'feature_info')
+  out <- tbl(x$con, 'feature_info')
   if (!is.null(assay_name)) {
     assert_string(assay_name)
     assay.info <- assay_info_tbl(x) %>%
@@ -134,13 +134,13 @@ sample_stats_tbl <- function(x) {
 ##' @export
 sample_covariate_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x, 'sample_covariate') %>% set_fds(x)
+  tbl(x$con, 'sample_covariate') %>% set_fds(x)
 }
 
 ##' @export
 sample_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x, 'sample_info') %>% set_fds(x)
+  tbl(x$con, 'sample_info') %>% set_fds(x)
 }
 
 ##' Get/set db

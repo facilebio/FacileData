@@ -82,10 +82,10 @@ fetch_samples <- function(x, samples=NULL, assay="rnaseq", ...) {
     fds.tbl <- 'sample_info'
   }
 
-  copy <- !is(samples, 'tbl_sqlite')
+  copy <- !is(samples, 'tbl_dbi')
   pk <- primary_key(x, fds.tbl)
 
-  tbl(x, fds.tbl) %>%
+  tbl(x$con, fds.tbl) %>%
     semi_join(samples, by=pk, copy=copy, auto_index=copy) %>%
     set_fds(x)
 }

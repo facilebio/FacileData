@@ -1,6 +1,7 @@
 ##' Connect to a FacileDataSet repository.
 ##'
 ##' @export
+##' @importFrom DBI dbConnect
 ##' @param path The path to the FacileData repository
 ##' @param data.fn A custom path to the database (probably don't mess with this)
 ##' @param covdef.fn A custom path to the yaml file that has covariate mapping info
@@ -29,28 +30,32 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
     tmp.fn <- tempfile()
     file.copy(paths$sqlite.fn, tmp.fn)
     paths$sqlite.fn <- tmp.fn
-    out <- src_sqlite(paths$sqlite.fn)
-  } else {
-    out <- src_sqlite(paths$sqlite.fn)
-    if (db.loc == 'memory') {
-      mcon <- dbConnect(RSQLite::SQLite(), ":memory:")
-      RSQLite::sqliteCopyDatabase(out$con, mcon)
-      RSQLite::dbDisconnect(out$con)
-      out$con <- mcon
-    }
   }
-
-  dbGetQuery(out$con, 'pragma temp_store=MEMORY;')
-  dbGetQuery(out$con, sprintf('pragma cache_size=%d;', cache_size))
-
+  
+  con <- DBI::dbConnect(RSQLite::SQLite(), paths$sqlite.fn)
+  
+  if (db.loc == 'memory') {
+    mcon <- dbConnect(RSQLite::SQLite(), ":memory:")
+    RSQLite::sqliteCopyDatabase(con, mcon)
+    RSQLite::dbDisconnect(con)
+    con <- mcon
+  }
+  
+  # dbGetQuery(out$con, 'pragma temp_store=MEMORY;')
+  # dbGetQuery(out$con, sprintf('pragma cache_size=%d;', cache_size))
+  dbExecute(con, 'pragma temp_store=MEMORY;')
+  dbExecute(con, sprintf('pragma cache_size=%d;', cache_size))
+  
+  out <- list(con=con)
   out['parent.dir'] <- paths$path
   out['data.fn'] <- paths$sqlite.fn ## paths$data.fn
   out['sqlite.fn'] <- paths$sqlite.fn
   out['hdf5.fn'] <- paths$hdf5.fn
   out['anno.dir'] <- paths$anno.dir
-
+  out['db.loc'] <- db.loc
+  
   ## meta information
-  class(out) <- c('FacileDataSet', class(out))
+  class(out) <- 'FacileDataSet'
 
   mi <- meta_info(out)
   out['organism'] <- mi$organism
