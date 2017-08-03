@@ -1,0 +1,78 @@
+name: FacileTCGADataSet
+organism: Homo sapiens
+datasets:
+  BLCA:
+    url: https://portal.gdc.cancer.gov/projects/TCGA-BLCA
+    description: Bladder urothelial carcinoma
+  COAD:
+    url: https://portal.gdc.cancer.gov/projects/TCGA-COAD
+    description: Colon adenocarcinoma
+sample_covariates:
+  indication:
+    type: tumor_classification
+    class: categorical
+    description: High level indication of patient's cancer type
+    label: Cancer Indication
+  OS:
+    type: response
+    class: right_censored
+    description: >
+      Overall Survival in days or months. The units still need to be standardized
+      across trials.
+    label: Overall survival
+  PFS:
+    type: response
+    class: right_censored
+    description: >
+      Progression Free Survival. The units still need to be standardized
+      across trials.
+    label: Progression free survival
+  sample_type:
+    type: clinical
+    class: categorical
+    levels: ['normal', 'tumor']
+    description: Whether sample comes from a tumor or adjacent normal
+    label: Sample type (tumor/normal)
+  sex:
+    type: clinical
+    class: categorical
+    levels: ['m', 'f']
+    description: In the "ratio between chrX:chrY" sense.
+    label: Sex
+  stage:
+    type: clinical
+    class: categorical
+    description: Cancer staging classification (I-IV)
+    label: Cancer stage
+  subtype_molecular:
+    type: tumor_classification
+    class: categorical
+    description: >
+      The luminal/basal subtyping scheme in bladder, as defined by Damrauer et al.
+      (doi:10.1073/pnas.1318376111). For a larger umbrella review
+      of the diversity of bladder subtypes, you can refer to doi:10.1038/nrc3817.
+    label: Bladder cancer subtype (luminal/basal)
+  subtype_tcga:
+    type: tumor_classification
+    class: categorical
+    description: >
+      Expression based subtypes of bladder cancer (I-IV) as described in the
+      TCGA bladder paper (doi:10.1038/nature12965). For a larger umbrella review
+      of the diversity of bladder subtypes, you can refer to doi:10.1038/nrc3817.
+    label: Bladder cancer subtype (TCGA)
+  subtype_crc_cms:
+    type: tumor_classification
+    class: categorical
+    description: >
+      The consensus molecular subtypes of CRC.
+    label: Consensus Molecular CRC Subtypes (CMS1-4)
+    levels: ['CMS1', 'CMS2', 'CMS3', 'CMS4']
+  subtype_microsatellite_instability:
+    type: tumor_classification
+    class: categorical
+    description: >
+      The consensus molecular subtypes of CRC.
+    label: Consensus Molecular CRC Subtypes (CMS1-4)
+    levels: ['MSI-hi', 'MSI-lo/MSS']
+
+
