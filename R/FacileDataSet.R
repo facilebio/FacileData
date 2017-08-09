@@ -31,21 +31,21 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
     file.copy(paths$sqlite.fn, tmp.fn)
     paths$sqlite.fn <- tmp.fn
   }
-  
+
   con <- DBI::dbConnect(RSQLite::SQLite(), paths$sqlite.fn)
-  
+
   if (db.loc == 'memory') {
     mcon <- dbConnect(RSQLite::SQLite(), ":memory:")
     RSQLite::sqliteCopyDatabase(con, mcon)
     RSQLite::dbDisconnect(con)
     con <- mcon
   }
-  
+
   # dbGetQuery(out$con, 'pragma temp_store=MEMORY;')
   # dbGetQuery(out$con, sprintf('pragma cache_size=%d;', cache_size))
   dbExecute(con, 'pragma temp_store=MEMORY;')
   dbExecute(con, sprintf('pragma cache_size=%d;', cache_size))
-  
+
   out <- list(con=con)
   out['parent.dir'] <- paths$path
   out['data.fn'] <- paths$sqlite.fn ## paths$data.fn
@@ -53,7 +53,7 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   out['hdf5.fn'] <- paths$hdf5.fn
   out['anno.dir'] <- paths$anno.dir
   out['db.loc'] <- db.loc
-  
+
   ## meta information
   class(out) <- 'FacileDataSet'
 
@@ -163,5 +163,5 @@ samples <- function(x) {
   stopifnot(is.FacileDataSet(x))
   sample_info_tbl(x) %>%
     select(dataset, sample_id) %>%
-    collect(n=Inf)
+    set_fds(x)
 }

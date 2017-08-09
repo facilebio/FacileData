@@ -414,19 +414,23 @@ create_assay_feature_descriptor <- function(x, features, assay_name=NULL) {
   ## TODO: Refactor the code inside `fetch_assay_data` to use this.
   stopifnot(is.FacileDataSet(x))
 
-  if (is.character(features) || missing(features)) {
+  if (is.character(features) || missing(features) || is(features, 'tbl_sql')) {
     assert_string(assay_name)
     assert_choice(assay_name, assay_names(x))
   }
-
+  
   if (missing(features)) {
     features <- assay_feature_info(x, assay_name) %>% collect(n=Inf)
   } else if (is.character(features)) {
     features <- tibble(feature_id=features, assay=assay_name)
-  } else if (is.data.frame(features) && is.character(assay_name)) {
+  } else if (is(features, 'tbl_sql')) {
+    features <- collect(features, n=Inf)
+  }
+  
+  if (is.character(assay_name)) {
     features[['assay']] <- assay_name
   }
-  features <- collect(features, n=Inf) ## not necessary?
+  
   assert_assay_feature_descriptor(features, x)
   features
 }
@@ -440,28 +444,48 @@ create_assay_feature_descriptor <- function(x, features, assay_name=NULL) {
 ##' @param .fds A \code{FacileDataSet} object
 ##' @return a tbl-like result
 with_assay_data <- function(samples, features, assay_name=NULL,
-                            normalized=FALSE, aggregate.by=NULL, spread=NULL,
-                            ..., .fds=fds(samples)) {
+                            normalized=FALSE, aggregate.by=NULL,
+                            spread=TRUE, ..., .fds=fds(samples)) {
+  if (is.FacileDataSet(samples)) {
+    .fds <- samples(samples)
+    samples(samples(.fds))
+  }
   stopifnot(is.FacileDataSet(.fds))
   assert_sample_subset(samples)
   assert_flag(normalized)
-  if (!is.null(spread)) {
+  
+  ## Check that parameters are kosher before fetching data
+  features <- create_assay_feature_descriptor(.fds, features, 
+                                              assay_name=assay_name)
+  assay_name <- unique(features$assay)
+  if (test_flag(spread) && spread) {
+    ## infer column based on assay type (rnaseq for now)
+    spread <- if (can.spread.assay.by.name(adata, assay_name)) 'name' else 'id'
+  }
+  if (is.character(spread)) {
     spread <- assert_choice(spread, c('id', 'name'))
     spread <- if (spread == 'id') 'feature_id' else 'feature_name'
   }
-  features <- create_assay_feature_descriptor(.fds, features, assay_name=assay_name)
-  assays <- unique(features$assay)
-  if (length(assays) > 1L && !is.null(spread)) {
+  if (length(assay_name) > 1L && !is.null(spread)) {
     stop("Can only spread assay_data if asking for one assay_name")
   }
+  
+  ## Hit the datastore
   adata <- fetch_assay_data(.fds, features, samples, normalized=normalized,
                             aggregate.by=aggregate.by)
-  if (!is.null(spread)) {
+  
+  if (is.character(spread)) {
     adata <- select_(adata, .dots=c('dataset', 'sample_id', spread, 'value'))
     adata <- tidyr::spread_(adata, spread, 'value') %>% set_fds(.fds)
   }
 
-  adata %>% join_samples(samples)
+  join_samples(adata, samples)
+}
+
+can.spread.assay.by.name <- function(x, assay_name) {
+  ## TODO: check if duplicate sample_id;name combos exist, in which case
+  ## we spread with id and not name
+  TRUE  
 }
 
 ##' Takes a result from fetch_expression and spreads out genes acorss columns

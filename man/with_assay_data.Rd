@@ -5,7 +5,7 @@
 \title{Append expression values to sample-descriptor}
 \usage{
 with_assay_data(samples, features, assay_name = NULL, normalized = FALSE,
-  aggregate.by = NULL, spread = NULL, ..., .fds = fds(samples))
+  aggregate.by = NULL, spread = TRUE, ..., .fds = fds(samples))
 }
 \arguments{
 \item{.fds}{A \code{FacileDataSet} object}

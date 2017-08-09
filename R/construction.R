@@ -49,9 +49,19 @@ initializeFacileDataSet <- function(path, meta_file,
 }
 
 ##' @export
+##' @importFrom tools file_ext
 assert_valid_meta_file <- function(fn) {
   assert_file(fn)
-  warning("TODO: implement `assert_valid_meta_file`")
+  if (!tolower(file_ext(fn)) ==  'yaml') {
+    stop("meta file must be a yaml file")
+  }
+  dat <- yaml.load_file(fn)
+  req.toplevel <- c('name', 'organism', 'datasets', 'sample_covariates')
+  miss.toplevel <- setdiff(req.toplevel, names(dat))
+  if (length(miss.toplevel)) {
+    stop("Missing the following definitions in meta file: ",
+         paste(miss.toplevel, collapse=","))
+  }
   fn
 }
 

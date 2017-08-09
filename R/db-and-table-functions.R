@@ -150,6 +150,7 @@ sample_info_tbl <- function(x) {
 ##' @param x the object
 ##' @param db The \code{FacileDb} object
 fds <- function(x) {
+  if (is.FacileDataSet(x)) return(x)
   out <- attr(x, 'fds')
   if (is.null(out)) {
     warning("No FacileDataSet found in x (", class(x)[1L], ")", immediate.=TRUE)
