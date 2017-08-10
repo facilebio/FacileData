@@ -410,27 +410,38 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info,
   out
 }
 
-create_assay_feature_descriptor <- function(x, features, assay_name=NULL) {
+##' Creates a feature descriptor for interactive ease
+##'
+##' cretes a data.frame of features and assays they come from
+##' @export
+##' @param x FacileDataSet
+##' @param features a character string of fearture ids (requires assay_name)
+##'   or a data.frame with feature_id column.
+##' @param assay_name the assay to get the featurespace from. if this is provided,
+##'   it will trump an already existing assay_name column in \code{features}
+##' @return a feature descriptor with feature_id and assay_name, which can be
+##'   used to absolutely find features
+create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
   ## TODO: Refactor the code inside `fetch_assay_data` to use this.
   stopifnot(is.FacileDataSet(x))
 
-  if (is.character(features) || missing(features) || is(features, 'tbl_sql')) {
+  if (is.character(features) || is.null(features) || is(features, 'tbl_sql')) {
     assert_string(assay_name)
     assert_choice(assay_name, assay_names(x))
   }
-  
-  if (missing(features)) {
+
+  if (is.null(features)) {
     features <- assay_feature_info(x, assay_name) %>% collect(n=Inf)
   } else if (is.character(features)) {
     features <- tibble(feature_id=features, assay=assay_name)
   } else if (is(features, 'tbl_sql')) {
     features <- collect(features, n=Inf)
   }
-  
+
   if (is.character(assay_name)) {
     features[['assay']] <- assay_name
   }
-  
+
   assert_assay_feature_descriptor(features, x)
   features
 }
@@ -453,9 +464,9 @@ with_assay_data <- function(samples, features, assay_name=NULL,
   stopifnot(is.FacileDataSet(.fds))
   assert_sample_subset(samples)
   assert_flag(normalized)
-  
+
   ## Check that parameters are kosher before fetching data
-  features <- create_assay_feature_descriptor(.fds, features, 
+  features <- create_assay_feature_descriptor(.fds, features,
                                               assay_name=assay_name)
   assay_name <- unique(features$assay)
   if (test_flag(spread) && spread) {
@@ -469,11 +480,11 @@ with_assay_data <- function(samples, features, assay_name=NULL,
   if (length(assay_name) > 1L && !is.null(spread)) {
     stop("Can only spread assay_data if asking for one assay_name")
   }
-  
+
   ## Hit the datastore
   adata <- fetch_assay_data(.fds, features, samples, normalized=normalized,
                             aggregate.by=aggregate.by)
-  
+
   if (is.character(spread)) {
     adata <- select_(adata, .dots=c('dataset', 'sample_id', spread, 'value'))
     adata <- tidyr::spread_(adata, spread, 'value') %>% set_fds(.fds)
@@ -485,7 +496,7 @@ with_assay_data <- function(samples, features, assay_name=NULL,
 can.spread.assay.by.name <- function(x, assay_name) {
   ## TODO: check if duplicate sample_id;name combos exist, in which case
   ## we spread with id and not name
-  TRUE  
+  TRUE
 }
 
 ##' Takes a result from fetch_expression and spreads out genes acorss columns
@@ -515,15 +526,15 @@ spread_assay_data <- function(x, assay_name, key=c('name', 'feature_id'),
     key <- if ('name' %in% colnames(x)) 'symbol' else 'feature_id'
   }
   key <- match.arg(key, c('name', 'feature_id'))
-  
+
   val.opts <- intersect(c('value', 'cpm', 'count'), colnames(x))
-  
+
   if (missing(value)) {
     xref <- setNames(match(colnames(x), val.opts), colnames(x))
     xref <- xref[!is.na(xref)]
-    
+
     ## get either of these options in this order
-    vals <- 
+    vals <-
     value <- if ('cpm' %in% colnames(x)) 'cpm' else 'count'
   }
   key <- match.arg(key, c('symbol', 'feature_id'))

@@ -91,39 +91,43 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
 
 ##' Saves custom sample covariates to a FacileDataSet
 ##'
+##' TODO: Figure out how to encode sample_fiter_criteria into serlized
+##' (JSON) annotation file
+##'
 ##' @export
 ##' @importFrom jsonlite stream_out
 ##'
 ##' @param x the \code{FacileDataSet}
-##' @param name the variable name of the covariate
 ##' @param annotation the annotation table of covariate vaues to a
 ##'   sample-descriptor-like table
+##' @param name the variable name of the covariate
 ##' @param custom_key the custom key (likely userid) for the annotation
 ##' @param file.prefix Vincent uses this
 ##' @param sample_filter_criteria optional list of filtering criteria that were
 ##'   used to drill down into the samples we have the \code{annotatino}
 ##'   data.frame for
-save_custom_sample_covariates <- function(x, name, annotation,
+save_custom_sample_covariates <- function(x, annotation, name=NULL,
+                                          class='categorical',
                                           custom_key=Sys.getenv("USER"),
                                           file.prefix="facile",
                                           sample_filter_critera=NULL) {
   stopifnot(is.FacileDataSet(x))
-  stopifnot(is.character(name) && length(name) == 1L)
-  if (is.null(custom_key)) {
-    custom_key <- 'anonymous'
-  }
-  custom_key <- make.names(custom_key)
-  name <- make.names(name)
-  if (annotation$variable[1L] != name) {
-    annotation <- mutate(annotation, variable=name)
-  }
-  annotation <- annotation %>%
-    mutate(type='user_annotation', class='categorical',
-           date_entered=as.integer(Sys.time()))
+  annotation <- collect(annotation, n=Inf)
+  assert_columns(annotation, c('dataset', 'sample_id', 'value'))
+  if (is.null(name)) name <- annotation$name
+  if (!test_string(name)) stop("No name given/inferred for custom annotation")
+
+  if (is.null(custom_key)) custom_key <- 'anonymous'
+  custom_key <- assert_string(custom_key) %>% make.names
+
+  annotation[['variable']] <- make.names(name)
+  annotation <- annotation[, c('dataset', 'sample_id', 'variable', 'value')]
+  annotation[['class']] <- class
+  annotation[['type']] <- 'user_annotation'
+  annotation[['date_entered']] <- as.integer(Sys.time())
 
   fn <- paste0(file.prefix, '_', custom_key, '_', name, '_', Sys.Date(),'.json')
   fn <- file.path(x$anno.dir, fn)
-  ## TODO: figure out how to encode the sample_filter_criteria into the JSON file
   stream_out(x=annotation, con=file(fn))
   invisible(set_fds(annotation, x))
 }
