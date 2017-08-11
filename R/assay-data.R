@@ -240,7 +240,9 @@ assay_types <- function(x) {
 ##' @export
 assay_names <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  assay_info_tbl(x) %>% collect %$% assay
+  dassay <- default_assay(x)
+  out <- assay_info_tbl(x) %>% collect %$% assay
+  c(dassay, setdiff(out, dassay))
 }
 
 ##' @export
@@ -426,6 +428,7 @@ create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
   stopifnot(is.FacileDataSet(x))
 
   if (is.character(features) || is.null(features) || is(features, 'tbl_sql')) {
+    if (is.null(assay_name)) assay_name <- default_assay(x)
     assert_string(assay_name)
     assert_choice(assay_name, assay_names(x))
   }
@@ -435,11 +438,9 @@ create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
   } else if (is.character(features)) {
     features <- tibble(feature_id=features, assay=assay_name)
   } else if (is(features, 'tbl_sql')) {
-    features <- collect(features, n=Inf)
-  }
-
-  if (is.character(assay_name)) {
-    features[['assay']] <- assay_name
+    features <- collect(features, n=Inf) %>% mutate(assay_name=assay_name)
+  } else if (is.data.frame(features) && is.null(features[['assay_name']])) {
+    features[['assay_name']] <- assay_name
   }
 
   assert_assay_feature_descriptor(features, x)

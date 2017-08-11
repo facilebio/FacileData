@@ -59,6 +59,12 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
 
   mi <- meta_info(out)
   out['organism'] <- mi$organism
+
+  if (is.null(mi$default_assay)) {
+    mi$default_assay <- assay_names(out)[1L]
+  }
+  out['default_assay'] <- mi$default_assay
+
   class(out) <- c(mi$name, class(out))
 
   out
@@ -125,6 +131,11 @@ meta_info <- function(x) {
 organism <- function(x) {
   stopifnot(is.FacileDataSet(x))
   x$organism
+}
+
+default_assay <- function(x) {
+  stopifnot(is.FacileDataSet(x))
+  if (is.null(x$default_assay)) assay_names(x)[1L] else x$default_assay
 }
 
 ##' @rdname meta-info
