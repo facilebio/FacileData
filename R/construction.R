@@ -249,16 +249,16 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   ## If rnaseq, do calcnormfactors
   if (facile_assay_type == 'rnaseq') {
     ## Can create assay_sample_info_table
-    y <- edgeR::DGEList(do.call(cbind, dats)) %>% calcNormFactors
+    cnts <- do.call(cbind, dats)
+    normfactors <- calcNormFactors(cnts)
     asi <- tibble(
       assay=facile_assay_name,
       dataset=rep(names(datasets), sapply(dats, ncol)),
-      sample_id=colnames(y),
+      sample_id=colnames(cnts),
       hdf5_index=lapply(dats, function(d) seq(ncol(d))) %>% unlist,
-      libsize=y$samples$lib.size,
-      normfactor=y$samples$norm.factors)
-    rm(y)
-    gc()
+      libsize=colSums(cnts),
+      normfactor=normfactors)
+    rm(cnts)
   } else {
     asi <- lapply(names(dats), function(ds) {
       mtrx <- dats[[ds]]
@@ -270,6 +270,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
         libsize=-1, normfactor=-1)
     }) %>% bind_rows
   }
+
   asi <- append_facile_table(asi, x, 'assay_sample_info')
 
   # "numeric" R storage mode is "double" storage mode in hdf5
@@ -292,7 +293,11 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
     dname <- sprintf('%s/%s', aname, ds)
     h5createDataset(hdf5fn(x), dname, dim(dat), storage.mode=storage_mode,
                     chunk=chunk, level=chunk_compression)
-    h5write(dat, file=hdf5fn(x), dname)
+    ## For some reason dispatching on this keeps messing up:
+    ## Error in UseMethod("h5write") (from construction.R#296) :
+    ##   no applicable method for 'h5write' applied to an object of class
+    ##   "c('matrix', 'integer', 'numeric')"
+    rhdf5::h5write.default(dat, file=hdf5fn(x), dname)
     tibble(assay=facile_assay_name, dataset=ds, sample_id=colnames(dat),
            hdf5_index=seq(ncol(dat)))
   })
