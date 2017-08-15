@@ -38,13 +38,15 @@ fetch_assay_data <- function(x, features, samples=NULL, assay_name=NULL,
 
   if (missing(features)) {
     assert_string(assay_name)
-    features <- assay_feature_info(x, assay_name) %>% collect(n=Inf)
+    features <- assay_feature_info(x, assay_name) %>%
+      collect(n=Inf) %>%
+      rename(assay=assay_name)
   } else {
     if (is.character(features)) {
       features <- tibble(feature_id=features, assay=assay_name)
     }
     stopifnot(is(features, 'tbl') || is(features, 'data.frame'))
-    if (is.null(features$assay)) {
+    if (!'assay' %in% colnames(features) || !is.character(features$assay)) {
       features$assay <- assay_name
     }
     assert_assay_feature_descriptor(features)
@@ -439,8 +441,8 @@ create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
     features <- tibble(feature_id=features, assay=assay_name)
   } else if (is(features, 'tbl_sql')) {
     features <- collect(features, n=Inf) %>% mutate(assay_name=assay_name)
-  } else if (is.data.frame(features) && is.null(features[['assay_name']])) {
-    features[['assay_name']] <- assay_name
+  } else if (is.data.frame(features) && is.null(features[['assay']])) {
+    features[['assay']] <- assay_name
   }
 
   assert_assay_feature_descriptor(features, x)
