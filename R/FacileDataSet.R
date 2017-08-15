@@ -133,6 +133,9 @@ organism <- function(x) {
   x$organism
 }
 
+##' @rdname meta-info
+##' @export
+##' @param x \code{FacileDataSet}
 default_assay <- function(x) {
   stopifnot(is.FacileDataSet(x))
   if (is.null(x$default_assay)) assay_names(x)[1L] else x$default_assay

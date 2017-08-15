@@ -4,6 +4,7 @@
 \alias{meta_file}
 \alias{meta_info}
 \alias{organism}
+\alias{default_assay}
 \alias{dataset_definitions}
 \title{Path to the meta information file}
 \usage{
@@ -13,9 +14,13 @@ meta_info(x)
 
 organism(x)
 
+default_assay(x)
+
 dataset_definitions(x, as.list = TRUE)
 }
 \arguments{
+\item{x}{\code{FacileDataSet}}
+
 \item{x}{\code{FacileDataSet}}
 
 \item{x}{\code{FacileDataSet}}
