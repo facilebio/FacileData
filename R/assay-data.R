@@ -241,8 +241,8 @@ assay_types <- function(x) {
 assay_names <- function(x) {
   stopifnot(is.FacileDataSet(x))
   dassay <- default_assay(x)
-  out <- assay_info_tbl(x) %>% collect %$% assay
-  c(dassay, setdiff(out, dassay))
+  anames <- assay_info_tbl(x) %>% collect %$% assay
+  intersect(c(dassay, setdiff(anames, dassay)), anames)
 }
 
 ##' @export
