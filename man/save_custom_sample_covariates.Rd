@@ -4,17 +4,17 @@
 \alias{save_custom_sample_covariates}
 \title{Saves custom sample covariates to a FacileDataSet}
 \usage{
-save_custom_sample_covariates(x, name, annotation,
-  custom_key = Sys.getenv("USER"), file.prefix = "facile",
-  sample_filter_critera = NULL)
+save_custom_sample_covariates(x, annotation, name = NULL,
+  class = "categorical", custom_key = Sys.getenv("USER"),
+  file.prefix = "facile", sample_filter_critera = NULL)
 }
 \arguments{
 \item{x}{the \code{FacileDataSet}}
 
-\item{name}{the variable name of the covariate}
-
 \item{annotation}{the annotation table of covariate vaues to a
 sample-descriptor-like table}
+
+\item{name}{the variable name of the covariate}
 
 \item{custom_key}{the custom key (likely userid) for the annotation}
 
@@ -25,5 +25,6 @@ used to drill down into the samples we have the \code{annotatino}
 data.frame for}
 }
 \description{
-Saves custom sample covariates to a FacileDataSet
+TODO: Figure out how to encode sample_fiter_criteria into serlized
+(JSON) annotation file
 }
