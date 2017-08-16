@@ -73,7 +73,7 @@ assert_expression_result <- function(x) {
 ##' @rdname assertions
 is_expression_result <- function(x) {
   if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
-  has_columns(x, c('dataset', 'sample_id', 'feature_id', 'count'))
+  has_columns(x, c('dataset', 'sample_id', 'feature_id', 'value'))
 }
 
 ##' @export

@@ -56,7 +56,8 @@ test_that("cast_covariate converts right_censored data correctly", {
 
 test_that("spread_covariates casts simple covariates to correct class", {
   vars <- c('sex'='factor', 'stage'='character', 'sample_type'='factor')
-  wide <- fetch_sample_covariates(FDS, samples, names(vars)) %>%
+  wide <- FDS %>%
+    fetch_sample_covariates(samples, names(vars)) %>%
     spread_covariates
 
   ## Test presence of columns and class converted correctly
@@ -65,7 +66,7 @@ test_that("spread_covariates casts simple covariates to correct class", {
   }
 
   ## Ensure that all samples asked for are in wide result
-  snames <- with(collect(samples, n=Inf), paste0(dataset, '_', sample_id))
+  snames <- with(collect(samples, n=Inf), paste0(dataset, '__', sample_id))
   expect_true(setequal(rownames(wide), snames))
 })
 
@@ -75,7 +76,8 @@ test_that("spread_covariates works with both simple and complex types", {
 
   ## Check values retrieved in uber result with individual results from simple
   ## and cmoplex covariates separately
-  mixed <- fetch_sample_covariates(FDS, samples, c(simple, complex)) %>%
+  mixed <- FDS %>%
+    fetch_sample_covariates(samples, c(simple, complex)) %>%
     spread_covariates
 
   sc <- fetch_sample_covariates(FDS, samples, simple) %>%
@@ -104,7 +106,7 @@ test_that('with_sample_covariates returns long input with wide covariates', {
 
   ## Setup the individual expression and covariate table to merge into the
   ## expected result
-  exprs <- fetch_expression(FDS, samples, genes) %>%
+  exprs <- fetch_assay_data(FDS, genes, samples) %>%
     collect(n=Inf)
   wcovs <- fetch_sample_covariates(FDS, samples, covs) %>%
     spread_covariates
@@ -113,7 +115,7 @@ test_that('with_sample_covariates returns long input with wide covariates', {
     left_join(wcovs, by=c('dataset', 'sample_id')) %>%
     arrange(dataset, sample_id, feature_id)
 
-  ecovs <- fetch_expression(FDS, samples, genes) %>%
+  ecovs <- fetch_assay_data(FDS, genes, samples) %>%
     with_sample_covariates(covs) %>%
     arrange(dataset, sample_id, feature_id)
 

@@ -23,7 +23,8 @@
 ##' @return A lazy \code{\link[dplyr]{tbl}} object with the expression
 ##'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
 ##'   othwerise a \code{tbl_df} of the results.
-fetch_assay_data <- function(x, features, samples=NULL, assay_name=NULL,
+fetch_assay_data <- function(x, features, samples=NULL,
+                             assay_name=default_assay(x),
                              normalized=FALSE, as.matrix=FALSE, ...,
                              subset.threshold=700, aggregate.by=NULL) {
   stopifnot(is.FacileDataSet(x))
@@ -36,11 +37,9 @@ fetch_assay_data <- function(x, features, samples=NULL, assay_name=NULL,
     assert_choice(assay_name, assay_names(x))
   }
 
-  if (missing(features)) {
+  if (missing(features) || is.null(features)) {
     assert_string(assay_name)
-    features <- assay_feature_info(x, assay_name) %>%
-      collect(n=Inf) %>%
-      rename(assay=assay_name)
+    features <- assay_feature_info(x, assay_name) %>% collect(n=Inf)
   } else {
     if (is.character(features)) {
       features <- tibble(feature_id=features, assay=assay_name)
@@ -240,11 +239,26 @@ assay_types <- function(x) {
 }
 
 ##' @export
-assay_names <- function(x) {
+assay_names <- function(x, default_first=TRUE) {
   stopifnot(is.FacileDataSet(x))
-  dassay <- default_assay(x)
   anames <- assay_info_tbl(x) %>% collect %$% assay
-  intersect(c(dassay, setdiff(anames, dassay)), anames)
+  if (default_first && length(anames) > 1L) {
+    dassay <- default_assay(x)
+    anames <- intersect(c(dassay, setdiff(anames, dassay)), anames)
+  }
+  anames
+}
+
+##' @export
+assay_info <- function(x, assay_name=NULL) {
+  stopifnot(is.FacileDataSet(x))
+  ainfo <- assay_info_tbl(x) %>% collect(n=Inf)
+  if (!is.null(assay_name)) {
+    assert_string(assay_name)
+    assert_choice(assay_name, ainfo$assay)
+    ainfo <- filter(ainfo, assay == assay_name)
+  }
+  ainfo
 }
 
 ##' @export

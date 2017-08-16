@@ -1,7 +1,7 @@
 ##' Connect to a FacileDataSet repository.
 ##'
 ##' @export
-##' @importFrom DBI dbConnect
+##' @importFrom RSQLite dbConnect SQLite dbExecute
 ##' @param path The path to the FacileData repository
 ##' @param data.fn A custom path to the database (probably don't mess with this)
 ##' @param covdef.fn A custom path to the yaml file that has covariate mapping info
@@ -32,7 +32,7 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
     paths$sqlite.fn <- tmp.fn
   }
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), paths$sqlite.fn)
+  con <- dbConnect(SQLite(), paths$sqlite.fn)
 
   if (db.loc == 'memory') {
     mcon <- dbConnect(RSQLite::SQLite(), ":memory:")
@@ -41,8 +41,6 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
     con <- mcon
   }
 
-  # dbGetQuery(out$con, 'pragma temp_store=MEMORY;')
-  # dbGetQuery(out$con, sprintf('pragma cache_size=%d;', cache_size))
   dbExecute(con, 'pragma temp_store=MEMORY;')
   dbExecute(con, sprintf('pragma cache_size=%d;', cache_size))
 
@@ -138,7 +136,13 @@ organism <- function(x) {
 ##' @param x \code{FacileDataSet}
 default_assay <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  if (is.null(x$default_assay)) assay_names(x)[1L] else x$default_assay
+  if (is.null(x$default_assay)) {
+    out <- assay_names(x, default_first=FALSE)[1L]
+    if (is.na(out)) out <- NULL
+  } else {
+    out <- x$default_assay
+  }
+  out
 }
 
 ##' @rdname meta-info

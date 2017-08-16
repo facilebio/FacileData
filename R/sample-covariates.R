@@ -203,7 +203,7 @@ spread_covariates <- function(x, .fds=fds(x)) {
   out <- bind_rows(x, dummy) %>%
     dcast(dataset + sample_id ~ variable, value.var='value') %>%
     mutate(.dummy.=NULL) %>%
-    set_rownames(., paste(.$dataset, .$sample_id, sep='_'))
+    set_rownames(., paste(.$dataset, .$sample_id, sep='__'))
 
   cov.def <- covariate_definitions(.fds)
   if (!is.null(cov.def)) {

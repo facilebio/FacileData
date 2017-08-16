@@ -56,7 +56,8 @@ assert_valid_meta_file <- function(fn) {
     stop("meta file must be a yaml file")
   }
   dat <- yaml.load_file(fn)
-  req.toplevel <- c('name', 'organism', 'datasets', 'sample_covariates')
+  req.toplevel <- c('name', 'organism', 'datasets', 'sample_covariates',
+                    'default_assay')
   miss.toplevel <- setdiff(req.toplevel, names(dat))
   if (length(miss.toplevel)) {
     stop("Missing the following definitions in meta file: ",

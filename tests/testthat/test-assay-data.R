@@ -13,33 +13,28 @@ genes <- c(
 
 features <- tibble(assay='rnaseq', feature_id=genes)
 
-test_that("fetch_assay_data(..., assay='rnaseq') == fetch_expression(...)", {
-  ## Raw Data
-  dat <- FDS %>%
-    fetch_assay_data(features, samples, normalized=FALSE) %>%
-    arrange(sample_id, feature_name) %>%
-    select(dataset, sample_id, feature_id, symbol=feature_name, value)
+test_that("fetch_assay_data limits samples correctly", {
+  s.df <- collect(samples, n=Inf)
 
-  cnt <- FDS %>%
-    fetch_expression(samples, feature_ids=features$feature_id) %>%
-    arrange(sample_id, symbol) %>%
-    select(dataset, sample_id, feature_id, symbol, value=count)
+  e.sqlite <- fetch_assay_data(FDS, genes, samples) %>% collect(n=Inf)
+  e.df <- fetch_assay_data(FDS, genes, s.df) %>% collect(n=Inf)
 
-  expect_equal(dat, cnt)
+  ## results are same from tbl_df and tbl_sqlite `samples` parameter
+  expect_equal(e.sqlite, e.df)
 
-  ## Normalized
-  ndat <- FDS %>%
-    fetch_assay_data(features, samples, normalized=TRUE) %>%
-    arrange(sample_id, feature_name) %>%
-    select(dataset, sample_id, feature_id, symbol=feature_name, value)
+  ## samples limited correcly
+  expect_true(setequal(paste0(e.df$dataset, e.df$sample_id),
+                       paste0(s.df$dataset, s.df$sample_id)))
 
-  ncnt <- FDS %>%
-    fetch_expression(samples, feature_ids=features$feature_id) %>%
-    cpm(prior.count=5, log=TRUE) %>%
-    arrange(sample_id, symbol) %>%
-    select(dataset, sample_id, feature_id, symbol, value=cpm)
+})
 
-  expect_equal(ndat$value, ncnt$value, tolerance=0.05)
+test_that("spreading data works with_assay_data", {
+  expected <- FDS %>%
+    fetch_assay_data(genes, samples, normalized=TRUE) %>%
+    select(dataset, sample_id, feature_name, value) %>%
+    tidyr::spread(feature_name, value)
+  result <- samples %>% with_assay_data(genes, normalized=TRUE)
+  expect_equal(result, expected)
 })
 
 test_that("fetch_assay_data(..., aggregate.by='ewm') provides scores", {
@@ -49,10 +44,9 @@ test_that("fetch_assay_data(..., aggregate.by='ewm') provides scores", {
     select(dataset, sample_id, feature_id, symbol=feature_name, value) %>%
     mutate(samid=paste(dataset, sample_id, sep="__"))
 
-  library(multiGSEA)
   dat <- FDS %>%
     fetch_assay_data(features, samples, normalized=TRUE, as.matrix=TRUE)
-  ewm <- eigenWeightedMean(dat)$score[scores$samid]
+  ewm <- multiGSEA::eigenWeightedMean(dat)$score[scores$samid]
   expect_equal(scores$value, unname(ewm))
 })
 
