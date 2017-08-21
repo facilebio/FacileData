@@ -151,25 +151,22 @@ save_custom_sample_covariates <- function(x, annotation, name=NULL,
 ##' @return The facile \code{x} object, annotated with the specified covariates.
 with_sample_covariates <- function(x, covariates=NULL, na.rm=FALSE,
                                    custom_key=Sys.getenv("USER"), .fds=fds(x)) {
-  assert_sample_subset(x)
   stopifnot(is.FacileDataSet(.fds))
+  x <- assert_sample_subset(x) %>% collect(n=Inf)
   stopifnot(is.character(covariates) || is.null(covariates))
-
   if (is.character(covariates) && length(covariates) == 0L) {
     return(x)
   }
 
   samples <- x %>%
     select(dataset, sample_id) %>%
-    collect(n=Inf) %>% ## can't call distinct on SQLite backend :-(
     distinct(.keep_all=TRUE)
 
   covs <- fetch_sample_covariates(.fds, samples, covariates,
                                   custom_key=custom_key)
   covs <- spread_covariates(covs, .fds)
 
-  out <- collect(x, n=Inf) %>%
-    left_join(covs, by=c('dataset', 'sample_id'))
+  out <- left_join(x, covs, by=c('dataset', 'sample_id'))
 
   if (na.rm && length(covariates)) {
     keep <- complete.cases(select_(out, .dots=covariates))
@@ -203,7 +200,9 @@ spread_covariates <- function(x, .fds=fds(x)) {
   out <- bind_rows(x, dummy) %>%
     dcast(dataset + sample_id ~ variable, value.var='value') %>%
     mutate(.dummy.=NULL) %>%
-    set_rownames(., paste(.$dataset, .$sample_id, sep='__'))
+    ## I don't think we should set rownames here. Delete next command and test
+    # set_rownames(., paste(.$dataset, .$sample_id, sep='__'))
+    as.tbl
 
   cov.def <- covariate_definitions(.fds)
   if (!is.null(cov.def)) {

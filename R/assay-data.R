@@ -389,9 +389,13 @@ assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
 assay_info_over_samples <- function(x, samples, with_count=TRUE) {
   stopifnot(is.FacileDataSet(x))
   assert_sample_subset(samples)
-  assays <- assay_sample_info_tbl(x) %>%
-    collect %>%
-    inner_join(samples, by=c('dataset', 'sample_id'))
+
+  asi <- assay_sample_info_tbl(x)
+  if (!same_src(asi, samples)) {
+    asi <- collect(asi, n=Inf)
+    samples <- collect(samples, n=Inf)
+  }
+  assays <-  inner_join(asi, samples, by=c('dataset', 'sample_id'))
   if (with_count) {
     assays <- group_by(assays, assay) %>%
       summarize(n=n()) %>%
@@ -400,8 +404,9 @@ assay_info_over_samples <- function(x, samples, with_count=TRUE) {
     assays <- distinct(assays, assay) %>% mutate(n=-1L)
   }
 
-  inner_join(assays, assay_info_tbl(x), by='assay', copy=TRUE) %>%
-    arrange(assay)
+  inner_join(assays, assay_info_tbl(x), by='assay') %>%
+    arrange(assay) %>%
+    collect(n=Inf)
 }
 
 

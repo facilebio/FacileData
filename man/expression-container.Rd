@@ -19,7 +19,7 @@ as.DGEList(x, ...)
   custom_key = Sys.getenv("USER"), ...)
 
 \method{as.DGEList}{tbl_sql}(x, covariates = TRUE, feature_ids = NULL,
-  assay_name = default(assay(.fds)), .fds = fds(x),
+  assay_name = default_assay(.fds), .fds = fds(x),
   custom_key = Sys.getenv("USER"), ...)
 
 as.ExpressionSet(x, covariates = TRUE, feature_ids = NULL,

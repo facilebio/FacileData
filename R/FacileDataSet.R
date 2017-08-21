@@ -183,3 +183,30 @@ samples <- function(x) {
     select(dataset, sample_id) %>%
     set_fds(x)
 }
+
+##' A dataset-specific method to overridden that returns default sample grouping
+##'
+##' @export
+##' @rdname facet_frame
+facet_frame <- function(x, ...) {
+  UseMethod("facet_frame")
+}
+
+##' @export
+##' @rdname facet_frame
+facet_frame.default <- function(x, ...) {
+  tibble(facet=character(), dataset=facet, sample_id=facet)
+}
+
+##' @export
+print.FacileDataSet <- function(x, ...) {
+  ns <- RSQLite::dbGetQuery(x$con, "SELECT COUNT(*) FROM sample_info;")
+  nds <- RSQLite::dbGetQuery(x$con, "SELECT COUNT (DISTINCT dataset) FROM sample_info;")
+  out <- paste0(
+    "FacileDataSet",
+    if (class(x)[1] != "FacileDataSet") sprintf(" (%s)\n", class(x)[1L]) else "\n",
+    "  Directory: ", x$parent.dir, "\n",
+    sprintf("  %d samples over %d datasets\n", ns[1,1], nds[1,1]))
+  cat(out)
+  invisible()
+}

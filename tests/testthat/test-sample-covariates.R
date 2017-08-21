@@ -66,8 +66,8 @@ test_that("spread_covariates casts simple covariates to correct class", {
   }
 
   ## Ensure that all samples asked for are in wide result
-  snames <- with(collect(samples, n=Inf), paste0(dataset, '__', sample_id))
-  expect_true(setequal(rownames(wide), snames))
+  missed <- anti_join(wide, collect(samples), by=c('dataset', 'sample_id'))
+  expect_true(nrow(missed) == 0)
 })
 
 test_that("spread_covariates works with both simple and complex types", {
@@ -120,4 +120,17 @@ test_that('with_sample_covariates returns long input with wide covariates', {
     arrange(dataset, sample_id, feature_id)
 
   expect_equal(ecovs, expected)
+})
+
+test_that("successive with_sample_covariate calls build correct frame", {
+  expected <- FDS %>%
+    fetch_sample_covariates(samples, c('sex', 'stage')) %>%
+    spread_covariates %>%
+    arrange(dataset, sample_id)
+
+  res <- samples %>%
+    with_sample_covariates("sex") %>%
+    with_sample_covariates("stage") %>%
+    arrange(dataset, sample_id)
+  expect_equal(res, expected)
 })
