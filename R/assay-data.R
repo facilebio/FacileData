@@ -69,7 +69,7 @@ fetch_assay_data <- function(x, features, samples=NULL,
 
   if (!is.null(aggregate.by)) {
     assert_string(aggregate.by)
-    assert_choice(aggregate.by, 'ewm')
+    aggregate.by <- assert_choice(tolower(aggregate.by), c('ewm', 'zscore'))
     stopifnot(n.assays == 1L)
     if (!normalized) {
       warning("You probably don't want to aggregate.by on unnormalized data",
@@ -106,7 +106,7 @@ fetch_assay_data <- function(x, features, samples=NULL,
   assert_number(subset.threshold)
   if (!is.null(aggregate.by)) {
     assert_string(aggregate.by)
-    assert_choice(aggregate.by, 'ewm')
+    aggregate.by <- assert_choice(tolower(aggregate.by), c('ewm', 'zscore'))
   }
 
   finfo <- assay_feature_info(x, assay_name, feature_ids=feature_ids) %>%
@@ -169,7 +169,7 @@ fetch_assay_data <- function(x, features, samples=NULL,
   ## to optimize for speed later. The problem is introduced when the
   ## aggregate.by parameter was introduced
   vals <- do.call(cbind, dat$res)
-  # browser()
+
   if (nrow(vals) == 1L) {
     if (!is.null(aggregate.by)) {
       warning("No assay feature aggregation performed over single feature",
@@ -178,8 +178,10 @@ fetch_assay_data <- function(x, features, samples=NULL,
     aggregate.by <- NULL
   }
 
-  if (!is.null(aggregate.by)) {
-    scores <- eigenWeightedMean(vals)$score
+  if (is.character(aggregate.by)) {
+    scores <- switch(aggregate.by,
+                     ewm=eigenWeightedMean(vals, ...)$score,
+                     zscore=zScore(vals, ...)$score)
     vals <- matrix(scores, nrow=1, dimnames=list('score', names(scores)))
   }
 
@@ -386,7 +388,7 @@ assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
 ##' @return rows from assay_info_tbl that correspond to the assays defined
 ##'   over the given samples. If no assays are defined over these samples,
 ##'   you're going to get an empty tibble.
-assay_info_over_samples <- function(x, samples, with_count=TRUE) {
+assay_info_over_samples <- function(x, samples) {
   stopifnot(is.FacileDataSet(x))
   assert_sample_subset(samples)
 
@@ -395,18 +397,17 @@ assay_info_over_samples <- function(x, samples, with_count=TRUE) {
     asi <- collect(asi, n=Inf)
     samples <- collect(samples, n=Inf)
   }
-  assays <-  inner_join(asi, samples, by=c('dataset', 'sample_id'))
-  if (with_count) {
-    assays <- group_by(assays, assay) %>%
-      summarize(n=n()) %>%
-      ungroup
-  } else {
-    assays <- distinct(assays, assay) %>% mutate(n=-1L)
-  }
+  assays <- inner_join(asi, samples, by=c('dataset', 'sample_id'))
 
-  inner_join(assays, assay_info_tbl(x), by='assay') %>%
-    arrange(assay) %>%
-    collect(n=Inf)
+  ## Count number of samples across dataset count for each assay type
+  out <- assays %>%
+    group_by(assay, dataset) %>%
+    summarize(nsamples=n()) %>%
+    collect(n=Inf) %>%
+    group_by(assay) %>%
+    summarize(ndatasets=length(unique(dataset)), nsamples=sum(nsamples)) %>%
+    ungroup
+  out
 }
 
 
@@ -478,7 +479,8 @@ create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
 ##' @return a tbl-like result
 with_assay_data <- function(samples, features, assay_name=NULL,
                             normalized=FALSE, aggregate.by=NULL,
-                            spread=TRUE, ..., .fds=fds(samples)) {
+                            spread=TRUE, with_assay_name=FALSE, ...,
+                            .fds=fds(samples)) {
   if (is.FacileDataSet(samples)) {
     .fds <- samples(samples)
     samples(samples(.fds))
@@ -509,7 +511,11 @@ with_assay_data <- function(samples, features, assay_name=NULL,
 
   if (is.character(spread)) {
     adata <- select_(adata, .dots=c('dataset', 'sample_id', spread, 'value'))
-    adata <- tidyr::spread_(adata, spread, 'value') %>% set_fds(.fds)
+    adata <- tidyr::spread_(adata, spread, 'value')
+    if (with_assay_name || spread == 'id') {
+      colnames(adata)[-(1:2)] <- paste0(assay_name, '_', colnames(data)[-(1:2)])
+    }
+    adata <- set_fds(adata, .fds)
   }
 
   join_samples(adata, samples)

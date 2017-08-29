@@ -51,6 +51,7 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   out['hdf5.fn'] <- paths$hdf5.fn
   out['anno.dir'] <- paths$anno.dir
   out['db.loc'] <- db.loc
+  out[['cache']] <- list()
 
   ## meta information
   class(out) <- 'FacileDataSet'
@@ -73,7 +74,8 @@ is.FacileDataSet <- function(x) {
   ## `is` and `validate` funcitonality confused in here.
   is(x, 'FacileDataSet') &&
     'con' %in% names(x) && is(x$con, 'DBIObject') &&
-    'anno.dir' %in% names(x) && dir.exists(x$anno.dir)
+    'anno.dir' %in% names(x) && dir.exists(x$anno.dir) &&
+    'hdf5.fn' %in% names(x) && file.exists(x$hdf5.fn)
 }
 
 dbfn <- function(x, mustWork=TRUE) {
