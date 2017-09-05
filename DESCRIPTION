@@ -8,7 +8,7 @@ Description: An abstraction of an ExpressionSet-like object into a "tidy data"
   framework which allows effortless access into any subset of it without loading
   it in its entireity.
 Depends:
-    dplyr (>= 0.5.0),
+    dplyr (>= 0.7.2.9000),
     dtplyr
 Imports:
     magrittr,
