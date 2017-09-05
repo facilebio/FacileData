@@ -13,7 +13,8 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
                           meta.fn=file.path(path, 'meta.yaml'),
                           anno.dir=file.path(path, 'custom-annotation'),
                           cache_size=80000,
-                          db.loc=c('reference', 'temporary', 'memory')) {
+                          db.loc=c('reference', 'temporary', 'memory'),
+                          ...) {
   paths <- validate.facile.dirs(path, data.fn, sqlite.fn, hdf5.fn, meta.fn,
                                 anno.dir)
   db.loc <- match.arg(db.loc)

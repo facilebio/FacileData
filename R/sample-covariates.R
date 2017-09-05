@@ -266,7 +266,11 @@ cast_covariate <- function(covariate, values, cov.def, .fds) {
       values <- decode_right_censored(values, suffix=covariate)
     }
     if (is.character(def$levels)) {
-      values <- factor(values, def$levels)
+      ## protect against NAing a long list of values in the event that the
+      ## levels provided in the meta.yaml file don't include all levels observed
+      ## here
+      lvls <- c(def$levels, setdiff(def$levels, values))
+      values <- factor(values, lvls)
     }
   } else {
     if (covariate != '.dummy.') {

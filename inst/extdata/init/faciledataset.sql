@@ -98,6 +98,8 @@ CREATE TABLE assay_sample_info (
   PRIMARY KEY (assay, dataset, sample_id));
 CREATE INDEX assay_sample_info__dataset_samid ON assay_sample_info (dataset, sample_id);
 
+-- TODO: add assay_sample_covariate to provide assay specific information
+
 -- The `assay_feature_info` table holds sample level information for each
 -- feature in the assay. Most important is the mapping from a feature_id to its
 -- cognate row in its HDF5 assay matrix.

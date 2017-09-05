@@ -26,7 +26,8 @@
 fetch_assay_data <- function(x, features, samples=NULL,
                              assay_name=default_assay(x),
                              normalized=FALSE, as.matrix=FALSE, ...,
-                             subset.threshold=700, aggregate.by=NULL) {
+                             subset.threshold=700, aggregate.by=NULL,
+                             verbose=FALSE) {
   stopifnot(is.FacileDataSet(x))
   assert_flag(as.matrix)
   assert_flag(normalized)
@@ -80,7 +81,7 @@ fetch_assay_data <- function(x, features, samples=NULL,
   out <- lapply(assays, function(a) {
     f <- filter(features, assay == a)
     .fetch_assay_data(x, a, f$feature_id, samples, normalized, as.matrix,
-                      subset.threshold, aggregate.by)
+                      subset.threshold, aggregate.by, verbose=verbose)
   })
 
   if (length(out) == 1L) {
@@ -96,7 +97,8 @@ fetch_assay_data <- function(x, features, samples=NULL,
 
 .fetch_assay_data <- function(x, assay_name, feature_ids, samples,
                               normalized=FALSE, as.matrix=FALSE,
-                              subset.threshold=700, aggregate.by=NULL, ...) {
+                              subset.threshold=700, aggregate.by=NULL, ...,
+                              verbose=FALSE) {
   stopifnot(is.FacileDataSet(x))
   assert_string(assay_name)
   assert_character(feature_ids, min.len=1L)
@@ -118,8 +120,10 @@ fetch_assay_data <- function(x, features, samples=NULL,
     mutate(samid=paste(dataset, sample_id, sep="__"))
   bad.samples <- is.na(sinfo$hdf5_index)
   if (any(bad.samples)) {
-    warning(sum(bad.samples), " samples not found in `", assay_name, "`assay.",
-            immediate.=TRUE)
+    if (verbose) {
+      warning(sum(bad.samples), " samples not found in `",
+              assay_name, "`assay.", immediate.=TRUE)
+    }
     sinfo <- sinfo[!bad.samples,,drop=FALSE]
   }
 
@@ -158,7 +162,7 @@ fetch_assay_data <- function(x, features, samples=NULL,
       }
       dimnames(vals) <- list(finfo$feature_id, .$samid)
       if (normalized) {
-        vals <- normalize.assay.matrix(vals, finfo, ., ...)
+        vals <- normalize.assay.matrix(vals, finfo, ., verbose=verbose, ...)
       }
       vals
     }) %>%
@@ -171,7 +175,7 @@ fetch_assay_data <- function(x, features, samples=NULL,
   vals <- do.call(cbind, dat$res)
 
   if (nrow(vals) == 1L) {
-    if (!is.null(aggregate.by)) {
+    if (!is.null(aggregate.by) && verbose) {
       warning("No assay feature aggregation performed over single feature",
               immediate.=TRUE)
     }
@@ -414,7 +418,8 @@ assay_info_over_samples <- function(x, samples) {
 
 ## helper functino to fetch_assay_data
 normalize.assay.matrix <- function(vals, feature.info, sample.info,
-                                   log=TRUE, prior.count=5, ...) {
+                                   log=TRUE, prior.count=5, ...,
+                                   verbose=FALSE) {
   stopifnot(
     nrow(vals) == nrow(feature.info),
     all(rownames(vals) == feature.info$feature_id),
@@ -428,7 +433,10 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info,
   if (atype == 'rnaseq') {
     out <- edgeR::cpm(vals, libsize, log=log, prior.count=prior.count)
   } else {
-    warning("No normalization procedure for ", atype, " assay", immediate.=TRUE)
+    if (verbose) {
+      warning("No normalization procedure for ", atype, " assay",
+              immediate.=TRUE)
+    }
     out <- vals
   }
   out
@@ -471,6 +479,9 @@ create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
 
 ##' Append expression values to sample-descriptor
 ##'
+##' Since this is called in a "convenience" sort of way, often in a pipe-chain
+##' \code{normalize} defaults to \code{TRUE}
+##'
 ##' @export
 ##' @param x a samples descriptor
 ##' @param feature_ids character vector of feature_ids
@@ -478,9 +489,9 @@ create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
 ##' @param .fds A \code{FacileDataSet} object
 ##' @return a tbl-like result
 with_assay_data <- function(samples, features, assay_name=NULL,
-                            normalized=FALSE, aggregate.by=NULL,
+                            normalized=TRUE, aggregate.by=NULL,
                             spread=TRUE, with_assay_name=FALSE, ...,
-                            .fds=fds(samples)) {
+                            verbose=FALSE, .fds=fds(samples)) {
   if (is.FacileDataSet(samples)) {
     .fds <- samples(samples)
     samples(samples(.fds))
@@ -507,18 +518,28 @@ with_assay_data <- function(samples, features, assay_name=NULL,
 
   ## Hit the datastore
   adata <- fetch_assay_data(.fds, features, samples, normalized=normalized,
-                            aggregate.by=aggregate.by)
+                            aggregate.by=aggregate.by, verbose=verbose)
 
   if (is.character(spread)) {
+    spread.vals <- unique(adata[[spread]])
+    if (any(spread.vals %in% colnames(samples))) {
+      if (!with_assay_name && verbose) {
+        warning("appending assay_name to spread columns to avoid collision")
+      }
+      with_assay_name <- TRUE
+    }
     adata <- select_(adata, .dots=c('dataset', 'sample_id', spread, 'value'))
     adata <- tidyr::spread_(adata, spread, 'value')
+    spread.idx <- which(colnames(adata) %in% spread.vals)
     if (with_assay_name || spread == 'id') {
-      colnames(adata)[-(1:2)] <- paste0(assay_name, '_', colnames(data)[-(1:2)])
+      newname <- paste0(assay_name, '_', colnames(adata)[spread.idx])
+      colnames(adata)[spread.idx] <- newname
     }
     adata <- set_fds(adata, .fds)
   }
 
-  join_samples(adata, samples)
+  # join_samples(adata, samples)
+  join_samples(samples, adata)
 }
 
 can.spread.assay.by.name <- function(x, assay_name) {

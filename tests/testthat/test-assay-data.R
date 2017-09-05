@@ -33,10 +33,11 @@ test_that("spreading data works with_assay_data", {
     fetch_assay_data(genes, samples, normalized=TRUE) %>%
     select(dataset, sample_id, feature_name, value) %>%
     tidyr::spread(feature_name, value)
-  result <- samples %>% with_assay_data(genes, normalized=TRUE)
-  expect_equal(result, expected)
+  result <- samples %>%
+    with_assay_data(genes, normalized=TRUE) %>%
+    collect
 
-  r2 <- samples %>% with_assay_data(genes, normalized=TRUE)
+  expect_equal(result, expected)
 })
 
 test_that("fetch_assay_data(..., aggregate.by='ewm') provides scores", {
