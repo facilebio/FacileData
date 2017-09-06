@@ -269,7 +269,7 @@ cast_covariate <- function(covariate, values, cov.def, .fds) {
       ## protect against NAing a long list of values in the event that the
       ## levels provided in the meta.yaml file don't include all levels observed
       ## here
-      lvls <- c(def$levels, setdiff(def$levels, values))
+      lvls <- c(def$levels, setdiff(values, def$levels))
       values <- factor(values, lvls)
     }
   } else {
