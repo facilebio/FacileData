@@ -382,6 +382,16 @@ assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
     set_fds(x)
 }
 
+##' @rdname feature_name_map
+##' @export
+##'
+##' @param x \code{FacileDataSet}
+##' @param assay_name the name of assay to get the feature map for.
+assay_feature_name_map <- function(x, assay_name) {
+  ftype <- assay_feature_type(x, assay_name)
+  feature_name_map(x, ftype)
+}
+
 ##' Identify the number of each assay run across specific samples
 ##'
 ##' @export

@@ -6,7 +6,7 @@
 \usage{
 fetch_assay_data(x, features, samples = NULL, assay_name = default_assay(x),
   normalized = FALSE, as.matrix = FALSE, ..., subset.threshold = 700,
-  aggregate.by = NULL)
+  aggregate.by = NULL, verbose = FALSE)
 }
 \arguments{
 \item{x}{A \code{FacileDataSet} object.}

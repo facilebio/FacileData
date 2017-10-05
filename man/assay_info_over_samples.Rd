@@ -4,7 +4,7 @@
 \alias{assay_info_over_samples}
 \title{Identify the number of each assay run across specific samples}
 \usage{
-assay_info_over_samples(x, samples, with_count = TRUE)
+assay_info_over_samples(x, samples)
 }
 \arguments{
 \item{x}{FacileDataSet}

@@ -4,8 +4,9 @@
 \alias{with_assay_data}
 \title{Append expression values to sample-descriptor}
 \usage{
-with_assay_data(samples, features, assay_name = NULL, normalized = FALSE,
-  aggregate.by = NULL, spread = TRUE, ..., .fds = fds(samples))
+with_assay_data(samples, features, assay_name = NULL, normalized = TRUE,
+  aggregate.by = NULL, spread = TRUE, with_assay_name = FALSE, ...,
+  verbose = FALSE, .fds = fds(samples))
 }
 \arguments{
 \item{.fds}{A \code{FacileDataSet} object}
@@ -20,5 +21,6 @@ with_assay_data(samples, features, assay_name = NULL, normalized = FALSE,
 a tbl-like result
 }
 \description{
-Append expression values to sample-descriptor
+Since this is called in a "convenience" sort of way, often in a pipe-chain
+\code{normalize} defaults to \code{TRUE}
 }
