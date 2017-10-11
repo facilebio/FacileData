@@ -1,0 +1,88 @@
+---
+title: "FacileDataSet Overview"
+author: "Steve Lianoglou"
+date: "`r Sys.Date()`"
+package: "`r BiocStyle::pkg_ver('FacileDataSet')`"
+output:
+  html_document:
+    code_folding: show
+    fig_caption: yes
+    self_contained: yes
+    highlight: pygments
+    fig_width: 5
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+vignette: >
+  %\VignetteIndexEntry{FacileDataSet Overview}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(
+  echo=TRUE, warning=FALSE, message=FALSE, error=FALSE) #, dpi=150)
+library(ggplot2)
+library(cowplot)
+```
+
+# Overview
+
+The `FacileDataSet` is a container that stores multi-assy high throughput
+genomics data across large datasets.
+
+We will use the multi-assay, multi-dataset (indication) TCGA resource as a
+data source to showcase how programming against a FacileDataSet faciliates
+easier exploratory data analyses.
+
+The `FacileTCGADataSet` provides the full RNA-seq expression, miRNA expresion,
+and copy number data across all 11,000+ samples from the TCGA. These are the
+number of normal/tumor samples available across all indications:
+
+```{r tcga-sample-distribution}
+library(FacileDataSet)
+library(FacileTCGADataSet)
+tcga <- FacileTCGADataSet()
+distro <- samples(tcga) %>%
+  with_sample_covariates(c("indication", "sample_type"))
+ggplot(distro, aes(indication, fill=sample_type)) +
+  geom_bar() +
+  theme(axis.text.x=element_text(angle=90, hjust=1))
+```
+
+
+
+# Fast and Efficient Data Retrieval
+
+Broadly speaking, there are two classes of functions that are used to pull data
+out of a `FacileDataSet`, the `fetch_*` and `with_*` functions. To a first
+approximation, we can consider the `fetch_*` functions to be the lowest level
+functions, and the `with_*` functions are higher-level accessors.
+
+The `with_*` functions are *a bit* fast-and-loose. These are written to more
+naturally combine in pipe (`%>%`) data manipulation chains and provide analysts
+with a more fluent and succinct API with which to perform exploratory data
+analyses.
+
+For example, to retrieve normalized RNA-seq expression values for CXCL9 and GZMA
+along with survival and sex information for the samples in the samples in the
+TCGA bladder ("BLCA") indication, you can write:
+
+```{r quick-blca-example}
+features <- filter_features(tcga, name %in% c("CXCL9", "GZMA"))
+
+blca.dat <- tcga %>%
+  filter_samples(indication == "BLCA") %>% 
+  with_assay_data(features, assay_name="rnaseq") %>% 
+  with_sample_covariates(c("OS", "sex"))
+
+ggplot(blca.dat, aes(CXCL9, GZMA, color=sex)) +
+  geom_point()
+```
+
+
+
+# Exemplar Analyses
+
+Provide a number of common anlaysis examples using the FacileTCGADataSet.
