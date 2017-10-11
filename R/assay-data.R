@@ -478,7 +478,7 @@ create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
   } else if (is.character(features)) {
     features <- tibble(feature_id=features, assay=assay_name)
   } else if (is(features, 'tbl_sql')) {
-    features <- collect(features, n=Inf) %>% mutate(assay_name=assay_name)
+    features <- collect(features, n=Inf) %>% mutate(assay=assay_name)
   } else if (is.data.frame(features) && is.null(features[['assay']])) {
     features[['assay']] <- assay_name
   }
