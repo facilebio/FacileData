@@ -213,3 +213,4 @@ print.FacileDataSet <- function(x, ...) {
   cat(out)
   invisible()
 }
+

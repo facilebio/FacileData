@@ -85,7 +85,11 @@ extract.assay <- function(x, assay_name=NULL) {
     out <- ns$assayDataElement(x, assay_name)
   } else if (is(x, 'SummarizedExperiment')) {
     ns <- loadNamespace("SummarizedExperiment")
-    out <- if (is.null(assay_name)) assays(x)[[1L]] else assay(x, assay_name)
+    out <- if (is.null(assay_name)) {
+      ns$assays(x)[[1L]]
+    } else {
+      ns$assay(x, assay_name)
+    }
   } else if (is(x, 'matrix')) {
     out <- x
   } else {

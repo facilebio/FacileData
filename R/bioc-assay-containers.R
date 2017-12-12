@@ -217,3 +217,58 @@ as.ExpressionSet <- function(x, covariates=TRUE, feature_ids=NULL,
   fData(es) <- y$genes
   set_fds(es, .fds)
 }
+
+## as.FacileDataSet conversion and utility functions ===========================
+
+##' Converts Bioc assay containers into a FacileDataSet
+##'
+##' @rdname faciledataset-converter
+##' @export
+##' @return a \code{\link{FacileDataSet}}
+## @importFrom edgeR DGEList
+## @importFrom Biobase ExpressionSet fData pData
+## @importFrom SummarizedExperiment SummarizedExperiment assay rowData colData
+as.FacileDataSet <- function(x, path, ogranism, assays=NULL, metayaml=NULL,
+                             ...) {
+  UseMethod('as.FacileDataSet')
+}
+
+##' @method as.FacileDataSet ExpressionSet
+##' @export
+as.FacileDataSet.ExpressionSet <- function(x, path, ogranism, assays=NULL,
+                                           metayaml=NULL, ...) {
+}
+
+##' @method as.FacileDataSet SummarizedExperiment
+##' @export
+as.FacileDataSet.SummarizedExperiment <- function(x, path, ogranism, assays=NULL,
+                                                  metayaml=NULL, ...) {
+}
+
+##' @method as.FacileDataSet DGEList
+##' @export
+as.FacileDataSet.DGEList <- function(x, path, ogranism, assays=NULL,
+                                     metayaml=NULL, ...) {
+}
+
+##' @method as.FacileDataSet list
+##' @export
+as.FacileDataSet.list <- function(x, path, ogranism, assays=NULL, metayaml=NULL,
+                                  ...) {
+}
+
+#' Creates a shell of a yaml file for a FacileDataSet
+create_metayaml <- function(name='unspecified', organism='unspecified',
+                            datasets=list(), sample_covariates=list(),
+                            default_assay='unspecified') {
+  c('name', 'organism', 'datasets', 'sample_covariates',
+    'default_assay')
+
+}
+metayaml_from_df <- function(x) {
+
+}
+
+metayaml_from_column <- function(x, columm, ...) {
+
+}
