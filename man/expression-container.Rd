@@ -6,7 +6,11 @@
 \alias{as.DGEList.data.frame}
 \alias{as.DGEList.tbl_sql}
 \alias{as.ExpressionSet}
+\alias{as.ExpressionSet.data.frame}
+\alias{as.ExpressionSet.FacileDataSet}
 \alias{as.SummarizedExperiment}
+\alias{as.SummarizedExperiment.data.frame}
+\alias{as.SummarizedExperiment.FacileDataSet}
 \title{Converts a facile result into a DGEList or ExpressionSet, or ...}
 \usage{
 as.DGEList(x, ...)
@@ -23,12 +27,24 @@ as.DGEList(x, ...)
   assay_name = default_assay(.fds), .fds = fds(x),
   custom_key = Sys.getenv("USER"), ...)
 
-as.ExpressionSet(x, covariates = TRUE, feature_ids = NULL,
-  assay_name = default_assay(.fds), .fds = fds(x),
+as.ExpressionSet(x, ...)
+
+\method{as.ExpressionSet}{data.frame}(x, covariates = TRUE,
+  feature_ids = NULL, assay_name = default_assay(.fds), .fds = fds(x),
   custom_key = Sys.getenv("USER"), ...)
 
-as.SummarizedExperiment(x, covariates = TRUE, feature_ids = NULL,
-  assay_name = default_assay(.fds), .fds = fds(x),
+\method{as.ExpressionSet}{FacileDataSet}(x, covariates = TRUE,
+  feature_ids = NULL, assay_name = default_assay(.fds), .fds = fds(x),
+  custom_key = Sys.getenv("USER"), ...)
+
+as.SummarizedExperiment(x, ...)
+
+\method{as.SummarizedExperiment}{data.frame}(x, covariates = TRUE,
+  feature_ids = NULL, assay_name = default_assay(.fds), .fds = fds(x),
+  custom_key = Sys.getenv("USER"), ...)
+
+\method{as.ExpressionSet}{FacileDataSet}(x, covariates = TRUE,
+  feature_ids = NULL, assay_name = default_assay(.fds), .fds = fds(x),
   custom_key = Sys.getenv("USER"), ...)
 }
 \arguments{
@@ -67,6 +83,10 @@ if \code{x} is an \code{ExpressionSet}.}
 }
 \value{
 a \code{\link[edgeR]{DGEList}}
+
+a \code{\link[Biobase]{ExpressionSet}}
+
+a \code{\link[SummarizedExperiment]{SummarizedExperiment}}
 }
 \description{
 The genes and samples that populate the \code{DGEList} are specified by
