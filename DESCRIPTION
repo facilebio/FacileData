@@ -11,6 +11,7 @@ Depends:
     dplyr (>= 0.7.4),
     dtplyr
 Imports:
+    methods,
     magrittr,
     yaml,
     checkmate (>= 1.7.4),
@@ -22,9 +23,12 @@ Imports:
     data.table,
     jsonlite,
     multiGSEA (>= 0.10.4),
-    edgeR
+    edgeR,
+    lazyeval
 Suggests:
     testthat (>= 1.0.2),
     Biobase,
-    SummarizedExperiment
+    SummarizedExperiment,
+    knitr
 RoxygenNote: 6.0.1
+License: MIT

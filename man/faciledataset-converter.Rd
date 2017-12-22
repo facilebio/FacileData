@@ -2,13 +2,70 @@
 % Please edit documentation in R/bioc-assay-containers.R
 \name{as.FacileDataSet}
 \alias{as.FacileDataSet}
-\title{Converts Bioc assay containers into a FacileDataSet}
+\alias{as.FacileDataSet.ExpressionSet}
+\alias{as.FacileDataSet.SummarizedExperiment}
+\alias{as.FacileDataSet.DGEList}
+\alias{as.FacileDataSet.list}
+\title{Converts bioconductor assay containers into a FacileDataSet.}
 \usage{
-as.FacileDataSet(x, path, ogranism, assays = NULL, metayaml = NULL, ...)
+as.FacileDataSet(x, assay_name, assay_type, feature_info, feature_type,
+  metayaml = NULL, organism = "unspecified",
+  path = tempfile("FacileDataSet-", getwd()), source_assay = NULL, ...)
+
+\method{as.FacileDataSet}{ExpressionSet}(x, assay_name, assay_type,
+  feature_info, feature_type, metayaml = NULL, organism = "unspecified",
+  path = tempfile("FacileDataSet-", getwd()),
+  source_assay = assayDataElementNames(x)[1L], ...)
+
+\method{as.FacileDataSet}{SummarizedExperiment}(x, assay_name, assay_type,
+  feature_info, feature_type, metayaml = NULL, organism = "unspecified",
+  path = tempfile("FacileDataSet-", getwd()), source_assay = NULL, ...)
+
+\method{as.FacileDataSet}{DGEList}(x, assay_name, assay_type, feature_info,
+  feature_type, metayaml = NULL, organism = "unspecified",
+  path = tempfile("FacileDataSet-", getwd()), source_assay = NULL, ...)
+
+\method{as.FacileDataSet}{list}(x, path, organism, assays = NULL,
+  metayaml = NULL, ...)
+}
+\arguments{
+\item{x}{The bioconductor assay container to extract data from}
+
+\item{assay_name}{The name to use when storing the assay matrix from
+\code{x} into the faciledataset.}
+
+\item{assay_type}{what type of assay is this? rnaseq, microarry, nanostring,
+isoseq (isoform expression), etc.}
+
+\item{feature_info}{a data.frame that describes the information for the
+features (rows) of the assay you are extracting. Currently you had to
+hand-craft this. In the future we will provide automated default
+fData, rowData, etc. extractors for the source assay cointaner.}
+
+\item{feature_type}{\code{c('entrez', 'ensgid', 'enstid', 'genomic', 'custom')}}
+
+\item{metayaml}{a yaml file (or list of lists) that describes the covariates
+in the pData/colData of \code{x}. If not provided, a default one will be
+generated}
+
+\item{organism}{c("Homo sapiens", "Mus musculus", "unspecified"). This
+is used to fetch the appropriate genesets when this dataset is used with
+the facileexplorer}
+
+\item{path}{the directory to create the faciledataset into. Will create
+a default directory in the current working directory if not specified.}
+
+\item{source_assay}{the name of the assay element in \code{x} to extract
+for use.}
+
+\item{...}{more args}
 }
 \value{
 a \code{\link{FacileDataSet}}
 }
 \description{
-Converts Bioc assay containers into a FacileDataSet
+This function assumes you are only extracting one assay from the assay
+container and creating a FacileDataSet from it. This requires that you
+specify which assay (if the container has more than one) to extract, as
+well as hand-crafting the feature_info correctly for the assay.
 }

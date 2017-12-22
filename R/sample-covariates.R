@@ -137,6 +137,7 @@ save_custom_sample_covariates <- function(x, annotation, name=NULL,
 ##' Note that this function will force the collection of \code{x}
 ##'
 ##' @export
+##' @importFrom stats complete.cases
 ##' @param x a facile sample descriptor
 ##' @param covariates character vector of covariate names. If \code{NULL}
 ##'   (default), returns all covariates, if is character and length() == 0, then

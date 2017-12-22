@@ -56,12 +56,13 @@ subtype_map <- function(x) {
 ##' "AND"ed together.
 ##'
 ##' @export
+##' @importFrom lazyeval lazy_dots
 ##' @param x A \code{FacileDataRepository}
 ##' @param ... the NSE boolean filter criteria
 ##' @return a facile sample descriptor
 fetch_samples <- function(x, samples=NULL, assay="rnaseq", ...) {
   stopifnot(is.FacileDataSet(x))
-  dots <- lazyeval::lazy_dots(...)
+  dots <- lazy_dots(...)
   if (length(dots)) {
     stop("Currently rethinking how to make fetching samples intuitive, ie. ",
          "see fetch_samples.old")
@@ -90,41 +91,6 @@ fetch_samples <- function(x, samples=NULL, assay="rnaseq", ...) {
     set_fds(x)
 }
 
-## This was when I was trying to enable sample retrieval by making the
-## sample_covariate table "look wide" so the caller can use `filter` in an
-## expected way.
-## I think this is still a worthwhile endeavor, but me and NSE don't play well
-## together ... and I swear I did well in my programming languages and
-## compilers class ...
-fetch_samples.old <- function(x, ...) {
-  stopifnot(is.FacileDataSet(x))
-  dots <- lazyeval::lazy_dots(...)
-
-  if (length(dots)) {
-    crit <- lapply(as.list(dots), function(crit) {
-      expr <- as.character(crit$expr)
-      stopifnot(length(expr) == 3L)
-      op <- expr[1]
-      if (!op %in% c('==', '%in%')) {
-        stop("Only '==' and '%in%' operators allowed: ", expr)
-      }
-      # browser()
-      var <- expr[2L]
-      values <- expr[3]
-      list(variable=var, value=values)
-    })
-
-    covs <- unique(sapply(crit, '[[', 'variable'))
-    wcovs <- sample_covariate_tbl(x)
-    if (length(covs) == 1) {
-      wcovs <- filter(wcovs, variable == covs)
-    } else {
-      wcovs <- filter(wcovs, variable %in% covs)
-    }
-    out <- spread_covariates(wcovs, x)
-    filter(out, ...)
-  }
-}
 
 ##' Filters the samples down in a dataset to ones specified
 ##'
@@ -219,7 +185,7 @@ retrieve_samples_in_memory <- function(criteria, cov.table=NULL) {
 ##' @seealso \href{https://cran.r-project.org/web/packages/dplyr/vignettes/nse.html}{dplyr non-standard evaluation}
 ##'
 ##' @importFrom lazyeval interp
-##'
+##' @importFrom stats formula
 ##' @param variable the name of the variable to look for in the sample_covariate
 ##'   \code{variable} column
 ##' @param value \code{character} vector of values for the \code{variable} that

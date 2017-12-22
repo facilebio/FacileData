@@ -113,6 +113,7 @@ createWarehouse <- function(db.path, datasets, gene.info=fData(datasets[[1]]),
 
 ##' Creates the expression and sample_stats table, initialize with all data.
 ##' @importFrom reshape2 melt
+##' @importFrom stats setNames
 ##' @param db the db connection
 ##' @param datasets a list of expression sets to load up databases with
 initializeWithExpressionData <- function(db, datasets) {

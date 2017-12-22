@@ -86,3 +86,11 @@ ggplot(blca.dat, aes(CXCL9, GZMA, color=sex)) +
 # Exemplar Analyses
 
 Provide a number of common anlaysis examples using the FacileTCGADataSet.
+
+# Data Model
+
+The pData data.frame is stored in the sample_covariate table in the internal
+database using an [entity-attribute-value model][EAV].
+
+[EAV]: https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model
+

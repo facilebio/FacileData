@@ -7,11 +7,12 @@
 ##' TODO: Professionaly implement this.
 ##'
 ##' @export
+##' @importFrom lazyeval lazy_dots auto_name
 ##' @param x A \code{FacileDataSet}
 ##' @param ... NSE claused to use in \code{\link[dplyr]{filter}} expressions
 filter_samples <- function(x, ..., with_covariates=FALSE) {
   stopifnot(is.FacileDataSet(x))
-  dots <- lazyeval::lazy_dots(...)
+  dots <- lazy_dots(...)
   cov.table <- .create_wide_covariate_table(x, dots)
   out <- dplyr::filter_(cov.table, .dots=dots)
   if (!with_covariates) {
@@ -36,7 +37,7 @@ filter_samples <- function(x, ..., with_covariates=FALSE) {
     collect(n=Inf)
   all.vars <- all.vars$variable
 
-  dot.exprs <- names(lazyeval::auto_name(dots))
+  dot.exprs <- names(auto_name(dots))
   hits <- sapply(all.vars, function(var) any(grepl(var, dot.exprs)))
   out <- names(hits)[hits]
   if (length(out) == 0) {

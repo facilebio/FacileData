@@ -568,6 +568,7 @@ can.spread.assay.by.name <- function(x, assay_name) {
 ##' found, then we'll pick the feature_id and count column.
 ##'
 ##' @export
+##' @importFrom stats setNames
 ##' @param x facile expression result from \code{fetch_expression}
 ##' @param key the column from the long-form \code{fetch_expression} table
 ##'   to put in the columns of the outgoing data.frame that the values are

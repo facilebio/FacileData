@@ -209,53 +209,144 @@ as.ExpressionSet <- function(x, covariates=TRUE, feature_ids=NULL,
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
   assert_sample_subset(x)
-  if (!require("Biobase")) stop("Biobase required")
+  if (!requireNamespace("Biobase", quietly = TRUE)) {
+    stop("Biobase required")
+  }
   y <- as.DGEList(x, covariates, feature_ids, assay_name, .fds=.fds,
                   custom_key=custom_key, ...)
-  es <- ExpressionSet(y$counts)
-  pData(es) <- y$samples
-  fData(es) <- y$genes
+  es <- Biobase::ExpressionSet(y$counts)
+  es <- Biobase::`pData<-`(es, y$samples)
+  es <- Biobase::`fData<-`(es, y$genes)
   set_fds(es, .fds)
+}
+
+##' @export
+##' @rdname expression-container
+as.SummarizedExperiment <- function(x, covariates=TRUE, feature_ids=NULL,
+                                    assay_name=default_assay(.fds),
+                                    .fds=fds(x), custom_key=Sys.getenv("USER"),
+                                    ...) {
+  .fds <- force(.fds)
+  stopifnot(is.FacileDataSet(.fds))
+  assert_sample_subset(x)
+  if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
+    stop("SummarizedExperiment package required")
+  }
+  y <- as.DGEList(x, covariates, feature_ids, assay_name, .fds=.fds,
+                  custom_key=custom_key, ...)
+  ## TODO: Check y$genes to see if we should make a rowRanges out of the
+  ## rowData or just keep it as a DataFrame
+  out <- SummarizedExperiment::SummarizedExperiment(
+    y$counts, colData=y$samples, rowData=y$genes, ...)
+  set_fds(out, .fds)
 }
 
 ## as.FacileDataSet conversion and utility functions ===========================
 
-##' Converts Bioc assay containers into a FacileDataSet
+##' Converts bioconductor assay containers into a FacileDataSet.
+##'
+##' This function assumes you are only extracting one assay from the assay
+##' container and creating a FacileDataSet from it. This requires that you
+##' specify which assay (if the container has more than one) to extract, as
+##' well as hand-crafting the feature_info correctly for the assay.
 ##'
 ##' @rdname faciledataset-converter
 ##' @export
 ##' @return a \code{\link{FacileDataSet}}
-## @importFrom edgeR DGEList
-## @importFrom Biobase ExpressionSet fData pData
-## @importFrom SummarizedExperiment SummarizedExperiment assay rowData colData
-as.FacileDataSet <- function(x, path, ogranism, assays=NULL, metayaml=NULL,
-                             ...) {
-  UseMethod('as.FacileDataSet')
+##' @param x The bioconductor assay container to extract data from
+##' @param assay_name The name to use when storing the assay matrix from
+##' \code{x} into the faciledataset.
+##' @param assay_type what type of assay is this? rnaseq, microarry, nanostring,
+##'   isoseq (isoform expression), etc.
+##' @param feature_info a data.frame that describes the information for the
+##'   features (rows) of the assay you are extracting. Currently you had to
+##'   hand-craft this. In the future we will provide automated default
+##'   fData, rowData, etc. extractors for the source assay cointaner.
+##' @param feature_type \code{c('entrez', 'ensgid', 'enstid', 'genomic', 'custom')}
+##' @param metayaml a yaml file (or list of lists) that describes the covariates
+##'   in the pData/colData of \code{x}. If not provided, a default one will be
+##'   generated
+##' @param organism c("Homo sapiens", "Mus musculus", "unspecified"). This
+##'   is used to fetch the appropriate genesets when this dataset is used with
+##'   the facileexplorer
+##' @param path the directory to create the faciledataset into. Will create
+##'   a default directory in the current working directory if not specified.
+##' @param source_assay the name of the assay element in \code{x} to extract
+##'   for use.
+##' @param ... more args
+as.FacileDataSet <- function(x, assay_name, assay_type, feature_info,
+                             feature_type, metayaml=NULL,
+                             organism="unspecified",
+                             path=tempfile("FacileDataSet-", getwd()),
+                             source_assay=NULL, ...) {
+  UseMethod("as.FacileDataSet")
+}
+
+##' @method as.FacileDataSet default
+##' @export
+as.FacileDataSet.default <- function(x, assay_name, assay_type, feature_info,
+                                     feature_type, metayaml=NULL,
+                                     organism="unspecified",
+                                     path=tempfile("FacileDataSet-", getwd()),
+                                     source_assay=NULL, ...) {
+  stop("as.FacileDataSet not defined for object of class: ", class(x)[1L])
 }
 
 ##' @method as.FacileDataSet ExpressionSet
 ##' @export
-as.FacileDataSet.ExpressionSet <- function(x, path, ogranism, assays=NULL,
-                                           metayaml=NULL, ...) {
+##' @rdname faciledataset-converter
+as.FacileDataSet.ExpressionSet <- function(x, assay_name, assay_type, feature_info,
+                                           feature_type, metayaml=NULL,
+                                           organism="unspecified",
+                                           path=tempfile("FacileDataSet-", getwd()),
+                                           source_assay=assayDataElementNames(x)[1L],
+                                           ...) {
+  if (!requireNamespace("Biobase", quietly = TRUE)) {
+    stop("Biobase package required to convert ExpresionSet to FacileDataSet")
+  }
 }
 
 ##' @method as.FacileDataSet SummarizedExperiment
 ##' @export
-as.FacileDataSet.SummarizedExperiment <- function(x, path, ogranism, assays=NULL,
-                                                  metayaml=NULL, ...) {
+##' @rdname faciledataset-converter
+as.FacileDataSet.SummarizedExperiment <- function(x, assay_name, assay_type, feature_info,
+                                                  feature_type, metayaml=NULL,
+                                                  organism="unspecified",
+                                                  path=tempfile("FacileDataSet-", getwd()),
+                                                  source_assay=NULL, ...) {
 }
 
 ##' @method as.FacileDataSet DGEList
 ##' @export
-as.FacileDataSet.DGEList <- function(x, path, ogranism, assays=NULL,
-                                     metayaml=NULL, ...) {
+##' @rdname faciledataset-converter
+as.FacileDataSet.DGEList <- function(x, assay_name, assay_type, feature_info,
+                                     feature_type, metayaml=NULL,
+                                     organism="unspecified",
+                                     path=tempfile("FacileDataSet-", getwd()),
+                                     source_assay=NULL, ...) {
+}
+
+as.FacileDataSet.matrix <- function(x, assay_name, assay_type, feature_info,
+                                    feature_type, metayaml=NULL,
+                                    organism="unspecified",
+                                    path=tempfile("FacileDataSet-", getwd()),
+                                    source_assay=NULL, ...) {
+
 }
 
 ##' @method as.FacileDataSet list
 ##' @export
-as.FacileDataSet.list <- function(x, path, ogranism, assays=NULL, metayaml=NULL,
+##' @rdname faciledataset-converter
+as.FacileDataSet.list <- function(x, path, organism, assays=NULL, metayaml=NULL,
                                   ...) {
 }
+
+## Utlity functions to create meta.yaml file from various sample-covariates ====
+metayaml_from_df <- function(x) {
+
+}
+
+
 
 #' Creates a shell of a yaml file for a FacileDataSet
 create_metayaml <- function(name='unspecified', organism='unspecified',
@@ -265,9 +356,7 @@ create_metayaml <- function(name='unspecified', organism='unspecified',
     'default_assay')
 
 }
-metayaml_from_df <- function(x) {
 
-}
 
 metayaml_from_column <- function(x, columm, ...) {
 
