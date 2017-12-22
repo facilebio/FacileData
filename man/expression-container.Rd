@@ -6,6 +6,7 @@
 \alias{as.DGEList.data.frame}
 \alias{as.DGEList.tbl_sql}
 \alias{as.ExpressionSet}
+\alias{as.SummarizedExperiment}
 \title{Converts a facile result into a DGEList or ExpressionSet, or ...}
 \usage{
 as.DGEList(x, ...)
@@ -23,6 +24,10 @@ as.DGEList(x, ...)
   custom_key = Sys.getenv("USER"), ...)
 
 as.ExpressionSet(x, covariates = TRUE, feature_ids = NULL,
+  assay_name = default_assay(.fds), .fds = fds(x),
+  custom_key = Sys.getenv("USER"), ...)
+
+as.SummarizedExperiment(x, covariates = TRUE, feature_ids = NULL,
   assay_name = default_assay(.fds), .fds = fds(x),
   custom_key = Sys.getenv("USER"), ...)
 }

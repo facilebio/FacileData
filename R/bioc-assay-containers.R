@@ -209,11 +209,34 @@ as.ExpressionSet <- function(x, covariates=TRUE, feature_ids=NULL,
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
   assert_sample_subset(x)
-  if (!require("Biobase")) stop("Biobase required")
+  if (!requireNamespace("Biobase", quietly = TRUE)) {
+    stop("Biobase required")
+  }
   y <- as.DGEList(x, covariates, feature_ids, assay_name, .fds=.fds,
                   custom_key=custom_key, ...)
-  es <- ExpressionSet(y$counts)
-  pData(es) <- y$samples
-  fData(es) <- y$genes
+  es <- Biobase::ExpressionSet(y$counts)
+  es <- Biobase::`pData<-`(es, y$samples)
+  es <- Biobase::`fData<-`(es, y$genes)
   set_fds(es, .fds)
+}
+
+##' @export
+##' @rdname expression-container
+as.SummarizedExperiment <- function(x, covariates=TRUE, feature_ids=NULL,
+                                    assay_name=default_assay(.fds),
+                                    .fds=fds(x), custom_key=Sys.getenv("USER"),
+                                    ...) {
+  .fds <- force(.fds)
+  stopifnot(is.FacileDataSet(.fds))
+  assert_sample_subset(x)
+  if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
+    stop("SummarizedExperiment package required")
+  }
+  y <- as.DGEList(x, covariates, feature_ids, assay_name, .fds=.fds,
+                  custom_key=custom_key, ...)
+  ## TODO: Check y$genes to see if we should make a rowRanges out of the
+  ## rowData or just keep it as a DataFrame
+  out <- SummarizedExperiment::SummarizedExperiment(
+    y$counts, colData=y$samples, rowData=y$genes, ...)
+  set_fds(out, .fds)
 }
