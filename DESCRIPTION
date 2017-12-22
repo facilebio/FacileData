@@ -14,7 +14,7 @@ Imports:
     methods,
     magrittr,
     yaml,
-    checkmate (>= 1.7.4),
+    checkmate (>= 1.8.5),
     readxl,
     RSQLite,
     reshape2,
