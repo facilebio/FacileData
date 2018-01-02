@@ -96,23 +96,97 @@ as.FacileDataSet.list <- function(x, path, organism, assays=NULL, metayaml=NULL,
                                   ...) {
 }
 
-## Utlity functions to create meta.yaml file from various sample-covariates ====
-metayaml_from_df <- function(x) {
+#' Create a facile covariate definition file from a sample covariate data.frame
+#'
+#' Sample covariates (aka `pData`) are encoded in an
+#' entity-attribute-value (EAV) table. Metadata about these covariates are
+#' stored in a `meta.yaml` file in the FacileDataSet directory. This function
+#' generates the list-of-list structure to represent the `sample_covariates`
+#' section of the `meta.yaml` file.
+#'
+#' @section Survival:
+#' Survival data is encoded by two columns. One column to indicate the
+#' "time to event" (tte), and a second to indicate whether or not the denoted
+#' tte is an "event" (1) or "censored" (0). If there are such data in `x`, it
+#' must be in a (`tte_OS`, `event_OS`) pair of columns for "ordinary survival"
+#' or a (`tte_PFS`, `event_PFS`) for progression free survival.
+#'
+#' @export
+#' @param x a `pData` `data.frame`
+#' @param covariate_def a named list of covariate definitions. The names of
+#'   this list are the names the covariates will be called in the target
+#'   `FacileDataSet`. The values of the list are:
+#'   * `varname`: a `character()` of the column name(s) in `x` that this
+#'      sample covariate was derived from. If more than one column is to be used
+#'      for the facile covariate conversion (eg. if we are encoding survival),
+#'      then provide a `length() > 1` character vector with the names of the
+#'      columns in `x` that were used for the encoding. If this were encoding
+#'      survival this might be `c("time", "event") columns, in that order.
+#'   * label: a human readable label to use for this covariate in user facing
+#'      scenarios in the facileverse.
+#'   * `class`: the "facile class" of the covariate. This can either be
+#'     `categorical`, `real`, or `right_censored` (for survival).
+#'   * `levels`: (optional) if you want a `categorical` to be treated as a
+#'     factor if it isn't already encoded as such in the `pData` itself, or if
+#'     you want to rearrange the factor levels.
+#'   * `type`: (optinal) this is used a a "grouping" level, particularly in
+#'     the FacileExplorer. Not including this won't matter.
+#'     TODO: talk about covariate groupings in
+#'     `FacileExplorer::categoricalCovariateSelect`
+#' @return a list-of-lists that encodes the `sample_covariate` section of the
+#'   `meta.yaml` file for a `FacileDataSet`.
+#' @examples
+#' # covariate_def definition to take tte_OS and tte_event columns and turn
+#' # into a facile "OS" right_censored survival covariate
+#' cc <- list(
+#'   OS=list(
+#'     varname=c("tte_OS", "tte_event"),
+#'     label="Overall Survival",
+#'     class="right_censored",
+#'     type="clinical",
+#'     description="Overall survival in days"))
+create_eav_metadata <- function(x, covariate_def = list()) {
+  stopifnot(is.data.frame(x))
+  if (is.null(covariate_def)) covariate_def <- list()
+  stopifnot(is.list(covariate_def))
+  if (length(covariate_def)) {
+    stopifnot(
+      is.character(names(covariate_def)),
+      length(unique(name(covariate_def))) == length(covariate_def))
+  }
 
+  if ("dataset" %in% colnames(x)) x[['dataset']] <- NULL
+  if ("sample_id" %in% colnames(x)) x[['sample_id']] <- NULL
+
+  # generate generic covariate definitions for all columns
+  gcd <- lapply(colnames(x), function(name) eavdef_for_column(x, name))
+  names(gcd) <- colnames(x)
+
+  # remove definitions in gcd that are provided in covariate_def
+  axe <- lapply(covariate_def, '[[', 'varname')
+  axe <- unique(unlist(axe, recursive = TRUE, use.names = FALSE))
+  gcd[axe] <- NULL
+
+  out <- c(gcd, covariate_def)
+  out
 }
 
+#' Generate entity-attribute-value definition for a column in a data.frame
+#'
+#' @param x a `data.frame`
+#' @param column the name of the column in the `x` to parse.
+#' @return a generic list-of-list defintion for `x[[column]]`
+eavdef_for_column <- function(x, column) {
+  vals <- x[[column]]
+  if (is.null(vals)) stop("Unknown column in x: ", column)
 
-
-#' Creates a shell of a yaml file for a FacileDataSet
-create_metayaml <- function(name='unspecified', organism='unspecified',
-                            datasets=list(), sample_covariates=list(),
-                            default_assay='unspecified') {
-  c('name', 'organism', 'datasets', 'sample_covariates',
-    'default_assay')
-
-}
-
-
-metayaml_from_column <- function(x, columm, ...) {
-
+  out <- list(varname=column, label=column, class='categorical', type="generic",
+              description="no description provided")
+  if (is.numeric(vals)) {
+    out[['class']] <- "real"
+  }
+  if (is.factor(vals)) {
+    out[['levels']] <- levels(vals)
+  }
+  out
 }

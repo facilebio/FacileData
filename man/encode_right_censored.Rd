@@ -16,7 +16,7 @@ right censored.}
 1 means censored, and 0 is event. This is \code{FALSE} by default.}
 }
 \value{
-returns a numeric vector that componds time-to-event and censoring
+returns a numeric vector that combines time-to-event and censoring
   info (sign of the value).
 }
 \description{

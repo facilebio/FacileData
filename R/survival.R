@@ -36,7 +36,7 @@ decode_right_censored <- function(x, suffix=NULL, sas.encoding=FALSE) {
 ##'   right censored.
 ##' @param sas.encoding Is the 'event' vector "SAS encoded"? In the SAS world,
 ##'   1 means censored, and 0 is event. This is \code{FALSE} by default.
-##' @return returns a numeric vector that componds time-to-event and censoring
+##' @return returns a numeric vector that combines time-to-event and censoring
 ##'   info (sign of the value).
 encode_right_censored <- function(time, event, sas.encoding=FALSE) {
   event <- as.integer(event)
