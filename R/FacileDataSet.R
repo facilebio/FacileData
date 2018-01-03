@@ -1,12 +1,22 @@
-##' Connect to a FacileDataSet repository.
-##'
-##' @export
-##' @importFrom RSQLite dbConnect SQLite dbExecute
-##' @param path The path to the FacileData repository
-##' @param data.fn A custom path to the database (probably don't mess with this)
-##' @param covdef.fn A custom path to the yaml file that has covariate mapping info
-##' @param anno.dir A directory to house custom annotations/sample covariates
-##' @param cache_size A custom paramter for the SQLite database
+#' Instantiates a FacileDataSet object from disk.
+#'
+#' The FacileDataSet is a reference data storage implementation that implements
+#' the **FacileData Access API**. It facilitates the storage and retrieval of
+#' large amounts of data by leveraging a SQLite database to store sample- and
+#' feature-level metadata ("`pData`" and "`fData`"), and an HDF5 file to store
+#' all of the dense assay (matrix) data (gene counts, microarray intensities,
+#' etc.).
+#'
+#' TODO: Document the "FacileData Access API"
+#'
+#' @md
+#' @export
+#' @importFrom RSQLite dbConnect SQLite dbExecute
+#' @param path The path to the FacileData repository
+#' @param data.fn A custom path to the database (probably don't mess with this)
+#' @param covdef.fn A custom path to the yaml file that has covariate mapping info
+#' @param anno.dir A directory to house custom annotations/sample covariates
+#' @param cache_size A custom paramter for the SQLite database
 FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
                           sqlite.fn=file.path(path, 'data.sqlite'),
                           hdf5.fn=file.path(path, 'data.h5'),

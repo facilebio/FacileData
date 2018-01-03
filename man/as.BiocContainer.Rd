@@ -11,7 +11,7 @@
 \alias{as.SummarizedExperiment}
 \alias{as.SummarizedExperiment.data.frame}
 \alias{as.SummarizedExperiment.FacileDataSet}
-\title{Converts a facile result into a DGEList or ExpressionSet, or ...}
+\title{Converts a facile result into a traditional Bioconductor assay containers.}
 \usage{
 as.DGEList(x, ...)
 
@@ -89,8 +89,9 @@ a \code{\link[Biobase]{ExpressionSet}}
 a \code{\link[SummarizedExperiment]{SummarizedExperiment}}
 }
 \description{
-The genes and samples that populate the \code{DGEList} are specified by
-\code{x}, and the caller can request addition sample information to be
-appended to \code{out$samples} via specification through the
-\code{covariates} argument.
+Even though the faciledata API provides functionality to access your data
+in useful ways, it is still conceivable that you *might* prefer to work
+with these data using a more traditional bioconductor container like a
+`SummarizedExperiment`, `DGEList`, `ExpressionSet`, etc.These functions are
+here for you.
 }

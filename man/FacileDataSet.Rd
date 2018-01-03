@@ -2,7 +2,7 @@
 % Please edit documentation in R/FacileDataSet.R
 \name{FacileDataSet}
 \alias{FacileDataSet}
-\title{Connect to a FacileDataSet repository.}
+\title{Instantiates a FacileDataSet object from disk.}
 \usage{
 FacileDataSet(path, data.fn = file.path(path, "data.sqlite"),
   sqlite.fn = file.path(path, "data.sqlite"), hdf5.fn = file.path(path,
@@ -22,5 +22,13 @@ FacileDataSet(path, data.fn = file.path(path, "data.sqlite"),
 \item{covdef.fn}{A custom path to the yaml file that has covariate mapping info}
 }
 \description{
-Connect to a FacileDataSet repository.
+The FacileDataSet is a reference data storage implementation that implements
+the \strong{FacileData Access API}. It facilitates the storage and retrieval of
+large amounts of data by leveraging a SQLite database to store sample- and
+feature-level metadata ("\code{pData}" and "\code{fData}"), and an HDF5 file to store
+all of the dense assay (matrix) data (gene counts, microarray intensities,
+etc.).
+}
+\details{
+TODO: Document the "FacileData Access API"
 }

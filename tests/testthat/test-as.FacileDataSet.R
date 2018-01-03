@@ -21,18 +21,18 @@ validate_eav_recode <- function(x, expected, varname) {
   } else {
     expect_true(is.null(x$levels), info = varname)
   }
-  message("=== ", varname)
 }
 
-test_that("propper yaml covariate extraction from pData", {
-  pdat <- system.file("testdata", "test-sample-covariates.rds",
-                      package = "FacileDataSet")
-  pdat <- readRDS(pdat)
-  elol <- system.file("testdata", "expected-meta.yaml",
-                      package = "FacileDataSet")
-  elol <- yaml::read_yaml(elol)$sample_covariate
+test_that("simple pData yaml covariate extraction (no OS)", {
+  # Trying to recode the survival stuff isn't included in this test
+  pdat <- example_sample_covariates()
+  elol <- example_sample_covariate_definitions()
 
-  lol <- covdefs_from_df(pdat)
+  # remove OS covariates from pData and yaml
+  pdat <- select(pdat, -tte_OS, -event_OS)
+  elol$OS <- NULL
+
+  lol <- create_eav_metadata(pdat)
   fn <- tempfile()
   yaml::write_yaml(lol, fn)
   relol <- yaml::read_yaml(fn)
@@ -48,6 +48,24 @@ test_that("propper yaml covariate extraction from pData", {
   }
 })
 
+test_that("pData with OS is properly yaml encoded", {
+  # Trying to recode the survival stuff isn't included in this test
+  pdat <- example_sample_covariates()
+  pdat <- select(pdat, sex, age, tte_OS, event_OS)
+  elol <- example_sample_covariate_definitions()
+  elol <- elol[c('sex','age', 'OS')]
+
+  covdef <- list(
+    OS=list(
+      varname=c("tte_OS", "tte_event"),
+      class="right_censored",
+      label="Overall survival",
+
+      type="clinical",
+      description="Overall Survival in months"
+    ))
+
+})
 test_that("single ExpressionSet converts to FacileDataSet", {
 
 })

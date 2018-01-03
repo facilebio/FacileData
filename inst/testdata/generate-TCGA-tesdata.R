@@ -22,7 +22,8 @@ scovs <- bsamples %>%
   mutate(stage = factor(stage),
          sex = factor(sex, c("male", "female"))) %>%
   select(dataset, sample_id, stage, sex, age, sample_type,
-         subtype_molecular_bladder, subtype_receptor_breast)
+         subtype_molecular_bladder, subtype_receptor_breast,
+         tte_OS, event_OS)
 
 # Let's fill the categorical variables with all levels, even though our sampling
 # can't possibly do that.

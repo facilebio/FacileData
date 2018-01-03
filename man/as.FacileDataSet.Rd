@@ -37,7 +37,7 @@ as.FacileDataSet(x, assay_name, assay_type, feature_info, feature_type,
 \item{assay_type}{what type of assay is this? rnaseq, microarry, nanostring,
 isoseq (isoform expression), etc.}
 
-\item{feature_info}{a data.frame that describes the information for the
+\item{feature_info}{a \code{data.frame} that describes the information for the
 features (rows) of the assay you are extracting. Currently you had to
 hand-craft this. In the future we will provide automated default
 fData, rowData, etc. extractors for the source assay cointaner.}
@@ -48,9 +48,9 @@ fData, rowData, etc. extractors for the source assay cointaner.}
 in the pData/colData of \code{x}. If not provided, a default one will be
 generated}
 
-\item{organism}{c("Homo sapiens", "Mus musculus", "unspecified"). This
-is used to fetch the appropriate genesets when this dataset is used with
-the facileexplorer}
+\item{organism}{This is used to fetch the appropriate genesets when this
+dataset is used with the facileexplorer. Currently supported values are:
+\code{c("Homo sapiens", "Mus musculus", "unspecified")}.}
 
 \item{path}{the directory to create the faciledataset into. Will create
 a default directory in the current working directory if not specified.}
@@ -61,7 +61,7 @@ for use.}
 \item{...}{more args}
 }
 \value{
-a \code{\link{FacileDataSet}}
+a \code{\link[=FacileDataSet]{FacileDataSet()}}
 }
 \description{
 This function assumes you are only extracting one assay from the assay

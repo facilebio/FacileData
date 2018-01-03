@@ -55,5 +55,13 @@ sample_covariates:
     levels: ['normal', 'tumor', 'tumor_metastatic']
     description: Whether sample comes from a tumor or adjacent normal
     label: Sample type (tumor/normal)
+  OS:
+    type: clinical
+    class: right_censored
+    description: >
+      Overall Survival in days or months. The units still need to be standardized
+      across trials.
+    label: Overall survival
+
 
 

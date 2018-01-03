@@ -1,41 +1,29 @@
-##' Convert +/- encoding of time to event to time + event.
+##' Entity-attribute-value encodings for survival data.
 ##'
-##' Time to event (and event labels) are encoded as a single real value in the
-##' clinical data. The absoulte value of the value is the time to the event, and
-##' a positive value indicates an "event", negative is censored.
+##' @details
+##' Encoding of survival data in R requires two columns, one to store
+##' the time-to-event and another to indicate if there was an "event" at stored
+##' time, or if it was censored. A `FacileDataSet` stores these two `pData`
+##' columns into one "value" column in its entity-atribute-value
+##' `sample_covariate` table.
 ##'
-##' The encoding was defined by Wei. Positive values mean that there was an
-##' event at that time, negative values mean censoring (in R, that is 1 and 0,
-##' respectively).
+##' The `encode_right_censored` function takes the ime-to-event and censoring
+##' vectors and encodes them into a single signed time-to-event numeric value.
+##' Positive values indicate an event, and negative value are censored.
 ##'
+##' The `decode_right_censored` function re-instatiaes the two-column R-native
+##' storage of this data.
+##'
+##' @md
 ##' @export
-##' @param x the time to event
-##' @return two column data.frame
-decode_right_censored <- function(x, suffix=NULL, sas.encoding=FALSE) {
-  x <- as.numeric(x)
-  out <- data.frame(tte=abs(x))
-  if (sas.encoding) {
-    out[['event']] <- as.integer(x < 0)
-  } else {
-    out[['event']] <- as.integer(x > 0)
-  }
-  if (is.character(suffix)) {
-    names(out) <- paste0(names(out), '_', sub('^[^a-zA-Z]', '', suffix))
-  }
-  out
-}
-
-##' Encodes time and event status into single numeric vector.
+##' @rdname eav-right-censor
+##' @seealso [create_eav_metadata()]
 ##'
-##' A positive value for the time means that there was an event, negative
-##' value is "censored".
-##'
-##' @export
-##' @param time \code{numeric} time to event
+##' @param time `numeric` time to event
 ##' @param event 0/1 vector encoded in the "R sense". "1" is an event, "0" is
 ##'   right censored.
 ##' @param sas.encoding Is the 'event' vector "SAS encoded"? In the SAS world,
-##'   1 means censored, and 0 is event. This is \code{FALSE} by default.
+##'   1 means censored, and 0 is event. This is `FALSE` by default.
 ##' @return returns a numeric vector that combines time-to-event and censoring
 ##'   info (sign of the value).
 encode_right_censored <- function(time, event, sas.encoding=FALSE) {
@@ -55,5 +43,27 @@ encode_right_censored <- function(time, event, sas.encoding=FALSE) {
   }
   out <- ifelse(event == 0L, -1L * time, time)
   out[isna] <- NA
+  out
+}
+
+##' @md
+##' @export
+##' @rdname eav-right-censor
+##' @param x the time to event
+##' @param suffix adds `_<suffix>` to the `tte` and `event` columns of the
+##'   outgoing `data.frame`
+##' @return two column `data.frame` with `tte(_SUFFIX)?` and `event(_SUFFIX)?`
+##'   columns.
+decode_right_censored <- function(x, suffix=NULL, sas.encoding=FALSE) {
+  x <- as.numeric(x)
+  out <- data.frame(tte=abs(x))
+  if (sas.encoding) {
+    out[['event']] <- as.integer(x < 0)
+  } else {
+    out[['event']] <- as.integer(x > 0)
+  }
+  if (is.character(suffix)) {
+    names(out) <- paste0(names(out), '_', sub('^[^a-zA-Z]', '', suffix))
+  }
   out
 }

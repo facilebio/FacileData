@@ -21,3 +21,39 @@ createExampleFacileDataSet <- function(out.fn) {
   stop("This is created in FacileTCGA/inst/build-test-db")
 }
 
+#' Fetches exemplar pData
+#' @export
+#' @rdname test-helpers
+example_sample_covariates <- function() {
+  pdat <- system.file("testdata", "test-sample-covariates.rds",
+                      package = "FacileDataSet")
+  readRDS(pdat)
+}
+
+#' Fetches the meta file for the example FacileDataSet
+#' @export
+#' @rdname test-helpers
+#' @param file.path If `TRUE`, returns the path to the yaml file, otherwise
+#'   returns the list-of-list meta definition.
+#' @return Either the list-of-list meta definition, or path to the `meta.yaml`
+#'   file where these are defined.
+example_meta <- function(file.path=FALSE) {
+  out <- system.file("testdata", "expected-meta.yaml",
+                     package = "FacileDataSet")
+  if (!isTRUE(file.path)) {
+    out <- yaml::read_yaml(out)
+  }
+  out
+}
+
+#' Fetches the EAV definitions for the sample covariates
+#'
+#' @export
+#' @importFrom yaml read_yaml
+#' @rdname test-helpers
+#' @return the list-of-list definitions for the example `pData` returned from
+#'   [example_sample_covariates()]
+example_sample_covariate_definitions <- function() {
+  out <- example_meta(file.path=FALSE)
+  out$sample_covariate
+}
