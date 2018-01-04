@@ -1,7 +1,7 @@
-##' Enumerate the types of feature stored in a FacileDataSet
-##'
-##' @export
-##' @param x A \code{FacileDataSet}
+#' Enumerate the types of feature stored in a FacileDataSet
+#'
+#' @export
+#' @param x A \code{FacileDataSet}
 feature_types <- function(x) {
   stopifnot(is.FacileDataSet(x))
   ## Damn, can't do distinct on sqlite
@@ -11,26 +11,26 @@ feature_types <- function(x) {
     feature_type
 }
 
-##' Test if a given feature type is stored in a FacileDataSet
-##'
-##' @export
-##' @param x A \code{FacileDataSet}
-##' @param feature_type a character vector of potential feature types
-##' @return logical vector indicating whether or not a given \code{feature_type}
-##'   is stored in \code{x}
+#' Test if a given feature type is stored in a FacileDataSet
+#'
+#' @export
+#' @param x A \code{FacileDataSet}
+#' @param feature_type a character vector of potential feature types
+#' @return logical vector indicating whether or not a given \code{feature_type}
+#'   is stored in \code{x}
 has_feature_type <- function(x, feature_type) {
   stopifnot(is.FacileDataSet(x))
   assert_character(feature_type)
   feature_type %in% feature_types(x)
 }
 
-##' Returns table of names and aliases for features.
-##'
-##' @export
-##' @param x \code{FacileDataSet}
-##' @param feature_type a character vector specifying the feature type
-##' @return a tibble with \code{feature_id, name, type} columns, where type
-##'   is "primary" or "alias"
+#' Returns table of names and aliases for features.
+#'
+#' @export
+#' @param x \code{FacileDataSet}
+#' @param feature_type a character vector specifying the feature type
+#' @return a tibble with \code{feature_id, name, type} columns, where type
+#'   is "primary" or "alias"
 feature_name_map <- function(x, feature_type) {
   stopifnot(has_feature_type(x, feature_type))
   ## http://jira.gene.com/jira/browse/FACILEDATA-64 will put this in database

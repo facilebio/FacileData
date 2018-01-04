@@ -1,8 +1,8 @@
-##' Utility function to send more than one sql command to the database
-##'
-##' Copied from http://stackoverflow.com/questions/18914283
-##'
-##' @export
+#' Utility function to send more than one sql command to the database
+#'
+#' Copied from http://stackoverflow.com/questions/18914283
+#'
+#' @export
 sqlFromFile <- function(file){
   require(stringr)
   sql <- readLines(file)

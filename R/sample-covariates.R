@@ -1,12 +1,12 @@
-##' Fetch rows from sample_covariate table for specified samples and covariates
-##'
-##' @export
-##' @param db a \code{FacileDataSet} connection
-##' @param samples a samples descriptor \code{tbl_*}
-##' @param covariates character vector of covariate names
-##' @param custom_key The key to use to fetch more custom annotations over
-##'   the given samples
-##' @return rows from the \code{sample_covariate} table
+#' Fetch rows from sample_covariate table for specified samples and covariates
+#'
+#' @export
+#' @param db a \code{FacileDataSet} connection
+#' @param samples a samples descriptor \code{tbl_*}
+#' @param covariates character vector of covariate names
+#' @param custom_key The key to use to fetch more custom annotations over
+#'   the given samples
+#' @return rows from the \code{sample_covariate} table
 fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                     custom_key=Sys.getenv("USER")) {
   stopifnot(is.FacileDataSet(x))
@@ -45,14 +45,14 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
   set_fds(out, x)
 }
 
-##' Fetches custom (user) annotations for a given user prefix
-##'
-##' @export
-##' @importFrom jsonlite stream_in
-##' @param fds The \code{FacileDataSet}
-##' @param samples the facile sample descriptor
-##' @param custom_key The key to use for the custom annotation
-##' @return covariate tbl
+#' Fetches custom (user) annotations for a given user prefix
+#'
+#' @export
+#' @importFrom jsonlite stream_in
+#' @param fds The \code{FacileDataSet}
+#' @param samples the facile sample descriptor
+#' @param custom_key The key to use for the custom annotation
+#' @return covariate tbl
 fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                            custom_key=Sys.getenv("USER"),
                                            file.prefix="facile") {
@@ -89,23 +89,23 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
   out %>% set_fds(x)
 }
 
-##' Saves custom sample covariates to a FacileDataSet
-##'
-##' TODO: Figure out how to encode sample_fiter_criteria into serlized
-##' (JSON) annotation file
-##'
-##' @export
-##' @importFrom jsonlite stream_out
-##'
-##' @param x the \code{FacileDataSet}
-##' @param annotation the annotation table of covariate vaues to a
-##'   sample-descriptor-like table
-##' @param name the variable name of the covariate
-##' @param custom_key the custom key (likely userid) for the annotation
-##' @param file.prefix Vincent uses this
-##' @param sample_filter_criteria optional list of filtering criteria that were
-##'   used to drill down into the samples we have the \code{annotatino}
-##'   data.frame for
+#' Saves custom sample covariates to a FacileDataSet
+#'
+#' TODO: Figure out how to encode sample_fiter_criteria into serlized
+#' (JSON) annotation file
+#'
+#' @export
+#' @importFrom jsonlite stream_out
+#'
+#' @param x the \code{FacileDataSet}
+#' @param annotation the annotation table of covariate vaues to a
+#'   sample-descriptor-like table
+#' @param name the variable name of the covariate
+#' @param custom_key the custom key (likely userid) for the annotation
+#' @param file.prefix Vincent uses this
+#' @param sample_filter_criteria optional list of filtering criteria that were
+#'   used to drill down into the samples we have the \code{annotatino}
+#'   data.frame for
 save_custom_sample_covariates <- function(x, annotation, name=NULL,
                                           class='categorical',
                                           custom_key=Sys.getenv("USER"),
@@ -132,24 +132,24 @@ save_custom_sample_covariates <- function(x, annotation, name=NULL,
   invisible(set_fds(annotation, x))
 }
 
-##' Appends covariate columns to a query result
-##'
-##' Note that this function will force the collection of \code{x}
-##'
-##' @export
-##' @importFrom stats complete.cases
-##' @param x a facile sample descriptor
-##' @param covariates character vector of covariate names. If \code{NULL}
-##'   (default), returns all covariates, if is character and length() == 0, then
-##'   this is a no-op (x is returned)
-##' @param na.rm if \code{TRUE}, filters outgoing result such that only rows
-##'   with nonNA values for the \code{covariates} specified here will be
-##'   returned. Default: \code{FALSE}. Note that this will not check columns
-##'   not specified in \code{covariates} for NA-ness.
-##' @param custom_key The key to use to fetch more custom annotations over
-##'   the given samples
-##' @param .fds A \code{FacileDataSet} object
-##' @return The facile \code{x} object, annotated with the specified covariates.
+#' Appends covariate columns to a query result
+#'
+#' Note that this function will force the collection of \code{x}
+#'
+#' @export
+#' @importFrom stats complete.cases
+#' @param x a facile sample descriptor
+#' @param covariates character vector of covariate names. If \code{NULL}
+#'   (default), returns all covariates, if is character and length() == 0, then
+#'   this is a no-op (x is returned)
+#' @param na.rm if \code{TRUE}, filters outgoing result such that only rows
+#'   with nonNA values for the \code{covariates} specified here will be
+#'   returned. Default: \code{FALSE}. Note that this will not check columns
+#'   not specified in \code{covariates} for NA-ness.
+#' @param custom_key The key to use to fetch more custom annotations over
+#'   the given samples
+#' @param .fds A \code{FacileDataSet} object
+#' @return The facile \code{x} object, annotated with the specified covariates.
 with_sample_covariates <- function(x, covariates=NULL, na.rm=FALSE,
                                    custom_key=Sys.getenv("USER"), .fds=fds(x)) {
   stopifnot(is.FacileDataSet(.fds))
@@ -177,15 +177,15 @@ with_sample_covariates <- function(x, covariates=NULL, na.rm=FALSE,
   set_fds(out, .fds)
 }
 
-##' Spreads the covariates returned from database into wide data.frame
-##'
-##' Samples that did not have a value for a specific covariate are assigned to
-##' have NA.
-##'
-##' @export
-##' @param x output from \code{fetch_sample_covariates}
-##' @param .fds A \code{FacileDataSet} object
-##' @return a wide \code{tbl_df}-like object
+#' Spreads the covariates returned from database into wide data.frame
+#'
+#' Samples that did not have a value for a specific covariate are assigned to
+#' have NA.
+#'
+#' @export
+#' @param x output from \code{fetch_sample_covariates}
+#' @param .fds A \code{FacileDataSet} object
+#' @return a wide \code{tbl_df}-like object
 spread_covariates <- function(x, .fds=fds(x)) {
   stopifnot(is.FacileDataSet(.fds))
   x <- assert_sample_covariates(x) %>%

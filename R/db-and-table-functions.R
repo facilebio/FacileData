@@ -1,10 +1,10 @@
-##' Query a table to identify its primary key(s)
-##'
-##' @export
-##'
-##' @param x a \code{FacileDataSet} or \code{SQLiteConnection}
-##' @param table_name the name of the table to query
-##' @return a character vector of primary keys
+#' Query a table to identify its primary key(s)
+#'
+#' @export
+#'
+#' @param x a \code{FacileDataSet} or \code{SQLiteConnection}
+#' @param table_name the name of the table to query
+#' @return a character vector of primary keys
 primary_key <- function(x, table_name) {
   if (is.FacileDataSet(x)) x <- x$con
   stopifnot(is(x, 'SQLiteConnection'))
@@ -13,21 +13,21 @@ primary_key <- function(x, table_name) {
   filter(info, pk != 0)$name
 }
 
-##' Adds rows to a table in a FacileDataSet
-##'
-##' This function first checks the data in the target table \code{table_name}
-##' to ensure that rows in \code{dat} that exist in \code{table_name} (by
-##' checking the primary key) are not added.
-##'
-##' @export
-##'
-##' @param dat the \code{data.frame} of rows to add to the table, which must
-##'   have a superset of columns present in the \code{table_name} that is being
-##'   appended to
-##' @param x the \code{FacileDataSet}
-##' @param table_name the name of the table in \code{x} to add the rows of
-##'   \code{dat} to.
-##' @return invisibly returns the conformed version of \code{dat}.
+#' Adds rows to a table in a FacileDataSet
+#'
+#' This function first checks the data in the target table \code{table_name}
+#' to ensure that rows in \code{dat} that exist in \code{table_name} (by
+#' checking the primary key) are not added.
+#'
+#' @export
+#'
+#' @param dat the \code{data.frame} of rows to add to the table, which must
+#'   have a superset of columns present in the \code{table_name} that is being
+#'   appended to
+#' @param x the \code{FacileDataSet}
+#' @param table_name the name of the table in \code{x} to add the rows of
+#'   \code{dat} to.
+#' @return invisibly returns the conformed version of \code{dat}.
 append_facile_table <- function(dat, x, table_name) {
   stopifnot(is.FacileDataSet(x))
   target <- try(tbl(x$con, table_name), silent=TRUE)
@@ -63,25 +63,25 @@ append_facile_table <- function(dat, x, table_name) {
 
 ## Database Table Accessors ====================================================
 
-##' @export
+#' @export
 assay_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
   tbl(x$con, 'assay_info') %>% set_fds(x)
 }
 
-##' @export
+#' @export
 assay_feature_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
   tbl(x$con, 'assay_feature_info') %>% set_fds(x)
 }
 
-##' @export
+#' @export
 assay_sample_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
   tbl(x$con, 'assay_sample_info') %>% set_fds(x)
 }
 
-##' @export
+#' @export
 feature_info_tbl <- function(x, assay_name=NULL) {
   stopifnot(is.FacileDataSet(x))
   out <- tbl(x$con, 'feature_info')
@@ -100,11 +100,11 @@ feature_info_tbl <- function(x, assay_name=NULL) {
   out %>% set_fds(x)
 }
 
-##' Mimics the old `gene_info` table.
-##'
-##' This function needs to be removed and the code that relies on gene_info_tbl
-##' be update.
-##' @export
+#' Mimics the old `gene_info` table.
+#'
+#' This function needs to be removed and the code that relies on gene_info_tbl
+#' be update.
+#' @export
 gene_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
   ## Columns:
@@ -120,35 +120,35 @@ gene_info_tbl <- function(x) {
     set_fds(x)
 }
 
-##' Mimics old sample_stats table
-##'
-##' This function needs to be removed and the code that relies on
-##' sample_stats_tbl be updated.
-##' @export
+#' Mimics old sample_stats table
+#'
+#' This function needs to be removed and the code that relies on
+#' sample_stats_tbl be updated.
+#' @export
 sample_stats_tbl <- function(x) {
   assay_sample_info_tbl(x) %>%
     select(dataset, sample_id, libsize, normfactor) %>%
     set_fds(x)
 }
 
-##' @export
+#' @export
 sample_covariate_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
   tbl(x$con, 'sample_covariate') %>% set_fds(x)
 }
 
-##' @export
+#' @export
 sample_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
   tbl(x$con, 'sample_info') %>% set_fds(x)
 }
 
-##' Get/set db
-##'
-##' @rdname getsetdb
-##' @export
-##' @param x the object
-##' @param db The \code{FacileDb} object
+#' Get/set db
+#'
+#' @rdname getsetdb
+#' @export
+#' @param x the object
+#' @param db The \code{FacileDb} object
 fds <- function(x) {
   if (is.FacileDataSet(x)) return(x)
   out <- attr(x, 'fds')
@@ -158,21 +158,21 @@ fds <- function(x) {
   out
 }
 
-##' @rdname getsetdb
-##' @export
+#' @rdname getsetdb
+#' @export
 "fds<-" <- function(x, value) {
   UseMethod("fds<-", x)
 }
 
-##' @rdname getsetdb
-##' @export
+#' @rdname getsetdb
+#' @export
 "fds<-.tbl" <- function(x, value) {
   attr(x, 'fds') <- value
   x
 }
 
-##' @rdname getsetdb
-##' @export
+#' @rdname getsetdb
+#' @export
 "fds<-.data.frame" <- function(x, value) {
   attr(x, 'fds') <- value
   x
@@ -183,8 +183,8 @@ fds <- function(x) {
   x
 }
 
-##' @rdname getsetdb
-##' @export
+#' @rdname getsetdb
+#' @export
 set_fds <- function(x, value) {
   attr(x, 'fds') <- value
   x

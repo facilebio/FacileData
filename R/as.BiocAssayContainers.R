@@ -1,48 +1,48 @@
-##' Converts a facile result into a traditional Bioconductor assay containers.
-##'
-##' Even though the faciledata API provides functionality to access your data
-##' in useful ways, it is still conceivable that you *might* prefer to work
-##' with these data using a more traditional bioconductor container like a
-##' `SummarizedExperiment`, `DGEList`, `ExpressionSet`, etc.These functions are
-##' here for you.
-##'
-##' @rdname as.BiocContainer
-##' @export
-##' @importFrom edgeR DGEList
-##' @param x a facile expression-like result
-##' @param covariates The covariates the user wants to add to the $samples of
-##'   the DGEList. This can take the following forms:
-##'   \enumerate{
-##'     \item{TRUE}{
-##'       All covariates are retrieved from the \code{FacileDataSet}
-##'     }
-##'     \item{FALSE}{
-##'       TODO: Better handle FALSE
-##'     }
-##'     \item{character}{
-##'       A vector of covariate names to fetch from the \code{FacileDataSet}
-##'     }
-##'     \item{data.frame}{
-##'       A table that looks like a subset of the sample_covariate table
-##'     }
-##'     \item{NULL}{
-##'       If \code{NULL}, no covariates are retrieved
-##'     }
-##'   }
-##' @param feature_ids the features to get expression for (if not specified
-##'   in \code{x} descriptor)
-##' @param assay the \code{assayDataElement} to use for the expression data
-##'   if \code{x} is an \code{ExpressionSet}.
-##' @param .fds The \code{FacileDataSet} that \code{x} was retrieved from.
-##' @param custom_key the custom key to use to fetch custom annotations from
-##'   \code{.fds}
-##' @return a \code{\link[edgeR]{DGEList}}
+#' Converts a facile result into a traditional Bioconductor assay containers.
+#'
+#' Even though the faciledata API provides functionality to access your data
+#' in useful ways, it is still conceivable that you *might* prefer to work
+#' with these data using a more traditional bioconductor container like a
+#' `SummarizedExperiment`, `DGEList`, `ExpressionSet`, etc.These functions are
+#' here for you.
+#'
+#' @rdname as.BiocContainer
+#' @export
+#' @importFrom edgeR DGEList
+#' @param x a facile expression-like result
+#' @param covariates The covariates the user wants to add to the $samples of
+#'   the DGEList. This can take the following forms:
+#'   \enumerate{
+#'     \item{TRUE}{
+#'       All covariates are retrieved from the \code{FacileDataSet}
+#'     }
+#'     \item{FALSE}{
+#'       TODO: Better handle FALSE
+#'     }
+#'     \item{character}{
+#'       A vector of covariate names to fetch from the \code{FacileDataSet}
+#'     }
+#'     \item{data.frame}{
+#'       A table that looks like a subset of the sample_covariate table
+#'     }
+#'     \item{NULL}{
+#'       If \code{NULL}, no covariates are retrieved
+#'     }
+#'   }
+#' @param feature_ids the features to get expression for (if not specified
+#'   in \code{x} descriptor)
+#' @param assay the \code{assayDataElement} to use for the expression data
+#'   if \code{x} is an \code{ExpressionSet}.
+#' @param .fds The \code{FacileDataSet} that \code{x} was retrieved from.
+#' @param custom_key the custom key to use to fetch custom annotations from
+#'   \code{.fds}
+#' @return a \code{\link[edgeR]{DGEList}}
 as.DGEList <- function(x, ...) {
   UseMethod('as.DGEList')
 }
 
-##' @method as.DGEList matrix
-##' @rdname as.BiocContainer
+#' @method as.DGEList matrix
+#' @rdname as.BiocContainer
 as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
                               assay_name=default_assay(.fds), .fds=fds(x),
                               custom_key=Sys.getenv("USER"), ...) {
@@ -126,9 +126,9 @@ as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
   set_fds(y, .fds)
 }
 
-##' @export
-##' @method as.DGEList data.frame
-##' @rdname as.BiocContainer
+#' @export
+#' @method as.DGEList data.frame
+#' @rdname as.BiocContainer
 as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
                                   assay_name=default_assay(.fds), .fds=fds(x),
                                   custom_key=Sys.getenv("USER"),
@@ -182,9 +182,9 @@ as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
              .fds=.fds, custom_key=custom_key, ...)
 }
 
-##' @export
-##' @method as.DGEList tbl_sql
-##' @rdname as.BiocContainer
+#' @export
+#' @method as.DGEList tbl_sql
+#' @rdname as.BiocContainer
 as.DGEList.tbl_sql <- function(x, covariates=TRUE, feature_ids=NULL,
                                assay_name=default_assay(.fds), .fds=fds(x),
                                custom_key=Sys.getenv("USER"),
@@ -202,17 +202,17 @@ as.DGEList.FacileDataSet <- function(x, covariates=TRUE, feature_ids=NULL,
              ...)
 }
 
-##' @rdname as.BiocContainer
-##' @export
-##' @return a \code{\link[Biobase]{ExpressionSet}}
+#' @rdname as.BiocContainer
+#' @export
+#' @return a \code{\link[Biobase]{ExpressionSet}}
 as.ExpressionSet <- function(x, ...) {
   UseMethod('as.ExpressionSet')
 }
 
-##' @rdname as.BiocContainer
-##' @export
-##' @method as.ExpressionSet data.frame
-##' @rdname as.BiocContainer
+#' @rdname as.BiocContainer
+#' @export
+#' @method as.ExpressionSet data.frame
+#' @rdname as.BiocContainer
 as.ExpressionSet.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
                                         assay_name=default_assay(.fds),
                                         .fds=fds(x), custom_key=Sys.getenv("USER"), ...) {
@@ -230,10 +230,10 @@ as.ExpressionSet.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
   set_fds(es, .fds)
 }
 
-##' @rdname as.BiocContainer
-##' @export
-##' @method as.ExpressionSet FacileDataSet
-##' @rdname as.BiocContainer
+#' @rdname as.BiocContainer
+#' @export
+#' @method as.ExpressionSet FacileDataSet
+#' @rdname as.BiocContainer
 as.ExpressionSet.FacileDataSet <- function(x, covariates=TRUE, feature_ids=NULL,
                                            assay_name=default_assay(.fds),
                                            .fds=fds(x),
@@ -244,17 +244,17 @@ as.ExpressionSet.FacileDataSet <- function(x, covariates=TRUE, feature_ids=NULL,
                    custom_key, ...)
 }
 
-##' @rdname as.BiocContainer
-##' @export
-##' @return a \code{\link[SummarizedExperiment]{SummarizedExperiment}}
+#' @rdname as.BiocContainer
+#' @export
+#' @return a \code{\link[SummarizedExperiment]{SummarizedExperiment}}
 as.SummarizedExperiment <- function(x, ...) {
   UseMethod('as.SummarizedExperiment')
 }
 
-##' @rdname as.BiocContainer
-##' @export
-##' @method as.SummarizedExperiment data.frame
-##' @rdname as.BiocContainer
+#' @rdname as.BiocContainer
+#' @export
+#' @method as.SummarizedExperiment data.frame
+#' @rdname as.BiocContainer
 as.SummarizedExperiment.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
                                                assay_name=default_assay(.fds),
                                                .fds=fds(x),
@@ -275,10 +275,10 @@ as.SummarizedExperiment.data.frame <- function(x, covariates=TRUE, feature_ids=N
   set_fds(out, .fds)
 }
 
-##' @rdname as.BiocContainer
-##' @export
-##' @method as.ExpressionSet FacileDataSet
-##' @rdname as.BiocContainer
+#' @rdname as.BiocContainer
+#' @export
+#' @method as.ExpressionSet FacileDataSet
+#' @rdname as.BiocContainer
 as.SummarizedExperiment.FacileDataSet <- function(x, covariates=TRUE, feature_ids=NULL,
                                                   assay_name=default_assay(.fds),
                                                   .fds=fds(x), custom_key=Sys.getenv("USER"),

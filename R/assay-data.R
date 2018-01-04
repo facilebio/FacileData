@@ -1,28 +1,28 @@
-##' Fetch data from single assay of choice
-##'
-##' @export
-##' @importFrom rhdf5 h5read
-##' @importFrom multiGSEA eigenWeightedMean
-##' @inheritParams assay_feature_info
-##' @param x A \code{FacileDataSet} object.
-##' @param features a feature descriptor (data.frame with assay and feature_id
-##'   columms)
-##' @param samples a sample descriptor to specify which samples to return data
-##'   from.
-##' @param normalized return normalize or raw data values, defaults to
-##'   \code{raw}
-##' @param as.matrix by default, the data is returned in a long-form tbl-like
-##'   result. If set to \code{TRUE}, the data is returned as a matrix.
-##' @param ... parameters to pass to normalization methods
-##' @param subset.threshold sometimes fetching all the genes is faster than
-##'   trying to subset. We have to figure out why that is, but I've previously
-##'   tested random features of different lengths, and around 700 features was
-##'   the elbow.
-##' @param aggregate.by do you want individual level results or geneset
-##'   scores? Use 'ewm' for eigenWeightedMean, and that's all.
-##' @return A lazy \code{\link[dplyr]{tbl}} object with the expression
-##'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
-##'   othwerise a \code{tbl_df} of the results.
+#' Fetch data from single assay of choice
+#'
+#' @export
+#' @importFrom rhdf5 h5read
+#' @importFrom multiGSEA eigenWeightedMean
+#' @inheritParams assay_feature_info
+#' @param x A \code{FacileDataSet} object.
+#' @param features a feature descriptor (data.frame with assay and feature_id
+#'   columms)
+#' @param samples a sample descriptor to specify which samples to return data
+#'   from.
+#' @param normalized return normalize or raw data values, defaults to
+#'   \code{raw}
+#' @param as.matrix by default, the data is returned in a long-form tbl-like
+#'   result. If set to \code{TRUE}, the data is returned as a matrix.
+#' @param ... parameters to pass to normalization methods
+#' @param subset.threshold sometimes fetching all the genes is faster than
+#'   trying to subset. We have to figure out why that is, but I've previously
+#'   tested random features of different lengths, and around 700 features was
+#'   the elbow.
+#' @param aggregate.by do you want individual level results or geneset
+#'   scores? Use 'ewm' for eigenWeightedMean, and that's all.
+#' @return A lazy \code{\link[dplyr]{tbl}} object with the expression
+#'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
+#'   othwerise a \code{tbl_df} of the results.
 fetch_assay_data <- function(x, features, samples=NULL,
                              assay_name=default_assay(x),
                              normalized=FALSE, as.matrix=FALSE, ...,
@@ -222,8 +222,8 @@ fetch_assay_data <- function(x, features, samples=NULL,
   vals
 }
 
-##' Helper function to get sample assay data from single or aggregate features
-##' @export
+#' Helper function to get sample assay data from single or aggregate features
+#' @export
 fetch_assay_score <- function(x, features, samples=NULL, assay_name=NULL,
                               as.matrix=FALSE, ..., subset.threshold=700) {
   if (is.null(assay_name)) {
@@ -238,13 +238,13 @@ fetch_assay_score <- function(x, features, samples=NULL, assay_name=NULL,
   }
 
 }
-##' @export
+#' @export
 assay_types <- function(x) {
   stopifnot(is.FacileDataSet(x))
   assay_info_tbl(x) %>% collect(n=Inf) %$% assay_type
 }
 
-##' @export
+#' @export
 assay_names <- function(x, default_first=TRUE) {
   stopifnot(is.FacileDataSet(x))
   anames <- assay_info_tbl(x) %>% collect %$% assay
@@ -255,7 +255,7 @@ assay_names <- function(x, default_first=TRUE) {
   anames
 }
 
-##' @export
+#' @export
 assay_info <- function(x, assay_name=NULL) {
   stopifnot(is.FacileDataSet(x))
   ainfo <- assay_info_tbl(x) %>% collect(n=Inf)
@@ -267,26 +267,26 @@ assay_info <- function(x, assay_name=NULL) {
   ainfo
 }
 
-##' @export
+#' @export
 has_assay <- function(x, assay_name) {
   stopifnot(is.FacileDataSet(x))
   assert_character(assay_name)
   assay_name %in% assay_names(x)
 }
 
-##' Utility functions to get row and column indices of rnaseq hdf5 files.
-##'
-##' This is called to get things like hdf5_index and scaling factors for
-##' the samples in a given assay.
-##'
-##' @export
-##' @param x \code{FacileDataSet}
-##' @param assay_name the name of the assay
-##' @param samples a sample descriptor
-##' @return an updated version of \code{samples} decorated with hd5_index,
-##'   scaling factors, etc. Note that rows in \code{samples} that do not appear
-##'   in \code{assay_name} will be returnd here with NA values for hd5_index and
-##'   such.
+#' Utility functions to get row and column indices of rnaseq hdf5 files.
+#'
+#' This is called to get things like hdf5_index and scaling factors for
+#' the samples in a given assay.
+#'
+#' @export
+#' @param x \code{FacileDataSet}
+#' @param assay_name the name of the assay
+#' @param samples a sample descriptor
+#' @return an updated version of \code{samples} decorated with hd5_index,
+#'   scaling factors, etc. Note that rows in \code{samples} that do not appear
+#'   in \code{assay_name} will be returnd here with NA values for hd5_index and
+#'   such.
 assay_sample_info <- function(x, assay_name, samples=NULL) {
   stopifnot(is.FacileDataSet(x))
   if (!is.null(samples)) {
@@ -310,14 +310,14 @@ assay_sample_info <- function(x, assay_name, samples=NULL) {
 }
 
 
-##' Returns the feature_type for a given assay
-##'
-##' The elements of the rows for a given assay all correspond to a particular
-##' feature space (ie. feature_type='entrez')
-##'
-##' @export
-##' @param x \code{FacileDataSet}
-##' @param assay_name the name of the assay
+#' Returns the feature_type for a given assay
+#'
+#' The elements of the rows for a given assay all correspond to a particular
+#' feature space (ie. feature_type='entrez')
+#'
+#' @export
+#' @param x \code{FacileDataSet}
+#' @param assay_name the name of the assay
 assay_feature_type <- function(x, assay_name) {
   stopifnot(is.FacileDataSet(x))
   assert_string(assay_name)
@@ -328,20 +328,20 @@ assay_feature_type <- function(x, assay_name) {
     feature_type
 }
 
-##' Materializes a table with all feature information for a given assay.
-##'
-##' DEBUG: This logic is unnecessarily complex because I make sure to collect
-##' all tables from the database as opposed to copying external tables in and
-##' doing an inner_join in the database. I'm doing this becuase we are getting
-##' name collections on some of the temporary tables. We get erros like:
-##'     Warning: Error in : Table pkdtpohpsu already exists.
-##'
-##' This fetches the hdf5_index for the assays as well
-##' @export
-##' @inheritParams assay_feature_type
-##' @param feature_ids a character vector of feature_ids
-##' @return a \code{tbl_sqlite} result with the feature information for the
-##'   features in a specified assay. This
+#' Materializes a table with all feature information for a given assay.
+#'
+#' DEBUG: This logic is unnecessarily complex because I make sure to collect
+#' all tables from the database as opposed to copying external tables in and
+#' doing an inner_join in the database. I'm doing this becuase we are getting
+#' name collections on some of the temporary tables. We get erros like:
+#'     Warning: Error in : Table pkdtpohpsu already exists.
+#'
+#' This fetches the hdf5_index for the assays as well
+#' @export
+#' @inheritParams assay_feature_type
+#' @param feature_ids a character vector of feature_ids
+#' @return a \code{tbl_sqlite} result with the feature information for the
+#'   features in a specified assay. This
 assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
   ## NOTE: This is currently limited to a single assay
   ftype <- assay_feature_type(x, assay_name)
@@ -382,26 +382,26 @@ assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
     set_fds(x)
 }
 
-##' @rdname feature_name_map
-##' @export
-##'
-##' @param x \code{FacileDataSet}
-##' @param assay_name the name of assay to get the feature map for.
+#' @rdname feature_name_map
+#' @export
+#'
+#' @param x \code{FacileDataSet}
+#' @param assay_name the name of assay to get the feature map for.
 assay_feature_name_map <- function(x, assay_name) {
   ftype <- assay_feature_type(x, assay_name)
   feature_name_map(x, ftype)
 }
 
-##' Identify the number of each assay run across specific samples
-##'
-##' @export
-##' @param x FacileDataSet
-##' @param samples sample descriptor
-##' @param with_count return the number of samples in \code{samples} that are
-##'   assayed over each assay as a column in \code{return}
-##' @return rows from assay_info_tbl that correspond to the assays defined
-##'   over the given samples. If no assays are defined over these samples,
-##'   you're going to get an empty tibble.
+#' Identify the number of each assay run across specific samples
+#'
+#' @export
+#' @param x FacileDataSet
+#' @param samples sample descriptor
+#' @param with_count return the number of samples in \code{samples} that are
+#'   assayed over each assay as a column in \code{return}
+#' @return rows from assay_info_tbl that correspond to the assays defined
+#'   over the given samples. If no assays are defined over these samples,
+#'   you're going to get an empty tibble.
 assay_info_over_samples <- function(x, samples) {
   stopifnot(is.FacileDataSet(x))
   assert_sample_subset(samples)
@@ -452,17 +452,17 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info,
   out
 }
 
-##' Creates a feature descriptor for interactive ease
-##'
-##' cretes a data.frame of features and assays they come from
-##' @export
-##' @param x FacileDataSet
-##' @param features a character string of fearture ids (requires assay_name)
-##'   or a data.frame with feature_id column.
-##' @param assay_name the assay to get the featurespace from. if this is provided,
-##'   it will trump an already existing assay_name column in \code{features}
-##' @return a feature descriptor with feature_id and assay_name, which can be
-##'   used to absolutely find features
+#' Creates a feature descriptor for interactive ease
+#'
+#' cretes a data.frame of features and assays they come from
+#' @export
+#' @param x FacileDataSet
+#' @param features a character string of fearture ids (requires assay_name)
+#'   or a data.frame with feature_id column.
+#' @param assay_name the assay to get the featurespace from. if this is provided,
+#'   it will trump an already existing assay_name column in \code{features}
+#' @return a feature descriptor with feature_id and assay_name, which can be
+#'   used to absolutely find features
 create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
   ## TODO: Refactor the code inside `fetch_assay_data` to use this.
   stopifnot(is.FacileDataSet(x))
@@ -487,17 +487,17 @@ create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
   features
 }
 
-##' Append expression values to sample-descriptor
-##'
-##' Since this is called in a "convenience" sort of way, often in a pipe-chain
-##' \code{normalize} defaults to \code{TRUE}
-##'
-##' @export
-##' @param x a samples descriptor
-##' @param feature_ids character vector of feature_ids
-##' @param with_symbols Do you want gene symbols returned, too?
-##' @param .fds A \code{FacileDataSet} object
-##' @return a tbl-like result
+#' Append expression values to sample-descriptor
+#'
+#' Since this is called in a "convenience" sort of way, often in a pipe-chain
+#' \code{normalize} defaults to \code{TRUE}
+#'
+#' @export
+#' @param x a samples descriptor
+#' @param feature_ids character vector of feature_ids
+#' @param with_symbols Do you want gene symbols returned, too?
+#' @param .fds A \code{FacileDataSet} object
+#' @return a tbl-like result
 with_assay_data <- function(samples, features, assay_name=NULL,
                             normalized=TRUE, aggregate.by=NULL,
                             spread=TRUE, with_assay_name=FALSE, ...,
@@ -558,25 +558,25 @@ can.spread.assay.by.name <- function(x, assay_name) {
   TRUE
 }
 
-##' Takes a result from fetch_expression and spreads out genes acorss columns
-##'
-##' This is a convenience function, and will try to guess what you mean if you
-##' don't explicitly specify which columns to spread and what to call them.
-##' With that mind set, if we find a cpm and symbol column, we will use them
-##' because those are the thing you will likely want to use for exploratory
-##' data analysis if they're in the incoming dataset. If those columns aren't
-##' found, then we'll pick the feature_id and count column.
-##'
-##' @export
-##' @importFrom stats setNames
-##' @param x facile expression result from \code{fetch_expression}
-##' @param key the column from the long-form \code{fetch_expression} table
-##'   to put in the columns of the outgoing data.frame that the values are
-##'   "spread into"
-##' @param value the value column to spread into the \code{key} columns
-##' @param .fds the \code{FacileDataSet}
-##' @return a more stout \code{x} with the expression values spread across
-##'   columns.
+#' Takes a result from fetch_expression and spreads out genes acorss columns
+#'
+#' This is a convenience function, and will try to guess what you mean if you
+#' don't explicitly specify which columns to spread and what to call them.
+#' With that mind set, if we find a cpm and symbol column, we will use them
+#' because those are the thing you will likely want to use for exploratory
+#' data analysis if they're in the incoming dataset. If those columns aren't
+#' found, then we'll pick the feature_id and count column.
+#'
+#' @export
+#' @importFrom stats setNames
+#' @param x facile expression result from \code{fetch_expression}
+#' @param key the column from the long-form \code{fetch_expression} table
+#'   to put in the columns of the outgoing data.frame that the values are
+#'   "spread into"
+#' @param value the value column to spread into the \code{key} columns
+#' @param .fds the \code{FacileDataSet}
+#' @return a more stout \code{x} with the expression values spread across
+#'   columns.
 spread_assay_data <- function(x, assay_name, key=c('name', 'feature_id'),
                               value=c('cpm', 'value', 'count'),
                               .fds=fds(x)) {

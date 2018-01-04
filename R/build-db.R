@@ -1,10 +1,10 @@
-##' Creates the database
-##'
-##' @export
-##' @importFrom edgeR cpm calcNormFactors
-##' @importClassesFrom edgeR DGEList
-##' @importFrom RSQLite dbGetQuery dbSendQuery dbWriteTable dbDisconnect
-##' @importFrom RSQLite dbConnect dbWriteTable dbSendQuery
+#' Creates the database
+#'
+#' @export
+#' @importFrom edgeR cpm calcNormFactors
+#' @importClassesFrom edgeR DGEList
+#' @importFrom RSQLite dbGetQuery dbSendQuery dbWriteTable dbDisconnect
+#' @importFrom RSQLite dbConnect dbWriteTable dbSendQuery
 createWarehouse <- function(db.path, datasets, gene.info=fData(datasets[[1]]),
                             sample.meta, pragma.page_size=2**12,
                             db.type='sqlite', ...) {
@@ -111,11 +111,11 @@ createWarehouse <- function(db.path, datasets, gene.info=fData(datasets[[1]]),
 
 ## Create and initialize the warehouse database --------------------------------
 
-##' Creates the expression and sample_stats table, initialize with all data.
-##' @importFrom reshape2 melt
-##' @importFrom stats setNames
-##' @param db the db connection
-##' @param datasets a list of expression sets to load up databases with
+#' Creates the expression and sample_stats table, initialize with all data.
+#' @importFrom reshape2 melt
+#' @importFrom stats setNames
+#' @param db the db connection
+#' @param datasets a list of expression sets to load up databases with
 initializeWithExpressionData <- function(db, datasets) {
   counts <- lapply(datasets, exprs)
   counts <- do.call(cbind, counts)
@@ -162,9 +162,9 @@ createGeneTable <- function(db) {
   dbSendQuery(db, table.sql)
 }
 
-##' Creates the table that holds gene counts and meta information about data
-##'
-##' @importFrom reshape2 melt
+#' Creates the table that holds gene counts and meta information about data
+#'
+#' @importFrom reshape2 melt
 createExpressionTables <- function(db) {
   ## table.sql <- paste0(
   ##   "CREATE TABLE expression (",
@@ -195,10 +195,10 @@ createSampleCovariateTable <- function(db) {
   dbSendQuery(db, table.sql)
 }
 
-##' Update or add new sample covariate annotation
-##'
-##' @param db a \code{FacileDb} object
-##' @param covariates the covariate table to insert/replace
+#' Update or add new sample covariate annotation
+#'
+#' @param db a \code{FacileDb} object
+#' @param covariates the covariate table to insert/replace
 updateSampleCovariates <- function(db, covariates) {
   if (FALSE) {
     library(FacileTCGA)

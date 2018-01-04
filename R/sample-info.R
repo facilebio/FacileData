@@ -1,17 +1,17 @@
-##' Fetch the sample statistics for sets of samples in the warehouse
-##'
-##' NOTE: this function needs the axe. It has been changed to use the
-##' assay_sample_info_table, but the way we handle this with the new unhinged
-##' assay needs to change.
-##' @export
-##' @param x A \code{FacileDataSet} object
-##' @param samples a data.frame or tbl_sqlite that has dataset and sample_id
-##'   columns
-##' @param semi use \code{semi_join}? I've found this to be slow sometimes in
-##'   SQLite for some reason
-##' @param assay_name parameter added to keep old API same with new "unhinged"
-##'   FacileDataSets.
-##' @return a tbl_df or tbl_sqlite result from the sample_stats table
+#' Fetch the sample statistics for sets of samples in the warehouse
+#'
+#' NOTE: this function needs the axe. It has been changed to use the
+#' assay_sample_info_table, but the way we handle this with the new unhinged
+#' assay needs to change.
+#' @export
+#' @param x A \code{FacileDataSet} object
+#' @param samples a data.frame or tbl_sqlite that has dataset and sample_id
+#'   columns
+#' @param semi use \code{semi_join}? I've found this to be slow sometimes in
+#'   SQLite for some reason
+#' @param assay_name parameter added to keep old API same with new "unhinged"
+#'   FacileDataSets.
+#' @return a tbl_df or tbl_sqlite result from the sample_stats table
 fetch_sample_statistics <- function(x, samples=NULL, semi=TRUE,
                                     assay_name='rnaseq') {
   stopifnot(is.FacileDataSet(x))

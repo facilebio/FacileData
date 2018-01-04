@@ -1,16 +1,16 @@
 ## The code in here builds FacileDataSets from Bioconductor like objects
 
-##' Create an empty FacileDataSet
-##'
-##' @importFrom rhdf5 h5createFile h5createGroup H5close
-##' @export
-##'
-##' @param path the directory to create which will house the
-##'   \code{FacileDataSet}
-##' @param covariate_definition the path to the covariate definition file
-##' @param page_size,cache_size \code{pragma} values to setup the backend SQLite
-##'   database
-##' @return inivisibly returns the \code{FaclieDataSet} you just made
+#' Create an empty FacileDataSet
+#'
+#' @importFrom rhdf5 h5createFile h5createGroup H5close
+#' @export
+#'
+#' @param path the directory to create which will house the
+#'   \code{FacileDataSet}
+#' @param covariate_definition the path to the covariate definition file
+#' @param page_size,cache_size \code{pragma} values to setup the backend SQLite
+#'   database
+#' @return inivisibly returns the \code{FaclieDataSet} you just made
 initializeFacileDataSet <- function(path, meta_file,
                                     page_size=2**12, cache_size=2e5) {
   assert_valid_meta_file(meta_file)
@@ -48,8 +48,8 @@ initializeFacileDataSet <- function(path, meta_file,
   invisible(FacileDataSet(path))
 }
 
-##' @export
-##' @importFrom tools file_ext
+#' @export
+#' @importFrom tools file_ext
 assert_valid_meta_file <- function(fn) {
   assert_file(fn)
   if (!tolower(file_ext(fn)) ==  'yaml') {
@@ -158,21 +158,21 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
 }
 
 
-##' Adds a complete set of assay data for all samples across datasets in the
-##' FacileDataSet
-##'
-##' This needs to be busted up into functions Minimally loop over datasets to
-##' addFacileAssay
-##'
-##' @importFrom rhdf5 h5createFile h5createDataset h5write
-##' @export
-##'
-##' @param x The \code{FacileDataSeta}
-##' @param dat list of ExpressionSet, SummarizedExperiment, or DGELists that
-##'   have the assay data for the given assay across all of our datasets
-##' @param assay_name the name of the assay in the source dataset object
-##' @param facile_assay_name the name of the assay to store in the FacileDataSet
-##' @param facile_assay_type string indicating the assay_type
+#' Adds a complete set of assay data for all samples across datasets in the
+#' FacileDataSet
+#'
+#' This needs to be busted up into functions Minimally loop over datasets to
+#' addFacileAssay
+#'
+#' @importFrom rhdf5 h5createFile h5createDataset h5write
+#' @export
+#'
+#' @param x The \code{FacileDataSeta}
+#' @param dat list of ExpressionSet, SummarizedExperiment, or DGELists that
+#'   have the assay data for the given assay across all of our datasets
+#' @param assay_name the name of the assay in the source dataset object
+#' @param facile_assay_name the name of the assay to store in the FacileDataSet
+#' @param facile_assay_type string indicating the assay_type
 addFacileAssaySet <- function(x, datasets, facile_assay_name,
                               facile_assay_type=.assay.types,
                               facile_feature_type=.feature.types,
@@ -319,21 +319,21 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   invisible(list(samples=samples, assay_sample_info=asi))
 }
 
-##' Appends new features to \code{feature_info} table
-##'
-##' This function only adds features (feature_type, feature_id) that are not
-##' in the \code{feature_info} table already
-##'
-##' @export
-##' @param x The \code{FacileDataSet}
-##' @param feature_info a table of new features that provides all columns
-##'   in \code{feature_info_tbl(x)}
-##' @param type A way to override (or set) the \code{feature_type} column of the
-##'   \code{feature_info} table
-##' @return invisible returns an annotated version of the \code{feature_info}
-##'   table with an \code{$added} column with \code{TRUE/FALSE} values for the
-##'   features that were new (and added) to the repository or \code{FALSE} to
-##'   indicate that they were already in the database.
+#' Appends new features to \code{feature_info} table
+#'
+#' This function only adds features (feature_type, feature_id) that are not
+#' in the \code{feature_info} table already
+#'
+#' @export
+#' @param x The \code{FacileDataSet}
+#' @param feature_info a table of new features that provides all columns
+#'   in \code{feature_info_tbl(x)}
+#' @param type A way to override (or set) the \code{feature_type} column of the
+#'   \code{feature_info} table
+#' @return invisible returns an annotated version of the \code{feature_info}
+#'   table with an \code{$added} column with \code{TRUE/FALSE} values for the
+#'   features that were new (and added) to the repository or \code{FALSE} to
+#'   indicate that they were already in the database.
 append_facile_feature_info <- function(x, feature_info,
                                        type=feature_info$feature_type) {
   ## Argument Checking

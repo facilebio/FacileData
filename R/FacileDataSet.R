@@ -117,7 +117,7 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   out
 }
 
-##' @export
+#' @export
 is.FacileDataSet <- function(x) {
   ## `is` and `validate` funcitonality confused in here.
   is(x, 'FacileDataSet') &&
@@ -152,38 +152,38 @@ hdf5fn <- function(x, mustWork=TRUE) {
   out
 }
 
-##' Path to the meta information file
-##'
-##' @rdname meta-info
-##' @export
-##' @param x \code{FacileDataSet}
+#' Path to the meta information file
+#'
+#' @rdname meta-info
+#' @export
+#' @param x \code{FacileDataSet}
 meta_file <- function(x) {
   stopifnot(is.FacileDataSet(x))
   fn <- assert_file(file.path(x$parent.dir, 'meta.yaml'), 'r')
   fn
 }
 
-##' Get meta information for dataset
-##'
-##' @rdname meta-info
-##' @export
-##' @param x \code{FacileDataSet}
+#' Get meta information for dataset
+#'
+#' @rdname meta-info
+#' @export
+#' @param x \code{FacileDataSet}
 meta_info <- function(x) {
   out <- yaml.load_file(meta_file(x))
   out
 }
 
-##' @rdname meta-info
-##' @export
-##' @param x \code{FacileDataSet}
+#' @rdname meta-info
+#' @export
+#' @param x \code{FacileDataSet}
 organism <- function(x) {
   stopifnot(is.FacileDataSet(x))
   x$organism
 }
 
-##' @rdname meta-info
-##' @export
-##' @param x \code{FacileDataSet}
+#' @rdname meta-info
+#' @export
+#' @param x \code{FacileDataSet}
 default_assay <- function(x) {
   stopifnot(is.FacileDataSet(x))
   if (is.null(x$default_assay)) {
@@ -195,8 +195,8 @@ default_assay <- function(x) {
   out
 }
 
-##' @rdname meta-info
-##' @export
+#' @rdname meta-info
+#' @export
 dataset_definitions <- function(x, as.list=TRUE) {
   defs <- meta_info(x)$datasets
   if (!as.list) {
@@ -208,8 +208,8 @@ dataset_definitions <- function(x, as.list=TRUE) {
   defs
 }
 
-##' @export
-##' @importFrom yaml yaml.load_file
+#' @export
+#' @importFrom yaml yaml.load_file
 covariate_definitions <- function(x, as.list=TRUE) {
   out <- meta_info(x)$sample_covariates
   if (!as.list) {
@@ -226,7 +226,7 @@ covariate_definitions <- function(x, as.list=TRUE) {
   out %>% set_fds(x)
 }
 
-##' @export
+#' @export
 samples <- function(x) {
   stopifnot(is.FacileDataSet(x))
   sample_info_tbl(x) %>%
@@ -234,21 +234,21 @@ samples <- function(x) {
     set_fds(x)
 }
 
-##' A dataset-specific method to overridden that returns default sample grouping
-##'
-##' @export
-##' @rdname facet_frame
+#' A dataset-specific method to overridden that returns default sample grouping
+#'
+#' @export
+#' @rdname facet_frame
 facet_frame <- function(x, ...) {
   UseMethod("facet_frame")
 }
 
-##' @export
-##' @rdname facet_frame
+#' @export
+#' @rdname facet_frame
 facet_frame.default <- function(x, ...) {
   tibble(facet=character(), dataset=facet, sample_id=facet)
 }
 
-##' @export
+#' @export
 print.FacileDataSet <- function(x, ...) {
   ns <- RSQLite::dbGetQuery(x$con, "SELECT COUNT(*) FROM sample_info;")
   nds <- RSQLite::dbGetQuery(x$con, "SELECT COUNT (DISTINCT dataset) FROM sample_info;")
