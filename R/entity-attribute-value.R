@@ -4,6 +4,35 @@
 
 # Extracting data from EAV table into R ========================================
 
+#' Retrieve the meta information about a covariate for EAV decoding
+#'
+#' Mappings that define attribute-value encodings into R-native objects are
+#' stored in a `FacileDataSet`'s `meta.yaml` file, in the `sample_covariate`
+#' section.
+#' @md
+#' @export
+#'
+#' @param covariate the name of the covariate
+#' @param .fds the `FacileDataSet`
+#' @param covdefs The `covariate_definitions(.fds)` list
+#' @return a list of covariate information with the following elements:
+#'   `$name`, `$type`, `$class`, `$description`,
+#'   `$label`, `$is.factor`, (and maybe `$levels`)
+covariate_meta_info <- function(covariate, .fds, covdefs=NULL) {
+  if (is.null(covdefs)) {
+    stopifnot(is.FacileDataSet(.fds))
+    covdefs <- covariate_definitions(.fds)
+  }
+  assert_covariate_definitions(covdefs)
+  meta <- covdefs[[covariate]]
+  if (!is.list(meta)) {
+    stop("Covariate `", covariate, "` not found in covariate_definition file")
+  }
+  meta$name <- covariate
+  meta$is.factor <- meta$class == 'categorical' && is.character(meta$levels)
+  meta
+}
+
 #' Casts the character values of the covariates to their defined types.
 #'
 #' For most things, a single value will be returned from each cast, but in the
@@ -11,8 +40,13 @@
 #' data.frame with a `tte_<covariate>` column for time to event, and an
 #' `event_<covariate>` column to indicate event (1) or right censored (2).
 #'
+#' The mechanics of how values in the `sample_covariate` table are converted
+#' into R objects are handled by the information stored in the
+#' `FacileDataSets`'s `meta.yaml` file.
+#'
 #' @md
 #' @export
+#' @seealso [covariate_meta_info()], [covariae_defnitions()]
 #'
 #' @param covariate the name of the covariate
 #' @param values the covariate values (which is a `character`) as it is
@@ -58,30 +92,76 @@ cast_covariate <- function(covariate, values, cov.def, .fds) {
   values
 }
 
-#' Retrieve the meta information about a covariate
+# Value-to-R conversion functions ==============================================
+
+#' Entity-attribute-value encodings for survival data.
+#'
+#' @details
+#' Encoding of survival data in R requires two columns, one to store
+#' the time-to-event and another to indicate if there was an "event" at stored
+#' time, or if it was censored. A `FacileDataSet` stores these two `pData`
+#' columns into one "value" column in its entity-atribute-value
+#' `sample_covariate` table.
+#'
+#' The `encode_right_censored` function takes the ime-to-event and censoring
+#' vectors and encodes them into a single signed time-to-event numeric value.
+#' Positive values indicate an event, and negative value are censored.
+#'
+#' The `decode_right_censored` function re-instatiaes the two-column R-native
+#' storage of this data.
 #'
 #' @md
 #' @export
+#' @rdname eav-right-censor
+#' @seealso [create_eav_metadata()]
 #'
-#' @param covariate the name of the covariate
-#' @param .fds the `FacileDataSet`
-#' @param covdefs The `covariate_definitions(.fds)` list
-#' @return a list of covariate information with the following elements:
-#'   `$name`, `$type`, `$class`, `$description`,
-#'   `$label`, `$is.factor`, (and maybe `$levels`)
-covariate_meta_info <- function(covariate, .fds, covdefs=NULL) {
-  if (is.null(covdefs)) {
-    stopifnot(is.FacileDataSet(.fds))
-    covdefs <- covariate_definitions(.fds)
+#' @param time `numeric` time to event
+#' @param event 0/1 vector encoded in the "R sense". "1" is an event, "0" is
+#'   right censored.
+#' @param sas.encoding Is the 'event' vector "SAS encoded"? In the SAS world,
+#'   1 means censored, and 0 is event. This is `FALSE` by default.
+#' @return returns a numeric vector that combines time-to-event and censoring
+#'   info (sign of the value).
+encode_right_censored <- function(time, event, sas.encoding=FALSE) {
+  event <- as.integer(event)
+  isna <- is.na(event)
+  if (any(isna)) {
+    warning('NA values in the `event` flag, these will be set to NA again ',
+            'on the way out',  immediate.=TRUE)
+    event[isna] <- 1L
   }
-  assert_covariate_definitions(covdefs)
-  meta <- covdefs[[covariate]]
-  if (!is.list(meta)) {
-    stop("Covariate `", covariate, "` not found in covariate_definition file")
+  if (!all(event %in% c(0L, 1L))) {
+    stop("values in 'event' that are not 0 or 1")
   }
-  meta$name <- covariate
-  meta$is.factor <- meta$class == 'categorical' && is.character(meta$levels)
-  meta
+  if (sas.encoding) {
+    ## SAS is backgwards
+    event <- ifelse(event == 0L, 1L, 0L)
+  }
+  out <- ifelse(event == 0L, -1L * time, time)
+  out[isna] <- NA
+  out
+}
+
+#' @md
+#' @export
+#' @rdname eav-right-censor
+#' @param x the time to event
+#' @param suffix adds `_<suffix>` to the `tte` and `event` columns of the
+#'   outgoing `data.frame`
+#' @return two column `data.frame` with `tte(_SUFFIX)?` and `event(_SUFFIX)?`
+#'   columns.
+decode_right_censored <- function(x, suffix=NULL, sas.encoding=FALSE) {
+  x <- as.numeric(x)
+  out <- data.frame(tte=abs(x))
+  if (sas.encoding) {
+    out[['event']] <- as.integer(x < 0)
+  } else {
+    out[['event']] <- as.integer(x > 0)
+  }
+  if (is.character(suffix)) {
+    names(out) <- paste0(names(out), '_', sub('^[^a-zA-Z]', '', suffix))
+  }
+  out
 }
 
 # Creating attribute-value definitions =========================================
@@ -155,7 +235,7 @@ covariate_meta_info <- function(covariate, .fds, covdefs=NULL) {
 #' # into a facile "OS" right_censored survival covariate
 #' cc <- list(
 #'   OS=list(
-#'     varname=c("tte_OS", "tte_event"),
+#'     varname=c("tte_OS", "event_OS"),
 #'     label="Overall Survival",
 #'     class="right_censored",
 #'     type="clinical",

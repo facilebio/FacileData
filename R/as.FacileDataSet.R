@@ -39,8 +39,8 @@ as.FacileDataSet <- function(x, assay_name, assay_type, feature_info,
   UseMethod("as.FacileDataSet")
 }
 
-##' @method as.FacileDataSet default
-##' @export
+#' @method as.FacileDataSet default
+#' @export
 as.FacileDataSet.default <- function(x, assay_name, assay_type, feature_info,
                                      feature_type, metayaml=NULL,
                                      organism="unspecified",
@@ -49,9 +49,9 @@ as.FacileDataSet.default <- function(x, assay_name, assay_type, feature_info,
   stop("as.FacileDataSet not defined for object of class: ", class(x)[1L])
 }
 
-##' @method as.FacileDataSet ExpressionSet
-##' @export
-##' @rdname as.FacileDataSet
+#' @method as.FacileDataSet ExpressionSet
+#' @export
+#' @rdname as.FacileDataSet
 as.FacileDataSet.ExpressionSet <- function(x, assay_name, assay_type, feature_info,
                                            feature_type, metayaml=NULL,
                                            organism="unspecified",
@@ -63,9 +63,9 @@ as.FacileDataSet.ExpressionSet <- function(x, assay_name, assay_type, feature_in
   }
 }
 
-##' @method as.FacileDataSet SummarizedExperiment
-##' @export
-##' @rdname as.FacileDataSet
+#' @method as.FacileDataSet SummarizedExperiment
+#' @export
+#' @rdname as.FacileDataSet
 as.FacileDataSet.SummarizedExperiment <- function(x, assay_name, assay_type, feature_info,
                                                   feature_type, metayaml=NULL,
                                                   organism="unspecified",
@@ -73,9 +73,9 @@ as.FacileDataSet.SummarizedExperiment <- function(x, assay_name, assay_type, fea
                                                   source_assay=NULL, ...) {
 }
 
-##' @method as.FacileDataSet DGEList
-##' @export
-##' @rdname as.FacileDataSet
+#' @method as.FacileDataSet DGEList
+#' @export
+#' @rdname as.FacileDataSet
 as.FacileDataSet.DGEList <- function(x, assay_name, assay_type, feature_info,
                                      feature_type, metayaml=NULL,
                                      organism="unspecified",
@@ -91,9 +91,9 @@ as.FacileDataSet.matrix <- function(x, assay_name, assay_type, feature_info,
 
 }
 
-##' @method as.FacileDataSet list
-##' @export
-##' @rdname as.FacileDataSet
+#' @method as.FacileDataSet list
+#' @export
+#' @rdname as.FacileDataSet
 as.FacileDataSet.list <- function(x, path, organism, assays=NULL, metayaml=NULL,
                                   ...) {
 }
