@@ -1,9 +1,12 @@
 Package: FacileDataSet
 Type: Package
 Title: A warehouse for molecular clinical trial data to enable EDA
-Version: 0.6.12
-Author: Steve Lianoglou
-Maintainer: Steve Lianoglou <lianoglou.steve@gene.com>
+Version: 0.7.0
+Authors@R: c(
+    person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre")),
+    person("Vincent", "Rouilly", , "rouilly.vincent@gene.com", role = "ctb"),
+    person("Genentech", role = c("cph", "fnd"))
+    )
 Description: An abstraction of an ExpressionSet-like object into a "tidy data"
   framework which allows effortless access into any subset of it without loading
   it in its entireity.
