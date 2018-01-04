@@ -52,22 +52,14 @@ as.SummarizedExperiment(x, ...)
 
 \item{covariates}{The covariates the user wants to add to the $samples of
 the DGEList. This can take the following forms:
-\enumerate{
-  \item{TRUE}{
-    All covariates are retrieved from the \code{FacileDataSet}
-  }
-  \item{FALSE}{
-    TODO: Better handle FALSE
-  }
-  \item{character}{
-    A vector of covariate names to fetch from the \code{FacileDataSet}
-  }
-  \item{data.frame}{
-    A table that looks like a subset of the sample_covariate table
-  }
-  \item{NULL}{
-    If \code{NULL}, no covariates are retrieved
-  }
+\itemize{
+\item \code{TRUE}: All covariates are retrieved from the \code{FacileDataSet}
+\item \code{FALSE}: TODO: Better handle FALSE
+\item \code{character}: A vector of covariate names to fetch from the
+\code{FacileDataSet}
+\item \code{data.frame}: A table that looks like a subset of the
+\code{sample_covariate}, which will be transformed into the \code{pData}
+\item \code{NULL}: do not decorate with \emph{any} covariates.
 }}
 
 \item{feature_ids}{the features to get expression for (if not specified
@@ -78,11 +70,11 @@ in \code{x} descriptor)}
 \item{custom_key}{the custom key to use to fetch custom annotations from
 \code{.fds}}
 
-\item{assay}{the \code{assayDataElement} to use for the expression data
-if \code{x} is an \code{ExpressionSet}.}
+\item{assay}{the assay matrix to use when populating the \code{$counts} matrix
+of the \code{DGEList}.}
 }
 \value{
-a \code{\link[edgeR]{DGEList}}
+a \link[edgeR:DGEList]{edgeR::DGEList}
 
 a \code{\link[Biobase]{ExpressionSet}}
 
@@ -90,8 +82,8 @@ a \code{\link[SummarizedExperiment]{SummarizedExperiment}}
 }
 \description{
 Even though the faciledata API provides functionality to access your data
-in useful ways, it is still conceivable that you *might* prefer to work
+in useful ways, it is still conceivable that you \emph{might} prefer to work
 with these data using a more traditional bioconductor container like a
-`SummarizedExperiment`, `DGEList`, `ExpressionSet`, etc.These functions are
+\code{SummarizedExperiment}, \code{DGEList}, \code{ExpressionSet}, etc.These functions are
 here for you.
 }

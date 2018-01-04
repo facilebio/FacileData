@@ -6,37 +6,34 @@
 #' `SummarizedExperiment`, `DGEList`, `ExpressionSet`, etc.These functions are
 #' here for you.
 #'
+#' @md
 #' @rdname as.BiocContainer
+#'
 #' @export
 #' @importFrom edgeR DGEList
+#'
 #' @param x a facile expression-like result
 #' @param covariates The covariates the user wants to add to the $samples of
 #'   the DGEList. This can take the following forms:
-#'   \enumerate{
-#'     \item{TRUE}{
-#'       All covariates are retrieved from the \code{FacileDataSet}
-#'     }
-#'     \item{FALSE}{
-#'       TODO: Better handle FALSE
-#'     }
-#'     \item{character}{
-#'       A vector of covariate names to fetch from the \code{FacileDataSet}
-#'     }
-#'     \item{data.frame}{
-#'       A table that looks like a subset of the sample_covariate table
-#'     }
-#'     \item{NULL}{
-#'       If \code{NULL}, no covariates are retrieved
-#'     }
-#'   }
+#'   - `TRUE`: All covariates are retrieved from the `FacileDataSet`
+#'   - `FALSE`: TODO: Better handle FALSE
+#'   - `character`: A vector of covariate names to fetch from the
+#'     `FacileDataSet`
+#'   - `data.frame`: A table that looks like a subset of the
+#'     `sample_covariate`, which will be transformed into the `pData`
+#'   - `NULL`: do not decorate with *any* covariates.
 #' @param feature_ids the features to get expression for (if not specified
-#'   in \code{x} descriptor)
-#' @param assay the \code{assayDataElement} to use for the expression data
-#'   if \code{x} is an \code{ExpressionSet}.
-#' @param .fds The \code{FacileDataSet} that \code{x} was retrieved from.
+#'   in `x` descriptor)
+#' @param assay the assay matrix to use when populating the default assay
+#'   matrix of the bioconductor container, ie. the `$counts` matrix of a
+#'   `DGEList`, the `exprs()` of an `ExpressionSet`, etc.
+#' @param .fds The `FacileDataSet` that `x` was retrieved from.
 #' @param custom_key the custom key to use to fetch custom annotations from
-#'   \code{.fds}
-#' @return a \code{\link[edgeR]{DGEList}}
+#'   `.fds`.
+#' @return the appropriae bioconductor assay container, ie. a [edgeR::DGEList]
+#'   for `as.DGEList`, an [Biobase::ExpressionSet] for `as.ExpressionSet`, or
+#'   a [SummarizedExperiment::SummarizedExperiment] for
+#'   `as.SummarizedExperiment`.
 as.DGEList <- function(x, ...) {
   UseMethod('as.DGEList')
 }
