@@ -50,6 +50,8 @@ test_that("cast_covariate converts right_censored data correctly", {
     casted <- cast_covariate(name, vals$value, .fds=FDS)
     expect_is(casted, 'data.frame', info=name)
     expect_equal(names(casted), ex.names, info=name)
+    expect_is(casted[["tte_OS"]], "numeric")
+    expect_is(casted[["event_OS"]], "integer")
   }
 })
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/entity-attribute-value.R
 \name{covariate_meta_info}
 \alias{covariate_meta_info}
-\title{Retrieve the meta information about a covariate}
+\title{Retrieve the meta information about a covariate for EAV decoding}
 \usage{
 covariate_meta_info(covariate, .fds, covdefs = NULL)
 }
@@ -19,5 +19,7 @@ a list of covariate information with the following elements:
 \code{$label}, \code{$is.factor}, (and maybe \code{$levels})
 }
 \description{
-Retrieve the meta information about a covariate
+Mappings that define attribute-value encodings into R-native objects are
+stored in a \code{FacileDataSet}'s \code{meta.yaml} file, in the \code{sample_covariate}
+section.
 }

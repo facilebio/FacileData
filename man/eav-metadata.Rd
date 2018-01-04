@@ -29,7 +29,7 @@ scenarios in the facileverse.
 \item \code{levels}: (optional) if you want a \code{categorical} to be treated as a
 factor if it isn't already encoded as such in the \code{pData} itself, or if
 you want to rearrange the factor levels.
-\item \code{type}: (optinal) this is used a a "grouping" level, particularly in
+\item \code{type}: (optional) this is used a a "grouping" level, particularly in
 the FacileExplorer. Not including this won't matter.
 TODO: talk about covariate groupings in
 \code{FacileExplorer::categoricalCovariateSelect}
@@ -51,34 +51,81 @@ list-of-list structure to represent the \code{sample_covariates} section of the
 \details{
 For simple \code{pData} covariates, each column is treated independantly from the
 rest. There are some types of covariates which require multiple columns for
-proper encoding, such as encoding survival information (see the \strong{Survival}
-section below). In these cases, the caller needs to provide an entry in the
-\code{covariate_def} list that describes which \code{pData} columns (\code{varname}) goes
-into the single facile covariate value. Please reference the
-\strong{Defining EAV Encodings} section for more information.
+proper encoding, such as encoding of survival information, which requires
+a pair of values that indicate the "time to event" and the status of the
+event (death or censored). In these cases, the caller needs to provide an
+entry in the \code{covariate_def} list that describes which \code{pData} columns
+(\code{varname}) goes into the single facile covariate value.
 
-keeping track of the "time to event" in one column, and a separae column to
-indicate whether or not the event was a "death" or a censored. Still, these
-data are stored in the single "value" column of the FacileDataSet's internal
-entity-attribute-value (\code{sample_covariate}) table. In order to
-encode these types of columns correctly, we need to provide more information
-via the \code{covariate_def} parameter of this function.
+Please refer to the \strong{Encoding Survival Covariates} section for a more
+detailed description of how to define encoding survival informaiton into the
+EAV table using the \code{covariate_def} parameter. Further examples of how to
+encode other complex atributes will be added as they are required, but you
+can reference the \strong{Encoding Arbitrarily Complex Covariates} section for
+some more information.
 }
-\section{Survival}{
+\section{Encoding Survival Covariates}{
 
-Survival data is encoded by two columns. One column to indicate the
-"time to event" and a second to indicate whether or not the denoted
-tte is an "event" (1) or "censored" (0). The pair of columns will be encoded
-into the \code{FacileDataSet}'s EAV table as a single (numeric) value. The
-absolute value of the numeric indicates the "time to event" and the sign of
-the value indicates its censoring status (If there are such data in \code{x}, it
-must be in a (\code{tte_OS}, \code{event_OS}) pair of columns for "ordinary survival"
-or a (\code{tte_PFS}, \code{event_PFS}) for progression free survival. Please see the
-"Defining EAV Encodings" sections for more details.
+
+Survival data in R is typically encoded by two vectors. One vector that
+indicates the "time to event" (tte), and a second to indicate whether or not
+the denoted tte is an "event" (1) or "censored" (0).
+
+Normally these vectors appear as two columns in an experiment's \code{pData},
+and therefore need to be encoded into the \code{FacileDataSet}'s EAV table. To do
+so, the pair of vectors are turned into a signed numeric value. The absolute
+value of the numeric indicates the "time to event" and the sign of the value
+indicates its censoring status.
+
+Let's assume we have \code{tte_OS} and \code{event_OS} column that are used to encode
+a patient's overall survival (time and censor status). To store this as an
+"OS" covariate in the EAV table, a \code{covariate_def} list-of-list definition
+that captures this encoding would look like this:\preformatted{covariate_def <- list(
+  OS=list(
+    class="right_censored",
+    varname=c("tte_OS", "event_OS"),
+    label="Overall Survival",
+    type="clinical",
+    description="Overall survival in days"))
 }
 
-\section{Defining EAV Encodings}{
+Note how the name of the list-entry in \code{covariate_def} defines the name of
+the covariate in the \code{FacileDataSet}. The \code{class} entry for the \code{OS}
+definition indicates the type of variable this is. The \code{varname} entry
+lists the columns in the \code{pData} that are combined to make this value. The
+\code{meta.yaml} entry for the \code{"OS"} \code{covariate_def} entry looks like so:\preformatted{sample_covariates:
+  OS:
+    class: right_censored
+    varname: ["tte_OS", "event_OS"]
+    label: "Overall Survival"
+    type: "clinical"
+    description: "Overall survival in days"
+}
 
+Note that the \code{varname} entry in the \code{meta.yaml} file isn't used for
+anything. It is just kept for posterity.
+}
+
+\section{Encoding Arbitrarily Complex Covariates}{
+
+
+To encode a new type of complex covariate, we need to:
+\enumerate{
+\item Specify a new \code{class} (like \code{"right_censored"}) for use within a
+\code{FacileDataSet}.
+\item Define an \code{eav_encode_<class>} function which takes the R data vector(s) and
+converts them into a single value into the EAV table.
+\item Define a \code{eav_decode_<class>(x, attrname, def, ...)} function which takes
+the single value in the EAV table and casts it back into the R-naive data
+vector(s). \code{x} is the vector of (character) values, \code{attrname} is the
+name of the covariate in the EAV table, \code{def} is the definition-list for
+this covariate, and \code{...} allows each decode function to be further
+customized.
+\item Update the \code{if} clauses in the \code{cast_covariate} function to dispatch
+to the appropriate \code{decode_<class>} function.
+(TODO: update the \code{cast_covariate} function to automae this process so
+that we don't have to modify that function further).
+}
 }
 
 \examples{
@@ -86,7 +133,7 @@ or a (\code{tte_PFS}, \code{event_PFS}) for progression free survival. Please se
 # into a facile "OS" right_censored survival covariate
 cc <- list(
   OS=list(
-    varname=c("tte_OS", "tte_event"),
+    varname=c("tte_OS", "event_OS"),
     label="Overall Survival",
     class="right_censored",
     type="clinical",

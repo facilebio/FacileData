@@ -2,7 +2,7 @@
 # entity-attribute-value `sample_covariate` table in the FacileDataSet.
 # The functions defined here support `pData` <-> eav conversion.
 
-# Extracting data from EAV table into R ========================================
+# EAV -> pData utility functions ===============================================
 
 #' Retrieve the meta information about a covariate for EAV decoding
 #'
@@ -33,7 +33,7 @@ covariate_meta_info <- function(covariate, .fds, covdefs=NULL) {
   meta
 }
 
-#' Casts the character values of the covariates to their defined types.
+#' Casts the character EAV values to their R-native defined types.
 #'
 #' For most things, a single value will be returned from each cast, but in the
 #' case of "time_to_event" data, the value is expended to a two column
@@ -46,6 +46,7 @@ covariate_meta_info <- function(covariate, .fds, covdefs=NULL) {
 #'
 #' @md
 #' @export
+#' @importFrom methods getFunction
 #' @seealso [covariate_meta_info()], [covariae_defnitions()]
 #'
 #' @param covariate the name of the covariate
@@ -68,31 +69,77 @@ cast_covariate <- function(covariate, values, cov.def, .fds) {
   stopifnot(is.character(values))
   stopifnot(is.character(covariate) && length(covariate) == 1L)
 
-  def <- cov.def[[covariate]]
-  if (is.list(def)) {
-    if (def$class == 'real') {
-      values <- as.numeric(values)
+  if (covariate != '.dummy.') {
+    def <- cov.def[[covariate]]
+    if (is.null(def)) {
+      warning("Covariate definition not found for ", covariate,
+              " casting assumed to be categorical", immediate. = TRUE)
+      def <- list(class="categorical")
     }
-    if (def$class == 'right_censored') {
-      values <- decode_right_censored(values, suffix=covariate)
+
+    clazz <- def$class
+    stopifnot(is.character(clazz), length(clazz) == 1L)
+
+    decode.fn <- paste0("eav_decode_", clazz)
+    dfn <- getFunction(decode.fn)
+    if (!is.function(dfn)) {
+      warning(decode.fn, " function not found, please define this function.",
+              " Casting currently assumed to be categorical", immediate. = TRUE)
+      def$class <- 'categorical'
+      dfn <- eav_decode_categorical
     }
-    if (is.character(def$levels)) {
-      ## protect against NAing a long list of values in the event that the
-      ## levels provided in the meta.yaml file don't include all levels observed
-      ## here
-      lvls <- c(def$levels, setdiff(values, def$levels))
-      values <- factor(values, lvls)
-    }
-  } else {
-    if (covariate != '.dummy.') {
-      warning("No covariate definition found for: ", covariate, immediate.=TRUE)
-    }
+
+    values <- dfn(values, covariate, def)
   }
 
   values
 }
 
-# Value-to-R conversion functions ==============================================
+# Specific EAV -> pData conversion functions -----------------------------------
+
+#' Entity-attribute-value decoding for real values.
+#'
+#' This is a simple function to handle converting numeric values in the EAV
+#' table to numeric data in R.
+#'
+#' @rdname simple-eav-decode-functions
+#' @param x the values column from the `EAV` table for this covariate
+#' @param attrname the name of "attribute" (covariate) in the EAV table.
+#' @param def the `covariate_definition` list for this covariate
+#' @return a `numeric` vector of `length(x)`
+eav_decode_real <- function(x, attrname=character(), def=list(), ...) {
+  out <- as.numeric(x)
+  n.na <- sum(is.na(out))
+  if (n.na > 0L) {
+    msg <- "%d (%.2f) values in `%s` covariate failed conversion to numeric"
+    warning(sprintf(msg, n.na, n.na / length(x), attrname))
+  }
+
+  out
+}
+
+#' Entity-attribute-value decoding for categorical (character) values.
+#'
+#' This is essentially a pass through function for categorical/character
+#' values in the EAV table. If the `def` list contains a `levels` entry, then
+#' the returned value is converted to a factor, with the levels in the order
+#' as defined in `def$levels`. If more levels appear in `x` than exist in
+#' `def$levels` they are appended to the end of the factor levels in
+#' alphabetical order.
+#'
+#' @inheritParams eav_decode_real
+#' @rdname simple-eav-decode-functions
+eav_decode_categorical <- function(x, attrname=character(), def=list(), ...) {
+  out <- as.character(x)
+  if (is.character(def$levels)) {
+    ## protect against NAing a long list of values in the event that the
+    ## levels provided in the meta.yaml file don't include all levels observed
+    ## here
+    lvls <- unique(c(def$levels, setdiff(out, def$levels)))
+    out <- factor(out, lvls)
+  }
+  out
+}
 
 #' Entity-attribute-value encodings for survival data.
 #'
@@ -122,7 +169,7 @@ cast_covariate <- function(covariate, values, cov.def, .fds) {
 #'   1 means censored, and 0 is event. This is `FALSE` by default.
 #' @return returns a numeric vector that combines time-to-event and censoring
 #'   info (sign of the value).
-encode_right_censored <- function(time, event, sas.encoding=FALSE) {
+eav_encode_right_censored <- function(time, event, sas.encoding=FALSE) {
   event <- as.integer(event)
   isna <- is.na(event)
   if (any(isna)) {
@@ -148,9 +195,11 @@ encode_right_censored <- function(time, event, sas.encoding=FALSE) {
 #' @param x the time to event
 #' @param suffix adds `_<suffix>` to the `tte` and `event` columns of the
 #'   outgoing `data.frame`
+#' @param def the covariate definition for this variable
 #' @return two column `data.frame` with `tte(_SUFFIX)?` and `event(_SUFFIX)?`
 #'   columns.
-decode_right_censored <- function(x, suffix=NULL, sas.encoding=FALSE) {
+eav_decode_right_censored <- function(x, attrname=character(), def=list(),
+                                      suffix=attrname, sas.encoding=FALSE, ...) {
   x <- as.numeric(x)
   out <- data.frame(tte=abs(x))
   if (sas.encoding) {
@@ -158,13 +207,13 @@ decode_right_censored <- function(x, suffix=NULL, sas.encoding=FALSE) {
   } else {
     out[['event']] <- as.integer(x > 0)
   }
-  if (is.character(suffix)) {
+  if (is.character(suffix) && length(suffix) == 1L) {
     names(out) <- paste0(names(out), '_', sub('^[^a-zA-Z]', '', suffix))
   }
   out
 }
 
-# Creating attribute-value definitions =========================================
+# pData -> EAV utility functions ===============================================
 
 #' Create a facile covariate definition file from a sample `pData` data.frame
 #'
@@ -178,29 +227,83 @@ decode_right_censored <- function(x, suffix=NULL, sas.encoding=FALSE) {
 #'
 #' For simple `pData` covariates, each column is treated independantly from the
 #' rest. There are some types of covariates which require multiple columns for
-#' proper encoding, such as encoding survival information (see the **Survival**
-#' section below). In these cases, the caller needs to provide an entry in the
-#' `covariate_def` list that describes which `pData` columns (`varname`) goes
-#' into the single facile covariate value. Please reference the
-#' **Defining EAV Encodings** section for more information.
+#' proper encoding, such as encoding of survival information, which requires
+#' a pair of values that indicate the "time to event" and the status of the
+#' event (death or censored). In these cases, the caller needs to provide an
+#' entry in the `covariate_def` list that describes which `pData` columns
+#' (`varname`) goes into the single facile covariate value.
 #'
-#' keeping track of the "time to event" in one column, and a separae column to
-#' indicate whether or not the event was a "death" or a censored. Still, these
-#' data are stored in the single "value" column of the FacileDataSet's internal
-#' entity-attribute-value (`sample_covariate`) table. In order to
-#' encode these types of columns correctly, we need to provide more information
-#' via the `covariate_def` parameter of this function.
+#' Please refer to the **Encoding Survival Covariates** section for a more
+#' detailed description of how to define encoding survival informaiton into the
+#' EAV table using the `covariate_def` parameter. Further examples of how to
+#' encode other complex atributes will be added as they are required, but you
+#' can reference the **Encoding Arbitrarily Complex Covariates** section for
+#' some more information.
 #'
-#' @section Survival:
-#' Survival data is encoded by two columns. One column to indicate the
-#' "time to event" and a second to indicate whether or not the denoted
-#' tte is an "event" (1) or "censored" (0). The pair of columns will be encoded
-#' into the `FacileDataSet`'s EAV table as a single (numeric) value. The
-#' absolute value of the numeric indicates the "time to event" and the sign of
-#' the value indicates its censoring status (If there are such data in `x`, it
-#' must be in a (`tte_OS`, `event_OS`) pair of columns for "ordinary survival"
-#' or a (`tte_PFS`, `event_PFS`) for progression free survival. Please see the
-#' "Defining EAV Encodings" sections for more details.
+#' @section Encoding Survival Covariates:
+#'
+#' Survival data in R is typically encoded by two vectors. One vector that
+#' indicates the "time to event" (tte), and a second to indicate whether or not
+#' the denoted tte is an "event" (1) or "censored" (0).
+#'
+#' Normally these vectors appear as two columns in an experiment's `pData`,
+#' and therefore need to be encoded into the `FacileDataSet`'s EAV table. To do
+#' so, the pair of vectors are turned into a signed numeric value. The absolute
+#' value of the numeric indicates the "time to event" and the sign of the value
+#' indicates its censoring status.
+#'
+#' Let's assume we have `tte_OS` and `event_OS` column that are used to encode
+#' a patient's overall survival (time and censor status). To store this as an
+#' "OS" covariate in the EAV table, a `covariate_def` list-of-list definition
+#' that captures this encoding would look like this:
+#'
+#' ```
+#' covariate_def <- list(
+#'   OS=list(
+#'     class="right_censored",
+#'     varname=c("tte_OS", "event_OS"),
+#'     label="Overall Survival",
+#'     type="clinical",
+#'     description="Overall survival in days"))
+#' ```
+#'
+#' Note how the name of the list-entry in `covariate_def` defines the name of
+#' the covariate in the `FacileDataSet`. The `class` entry for the `OS`
+#' definition indicates the type of variable this is. The `varname` entry
+#' lists the columns in the `pData` that are combined to make this value. The
+#' `meta.yaml` entry for the `"OS"` `covariate_def` entry looks like so:
+#'
+#' ```
+#' sample_covariates:
+#'   OS:
+#'     class: right_censored
+#'     varname: ["tte_OS", "event_OS"]
+#'     label: "Overall Survival"
+#'     type: "clinical"
+#'     description: "Overall survival in days"
+#' ```
+#'
+#' Note that the `varname` entry in the `meta.yaml` file isn't used for
+#' anything. It is just kept for posterity.
+#'
+#' @section Encoding Arbitrarily Complex Covariates:
+#'
+#' To encode a new type of complex covariate, we need to:
+#'
+#' 1. Specify a new `class` (like `"right_censored"`) for use within a
+#'    `FacileDataSet`.
+#' 2. Define an `eav_encode_<class>` function which takes the R data vector(s) and
+#'    converts them into a single value into the EAV table.
+#' 3. Define a `eav_decode_<class>(x, attrname, def, ...)` function which takes
+#'    the single value in the EAV table and casts it back into the R-naive data
+#'    vector(s). `x` is the vector of (character) values, `attrname` is the
+#'    name of the covariate in the EAV table, `def` is the definition-list for
+#'    this covariate, and `...` allows each decode function to be further
+#'    customized.
+#' 4. Update the `if` clauses in the `cast_covariate` function to dispatch
+#'    to the appropriate `decode_<class>` function.
+#'    (TODO: update the `cast_covariate` function to automae this process so
+#'    that we don't have to modify that function further).
 #'
 #' @md
 #' @rdname eav-metadata
@@ -223,7 +326,7 @@ decode_right_censored <- function(x, suffix=NULL, sas.encoding=FALSE) {
 #'   * `levels`: (optional) if you want a `categorical` to be treated as a
 #'     factor if it isn't already encoded as such in the `pData` itself, or if
 #'     you want to rearrange the factor levels.
-#'   * `type`: (optinal) this is used a a "grouping" level, particularly in
+#'   * `type`: (optional) this is used a a "grouping" level, particularly in
 #'     the FacileExplorer. Not including this won't matter.
 #'     TODO: talk about covariate groupings in
 #'     `FacileExplorer::categoricalCovariateSelect`
@@ -265,9 +368,6 @@ create_eav_metadata <- function(x, covariate_def = list()) {
 }
 
 #' @rdname eav-metadata
-#'
-#' @section Defining EAV Encodings:
-#'
 validate_covariate_def_list <- function(x, pdata) {
   # this is named a list of lists
   stopifnot(is.list(x), is.character(names(x)))

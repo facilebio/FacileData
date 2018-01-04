@@ -2,7 +2,7 @@
 % Please edit documentation in R/entity-attribute-value.R
 \name{cast_covariate}
 \alias{cast_covariate}
-\title{Casts the character values of the covariates to their defined types.}
+\title{Casts the character EAV values to their R-native defined types.}
 \usage{
 cast_covariate(covariate, values, cov.def, .fds)
 }
@@ -29,4 +29,12 @@ For most things, a single value will be returned from each cast, but in the
 case of "time_to_event" data, the value is expended to a two column
 data.frame with a \code{tte_<covariate>} column for time to event, and an
 \code{event_<covariate>} column to indicate event (1) or right censored (2).
+}
+\details{
+The mechanics of how values in the \code{sample_covariate} table are converted
+into R objects are handled by the information stored in the
+\code{FacileDataSets}'s \code{meta.yaml} file.
+}
+\seealso{
+\code{\link[=covariate_meta_info]{covariate_meta_info()}}, \code{\link[=covariae_defnitions]{covariae_defnitions()}}
 }
