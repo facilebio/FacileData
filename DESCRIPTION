@@ -1,6 +1,7 @@
 Package: FacileDataSet
 Type: Package
-Title: A warehouse for molecular clinical trial data to enable EDA
+Title: Provides an API for fluent and chainable interaction with genomics data,
+    and a datasetore that implements this API to work with muthatand (warehouse for molecular clinical trial data to enable EDA
 Version: 0.7.0
 Authors@R: c(
     person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre")),

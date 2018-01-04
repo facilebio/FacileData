@@ -9,6 +9,7 @@
 #' Mappings that define attribute-value encodings into R-native objects are
 #' stored in a `FacileDataSet`'s `meta.yaml` file, in the `sample_covariate`
 #' section.
+#'
 #' @md
 #' @export
 #'
@@ -28,8 +29,10 @@ covariate_meta_info <- function(covariate, .fds, covdefs=NULL) {
   if (!is.list(meta)) {
     stop("Covariate `", covariate, "` not found in covariate_definition file")
   }
-  meta$name <- covariate
-  meta$is.factor <- meta$class == 'categorical' && is.character(meta$levels)
+  meta[["name"]] <- covariate
+  meta[["is.factor"]] <- meta$class == 'categorical' &&
+    is.character(meta$levels) &&
+    length(meta$levels) > 0L
   meta
 }
 
@@ -271,7 +274,8 @@ eav_decode_right_censored <- function(x, attrname=character(), def=list(),
 #' the covariate in the `FacileDataSet`. The `class` entry for the `OS`
 #' definition indicates the type of variable this is. The `varname` entry
 #' lists the columns in the `pData` that are combined to make this value. The
-#' `meta.yaml` entry for the `"OS"` `covariate_def` entry looks like so:
+#' analagous `meta.yaml` entry in the `sample_covariates` section for the `"OS"`
+#' `covariate_def` entry looks like so:
 #'
 #' ```
 #' sample_covariates:

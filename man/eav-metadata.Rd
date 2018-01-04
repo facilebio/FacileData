@@ -93,7 +93,8 @@ Note how the name of the list-entry in \code{covariate_def} defines the name of
 the covariate in the \code{FacileDataSet}. The \code{class} entry for the \code{OS}
 definition indicates the type of variable this is. The \code{varname} entry
 lists the columns in the \code{pData} that are combined to make this value. The
-\code{meta.yaml} entry for the \code{"OS"} \code{covariate_def} entry looks like so:\preformatted{sample_covariates:
+analagous \code{meta.yaml} entry in the \code{sample_covariates} section for the \code{"OS"}
+\code{covariate_def} entry looks like so:\preformatted{sample_covariates:
   OS:
     class: right_censored
     varname: ["tte_OS", "event_OS"]
