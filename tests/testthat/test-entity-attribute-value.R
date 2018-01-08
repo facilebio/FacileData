@@ -19,38 +19,12 @@ validate_eav_recode <- function(x, expected, varname) {
   }
 }
 
-test_that("simple pData -> yaml covariate encoding works (no OS)", {
+test_that("pData -> meta.yaml covariate encoding works (simple & compound)", {
   # Trying to recode the survival stuff isn't included in this test
   pdat <- example_sample_covariates()
   elol <- example_sample_covariate_definitions()
 
-  # remove OS covariates from pData and yaml
-  pdat <- select(pdat, -tte_OS, -event_OS)
-  elol$OS <- NULL
-
-  lol <- create_eav_metadata(pdat)
-  fn <- tempfile()
-  yaml::write_yaml(lol, fn)
-  relol <- yaml::read_yaml(fn)
-
-  # ensure that all variables from dataframe were by covdefs_from_df
-  expected.vars <- setdiff(colnames(pdat), c("dataset", "sample_id"))
-  expect_true(setequal(names(relol), expected.vars))
-  expect_true(setequal(names(relol), names(elol)))
-
-  # encodings match
-  for (varname in expected.vars) {
-    validate_eav_recode(relol[[varname]], elol[[varname]], varname)
-  }
-})
-
-test_that("compound pData -> meta.yaml encoding (with OS) works", {
-  # Trying to recode the survival stuff isn't included in this test
-  pdat <- example_sample_covariates()
-  pdat <- select(pdat, sex, age, tte_OS, event_OS)
-  elol <- example_sample_covariate_definitions()
-  elol <- elol[c('sex','age', 'OS')]
-
+  # define covariate_def(-inition) for the compound OS facile covariate:
   covdef <- list(
     OS=list(
       varname=c("tte_OS", "event_OS"),
@@ -66,11 +40,22 @@ test_that("compound pData -> meta.yaml encoding (with OS) works", {
   yaml::write_yaml(lol, fn)
   relol <- yaml::read_yaml(fn)
 
-})
-test_that("single ExpressionSet converts to FacileDataSet", {
+  # Explicitly test that the tte_OS and event_OS columns from `pDat` were
+  # compounded into the OS covariatel.
+  # Reference the "Encoding Survival Covariates" section in the
+  # `?create_eav_metadata` helpf file for what the expected behavior of how this
+  # compounded, multi-column-to-single-value mapping should work.
+  compounded <- c("tte_OS", "event_OS")
+  expect_true(all(compounded %in% names(pdat))) # in pData
+  expect_true(!any(c("tte_OS", "event_OS") %in% names(relol))) # not in yaml
+  expect_true(setequal(relol$OS$varname, compounded)) # names of columns saved for posterity
 
+  # ensure that variables from encoded yaml file match test meta.yaml file
+  expect_true(setequal(names(relol), names(lol)))
+
+  # encodings match
+  for (varname in names(lol)) {
+    validate_eav_recode(relol[[varname]], elol[[varname]], varname)
+  }
 })
 
-test_that("list of ExpressionSets convert to FacileDataSet", {
-
-})

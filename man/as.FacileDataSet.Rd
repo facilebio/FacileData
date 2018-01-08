@@ -15,15 +15,17 @@ as.FacileDataSet(x, assay_name, assay_type, feature_info, feature_type,
 \method{as.FacileDataSet}{ExpressionSet}(x, assay_name, assay_type,
   feature_info, feature_type, metayaml = NULL, organism = "unspecified",
   path = tempfile("FacileDataSet-", getwd()),
-  source_assay = assayDataElementNames(x)[1L], ...)
+  source_assay = assayDataElementNames(x)[1L], dset = "eset", ...)
 
 \method{as.FacileDataSet}{SummarizedExperiment}(x, assay_name, assay_type,
   feature_info, feature_type, metayaml = NULL, organism = "unspecified",
-  path = tempfile("FacileDataSet-", getwd()), source_assay = NULL, ...)
+  path = tempfile("FacileDataSet-", getwd()), source_assay = NULL,
+  dset = "sumexp", ...)
 
 \method{as.FacileDataSet}{DGEList}(x, assay_name, assay_type, feature_info,
   feature_type, metayaml = NULL, organism = "unspecified",
-  path = tempfile("FacileDataSet-", getwd()), source_assay = NULL, ...)
+  path = tempfile("FacileDataSet-", getwd()), source_assay = NULL,
+  dset = "dgelist", ...)
 
 \method{as.FacileDataSet}{list}(x, path, organism, assays = NULL,
   metayaml = NULL, ...)
@@ -65,7 +67,23 @@ a \code{\link[=FacileDataSet]{FacileDataSet()}}
 }
 \description{
 This function assumes you are only extracting one assay from the assay
-container and creating a FacileDataSet from it. This requires that you
-specify which assay (if the container has more than one) to extract, as
-well as hand-crafting the feature_info correctly for the assay.
+container and creating a \code{FacileDataSet} from it. This requires that you
+specify which assay (if the container has more than one) to extract. The
+\code{feature_info} table is populated by the particular \code{fData} (\code{mcols},
+\code{y$genes}, etc.) from the assay container. The \code{pData} from the assay
+container will be ingestged as well.
+
+\strong{Please read the Details section}  for more a more complete description
+of the data that is required to create a complete \code{FacileDataSet}
+}
+\details{
+A \code{FacileDataSet} can be created from a number of different Bioconductor
+containers, such as a \link[Biobase:ExpressionSet]{Biobase::ExpressionSet},
+\link[SummarizedExperiment:SummarizedExperiment]{SummarizedExperiment::SummarizedExperiment}, or an \link[edgeR:DGEList]{edgeR::DGEList}. To
+create a \code{FacileDataSet} that spans multiple Bioc containters, ie. you may
+have one ExpressionSet per indication in the TCGA. You can make
+\code{FacileDataSet} to encompass the data from \emph{all} of these indications by
+providing a \code{list} of \code{ExpressionSet}s. The \code{list} should have its \code{names()}
+set to each of the TCGA indications ("BLCA", "BRCA", etc.) the data came
+from.
 }

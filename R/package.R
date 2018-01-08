@@ -8,3 +8,6 @@
 #' @import tidyr
 #' @import methods
 NULL
+
+#' More description goes here about the FacileDataSet package.
+"_PACKAGE"

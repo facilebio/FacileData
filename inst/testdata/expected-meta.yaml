@@ -1,4 +1,4 @@
-name: FacileTCGADataSet
+name: TestFacileDataSet
 organism: Homo sapiens
 default_assay: rnaseq
 datasets:
@@ -10,28 +10,26 @@ datasets:
     description: Breast invasive carcinoma
 sample_covariates:
   stage:
-    varname: stage
-    type: clinical
     class: categorical
     levels: ["stage i", "stage ii", "stage iii", "stage iv"]
     description: Cancer staging classification (I-IV)
     label: Pathological Tumor Staging
-  sex:
-    varname: sex
+    colnames: stage
     type: clinical
+  sex:
     class: categorical
     levels: ['male', 'female'] # reversed factor
     description: "chrX:chrY ratio"
     label: Sex
-  age:
-    varname: age
+    colnames: sex
     type: clinical
+  age:
     class: real
     description: Age of patient in years
     label: Age (years)
+    colnames: age
+    type: clinical
   subtype_molecular_bladder:
-    varname: subtype_molecular_bladder
-    type: tumor_classification
     class: categorical
     # levels: ["luminal", "basal"] # for test, we don't specify this is factor
     description: >
@@ -39,29 +37,33 @@ sample_covariates:
       (doi:10.1073/pnas.1318376111). For a larger umbrella review
       of the diversity of bladder subtypes, you can refer to doi:10.1038/nrc3817.
     label: Bladder cancer subtype (luminal/basal)
-  subtype_receptor_breast:
-    varname: subtype_receptor_breast
+    colnames: subtype_molecular_bladder
     type: tumor_classification
+  subtype_receptor_breast:
     class: categorical
     levels: ["ER+/PR+", "Her2+", "TNBC"]
     description: >
       Breast cancer classification based on amplification and/or deletion of
       different receptors.
     label: Breast cancer subtype (receptor status)
+    colnames: subtype_receptor_breast
+    type: tumor_classification
   sample_type:
-    varname: sample_type
-    type: clinical
     class: categorical
     levels: ['normal', 'tumor', 'tumor_metastatic']
     description: Whether sample comes from a tumor or adjacent normal
     label: Sample type (tumor/normal)
-  OS:
+    colnames: sample_type
     type: clinical
+  OS:
     class: right_censored
     description: >
       Overall Survival in days or months. The units still need to be standardized
       across trials.
     label: Overall survival
+    colnames: ["tte_OS", "event_OS"]
+    argnames: ["time", "event"]
+    type: clinical
 
 
 

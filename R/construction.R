@@ -43,8 +43,7 @@ initializeFacileDataSet <- function(path, meta_file,
   hd5.fn <- file.path(path, 'data.h5')
   h5createFile(hd5.fn)
   h5createGroup(hd5.fn, 'assay')
-  H5close()
-
+  # H5close()
   invisible(FacileDataSet(path))
 }
 
@@ -158,21 +157,51 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
 }
 
 
-#' Adds a complete set of assay data for all samples across datasets in the
-#' FacileDataSet
+#' Adds new set of assay data for all samples in a FacileDataSet
 #'
-#' This needs to be busted up into functions Minimally loop over datasets to
-#' addFacileAssay
+#' Once a `FacileDataSet` has been created and initialized, either via a
+#' low-level call to [initializeFacileDataSet()], or a call to
+#' [as.FacileDataSet()] over a list of BiocAssayContainers, you can add more
+#' assays (ie. RNA-seq, microarray, etc) to the `FacileDataSet` using this
+#' function.
 #'
+#' Note that you cannot add assay data piecemeal. That is to say, you can't call
+#' this function once to add copynumber data
+#' (`addFacileAssaySet(..., facile_assay_type = "cnv")` to a subset of samples
+#' and later call this function again to add copynumber to the rest of the
+#' samples. The function will throw an error if
+#' `facile_assay_type %in% assay_names(x) == TRUE`.
+#'
+#' @md
 #' @importFrom rhdf5 h5createFile h5createDataset h5write
 #' @export
 #'
-#' @param x The \code{FacileDataSeta}
-#' @param dat list of ExpressionSet, SummarizedExperiment, or DGELists that
-#'   have the assay data for the given assay across all of our datasets
-#' @param assay_name the name of the assay in the source dataset object
-#' @param facile_assay_name the name of the assay to store in the FacileDataSet
-#' @param facile_assay_type string indicating the assay_type
+#' @param x The `FacileDataSet`
+#' @param datasets list of `ExpressionSet`, `SummarizedExperiment`, or
+#'   `DGEList`s that have the new assay data across all of the datasets in `x`.
+#' @param facile_assay_name the name of the assay in the source dataset object
+#' @param facile_assay_type string indicating the assay_type ('rnaseq',
+#'   'affymetrix', etc.)
+#' @param facile_feature_type a string indicating the universe the features in
+#'   this assay refer to, ie. "entrez", "ensgid", "enstid", etc.
+#' @param facie_assay_description a string that allows the caller to provide
+#'   a "freeform" description of the assay (platform, protocol, whatever).
+#' @param facile_feature_info a `data.frame` with the required `feature_info`
+#'   columns that describe the features in this assay. Please refer to the
+#'   "Features" section of the `FacileDataSet` vignette for more complete
+#'   description.
+#' @param storage_mode either `"integer"` or `"numeric"`, maps to the
+#'   `storage.mode` parameter in [rhdf5::h5createDataset()]
+#' @param chunk_rows the first entry in the `chunk` parameter in
+#'   [rhdf5::h5createDataset()] (`integer`)
+#' @param chunk_cols the second entry in the `chunk` parameter in
+#'   [rhdf5::h5createDataset()]. If this is `"ncol"`, it is set to the number
+#'   of columns in each of the internal dataset matrices being added.
+#' @param chunk_compression the `level` parameter in [rhdf5::h5createDataset()]
+#' @param assay_name the assay name in the data containers provided in the
+#'   `datasets` list.
+#' @return a `tibble` subset of `facile_feature_info` that indicates the *new*
+#'   features that were added to the internal `feature_info_tbl`.
 addFacileAssaySet <- function(x, datasets, facile_assay_name,
                               facile_assay_type=.assay.types,
                               facile_feature_type=.feature.types,

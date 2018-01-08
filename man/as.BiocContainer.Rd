@@ -68,13 +68,17 @@ in \code{x} descriptor)}
 \item{.fds}{The \code{FacileDataSet} that \code{x} was retrieved from.}
 
 \item{custom_key}{the custom key to use to fetch custom annotations from
-\code{.fds}}
+\code{.fds}.}
 
-\item{assay}{the assay matrix to use when populating the \code{$counts} matrix
-of the \code{DGEList}.}
+\item{assay}{the assay matrix to use when populating the default assay
+matrix of the bioconductor container, ie. the \code{$counts} matrix of a
+\code{DGEList}, the \code{exprs()} of an \code{ExpressionSet}, etc.}
 }
 \value{
-a \link[edgeR:DGEList]{edgeR::DGEList}
+the appropriae bioconductor assay container, ie. a \link[edgeR:DGEList]{edgeR::DGEList}
+for \code{as.DGEList}, an \link[Biobase:ExpressionSet]{Biobase::ExpressionSet} for \code{as.ExpressionSet}, or
+a \link[SummarizedExperiment:SummarizedExperiment]{SummarizedExperiment::SummarizedExperiment} for
+\code{as.SummarizedExperiment}.
 
 a \code{\link[Biobase]{ExpressionSet}}
 

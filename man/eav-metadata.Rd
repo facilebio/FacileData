@@ -83,7 +83,7 @@ a patient's overall survival (time and censor status). To store this as an
 that captures this encoding would look like this:\preformatted{covariate_def <- list(
   OS=list(
     class="right_censored",
-    varname=c("tte_OS", "event_OS"),
+    arguments=c(time="tte_OS", event="event_OS"),
     label="Overall Survival",
     type="clinical",
     description="Overall survival in days"))
@@ -92,15 +92,18 @@ that captures this encoding would look like this:\preformatted{covariate_def <- 
 Note how the name of the list-entry in \code{covariate_def} defines the name of
 the covariate in the \code{FacileDataSet}. The \code{class} entry for the \code{OS}
 definition indicates the type of variable this is. The \code{varname} entry
-lists the columns in the \code{pData} that are combined to make this value. The
-analagous \code{meta.yaml} entry in the \code{sample_covariates} section for the \code{"OS"}
-\code{covariate_def} entry looks like so:\preformatted{sample_covariates:
+lists the columns in the \code{pData} that are combined to make this value.
+The \code{names(varnames)} correspond to the parameters in the
+\code{\link[=eav_encode_right_censored]{eav_encode_right_censored()}} function. The analagous \code{meta.yaml} entry in
+the \code{sample_covariates} section for the \code{"OS"} \code{covariate_def} entry looks
+like so:\preformatted{sample_covariates:
   OS:
     class: right_censored
-    varname: ["tte_OS", "event_OS"]
     label: "Overall Survival"
     type: "clinical"
     description: "Overall survival in days"
+    colnames: ["tte_OS", "event_OS"]
+    argnames: ["time", "event"]
 }
 
 Note that the \code{varname} entry in the \code{meta.yaml} file isn't used for
@@ -110,22 +113,23 @@ anything. It is just kept for posterity.
 \section{Encoding Arbitrarily Complex Covariates}{
 
 
-To encode a new type of complex covariate, we need to:
+To encode a new type of complex covariate from a wide \code{pData} data.frame,
+we need to:
 \enumerate{
 \item Specify a new \code{class} (like \code{"right_censored"}) for use within a
 \code{FacileDataSet}.
-\item Define an \code{eav_encode_<class>} function which takes the R data vector(s) and
-converts them into a single value into the EAV table.
+\item Define an \code{eav_encode_<class>(arg1, arg2, ...)} function which takes the
+R data vectors (arg1, arg2) and converts them into a single value for the
+EAV table.
 \item Define a \code{eav_decode_<class>(x, attrname, def, ...)} function which takes
 the single value in the EAV table and casts it back into the R-naive data
-vector(s). \code{x} is the vector of (character) values, \code{attrname} is the
-name of the covariate in the EAV table, \code{def} is the definition-list for
-this covariate, and \code{...} allows each decode function to be further
-customized.
-\item Update the \code{if} clauses in the \code{cast_covariate} function to dispatch
-to the appropriate \code{decode_<class>} function.
-(TODO: update the \code{cast_covariate} function to automae this process so
-that we don't have to modify that function further).
+vector(s).
+\itemize{
+\item \code{x} is the vector of (character) values from the EAV table
+\item \code{attrname} is the name of the covariate in the EAV table
+\item \code{def} is the definition-list for this covariate.
+\item \code{...} allows each decode function to be further customized.
+}
 }
 }
 
