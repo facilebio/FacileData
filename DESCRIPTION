@@ -36,6 +36,7 @@ Suggests:
   Biobase,
   SummarizedExperiment,
   knitr,
-  roxygen2 (>= 6.0.0)
+  roxygen2 (>= 6.0.0),
+  FacileTCGADataSet
 RoxygenNote: 6.0.1
 License: MIT
