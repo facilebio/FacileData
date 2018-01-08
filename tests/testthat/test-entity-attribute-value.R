@@ -9,7 +9,7 @@ context("Entity-Attribute-Value conversions")
 validate_eav_recode <- function(x, expected, varname) {
   expect_is(x, "list", info = varname)
   expect_is(expected, "list", info = varname)
-  expect_equal(x$varname, expected$varname, info = varname)
+  expect_equal(x$colnames, expected$colnames, info = varname)
   expect_equal(x$class, expected$class, info = varname)
   if (!is.null(expected$levels)) {
     expect_true(is.character(x$levels), info = varname)
@@ -27,7 +27,7 @@ test_that("pData -> meta.yaml covariate encoding works (simple & compound)", {
   # define covariate_def(-inition) for the compound OS facile covariate:
   covdef <- list(
     OS=list(
-      varname=c("tte_OS", "event_OS"),
+      colnames=c(time="tte_OS", event="event_OS"),
       class="right_censored",
       label="Overall survival",
 
@@ -48,7 +48,7 @@ test_that("pData -> meta.yaml covariate encoding works (simple & compound)", {
   compounded <- c("tte_OS", "event_OS")
   expect_true(all(compounded %in% names(pdat))) # in pData
   expect_true(!any(c("tte_OS", "event_OS") %in% names(relol))) # not in yaml
-  expect_true(setequal(relol$OS$varname, compounded)) # names of columns saved for posterity
+  expect_true(setequal(relol$OS$colnames, compounded)) # names of columns saved for posterity
 
   # ensure that variables from encoded yaml file match test meta.yaml file
   expect_true(setequal(names(relol), names(lol)))

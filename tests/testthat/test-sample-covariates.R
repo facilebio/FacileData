@@ -49,9 +49,9 @@ test_that("cast_covariate converts right_censored data correctly", {
     vals <- fetch_sample_covariates(FDS, samples, name) %>% collect(n=Inf)
     casted <- cast_covariate(name, vals$value, .fds=FDS)
     expect_is(casted, 'data.frame', info=name)
-    expect_equal(names(casted), ex.names, info=name)
-    expect_is(casted[["tte_OS"]], "numeric")
-    expect_is(casted[["event_OS"]], "integer")
+    expect_true(setequal(names(casted), ex.names), info=name)
+    expect_is(casted[[ex.names[1]]], "numeric", info = ex.names[1])
+    expect_is(casted[[ex.names[2]]], "integer", info = ex.names[2])
   }
 })
 

@@ -344,7 +344,7 @@ eav_decode_right_censored <- function(x, attrname=character(), def=list(),
 #' # into a facile "OS" right_censored survival covariate
 #' cc <- list(
 #'   OS=list(
-#'     varname=c("tte_OS", "event_OS"),
+#'     colnames=c(time="tte_OS", event="event_OS"),
 #'     label="Overall Survival",
 #'     class="right_censored",
 #'     type="clinical",
@@ -365,7 +365,7 @@ create_eav_metadata <- function(x, covariate_def = list()) {
   names(gcd) <- colnames(x)
 
   # remove definitions in gcd that are provided in covariate_def
-  axe <- lapply(covariate_def, '[[', 'varname')
+  axe <- lapply(covariate_def, '[[', 'colnames')
   axe <- unique(unlist(axe, recursive = TRUE, use.names = FALSE))
   gcd[axe] <- NULL
 
@@ -383,7 +383,7 @@ validate_covariate_def_list <- function(x, pdata) {
   stopifnot(length(unique(names(x))) == length(x))
 
   # each list item has the following elements
-  required.elements <- c('varname', 'class')
+  required.elements <- c('colnames', 'class')
   # 'label', 'type' (group), and 'description' are also nice to have, but not
   # strictly required.
   has.elems <- sapply(x, function(el) all(required.elements %in% names(el)))
@@ -398,7 +398,7 @@ validate_covariate_def_list <- function(x, pdata) {
 
   # varname entries are valid columns in `pdata`
   for (element in names(x)) {
-    cnames <- x[[element]]$varname
+    cnames <- x[[element]]$colnames
     if (!is.character(cnames)) {
       stop(sprintf("%s:varname is not a character", element))
     }
@@ -427,7 +427,8 @@ eavdef_for_column <- function(x, column) {
   vals <- x[[column]]
   if (is.null(vals)) stop("Unknown column in x: ", column)
 
-  out <- list(varname=column, label=column, class='categorical', type="generic",
+  out <- list(colnames=column, label=column, class='categorical',
+              type="generic",
               description="no description provided")
   if (is.numeric(vals)) {
     out[['class']] <- "real"
