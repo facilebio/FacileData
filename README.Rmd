@@ -48,10 +48,8 @@ devtools::install_github("faciledata/FacileTCGADataSet")
 
 # Example Usage
 
-As a teaser, we provide code snippets that show how to plot HER2 copy number
-vs expression across the TCGA "BLCA" and "BRCA" indications using the=
-`FacileDataSet`. We'll then compare that to how the same code might be written
-using more traditional bioconductor containers.
+As a teaser, we'll show how to plot HER2 copy number vs expression across the
+TCGA bladder and breast indications ("BLCA" and "BRCA") using a `FacileDataSet`.
 
 ```{r her2-cnv-expression, eval = FALSE}
 library(FacileData)
@@ -66,9 +64,37 @@ fdat <- tcga %>%
   with_assay_data(features, assay_name = "cnv_score") %>% 
   with_sample_covariates(c("indication", "sex"))
 
-ggplot(fdat, aes(cnv_score_ERBB2, ERBB2, color=sex)) +
+ggplot(fdat, aes(cnv_score_ERBB2, ERBB2, color = sex)) +
   geom_point() +
   facet_wrap(~ indication)
 ```
 
 <img src="vignettes/images/her2_cnv_vs_expression.png" />
+
+Let's compare how you might do the same using data stored in a
+`SummarizedExperiment` named `se.tcga` that stores RNA-seq (raw and normalized)
+and copy number data.
+
+```{r example-sumexp}
+# load / get `se.all` from somewhere
+fidx <- which(mcols(se.all)$name == "ERBB2")
+se <- se.all[, se.all$indication %in% c("BLCA", "BRCA")]
+
+sdat <- data.frame(
+  ERBB2 = assay(se, "rnaseq_norm")[fidx,],
+  cnv_score_ERBB2 = assay(se, "cnv_score")[fidx,],
+  sex = se$sex,
+  indication = se$indication)
+
+ggplot(fdat, aes(cnv_score_ERBB2, ERBB2, color=sex)) +
+  geom_point() +
+  facet_wrap(~ indication)
+```
+
+Or peharps using [biobroom](http://bioconductor.org/packages/biobroom)
+
+```{r biobroom}
+
+```
+
+
