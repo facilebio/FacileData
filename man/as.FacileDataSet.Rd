@@ -2,15 +2,19 @@
 % Please edit documentation in R/as.FacileDataSet.R
 \name{as.FacileDataSet}
 \alias{as.FacileDataSet}
+\alias{as.FacileDataSet.list}
 \alias{as.FacileDataSet.ExpressionSet}
 \alias{as.FacileDataSet.SummarizedExperiment}
 \alias{as.FacileDataSet.DGEList}
-\alias{as.FacileDataSet.list}
 \title{Converts bioconductor assay containers into a FacileDataSet.}
 \usage{
-as.FacileDataSet(x, assay_name, assay_type, feature_info, feature_type,
-  metayaml = NULL, organism = "unspecified",
-  path = tempfile("FacileDataSet-", getwd()), source_assay = NULL, ...)
+as.FacileDataSet(x, path, assay_name, assay_type, metayaml = NULL,
+  source_assay = NULL, covariate_def = list(), organism = "unspecified",
+  ...)
+
+\method{as.FacileDataSet}{list}(x, path, assay_name, assay_type,
+  metayaml = NULL, source_assay = NULL, covariate_def = list(),
+  organism = "unspecified", ...)
 
 \method{as.FacileDataSet}{ExpressionSet}(x, assay_name, assay_type,
   feature_info, feature_type, metayaml = NULL, organism = "unspecified",
@@ -26,12 +30,13 @@ as.FacileDataSet(x, assay_name, assay_type, feature_info, feature_type,
   feature_type, metayaml = NULL, organism = "unspecified",
   path = tempfile("FacileDataSet-", getwd()), source_assay = NULL,
   dset = "dgelist", ...)
-
-\method{as.FacileDataSet}{list}(x, path, organism, assays = NULL,
-  metayaml = NULL, ...)
 }
 \arguments{
 \item{x}{The bioconductor assay container to extract data from}
+
+\item{path}{the directory to create the faciledataset into. Will create
+a default directory in the current working directory if not specified.
+This directory should not yet exist.}
 
 \item{assay_name}{The name to use when storing the assay matrix from
 \code{x} into the faciledataset.}
@@ -39,26 +44,22 @@ as.FacileDataSet(x, assay_name, assay_type, feature_info, feature_type,
 \item{assay_type}{what type of assay is this? rnaseq, microarry, nanostring,
 isoseq (isoform expression), etc.}
 
-\item{feature_info}{a \code{data.frame} that describes the information for the
-features (rows) of the assay you are extracting. Currently you had to
-hand-craft this. In the future we will provide automated default
-fData, rowData, etc. extractors for the source assay cointaner.}
-
-\item{feature_type}{\code{c('entrez', 'ensgid', 'enstid', 'genomic', 'custom')}}
-
 \item{metayaml}{a yaml file (or list of lists) that describes the covariates
 in the pData/colData of \code{x}. If not provided, a default one will be
 generated}
 
+\item{source_assay}{the name of the assay element in \code{x} to extract
+for use.}
+
+\item{covariate_def}{a list-of-list covariate definition map to encode
+complex covariates into the internal entity-attribute-value
+\code{sample_covariate} table. Refer to the help in the \code{\link[=create_eav_metadata]{create_eav_metadata()}}
+function man page for further details on its use, specifically the
+"Encoding Survival Covariates" section.}
+
 \item{organism}{This is used to fetch the appropriate genesets when this
 dataset is used with the facileexplorer. Currently supported values are:
 \code{c("Homo sapiens", "Mus musculus", "unspecified")}.}
-
-\item{path}{the directory to create the faciledataset into. Will create
-a default directory in the current working directory if not specified.}
-
-\item{source_assay}{the name of the assay element in \code{x} to extract
-for use.}
 
 \item{...}{more args}
 }
@@ -71,7 +72,9 @@ container and creating a \code{FacileDataSet} from it. This requires that you
 specify which assay (if the container has more than one) to extract. The
 \code{feature_info} table is populated by the particular \code{fData} (\code{mcols},
 \code{y$genes}, etc.) from the assay container. The \code{pData} from the assay
-container will be ingestged as well.
+container will be ingested as well, so do your best to ensure that this
+represents the most complete version of the pData for the FacileDataSet
+you will be createing..
 
 \strong{Please read the Details section}  for more a more complete description
 of the data that is required to create a complete \code{FacileDataSet}
@@ -87,3 +90,38 @@ providing a \code{list} of \code{ExpressionSet}s. The \code{list} should have it
 set to each of the TCGA indications ("BLCA", "BRCA", etc.) the data came
 from.
 }
+\section{Sample Covariates}{
+
+
+The \code{pData} data.frame object will be picked off from all of the containers
+provided in the list of datasets you are using to create the FacileDataSet.
+\code{dataset} and \code{sample_id} columns will be forcibly added (or modified) as
+columns to all of the individual \code{pData} data.frames.
+
+In order to insert the entirety of the \code{pData} elements into the inernal
+\code{sample_covariate} table, we rely on the \code{dplyr::bind_rows} function to
+create an uber \code{data.frame} which will be converted into an
+entity-attribute-value table. Note that when row-binding, columns are matched
+by name, and any missing columns with be filled with \code{NA}.
+
+Please ensure that the covariates across the \code{pData} data.frames have already
+been harmonized!
+}
+
+\section{Feature meta-information}{
+
+
+The feature information (aka "fData") are stored in an internal
+\code{feature_info} SQLite table within the \code{FacileDataSet}. The information to
+populate this table will be retrieved from the corresponding \code{fData}-like
+\code{data.frame} from \strong{the first} given bioc-container in the list \code{xx. This}data.frame` must define the following columns:
+\itemize{
+\item "feature_type": \code{character} (c('entrez', 'ensgid', 'enstid', 'genomic', 'custom'))
+\item "feature_id": \code{character}
+\item "name": \code{character}
+\item "meta": \code{character}
+\item "effective_length": \code{numeric}
+\item "source": \code{character}
+}
+}
+

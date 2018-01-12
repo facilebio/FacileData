@@ -84,9 +84,9 @@ cast_covariate <- function(covariate, values, cov.def, .fds) {
     stopifnot(is.character(clazz), length(clazz) == 1L)
 
     decode.fn <- paste0("eav_decode_", clazz)
-    dfn <- getFunction(decode.fn)
+    dfn <- tryCatch(getFunction(decode.fn), error = function(e) NULL)
     if (!is.function(dfn)) {
-      warning(decode.fn, " function not found, please define this function.",
+      warning(decode.fn, " casting function not found, please define one.",
               " Casting currently assumed to be categorical", immediate. = TRUE)
       def$class <- 'categorical'
       dfn <- eav_decode_categorical
@@ -110,7 +110,7 @@ cast_covariate <- function(covariate, values, cov.def, .fds) {
 #' @param attrname the name of "attribute" (covariate) in the EAV table.
 #' @param def the `covariate_definition` list for this covariate
 #' @return a `numeric` vector of `length(x)`
-eav_decode_real <- function(x, attrname=character(), def=list(), ...) {
+eav_decode_real <- function(x, attrname = character(), def = list(), ...) {
   out <- as.numeric(x)
   n.na <- sum(is.na(out))
   if (n.na > 0L) {
@@ -118,6 +118,35 @@ eav_decode_real <- function(x, attrname=character(), def=list(), ...) {
     warning(sprintf(msg, n.na, n.na / length(x), attrname))
   }
 
+  out
+}
+
+eav_encode_real <- function(x, ...) {
+  stopifnot(is.numeric(x))
+  out <- as.character(x)
+  attr(out, "eavclass") <- "real"
+  out
+}
+
+eav_encode_numeric <- eav_encode_real
+eav_encode_integer <- eav_encode_real
+
+#' @rdname simple-eav-decode-functions
+eav_encode_logical <- function(x, ...) {
+  stopifnot(is.logical(x))
+  out <- as.character(as.integer(x))
+  attr(out, "eavlcass") <- "logical"
+  out
+}
+
+eav_decode_logical <- function(x, attrname = character(), def = list(), ...) {
+  out <- as.logical(as.integer(x))
+  isna <- is.na(out)
+  nna <- sum(isna)
+  if (nna > 0) {
+    msg <- "%d values unsuccessfully converted to logical `%s`, kept as as NA"
+    warning(sprintf(msg, nna, attrname), immediate. = TRUE)
+  }
   out
 }
 
@@ -143,6 +172,16 @@ eav_decode_categorical <- function(x, attrname=character(), def=list(), ...) {
   }
   out
 }
+
+eav_encode_categorical <- function(x, ...) {
+  stopifnot(is.factor(x) || is.character(x))
+  out <- as.characer(x)
+  attr(x, "eavclass") <- "categorical"
+  out
+}
+
+eav_encode_character <- eav_encode_categorical
+eav_encode_factor <- eav_encode_categorical
 
 #' Entity-attribute-value encodings for survival data.
 #'
@@ -172,7 +211,7 @@ eav_decode_categorical <- function(x, attrname=character(), def=list(), ...) {
 #'   1 means censored, and 0 is event. This is `FALSE` by default.
 #' @return returns a numeric vector that combines time-to-event and censoring
 #'   info (sign of the value).
-eav_encode_right_censored <- function(time, event, sas.encoding=FALSE) {
+eav_encode_right_censored <- function(time, event, sas.encoding=FALSE, ...) {
   event <- as.integer(event)
   isna <- is.na(event)
   if (any(isna)) {
@@ -430,8 +469,18 @@ eavdef_for_column <- function(x, column) {
   out <- list(colnames=column, label=column, class='categorical',
               type="generic",
               description="no description provided")
+  # encode.name <- paste0("eav_encode_", class(x)[1L])
+  # encode.fn <- tryCatch(getFunction(encode.name), error = function(e) NULL)
+  # if (!is.function(encode.fn)) {
+  #
+  # }
+
+  # TODO: This shouldn't be an if/else thing.
   if (is.numeric(vals)) {
     out[['class']] <- "real"
+  }
+  if (is.logical(vals)) {
+    out[['class']] <- 'logical'
   }
   if (is.factor(vals)) {
     out[['levels']] <- levels(vals)

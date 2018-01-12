@@ -441,7 +441,12 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info,
   atype <- feature.info$assay_type[1L]
   libsize <- sample.info$libsize * sample.info$normfactor
   if (atype == 'rnaseq') {
+    # we assume these are units that are at the count level
     out <- edgeR::cpm(vals, libsize, log=log, prior.count=prior.count)
+  } else if (atype == "tpm") {
+    # someone processed their data with salmon or kallisto and wanted to store
+    # tpm. Normalizing this is just log2(val + prior.count)
+    out <- log2(vals + prior.count)
   } else {
     if (verbose) {
       warning("No normalization procedure for ", atype, " assay",

@@ -138,7 +138,7 @@ vector(s).
 # into a facile "OS" right_censored survival covariate
 cc <- list(
   OS=list(
-    varname=c("tte_OS", "event_OS"),
+    colnames=c(time="tte_OS", event="event_OS"),
     label="Overall Survival",
     class="right_censored",
     type="clinical",

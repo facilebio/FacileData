@@ -5,7 +5,7 @@
 \alias{eav_decode_right_censored}
 \title{Entity-attribute-value encodings for survival data.}
 \usage{
-eav_encode_right_censored(time, event, sas.encoding = FALSE)
+eav_encode_right_censored(time, event, sas.encoding = FALSE, ...)
 
 eav_decode_right_censored(x, attrname = character(), def = list(),
   suffix = attrname, sas.encoding = FALSE, ...)

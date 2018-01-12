@@ -2,10 +2,13 @@
 % Please edit documentation in R/entity-attribute-value.R
 \name{eav_decode_real}
 \alias{eav_decode_real}
+\alias{eav_encode_logical}
 \alias{eav_decode_categorical}
 \title{Entity-attribute-value decoding for real values.}
 \usage{
 eav_decode_real(x, attrname = character(), def = list(), ...)
+
+eav_encode_logical(x, ...)
 
 eav_decode_categorical(x, attrname = character(), def = list(), ...)
 }
