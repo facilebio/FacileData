@@ -35,7 +35,7 @@ test_that("pData -> meta.yaml covariate encoding works (simple & compound)", {
       description="Overall Survival in months"
     ))
 
-  lol <- create_eav_metadata(pdat, covariate_def = covdef)
+  lol <- eav_metadata_create(pdat, covariate_def = covdef)
   fn <- tempfile()
   yaml::write_yaml(lol, fn)
   relol <- yaml::read_yaml(fn)
@@ -43,7 +43,7 @@ test_that("pData -> meta.yaml covariate encoding works (simple & compound)", {
   # Explicitly test that the tte_OS and event_OS columns from `pDat` were
   # compounded into the OS covariatel.
   # Reference the "Encoding Survival Covariates" section in the
-  # `?create_eav_metadata` helpf file for what the expected behavior of how this
+  # `?eav_metadata_create` helpf file for what the expected behavior of how this
   # compounded, multi-column-to-single-value mapping should work.
   compounded <- c("tte_OS", "event_OS")
   expect_true(all(compounded %in% names(pdat))) # in pData

@@ -274,7 +274,7 @@ as.SummarizedExperiment.data.frame <- function(x, covariates=TRUE, feature_ids=N
 
 #' @rdname as.BiocContainer
 #' @export
-#' @method as.ExpressionSet FacileDataSet
+#' @method as.SummarizedExperiment FacileDataSet
 #' @rdname as.BiocContainer
 as.SummarizedExperiment.FacileDataSet <- function(x, covariates=TRUE, feature_ids=NULL,
                                                   assay_name=default_assay(.fds),

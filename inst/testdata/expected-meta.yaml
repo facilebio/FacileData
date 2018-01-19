@@ -14,20 +14,26 @@ sample_covariates:
     levels: ["stage i", "stage ii", "stage iii", "stage iv"]
     description: Cancer staging classification (I-IV)
     label: Pathological Tumor Staging
-    colnames: stage
+    # colnames: stage
+    arguments:
+      x: stage
     type: clinical
   sex:
     class: categorical
     levels: ['male', 'female'] # reversed factor
     description: "chrX:chrY ratio"
     label: Sex
-    colnames: sex
+    # colnames: sex
+    arguments:
+      x: sex
     type: clinical
   age:
     class: real
     description: Age of patient in years
     label: Age (years)
-    colnames: age
+    # colnames: age
+    arguments:
+      x: age
     type: clinical
   subtype_molecular_bladder:
     class: categorical
@@ -37,7 +43,9 @@ sample_covariates:
       (doi:10.1073/pnas.1318376111). For a larger umbrella review
       of the diversity of bladder subtypes, you can refer to doi:10.1038/nrc3817.
     label: Bladder cancer subtype (luminal/basal)
-    colnames: subtype_molecular_bladder
+    # colnames: subtype_molecular_bladder
+    arguments:
+      x: subtype_molecular_bladder
     type: tumor_classification
   subtype_receptor_breast:
     class: categorical
@@ -46,24 +54,28 @@ sample_covariates:
       Breast cancer classification based on amplification and/or deletion of
       different receptors.
     label: Breast cancer subtype (receptor status)
-    colnames: subtype_receptor_breast
+    # colnames: subtype_receptor_breast
+    arguments:
+      x: subtype_receptor_breast
     type: tumor_classification
   sample_type:
     class: categorical
     levels: ['normal', 'tumor', 'tumor_metastatic']
     description: Whether sample comes from a tumor or adjacent normal
     label: Sample type (tumor/normal)
-    colnames: sample_type
+    # colnames: sample_type
+    arguments:
+      x: sample_type
     type: clinical
   OS:
     class: right_censored
+    arguments:
+      time: tte_OS
+      event: event_OS
+    label: Overall survival
+    type: clinical
     description: >
       Overall Survival in days or months. The units still need to be standardized
       across trials.
-    label: Overall survival
-    colnames: ["tte_OS", "event_OS"]
-    argnames: ["time", "event"]
-    type: clinical
-
-
-
+    # colnames: ["tte_OS", "event_OS"]
+    # argnames: ["time", "event"]

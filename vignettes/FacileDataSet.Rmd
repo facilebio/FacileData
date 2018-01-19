@@ -37,9 +37,79 @@ access to arbitrary subsets of data stored on disk wihtout having to load all
 of the data into RAM, making this datastore ideal for housing data like
 *the entirety* of the data from [The Cancer Genome Atlas][tcga].
 
+This document first shows you how to create a `FacileDataSet`, and later gets
+into the design and implentation details of the `FacileDataSet`. These details
+are helpful to understand its performance characterstics (which are awesome),
+and how you might go about tweaking/improving them.
+
+**Warning:** Once you get start to use a `FacileDataSet`, you will find it hard
+to go back to "the normal way" of doing this!
+
 [tcga]: https://cancergenome.nih.gov/
 
-# Hybrid Data Storage
+# FacileDataSet Creation
+
+The easiest way to create a `FacileDataSet` is to pass a list of
+[well-groomed](#well-groomed-datasets) `list` of `SummarizedExperiment`s
+(or `ExpressionSet`s) to the `as.FacileDataSet` function.
+
+A `FacileDataSet` is stored on disk as a well-structured directory. You can
+look at the [FacileDataSet Architecture](#faciledataset-architecture) section
+for the full details, but the important information to know is that:
+
+1. The dense assay matrices of the `SummarizedExperiment` are stored in 
+   an HDF5 file.
+2. Feature (row) and sample (column) metadata (`fData` and `pData`, 
+   respectively) are stored in an SQLite database.
+3. The `pData`/`colData` data.frames of each `SummarizedExperiment` are stored
+   in an SQLite table in an [entity-attribute-value][EAV] format in order to
+   supoport covariates that are both common to all `SummarizedExperiment`s and
+   unique to others.
+4. There is a `meta.yaml` file that stores important information about the
+   dataset itself. Perhaps most important is the `sample_covariates` section
+   that dictates how each covariate stored in the EAV table is decoded back
+   into its native R-representation. More details are provided in the
+   [Entity-Attribute-Value Table](#entity-attribute-value-table) section.
+
+## The meta.yaml File
+
+Perhaps the most important file to be concerned with when creating a 
+`FacileDataSet` is the `meta.yaml` file.
+
+Upon `FacileDataSet` creation, the `meta.yaml` file can be used to correctly
+encode the sample covariates from the `pData` into its appropriate value
+representation in the EAV table. If one isn't provided, a default one will
+be created on-the-fly.
+
+After the FacileDataSet has been created, the information in the 
+`sample_covariates` section of the `meta.yaml` is used to decode them back into
+R.
+
+yaml files are easily manipulated with your favorite text editor, so I
+recommend you use the `metayaml_skeleton(se.list, ...)` function to first
+create it. You can then modify it by hand, and finally use the hand tweaked
+version of it in your call to `as.FacileDatSet(se.list, ...)`
+
+
+
+## Well Groomed Datasets
+
+TODO: Explain what I mean by a "well-groomed" list of `SummarizedExperiment`s.
+
+### Well Groomed pData
+
+Given a list of `SummarizedExperiment`s, we collect the individual
+`pData()`/`mcols()`. When `colnames()` match across these `data.frame`s, we
+assume that the covariates *mean the same thing* and are
+*encoded using the same scheme* (ie. factor levels match).
+
+Where `colnames()` differ between `pData` `data.frame`s, even if it is just by a 
+single letter, or their caseb, are treated as being different.
+
+
+# FacileDataSet Architecture
+
+## Hybrid Data Storage
 
 The `FacileDataSet` stores the following data:
 
@@ -54,7 +124,7 @@ The `FacileDataSet` stores the following data:
     a. The included `testdata/expected-meta.yaml` file for, which is an
        exemplar file for the `testdata/TestFacileTcgaDataSet`, which consists
        of data extracted from two datasets (BLCA and BRCA) from the TCGA.
-    b. The help file provided by the [create_eav_metadata()] function, which
+    b. The help file provided by the `eav_metadata_create` function, which
        describes in greater detail how we track a dataset's sample-level
        covariates (aka, "pData" in the bioconductor world).
    In the meantime, a short description of the entries found in the
@@ -69,7 +139,7 @@ The `FacileDataSet` stores the following data:
       The datasets are further enumerated.
     - `sample_covariates`: a section that enumerates the covariatets that
       are tracked over the samples inside the `FacileDataSet` (ie. a mapping
-      of the `pData` for the samples). Reference [create_eav_metadata()]
+      of the `pData` for the samples). Reference `?create_eav_metadata`
       for more information.
 4. A `custom-annotation` directory, which stores custom `sample_covariate`
    (aka "pData") informaiton that analysts can identify and describe during
@@ -79,9 +149,9 @@ The `FacileDataSet` stores the following data:
    a custom `anno.dir` parameter so that custom annotations are stored
    elsewhere.
 
-## SQLite Schema
+### SQLite Schema
 
-## Entity-Attribute-Value Table
+### Entity-Attribute-Value Table
 
 Sample covariates (aka `pData`) are encoded in an
 [entity-attribute-value (EAV) table][EAV].
@@ -175,7 +245,7 @@ we need to:
     - `...` allows each decode function to be further customized.
 [EAV]: https://en.wikipedia.org/wiki/Entity-attribute-value_model
 
-## HDF5 File Assay Data
+### HDF5 File Assay Data
 
 The HDF5 file has one directory per assay. These directories have one matrix
 per dataset for the given assay. 

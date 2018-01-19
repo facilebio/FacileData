@@ -1,3 +1,7 @@
+# User-friendly functions used in the creation of a FacileDataSet
+#
+# The easiest way to create a FacileDataSet is to start from a well manicured
+# SummarizeExperiment (or list of them).
 #' Converts bioconductor assay containers into a FacileDataSet.
 #'
 #' @description
@@ -76,7 +80,7 @@
 #'   for use.
 #' @param covariate_def a list-of-list covariate definition map to encode
 #'   complex covariates into the internal entity-attribute-value
-#'   `sample_covariate` table. Refer to the help in the [create_eav_metadata()]
+#'   `sample_covariate` table. Refer to the help in the [eav_metadata_create()]
 #'   function man page for further details on its use, specifically the
 #'   "Encoding Survival Covariates" section.
 #' @param organism This is used to fetch the appropriate genesets when this
@@ -150,7 +154,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     dplyr::select(out, dataset, sample_id, everything())
   })
   pdat <- dplyr::bind_rows(pdats)
-  eav.meta <- create_eav_metadata(pdat, covariate_def = covariate_def)
+  eav.meta <- eav_metadata_create(pdat, covariate_def = covariate_def)
 
   adat <- lapply(x, adata, assay = source_assay)
 

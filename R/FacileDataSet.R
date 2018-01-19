@@ -20,7 +20,7 @@
 #'     a. The included `testdata/expected-meta.yaml` file for, which is an
 #'        exemplar file for the `testdata/TestFacileTcgaDataSet`, which consists
 #'        of data extracted from two datasets (BLCA and BRCA) from the TCGA.
-#'     b. The help file provided by the [create_eav_metadata()] function, which
+#'     b. The help file provided by the [eav_metadata_create()] function, which
 #'        describes in greater detail how we track a dataset's sample-level
 #'        covariates (aka, "pData" in the bioconductor world).
 #'    In the meantime, a short description of the entries found in the
@@ -35,7 +35,7 @@
 #'       The datasets are further enumerated.
 #'     - `sample_covariates`: a section that enumerates the covariatets that
 #'       are tracked over the samples inside the `FacileDataSet` (ie. a mapping
-#'       of the `pData` for the samples). Reference [create_eav_metadata()]
+#'       of the `pData` for the samples). Reference [eav_metadata_create()]
 #'       for more information.
 #' 4. A `custom-annotation` directory, which stores custom `sample_covariate`
 #'    (aka "pData") informaiton that analysts can identify and describe during
@@ -165,11 +165,16 @@ meta_file <- function(x) {
 
 #' Get meta information for dataset
 #'
+#' @md
 #' @rdname meta-info
 #' @export
-#' @param x \code{FacileDataSet}
-meta_info <- function(x) {
-  out <- yaml.load_file(meta_file(x))
+#'
+#' @param x `FacileDataSet`
+#' @param fn The path to the `meta.yaml` file.
+#' @return The `meta.yaml` file parsed into a list-of-lists representation
+meta_info <- function(x, fn = meta_file(x)) {
+  out <- assert_valid_meta_file(fn, as.list = TRUE)
+
   out
 }
 

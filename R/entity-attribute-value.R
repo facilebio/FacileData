@@ -1,6 +1,10 @@
-# What we know as `pData` in the R/bioc/ExpressionSet world are stored in an
-# entity-attribute-value `sample_covariate` table in the FacileDataSet.
-# The functions defined here support `pData` <-> eav conversion.
+# A `FacileDataSet` stores the `pData` across its samples in an
+# entity-attribute-value `sample_covariate` table in the internal SQLite
+# database.
+#
+# The functions in this file facilitate conversion of wide pdata to long EAV
+# tables, and handles the value encoding and decoding into and out of the
+# database and R.
 
 # EAV -> pData utility functions ===============================================
 
@@ -202,7 +206,7 @@ eav_encode_factor <- eav_encode_categorical
 #' @md
 #' @export
 #' @rdname eav-right-censor
-#' @seealso [create_eav_metadata()]
+#' @seealso [eav_metadata_create()]
 #'
 #' @param time `numeric` time to event
 #' @param event 0/1 vector encoded in the "R sense". "1" is an event, "0" is
@@ -311,22 +315,24 @@ eav_decode_right_censored <- function(x, attrname=character(), def=list(),
 #'
 #' Note how the name of the list-entry in `covariate_def` defines the name of
 #' the covariate in the `FacileDataSet`. The `class` entry for the `OS`
-#' definition indicates the type of variable this is. The `varname` entry
-#' lists the columns in the `pData` that are combined to make this value.
-#' The `names(varnames)` correspond to the parameters in the
-#' [eav_encode_right_censored()] function. The analagous `meta.yaml` entry in
-#' the `sample_covariates` section for the `"OS"` `covariate_def` entry looks
-#' like so:
+#' definition indicates the type of variable this is. The `arguments` section
+#' is only used when encoding a wide `pData` into the EAV value column.
+#' `names(arguments)` correspond to the parameters in the
+#' `[eav_encode_right_censored()]` function, and their values are the columns in
+#' the target `pData` that populate the respective parameters in the function
+#' call. The analagous `meta.yaml` entry in the `sample_covariates` section for
+#' the `"OS"` `covariate_def` entry looks like so:
 #'
 #' ```
 #' sample_covariates:
 #'   OS:
 #'     class: right_censored
+#'     arguments:
+#'       time: tte_OS
+#'       event: event_OS
 #'     label: "Overall Survival"
 #'     type: "clinical"
 #'     description: "Overall survival in days"
-#'     colnames: ["tte_OS", "event_OS"]
-#'     argnames: ["time", "event"]
 #' ```
 #'
 #' Note that the `varname` entry in the `meta.yaml` file isn't used for
@@ -383,12 +389,12 @@ eav_decode_right_censored <- function(x, attrname=character(), def=list(),
 #' # into a facile "OS" right_censored survival covariate
 #' cc <- list(
 #'   OS=list(
-#'     colnames=c(time="tte_OS", event="event_OS"),
+#'     arguments=list(time="tte_OS", event="event_OS"),
 #'     label="Overall Survival",
 #'     class="right_censored",
 #'     type="clinical",
 #'     description="Overall survival in days"))
-create_eav_metadata <- function(x, covariate_def = list()) {
+eav_metadata_create <- function(x, covariate_def = list()) {
   stopifnot(is.data.frame(x))
   if (is.null(covariate_def)) covariate_def <- list()
   stopifnot(is.list(covariate_def))
@@ -404,52 +410,13 @@ create_eav_metadata <- function(x, covariate_def = list()) {
   names(gcd) <- colnames(x)
 
   # remove definitions in gcd that are provided in covariate_def
+  # TODO: FIXTHIS to use arguments instead of colnames
   axe <- lapply(covariate_def, '[[', 'colnames')
   axe <- unique(unlist(axe, recursive = TRUE, use.names = FALSE))
   gcd[axe] <- NULL
 
   out <- c(gcd, covariate_def)
   out
-}
-
-#' @rdname eav-metadata
-validate_covariate_def_list <- function(x, pdata) {
-  # this is named a list of lists
-  stopifnot(is.list(x), is.character(names(x)))
-  is.lists <- sapply(x, is.list)
-  stopifnot(all(is.lists))
-  # the names are unique
-  stopifnot(length(unique(names(x))) == length(x))
-
-  # each list item has the following elements
-  required.elements <- c('colnames', 'class')
-  # 'label', 'type' (group), and 'description' are also nice to have, but not
-  # strictly required.
-  has.elems <- sapply(x, function(el) all(required.elements %in% names(el)))
-  stopifnot(all(has.elems))
-
-  # `dataset` and `sample_id` shouldn't be in here
-  illegal <- intersect(c("dataset", "sample_id"), names(x))
-  if (length(illegal)) {
-    stop("The following variables are protected and should not be included: ",
-         paste(illegal, sep = ", "))
-  }
-
-  # varname entries are valid columns in `pdata`
-  for (element in names(x)) {
-    cnames <- x[[element]]$colnames
-    if (!is.character(cnames)) {
-      stop(sprintf("%s:varname is not a character", element))
-    }
-    bad.cnames <- setdiff(cnames, colnames(pdata))
-    if (length(bad.cnames)) {
-      msg <- "%s:varname element '%s' not found as column in `pdata`"
-      msg <- sprintf(msg, element, paste(bad.cnames, collapse="&"))
-      stop(msg)
-    }
-  }
-
-  TRUE
 }
 
 #' Generate entity-attribute-value definition for a column in a data.frame
@@ -466,8 +433,7 @@ eavdef_for_column <- function(x, column) {
   vals <- x[[column]]
   if (is.null(vals)) stop("Unknown column in x: ", column)
 
-  out <- list(colnames=column, label=column, class='categorical',
-              type="generic",
+  out <- list(arguments=list(x=column), class = "categorical",
               description="no description provided")
   # encode.name <- paste0("eav_encode_", class(x)[1L])
   # encode.fn <- tryCatch(getFunction(encode.name), error = function(e) NULL)
@@ -488,11 +454,59 @@ eavdef_for_column <- function(x, column) {
   out
 }
 
+#' Validates that a covariate defintion list reasonably describes a data.frame
+#'
+#' @param x a covariate definition list-of-lists
+#' @param pdata a `data.frame`
+validate_covariate_def_list <- function(x, pdata) {
+  # this is named a list of lists
+  stopifnot(is.list(x), is.character(names(x)))
+  is.lists <- sapply(x, is.list)
+  stopifnot(all(is.lists))
+  # the names are unique
+  stopifnot(length(unique(names(x))) == length(x))
+
+  # each list item has the following elements
+  required.elements <- c("arguments", "class")
+  # 'label', 'type' (group), and 'description' are also nice to have, but not
+  # strictly required.
+  has.elems <- sapply(x, function(el) required.elements %in% names(el))
+  rownames(has.elems) <- required.elements
+  for (wut in required.elements) {
+    missed <- which(!has.elems[wut,])
+    if (length(missed)) {
+      msg <- sprintf("The following columns are missing '%s'\n:    %s",
+                     wut, paste(colnames(has.elems)[missed], collapse=","))
+      stop(msg)
+    }
+  }
+
+  # `dataset` and `sample_id` shouldn't be in here
+  illegal <- intersect(c("dataset", "sample_id"), names(x))
+  if (length(illegal)) {
+    stop("The following variables are protected and should not be included: ",
+         paste(illegal, sep = ", "))
+  }
+
+  # varname entries are valid columns in `pdata`
+  for (element in names(x)) {
+    args <- x[[element]]$arguments
+    cnames <- unlist(args)
+    if (!is.character(cnames)) {
+      stop(sprintf("%s:varname is not a character", element))
+    }
+    assert_columns(pdata, cnames)
+  }
+
+  TRUE
+}
+
+
 #' Convert a `pData` data.frame to a melted EAV table
 #'
 #' Transforms a wide `pData` data.frame into a melted EAV table for use in
 #' a `FacileDataSet`. This function requires the list-of-list encodings that
-#' are generated from [create_eav_metadata()] to do its thing. The caller can
+#' are generated from [eav_metadata_create()] to do its thing. The caller can
 #' provide their own encoding via the `eav_metadata` parameter, otherwise a
 #' default one will be generated.
 #'
@@ -501,16 +515,60 @@ eavdef_for_column <- function(x, column) {
 #'
 #' @param x a wide `pData` data.frame
 #' @param eav_metadata the list-of-list covariate encodings for the EAV table
-#'   of the type that is generated by [create_eav_metadata()]
-#' @param covariate_def passed to [create_eav_metadata()] if `eav_metadata`
+#'   of the type that is generated by [eav_metadata_create()]
+#' @param covariate_def passed to [eav_metadata_create()] if `eav_metadata`
 #'   parameter is not provided.
 #' @return a melted EAV tagble from `x`
-df2eav <- function(x, eav_metadata = NULL, covariate_def = list()) {
+as.EAVtable <- function(x, eav_metadata = NULL, covariate_def = list()) {
+  stopifnot(is.data.frame(x))
+  assert_columns(x, c("dataset", "sample_id"))
+
   if (is.null(eav_metadata)) {
-    eav_metadata <- create_eav_metadata(x, covariate_def)
+    eav_metadata <- eav_metadata_create(x, covariate_def)
   }
   validate_covariate_def_list(eav_metadata, x)
 
+  eav <- lapply(names(eav_metadata), function(aname) {
+    eav_encode_covariate(x, eav_metadata[[vname]], aname)
+  })
+
+  dplyr::bind_rows(eav)
 }
 
+#' Encodes column(s) from `pData` into  value
+#'
+#' This function is not exported, and should only be called from within the
+#' [as.EAVtable()] function because we rely on validity checks that are
+#' hapenning there.
+#'
+#' @md
+#'
+#' @param pdata the `pData` `data.frame`
+#' @param covariate_def the singe-list-definition of this covariate
+#' @param vname the name of the attribute column in the eav table
+#' @return a four-column `data.frame` (dataset,sample_id,variable,value)
+#'   with the encoded covariate into a single `value` column.
+eav_encode_covariate <- function(pdata, covariate_def, aname = "variable") {
+  assert_columns(pdata, c("dataset", "sample_id"))
+
+  # check if there is an encode function defined.
+  clazz <- covariate_def[["class"]]
+  if(!is.character(clazz) && length(clazz) != 1L) {
+    stop("A proper `class` covariate definition is required for: ", aname)
+  }
+
+  encode.name <- paste0("eav_encode_", clazz)
+  encode.fn <- getFunction(encode.name)
+  if (!is.function(encode.fn)) {
+    msg <- sprintf("No `%s` function defined for variable %s (%s)",
+                   encode.name, aname, clazz)
+    stop(msg)
+  }
+  args <- covariate_def[['arguments']]
+  stopifnot(is.character(args), is.character(names(args)))
+
+  ## is here a fu
+  args <- as.list(args)
+
+}
 

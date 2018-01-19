@@ -49,7 +49,7 @@ initializeFacileDataSet <- function(path, meta_file,
 
 #' @export
 #' @importFrom tools file_ext
-assert_valid_meta_file <- function(fn) {
+assert_valid_meta_file <- function(fn, as.list = FALSE) {
   assert_file(fn)
   if (!tolower(file_ext(fn)) ==  'yaml') {
     stop("meta file must be a yaml file")
@@ -62,7 +62,7 @@ assert_valid_meta_file <- function(fn) {
     stop("Missing the following definitions in meta file: ",
          paste(miss.toplevel, collapse=","))
   }
-  fn
+  if (as.list) dat else fn
 }
 
 .feature.types <- c('entrez', 'ensgid', 'enstid')
