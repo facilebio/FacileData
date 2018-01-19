@@ -307,7 +307,7 @@ eav_decode_right_censored <- function(x, attrname=character(), def=list(),
 #' covariate_def <- list(
 #'   OS=list(
 #'     class="right_censored",
-#'     arguments=c(time="tte_OS", event="event_OS"),
+#'     arguments=list(time="tte_OS", event="event_OS"),
 #'     label="Overall Survival",
 #'     type="clinical",
 #'     description="Overall survival in days"))

@@ -88,7 +88,7 @@ R.
 yaml files are easily manipulated with your favorite text editor, so I
 recommend you use the `metayaml_skeleton(se.list, ...)` function to first
 create it. You can then modify it by hand, and finally use the hand tweaked
-version of it in your call to `as.FacileDatSet(se.list, ...)`
+version of it in your call to `as.FacileDatSet(se.list, yaml, ...)`
 
 
 
