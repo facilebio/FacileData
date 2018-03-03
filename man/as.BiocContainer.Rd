@@ -43,7 +43,7 @@ as.SummarizedExperiment(x, ...)
   feature_ids = NULL, assay_name = default_assay(.fds), .fds = fds(x),
   custom_key = Sys.getenv("USER"), ...)
 
-\method{as.ExpressionSet}{FacileDataSet}(x, covariates = TRUE,
+\method{as.SummarizedExperiment}{FacileDataSet}(x, covariates = TRUE,
   feature_ids = NULL, assay_name = default_assay(.fds), .fds = fds(x),
   custom_key = Sys.getenv("USER"), ...)
 }

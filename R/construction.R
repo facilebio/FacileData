@@ -159,18 +159,18 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
 
 #' Adds new set of assay data for all samples in a FacileDataSet
 #'
-#' Once a `FacileDataSet` has been created and initialized, either via a
+#' Once a FacileDataSet has been created and initialized, either via a
 #' low-level call to [initializeFacileDataSet()], or a call to
 #' [as.FacileDataSet()] over a list of BiocAssayContainers, you can add more
-#' assays (ie. RNA-seq, microarray, etc) to the `FacileDataSet` using this
+#' assays (ie. RNA-seq, microarray, etc) to the FacileDataSet using this
 #' function.
 #'
-#' Note that you cannot add assay data piecemeal. That is to say, you can't call
+#' Note that you cannot add assay data piecemeal. That is to say, you can not call
 #' this function once to add copynumber data
-#' (`addFacileAssaySet(..., facile_assay_type = "cnv")` to a subset of samples
+#' (addFacileAssaySet(..., facile_assay_type = "cnv") to a subset of samples
 #' and later call this function again to add copynumber to the rest of the
 #' samples. The function will throw an error if
-#' `facile_assay_type %in% assay_names(x) == TRUE`.
+#' facile_assay_type %in% assay_names(x) == TRUE.
 #'
 #' @md
 #' @importFrom rhdf5 h5createFile h5createDataset h5write

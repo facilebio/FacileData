@@ -52,9 +52,17 @@ a \code{tibble} subset of \code{facile_feature_info} that indicates the \emph{ne
 features that were added to the internal \code{feature_info_tbl}.
 }
 \description{
-Once a \code{FacileDataSet} has been created and initialized, either via a
+Once a FacileDataSet has been created and initialized, either via a
 low-level call to \code{\link[=initializeFacileDataSet]{initializeFacileDataSet()}}, or a call to
 \code{\link[=as.FacileDataSet]{as.FacileDataSet()}} over a list of BiocAssayContainers, you can add more
-assays (ie. RNA-seq, microarray, etc) to the \code{FacileDataSet} using this
+assays (ie. RNA-seq, microarray, etc) to the FacileDataSet using this
 function.
+}
+\details{
+Note that you cannot add assay data piecemeal. That is to say, you can not call
+this function once to add copynumber data
+(addFacileAssaySet(..., facile_assay_type = "cnv") to a subset of samples
+and later call this function again to add copynumber to the rest of the
+samples. The function will throw an error if
+facile_assay_type %in% assay_names(x) == TRUE.
 }

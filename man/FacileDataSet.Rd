@@ -46,7 +46,7 @@ refer to the following:
 a. The included \code{testdata/expected-meta.yaml} file for, which is an
 exemplar file for the \code{testdata/TestFacileTcgaDataSet}, which consists
 of data extracted from two datasets (BLCA and BRCA) from the TCGA.
-b. The help file provided by the \code{\link[=create_eav_metadata]{create_eav_metadata()}} function, which
+b. The help file provided by the \code{\link[=eav_metadata_create]{eav_metadata_create()}} function, which
 describes in greater detail how we track a dataset's sample-level
 covariates (aka, "pData" in the bioconductor world).
 In the meantime, a short description of the entries found in the
@@ -62,7 +62,7 @@ a \link[Biobase:ExpressionSet]{Biobase::ExpressionSet})
 The datasets are further enumerated.
 \item \code{sample_covariates}: a section that enumerates the covariatets that
 are tracked over the samples inside the \code{FacileDataSet} (ie. a mapping
-of the \code{pData} for the samples). Reference \code{\link[=create_eav_metadata]{create_eav_metadata()}}
+of the \code{pData} for the samples). Reference \code{\link[=eav_metadata_create]{eav_metadata_create()}}
 for more information.
 }
 \item A \code{custom-annotation} directory, which stores custom \code{sample_covariate}

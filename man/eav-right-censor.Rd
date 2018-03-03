@@ -51,5 +51,5 @@ The \code{decode_right_censored} function re-instatiaes the two-column R-native
 storage of this data.
 }
 \seealso{
-\code{\link[=create_eav_metadata]{create_eav_metadata()}}
+\code{\link[=eav_metadata_create]{eav_metadata_create()}}
 }

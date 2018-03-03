@@ -4,7 +4,7 @@
 \alias{fdata}
 \title{Bioc-container specific fData extraction functions}
 \usage{
-fdata(x, ...)
+fdata(x, validate = FALSE, ...)
 }
 \description{
 not exported on purpose

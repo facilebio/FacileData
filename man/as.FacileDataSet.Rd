@@ -10,11 +10,11 @@
 \usage{
 as.FacileDataSet(x, path, assay_name, assay_type, metayaml = NULL,
   source_assay = NULL, covariate_def = list(), organism = "unspecified",
-  ...)
+  dataset_name = "NAME_ME", ...)
 
 \method{as.FacileDataSet}{list}(x, path, assay_name, assay_type,
   metayaml = NULL, source_assay = NULL, covariate_def = list(),
-  organism = "unspecified", ...)
+  organism = "unspecified", dataset_name = "NAME_ME", ...)
 
 \method{as.FacileDataSet}{ExpressionSet}(x, assay_name, assay_type,
   feature_info, feature_type, metayaml = NULL, organism = "unspecified",
@@ -53,13 +53,16 @@ for use.}
 
 \item{covariate_def}{a list-of-list covariate definition map to encode
 complex covariates into the internal entity-attribute-value
-\code{sample_covariate} table. Refer to the help in the \code{\link[=create_eav_metadata]{create_eav_metadata()}}
+\code{sample_covariate} table. Refer to the help in the \code{\link[=eav_metadata_create]{eav_metadata_create()}}
 function man page for further details on its use, specifically the
 "Encoding Survival Covariates" section.}
 
 \item{organism}{This is used to fetch the appropriate genesets when this
 dataset is used with the facileexplorer. Currently supported values are:
 \code{c("Homo sapiens", "Mus musculus", "unspecified")}.}
+
+\item{dataset_name}{the \code{name} attribute of the FacileDataSet \code{meta.yaml}
+file.}
 
 \item{...}{more args}
 }
@@ -68,16 +71,17 @@ a \code{\link[=FacileDataSet]{FacileDataSet()}}
 }
 \description{
 This function assumes you are only extracting one assay from the assay
-container and creating a \code{FacileDataSet} from it. This requires that you
-specify which assay (if the container has more than one) to extract. The
-\code{feature_info} table is populated by the particular \code{fData} (\code{mcols},
+container and creating a \code{FacileDataSet} from it. If the bioc-containers
+you are using can support more than one assay, specify which one to extract
+using the \code{source_assay} parameter, otherwise the first assay in the
+container will be taken. The \code{source_assay} you are using to initialize the
+\code{FacileDataSet} here will become its \code{default_assay} when its used later.
+
+The \code{feature_info} table is populated by the particular \code{fData} (\code{mcols},
 \code{y$genes}, etc.) from the assay container. The \code{pData} from the assay
 container will be ingested as well, so do your best to ensure that this
 represents the most complete version of the pData for the FacileDataSet
-you will be createing..
-
-\strong{Please read the Details section}  for more a more complete description
-of the data that is required to create a complete \code{FacileDataSet}
+you will be creating.
 }
 \details{
 A \code{FacileDataSet} can be created from a number of different Bioconductor
