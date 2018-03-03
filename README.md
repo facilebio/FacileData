@@ -26,16 +26,17 @@ Example Usage
 As a teaser, we provide code snippets that show how to plot HER2 copy number vs expression across the TCGA "BLCA" and "BRCA" indications using the= `FacileDataSet`. We'll then compare that to how the same code might be written using more traditional bioconductor containers.
 
 ``` r
+library(ggplot2)
 library(FacileData)
 library(FacileTCGADataSet)
 tcga <- FacileTCGADataSet()
 
 features <- filter_features(tcga, name == "ERBB2")
 
-fdat <- tcga %>% 
-  filter_samples(indication %in% c("BLCA", "BRCA")) %>% 
+fdat <- tcga %>%
+  filter_samples(indication %in% c("BLCA", "BRCA")) %>%
   with_assay_data(features, assay_name = "rnaseq", normalized = TRUE) %>%
-  with_assay_data(features, assay_name = "cnv_score") %>% 
+  with_assay_data(features, assay_name = "cnv_score") %>%
   with_sample_covariates(c("indication", "sex"))
 
 ggplot(fdat, aes(cnv_score_ERBB2, ERBB2, color=sex)) +
