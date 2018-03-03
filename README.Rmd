@@ -26,7 +26,7 @@ package provides two things:
    *FacileData Access API* called a *FacileDataSet*. The `FacileDataSet`
    provides efficient storage and retrieval of arbitrarily large high-throughput
    genomics datasets. For example, a single `FacileDataSet` can be used to store
-   *all* of the RNA-seq, microarray, RPPA, etc. data from the 
+   *all* of the RNA-seq, microarray, RPPA, etc. data from the
    [The Cancer Genome Atlas][tcga]. This singular `FacileDataSet` allows
    analysts easy access to arbitrary subsets of these data without having to
    load all of it into memory.
@@ -52,16 +52,17 @@ As a teaser, we'll show how to plot HER2 copy number vs expression across the
 TCGA bladder and breast indications ("BLCA" and "BRCA") using a `FacileDataSet`.
 
 ```{r her2-cnv-expression, eval = FALSE}
+library(ggplot2)
 library(FacileData)
 library(FacileTCGADataSet)
 tcga <- FacileTCGADataSet()
 
 features <- filter_features(tcga, name == "ERBB2")
 
-fdat <- tcga %>% 
-  filter_samples(indication %in% c("BLCA", "BRCA")) %>% 
+fdat <- tcga %>%
+  filter_samples(indication %in% c("BLCA", "BRCA")) %>%
   with_assay_data(features, assay_name = "rnaseq", normalized = TRUE) %>%
-  with_assay_data(features, assay_name = "cnv_score") %>% 
+  with_assay_data(features, assay_name = "cnv_score") %>%
   with_sample_covariates(c("indication", "sex"))
 
 ggplot(fdat, aes(cnv_score_ERBB2, ERBB2, color = sex)) +
@@ -96,5 +97,3 @@ Or peharps using [biobroom](http://bioconductor.org/packages/biobroom)
 ```{r biobroom}
 
 ```
-
-
