@@ -421,8 +421,10 @@ eav_metadata_create <- function(x, covariate_def = list()) {
 
 #' Generate entity-attribute-value definition for a column in a data.frame
 #'
-#' Creates the miniimal list-definition for a single column in a `pData`
-#' `data.frame`. This function is not exported on purpose.
+#' Creates the minimal list-definition for a single column in a `pData`
+#' `data.frame`. This function is not exported on purpose. Column descriptions
+#' will be taken from the "label" attribute of data.frames or the "metadata" list
+#' for DataFrames.
 #'
 #' @md
 #'
@@ -433,15 +435,23 @@ eavdef_for_column <- function(x, column) {
   vals <- x[[column]]
   if (is.null(vals)) stop("Unknown column in x: ", column)
 
-  out <- list(arguments=list(x=column), class = "categorical",
-              description="no description provided")
-  # encode.name <- paste0("eav_encode_", class(x)[1L])
-  # encode.fn <- tryCatch(getFunction(encode.name), error = function(e) NULL)
-  # if (!is.function(encode.fn)) {
-  #
-  # }
+  out <- list(
+      arguments=list(x=column),
+      class = "categorical",
+      description="no description provided"
+  )
 
-  # TODO: This shouldn't be an if/else thing.
+  if (is(x,"DataFrame")) {
+      col_descs = unlist(metadata(x))
+  } else {
+      col_descs = as.character(attr(x,"label"))
+  }
+
+  if (!is.null(col_descs)) {
+      if (column %in% names(col_descs)) {
+          out$description = col_descs[column]
+      }
+  }
   if (is.numeric(vals)) {
     out[['class']] <- "real"
   }
@@ -450,6 +460,9 @@ eavdef_for_column <- function(x, column) {
   }
   if (is.factor(vals)) {
     out[['levels']] <- levels(vals)
+  }
+  if (is(vals, "Surv")) {
+      out[['class']] <- 'right_censored'
   }
   out
 }
