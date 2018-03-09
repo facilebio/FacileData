@@ -99,11 +99,13 @@ as.FacileDataSet <- function(x, path, assay_name, assay_type,
   UseMethod("as.FacileDataSet")
 }
 
-# These are the containers we can extract data from
+## These are the containers we can extract data from
+## package=class
 legit.as.classes <- c(
-  "SummarizedExperiment"="SummarizedExperiment",
-  "Biobase"="ExpressionSet",
-  "edgeR"="DGEList")
+    "SummarizedExperiment"="SummarizedExperiment",
+    "SummarizedExperiment"="RangedSummarizedExperiment",
+    "Biobase"="ExpressionSet",
+    "edgeR"="DGEList")
 
 #' @method as.FacileDataSet default
 #' @export
@@ -180,7 +182,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     name = dataset_name,
     organism = organism,
     default_assay = assay_name,
-    datasets = lapply(adat, ds_annot),
+    datasets = lapply(x, ds_annot),
     sample_covariates = eav.meta)
   list(fdata = finfo, pdata = pdat, meta = meta, adata = adat)
 }
