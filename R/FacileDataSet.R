@@ -174,7 +174,6 @@ meta_file <- function(x) {
 #' @return The `meta.yaml` file parsed into a list-of-lists representation
 meta_info <- function(x, fn = meta_file(x)) {
   out <- assert_valid_meta_file(fn, as.list = TRUE)
-
   out
 }
 
@@ -265,4 +264,3 @@ print.FacileDataSet <- function(x, ...) {
   cat(out)
   invisible()
 }
-

@@ -54,7 +54,7 @@ covariate_meta_info <- function(covariate, .fds, covdefs=NULL) {
 #' @md
 #' @export
 #' @importFrom methods getFunction
-#' @seealso [covariate_meta_info()], [covariae_defnitions()]
+#' @seealso [covariate_meta_info()], [covariate_defnitions()]
 #'
 #' @param covariate the name of the covariate
 #' @param values the covariate values (which is a `character`) as it is
@@ -271,7 +271,7 @@ eav_decode_right_censored <- function(x, attrname=character(), def=list(),
 #' list-of-list structure to represent the `sample_covariates` section of the
 #' `meta.yaml` file.
 #'
-#' For simple `pData` covariates, each column is treated independantly from the
+#' For simple `pData` covariates, each column is treated independently from the
 #' rest. There are some types of covariates which require multiple columns for
 #' proper encoding, such as encoding of survival information, which requires
 #' a pair of values that indicate the "time to event" and the status of the
@@ -571,4 +571,3 @@ eav_encode_covariate <- function(pdata, covariate_def, aname = "variable") {
   args <- as.list(args)
 
 }
-

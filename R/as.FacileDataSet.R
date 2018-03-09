@@ -94,9 +94,25 @@ as.FacileDataSet <- function(x, path, assay_name, assay_type,
                              metayaml = NULL, source_assay = NULL,
                              covariate_def = list(),
                              dataset_name = "NAME_ME",
-                             organism = "unspecified"
+                             organism = "unspecified",
                              ...) {
   UseMethod("as.FacileDataSet")
+}
+
+# These are the containers we can extract data from
+legit.as.classes <- c(
+  "SummarizedExperiment"="SummarizedExperiment",
+  "Biobase"="ExpressionSet",
+  "edgeR"="DGEList")
+
+#' @method as.FacileDataSet default
+#' @export
+as.FacileDataSet.default <- function(x, ...) {
+    xclass = class(x)[1L]
+    if (! xclass %in% legit.as.classes) {
+        stop("as.FacileDataSet not defined for object of class: ", xclass)
+    }
+    as.FacileDataSet(list(x))
 }
 
 #' @method as.FacileDataSet list
@@ -140,7 +156,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     names(legit.as.classes)[pkg.idx]
   })
   if (!requireNamespace(pkg, quietly = TRUE)) {
-    stop(pkg, " package required to convert ExpresionSet to FacileDataSet")
+    stop(pkg, " package required to convert these objects to a FacileDataSet")
   }
 
   # feature-space of assay containers must be identical
@@ -298,62 +314,7 @@ adata.DGEList <- function(x, assay = NULL, ...) {
   x$counts
 }
 
-# These are the containers we can extract data from
-legit.as.classes <- c(
-  "SummarizedExperiment"="SummarizedExperiment",
-  "Biobase"="ExpressionSet",
-  "edgeR"="DGEList")
-
-#' @method as.FacileDataSet default
-#' @export
-as.FacileDataSet.default <- function(x, assay_name, assay_type, feature_info,
-                                     feature_type, metayaml=NULL,
-                                     organism="unspecified",
-                                     path=tempfile("FacileDataSet-", getwd()),
-                                     source_assay=NULL, ...) {
-  stop("as.FacileDataSet not defined for object of class: ", class(x)[1L])
-}
-
-#' @method as.FacileDataSet ExpressionSet
-#' @export
-#' @rdname as.FacileDataSet
-as.FacileDataSet.ExpressionSet <- function(x, assay_name, assay_type, feature_info,
-                                           feature_type, metayaml=NULL,
-                                           organism="unspecified",
-                                           path=tempfile("FacileDataSet-", getwd()),
-                                           source_assay=assayDataElementNames(x)[1L],
-                                           dset="eset", ...) {
-  if (!requireNamespace("Biobase", quietly = TRUE)) {
-    stop("Biobase package required to convert ExpresionSet to FacileDataSet")
-  }
-  as.FacileDataSet(list(x), ...)
-}
-
-#' @method as.FacileDataSet SummarizedExperiment
-#' @export
-#' @rdname as.FacileDataSet
-as.FacileDataSet.SummarizedExperiment <- function(x, assay_name, assay_type, feature_info,
-                                                  feature_type, metayaml=NULL,
-                                                  organism="unspecified",
-                                                  path=tempfile("FacileDataSet-", getwd()),
-                                                  source_assay=NULL,
-                                                  dset="sumexp", ...) {
-  as.FacileDataSet(list(x), ...)
-}
-
-#' @method as.FacileDataSet DGEList
-#' @export
-#' @rdname as.FacileDataSet
-as.FacileDataSet.DGEList <- function(x, assay_name, assay_type, feature_info,
-                                     feature_type, metayaml=NULL,
-                                     organism="unspecified",
-                                     path=tempfile("FacileDataSet-", getwd()),
-                                     source_assay=NULL, dset="dgelist", ...) {
-  as.FacileDataSet(list(x), ...)
-}
-
-
-# Internal functions to finalzie as.FacileDataSet.* ============================
+# Internal functions to finalize as.FacileDataSet.* ============================
 
 #' Finalizes conversion of bioconductor containers into a FacileDataSet.
 #'
@@ -377,7 +338,7 @@ as.FacileDataSet.DGEList <- function(x, assay_name, assay_type, feature_info,
 #' @param path the path to the folder that will contain the facile contents
 #' @param meta_file the path on disk where the `meta.yaml` file exists for
 #'   this `FacileDataSet`. Reference the help in [FacileDataSet()] for a more
-#'   complete description fo what is expected in the `meta.yaml` file.
+#'   complete description of what is expected in the `meta.yaml` file.
 #' @param page_size parameter to tweak SQLite
 #' @param cache_size parameter to tweak SQLite
 #' @param sample_covariates (named) list of pData `data.frame`s that will be
