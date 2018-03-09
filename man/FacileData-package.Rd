@@ -6,7 +6,12 @@
 \alias{FacileData-package}
 \title{More description goes here about the FacileDataSet package.}
 \description{
-More description goes here about the FacileDataSet package.
+Defines a fluent API over multi-assay high-throughput genomics data
+to facilitate exploratory data analysis. This package also defines a
+"FacileDataSet" class, which is a reference implementation of the "FacileData"
+API that uses SQLite and HDF5 files to store arbitrarily large datasets and
+provide fast and efficient access to arbitrary subsets of these data without
+loading it all into memory.
 }
 \author{
 \strong{Maintainer}: Steve Lianoglou \email{slianoglou@gmail.com}
@@ -14,6 +19,7 @@ More description goes here about the FacileDataSet package.
 Other contributors:
 \itemize{
   \item Vincent Rouilly \email{rouilly.vincent@gene.com} [contributor]
+  \item Peter Haverty \email{haverty.peter@gene.com} [contributor]
   \item Genentech [copyright holder, funder]
 }
 

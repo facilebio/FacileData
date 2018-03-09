@@ -5,6 +5,7 @@ Version: 0.7.0
 Authors@R: c(
   person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre")),
   person("Vincent", "Rouilly", , "rouilly.vincent@gene.com", role = "ctb"),
+  person("Peter", "Haverty", , "haverty.peter@gene.com", role = "ctb"),
   person("Genentech", role = c("cph", "fnd"))
   )
 Description: Defines a fluent API over multi-assay high-throughput genomics data
@@ -30,7 +31,8 @@ Imports:
   jsonlite,
   multiGSEA (>= 0.10.4),
   edgeR,
-  lazyeval
+  lazyeval,
+  survival
 Suggests:
   testthat (>= 1.0.2),
   Biobase,
@@ -38,5 +40,5 @@ Suggests:
   knitr,
   roxygen2 (>= 6.0.0),
   FacileTCGADataSet
-RoxygenNote: 6.0.1
+RoxygenNote: 6.0.1.9000
 License: MIT

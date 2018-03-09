@@ -31,7 +31,7 @@ in the rows of \code{assays}}
 
 \item{meta_file}{the path on disk where the \code{meta.yaml} file exists for
 this \code{FacileDataSet}. Reference the help in \code{\link[=FacileDataSet]{FacileDataSet()}} for a more
-complete description fo what is expected in the \code{meta.yaml} file.}
+complete description of what is expected in the \code{meta.yaml} file.}
 
 \item{page_size}{parameter to tweak SQLite}
 

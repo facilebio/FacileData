@@ -3,33 +3,15 @@
 \name{as.FacileDataSet}
 \alias{as.FacileDataSet}
 \alias{as.FacileDataSet.list}
-\alias{as.FacileDataSet.ExpressionSet}
-\alias{as.FacileDataSet.SummarizedExperiment}
-\alias{as.FacileDataSet.DGEList}
 \title{Converts bioconductor assay containers into a FacileDataSet.}
 \usage{
 as.FacileDataSet(x, path, assay_name, assay_type, metayaml = NULL,
-  source_assay = NULL, covariate_def = list(), organism = "unspecified",
-  dataset_name = "NAME_ME", ...)
+  source_assay = NULL, covariate_def = list(), dataset_name = "NAME_ME",
+  organism = "unspecified", ...)
 
 \method{as.FacileDataSet}{list}(x, path, assay_name, assay_type,
   metayaml = NULL, source_assay = NULL, covariate_def = list(),
   organism = "unspecified", dataset_name = "NAME_ME", ...)
-
-\method{as.FacileDataSet}{ExpressionSet}(x, assay_name, assay_type,
-  feature_info, feature_type, metayaml = NULL, organism = "unspecified",
-  path = tempfile("FacileDataSet-", getwd()),
-  source_assay = assayDataElementNames(x)[1L], dset = "eset", ...)
-
-\method{as.FacileDataSet}{SummarizedExperiment}(x, assay_name, assay_type,
-  feature_info, feature_type, metayaml = NULL, organism = "unspecified",
-  path = tempfile("FacileDataSet-", getwd()), source_assay = NULL,
-  dset = "sumexp", ...)
-
-\method{as.FacileDataSet}{DGEList}(x, assay_name, assay_type, feature_info,
-  feature_type, metayaml = NULL, organism = "unspecified",
-  path = tempfile("FacileDataSet-", getwd()), source_assay = NULL,
-  dset = "dgelist", ...)
 }
 \arguments{
 \item{x}{The bioconductor assay container to extract data from}
@@ -41,7 +23,7 @@ This directory should not yet exist.}
 \item{assay_name}{The name to use when storing the assay matrix from
 \code{x} into the faciledataset.}
 
-\item{assay_type}{what type of assay is this? rnaseq, microarry, nanostring,
+\item{assay_type}{what type of assay is this? rnaseq, microarray, nanostring,
 isoseq (isoform expression), etc.}
 
 \item{metayaml}{a yaml file (or list of lists) that describes the covariates
@@ -57,12 +39,12 @@ complex covariates into the internal entity-attribute-value
 function man page for further details on its use, specifically the
 "Encoding Survival Covariates" section.}
 
+\item{dataset_name}{the \code{name} attribute of the FacileDataSet \code{meta.yaml}
+file.}
+
 \item{organism}{This is used to fetch the appropriate genesets when this
 dataset is used with the facileexplorer. Currently supported values are:
 \code{c("Homo sapiens", "Mus musculus", "unspecified")}.}
-
-\item{dataset_name}{the \code{name} attribute of the FacileDataSet \code{meta.yaml}
-file.}
 
 \item{...}{more args}
 }
@@ -118,7 +100,8 @@ been harmonized!
 The feature information (aka "fData") are stored in an internal
 \code{feature_info} SQLite table within the \code{FacileDataSet}. The information to
 populate this table will be retrieved from the corresponding \code{fData}-like
-\code{data.frame} from \strong{the first} given bioc-container in the list \code{xx. This}data.frame` must define the following columns:
+\code{data.frame} from \strong{the first} given bioc-container in the list.
+This \code{data.frame} must define the following columns:
 \itemize{
 \item "feature_type": \code{character} (c('entrez', 'ensgid', 'enstid', 'genomic', 'custom'))
 \item "feature_id": \code{character}
