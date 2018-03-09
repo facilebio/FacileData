@@ -51,7 +51,7 @@
 #' The feature information (aka "fData") are stored in an internal
 #' `feature_info` SQLite table within the `FacileDataSet`. The information to
 #' populate this table will be retrieved from the corresponding `fData`-like
-#' `data.frame` from **the first** given bioc-container in the list `xx.
+#' `data.frame` from **the first** given bioc-container in the list.
 #' This `data.frame` must define the following columns:
 #'
 #' * "feature_type": `character` (c('entrez', 'ensgid', 'enstid', 'genomic', 'custom'))
@@ -71,7 +71,7 @@
 #'   This directory should not yet exist.
 #' @param assay_name The name to use when storing the assay matrix from
 #'   `x` into the faciledataset.
-#' @param assay_type what type of assay is this? rnaseq, microarry, nanostring,
+#' @param assay_type what type of assay is this? rnaseq, microarray, nanostring,
 #'   isoseq (isoform expression), etc.
 #' @param metayaml a yaml file (or list of lists) that describes the covariates
 #'   in the pData/colData of `x`. If not provided, a default one will be
@@ -92,8 +92,10 @@
 #' @return a [FacileDataSet()]
 as.FacileDataSet <- function(x, path, assay_name, assay_type,
                              metayaml = NULL, source_assay = NULL,
-                             covariate_def = list(), organism = "unspecified",
-                             dataset_name = "NAME_ME", ...) {
+                             covariate_def = list(),
+                             dataset_name = "NAME_ME",
+                             organism = "unspecified"
+                             ...) {
   UseMethod("as.FacileDataSet")
 }
 
@@ -162,11 +164,39 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     name = dataset_name,
     organism = organism,
     default_assay = assay_name,
-    datasets = sapply(names(adat), function(name) {
-      list(url="http://somewhere.com", description="Describe me")
-    }, simplify = FALSE),
+    datasets = lapply(adat, ds_annot),
     sample_covariates = eav.meta)
   list(fdata = finfo, pdata = pdat, meta = meta, adata = adat)
+}
+
+#' Bioc-container specific data set annotation extraction functions
+#'
+#' Takes dataset-level annotion as stored by each type. DGEList has
+#' no such slot, unfortunately, and thus gets the default. SE has a
+#' metadata slot and can provide url and description. eSet just has
+#' a character annotation and can provide a description.
+ds_annot <- function(x, validate = FALSE, ...) {
+  UseMethod("ds_annot")
+}
+
+ds_annot.SummarizedExperiment <- function(x, validate = FALSE) {
+    out = metadata(x)
+    if (validate && !(is.list(x) && setequal(names(x), c("url", "description")))) {
+        stop("SummarizedExperiment data set level annotation was not a list with 'url' and 'description'.")
+    }
+    out
+}
+
+ds_annot.ExpressionSet <- function(x, validate = FALSE) {
+    out = list(
+        url = "http://www.google.com",
+        description = annotation(x)
+        )
+    out
+}
+
+ds_annot.default <- function(x, validate = FALSE) {
+    list(url = "http://google.com", description = "NoDescription")
 }
 
 #' Bioc-container specific fData extraction functions
@@ -389,4 +419,3 @@ as_FacileDataSet <- function(sample_covariates, assays, assay_name, assay_type,
   tend <- Sys.time()
   message("Time taken: ", tend - tstart) ## ~ 30 seconds
 }
-
