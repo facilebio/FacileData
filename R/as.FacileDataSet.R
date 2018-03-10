@@ -174,6 +174,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   stopifnot(all(same.fspace))
 
   finfo <- fdata(first, validate = TRUE)
+
   pdats <- lapply(names(x), function(dname) {
       obj <- x[[dname]]
       out <- pdata(obj)
@@ -189,10 +190,10 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
 
   eav.meta <- eav_metadata_create(pdat, covariate_def = NULL)
 
-  adat <- lapply(names(x),
+  adat <- sapply(names(x),
                  function(dname) {
                      adata(x[[dname]], assay = source_assay)
-                 })
+                 }, simplify = FALSE)
 
   ds_list = sapply(names(x), function(dname) {
       ds_annot(x[[dname]])
@@ -205,10 +206,33 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     datasets = ds_list,
     sample_covariates = eav.meta
   )
+
   meta_yaml = paste0(tempfile(), ".yaml")
   write_yaml(meta, meta_yaml)
   fds <- initializeFacileDataSet(path, meta_yaml)
-  ##  list(fdata = finfo, pdata = pdat, meta = meta, adata = adat)
+
+  ## insert the first assay
+  if (is.integer(adat[[1]]))
+      storage_mode = "integer"
+  else
+      storage_mode = "numeric"
+
+  tstart <- Sys.time()
+  samples <- addFacileAssaySet(
+    fds,
+    adat,
+    facile_assay_name=meta$default_assay,
+    facile_assay_type='rnaseq',
+    facile_feature_type=finfo$feature_type[1],
+    facile_feature_info=finfo,
+    facile_assay_description=meta$name,
+    storage_mode=storage_mode,
+    chunk_rows=chunk_rows,
+    chunk_cols=chunk_cols,
+    chunk_compression=chunk_compression
+  )
+  tend <- Sys.time()
+  message("Time taken: ", tend - tstart) ## ~ 30 seconds
 
   fds
 }
@@ -271,7 +295,9 @@ validate.fdata <- function(x, ...) {
     feature_id="character",
     name="character",
     meta="character",
-    effective_length="numeric")
+    effective_length="numeric",
+    source="character"
+  )
 
   # Ensure required columns are there, and that they are of the right type
   for (cname in names(req.cols)) {

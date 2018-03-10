@@ -15,7 +15,7 @@ ds = list(
 ds = lapply(ds,
             function(x) {
                 rownames(x) = paste0("GeneID:",rownames(x))
-                f = colnames(mcols(x)) = c("aliases","effective_length", "feature_type","name","meta")
+                f = colnames(mcols(x)) = c("aliases", "effective_length", "feature_type", "name", "meta")
                 mcols(x)$source = "IGIS"
                 mcols(x)$feature_type = "entrez"
                 mcols(x)$feature_id = rownames(x)
