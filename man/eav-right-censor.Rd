@@ -47,7 +47,7 @@ The \code{encode_right_censored} function takes the ime-to-event and censoring
 vectors and encodes them into a single signed time-to-event numeric value.
 Positive values indicate an event, and negative value are censored.
 
-The \code{decode_right_censored} function re-instatiaes the two-column R-native
+The \code{decode_right_censored} function re-instantiates the two-column R-native
 storage of this data.
 }
 \seealso{

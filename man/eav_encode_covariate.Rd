@@ -2,14 +2,14 @@
 % Please edit documentation in R/entity-attribute-value.R
 \name{eav_encode_covariate}
 \alias{eav_encode_covariate}
-\title{Encodes column(s) from \code{pData} into  value}
+\title{Encodes column(s) from \code{pData} into value}
 \usage{
 eav_encode_covariate(pdata, covariate_def, aname = "variable")
 }
 \arguments{
 \item{pdata}{the \code{pData} \code{data.frame}}
 
-\item{covariate_def}{the singe-list-definition of this covariate}
+\item{covariate_def}{the single-list-definition of this covariate}
 
 \item{vname}{the name of the attribute column in the eav table}
 }
@@ -20,5 +20,5 @@ with the encoded covariate into a single \code{value} column.
 \description{
 This function is not exported, and should only be called from within the
 \code{\link[=as.EAVtable]{as.EAVtable()}} function because we rely on validity checks that are
-hapenning there.
+happening there.
 }

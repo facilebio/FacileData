@@ -1,6 +1,5 @@
 # A `FacileDataSet` stores the `pData` across its samples in an
-# entity-attribute-value `sample_covariate` table in the internal SQLite
-# database.
+# entity-attribute-value `sample_covariate` table in the internal database.
 #
 # The functions in this file facilitate conversion of wide pdata to long EAV
 # tables, and handles the value encoding and decoding into and out of the
@@ -54,7 +53,7 @@ covariate_meta_info <- function(covariate, .fds, covdefs=NULL) {
 #' @md
 #' @export
 #' @importFrom methods getFunction
-#' @seealso [covariate_meta_info()], [covariate_defnitions()]
+#' @seealso [covariate_meta_info()], [covariate_definitions()]
 #'
 #' @param covariate the name of the covariate
 #' @param values the covariate values (which is a `character`) as it is
@@ -200,7 +199,7 @@ eav_encode_factor <- eav_encode_categorical
 #' vectors and encodes them into a single signed time-to-event numeric value.
 #' Positive values indicate an event, and negative value are censored.
 #'
-#' The `decode_right_censored` function re-instatiaes the two-column R-native
+#' The `decode_right_censored` function re-instantiates the two-column R-native
 #' storage of this data.
 #'
 #' @md
@@ -220,7 +219,7 @@ eav_encode_right_censored <- function(time, event, sas.encoding=FALSE, ...) {
   isna <- is.na(event)
   if (any(isna)) {
     warning('NA values in the `event` flag, these will be set to NA again ',
-            'on the way out',  immediate.=TRUE)
+            'on the way out', immediate.=TRUE)
     event[isna] <- 1L
   }
   if (!all(event %in% c(0L, 1L))) {
@@ -280,9 +279,9 @@ eav_decode_right_censored <- function(x, attrname=character(), def=list(),
 #' (`varname`) goes into the single facile covariate value.
 #'
 #' Please refer to the **Encoding Survival Covariates** section for a more
-#' detailed description of how to define encoding survival informaiton into the
+#' detailed description of how to define encoding survival information into the
 #' EAV table using the `covariate_def` parameter. Further examples of how to
-#' encode other complex atributes will be added as they are required, but you
+#' encode other complex attributes will be added as they are required, but you
 #' can reference the **Encoding Arbitrarily Complex Covariates** section for
 #' some more information.
 #'
@@ -366,11 +365,11 @@ eav_decode_right_censored <- function(x, attrname=character(), def=list(),
 #'   `FacileDataSet`. The values of the list are:
 #'   * `varname`: a `character()` of the column name(s) in `x` that this
 #'      sample covariate was derived from. If more than one column is to be used
-#'      for the facile covariate conversion (eg. if we are encoding survival),
+#'      for the facile covariate conversion (e.g. if we are encoding survival),
 #'      then provide a `length() > 1` character vector with the names of the
 #'      columns in `x` that were used for the encoding. If this were encoding
-#'      survival this might be `c("time", "event") columns, in that order.
-#'   * label: a human readable label to use for this covariate in user facing
+#'      survival this might be `c("time", "event")` columns, in that order.
+#'   * `label`: a human readable label to use for this covariate in user facing
 #'      scenarios in the facileverse.
 #'   * `class`: the "facile class" of the covariate. This can either be
 #'     `categorical`, `real`, or `right_censored` (for survival).
@@ -556,16 +555,16 @@ as.EAVtable <- function(x, eav_metadata = NULL, covariate_def = list()) {
   long
 }
 
-#' Encodes column(s) from `pData` into  value
+#' Encodes column(s) from `pData` into value
 #'
 #' This function is not exported, and should only be called from within the
 #' [as.EAVtable()] function because we rely on validity checks that are
-#' hapenning there.
+#' happening there.
 #'
 #' @md
 #'
 #' @param pdata the `pData` `data.frame`
-#' @param covariate_def the singe-list-definition of this covariate
+#' @param covariate_def the single-list-definition of this covariate
 #' @param vname the name of the attribute column in the eav table
 #' @return a four-column `data.frame` (dataset,sample_id,variable,value)
 #'   with the encoded covariate into a single `value` column.

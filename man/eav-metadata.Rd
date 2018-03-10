@@ -15,11 +15,11 @@ this list are the names the covariates will be called in the target
 \itemize{
 \item \code{varname}: a \code{character()} of the column name(s) in \code{x} that this
 sample covariate was derived from. If more than one column is to be used
-for the facile covariate conversion (eg. if we are encoding survival),
+for the facile covariate conversion (e.g. if we are encoding survival),
 then provide a \code{length() > 1} character vector with the names of the
 columns in \code{x} that were used for the encoding. If this were encoding
-survival this might be `c("time", "event") columns, in that order.
-\item label: a human readable label to use for this covariate in user facing
+survival this might be \code{c("time", "event")} columns, in that order.
+\item \code{label}: a human readable label to use for this covariate in user facing
 scenarios in the facileverse.
 \item \code{class}: the "facile class" of the covariate. This can either be
 \code{categorical}, \code{real}, or \code{right_censored} (for survival).
@@ -55,9 +55,9 @@ entry in the \code{covariate_def} list that describes which \code{pData} columns
 (\code{varname}) goes into the single facile covariate value.
 
 Please refer to the \strong{Encoding Survival Covariates} section for a more
-detailed description of how to define encoding survival informaiton into the
+detailed description of how to define encoding survival information into the
 EAV table using the \code{covariate_def} parameter. Further examples of how to
-encode other complex atributes will be added as they are required, but you
+encode other complex attributes will be added as they are required, but you
 can reference the \strong{Encoding Arbitrarily Complex Covariates} section for
 some more information.
 }

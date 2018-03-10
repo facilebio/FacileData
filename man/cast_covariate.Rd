@@ -36,5 +36,5 @@ into R objects are handled by the information stored in the
 \code{FacileDataSets}'s \code{meta.yaml} file.
 }
 \seealso{
-\code{\link[=covariate_meta_info]{covariate_meta_info()}}, \code{\link[=covariate_defnitions]{covariate_defnitions()}}
+\code{\link[=covariate_meta_info]{covariate_meta_info()}}, \code{\link[=covariate_definitions]{covariate_definitions()}}
 }
