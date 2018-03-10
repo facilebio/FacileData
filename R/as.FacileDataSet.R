@@ -119,18 +119,14 @@ as.FacileDataSet.default <- function(x, ...) {
 #' @method as.FacileDataSet list
 #' @export
 #' @rdname as.FacileDataSet
-#' @param x
-#' @param path
-#' @param assay_name
-#' @param assay_type
-#' @param source_assay
-#' @param organism
-#' @param dataset_name
-#' @param ...
 as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
                                   source_assay,
-                                  organism,
-                                  dataset_name, ...) {
+                                  organism = c("unspecified", "Homo sapiens", "Mus musculus"),
+                                  dataset_name,
+                                  page_size=2**12, cache_size=2e5,
+                                  chunk_rows=5000, chunk_cols="ncol",
+                                  chunk_compression=5,
+                                  ...) {
   stopifnot(is.list(x))
   stopifnot(length(x) >= 1L)
   if (file.exists(path)) {
