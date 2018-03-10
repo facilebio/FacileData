@@ -5,13 +5,12 @@
 \alias{as.FacileDataSet.list}
 \title{Converts bioconductor assay containers into a FacileDataSet.}
 \usage{
-as.FacileDataSet(x, path, assay_name, assay_type, metayaml = NULL,
-  source_assay = NULL, covariate_def = list(), dataset_name = "NAME_ME",
-  organism = "unspecified", ...)
+as.FacileDataSet(x, path, assay_name, assay_type, source_assay = NULL,
+  dataset_name = "DEFAULT_NAME", organism = c("unspecified", "Homo sapiens",
+  "Mus musculus"), ...)
 
-\method{as.FacileDataSet}{list}(x, path, assay_name, assay_type,
-  metayaml = NULL, source_assay = NULL, covariate_def = list(),
-  organism = "unspecified", dataset_name = "NAME_ME", ...)
+\method{as.FacileDataSet}{list}(x, path, assay_name, assay_type, source_assay,
+  organism, dataset_name, ...)
 }
 \arguments{
 \item{x}{The bioconductor assay container to extract data from}
@@ -26,18 +25,8 @@ This directory should not yet exist.}
 \item{assay_type}{what type of assay is this? rnaseq, microarray, nanostring,
 isoseq (isoform expression), etc.}
 
-\item{metayaml}{a yaml file (or list of lists) that describes the covariates
-in the pData/colData of \code{x}. If not provided, a default one will be
-generated}
-
 \item{source_assay}{the name of the assay element in \code{x} to extract
 for use.}
-
-\item{covariate_def}{a list-of-list covariate definition map to encode
-complex covariates into the internal entity-attribute-value
-\code{sample_covariate} table. Refer to the help in the \code{\link[=eav_metadata_create]{eav_metadata_create()}}
-function man page for further details on its use, specifically the
-"Encoding Survival Covariates" section.}
 
 \item{dataset_name}{the \code{name} attribute of the FacileDataSet \code{meta.yaml}
 file.}

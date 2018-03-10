@@ -17,6 +17,8 @@ a generic list-of-list defintion for \code{x[[column]]}
 [[column]: R:[column
 }
 \description{
-Creates the miniimal list-definition for a single column in a \code{pData}
-\code{data.frame}. This function is not exported on purpose.
+Creates the minimal list-definition for a single column in a \code{pData}
+\code{data.frame}. This function is not exported on purpose. Column descriptions
+will be taken from the "label" attribute of data.frames or the "metadata" list
+for DataFrames.
 }

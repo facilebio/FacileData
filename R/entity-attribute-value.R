@@ -436,7 +436,6 @@ eavdef_for_column <- function(x, column) {
   if (is.null(vals)) stop("Unknown column in x: ", column)
 
   out <- list(
-      arguments=list(x=column),
       class = "categorical",
       description="no description provided"
   )

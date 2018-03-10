@@ -82,8 +82,7 @@
 #'   file.
 #' @param ... more args
 #' @return a [FacileDataSet()]
-as.FacileDataSet <- function(x, path, assay_name, assay_type,
-                             source_assay = NULL,
+as.FacileDataSet <- function(x, path, assay_name, assay_type, source_assay,
                              dataset_name = "DEFAULT_NAME",
                              organism = c("unspecified", "Homo sapiens", "Mus musculus"),
                              ...) {
@@ -189,6 +188,8 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     default_assay = assay_name,
     datasets = ds_list,
     sample_covariates = eav.meta)
+  #write_yaml(meta, "/gne/home/phaverty/foo.yaml")
+
   list(fdata = finfo, pdata = pdat, meta = meta, adata = adat)
 }
 
@@ -341,10 +342,8 @@ adata.DGEList <- function(x, assay = NULL, ...) {
 #' **This function is intentionally not exported**, however a savvy user may
 #' find themselves calling it to fill out a complete FacileDataSet after it has
 #' been initially constructed via a call to `as.FacileDataSet(stuff, ...)`
-#' not exported
 #'
 #' @md
-#' @export
 #'
 #' @param path the path to the folder that will contain the facile contents
 #' @param meta_file the path on disk where the `meta.yaml` file exists for
@@ -373,7 +372,7 @@ as_FacileDataSet <- function(sample_covariates, assays, assay_name, assay_type,
   # and generate long-form sample_covariate_table
   scovs <- df2eav(sample_covariates, covariate_def, metayaml, ...)
 
-  # initialize directory structure with metat.yaml
+  # initialize directory structure with meta.yaml
   fds <- initializeFacileDataSet(path, meta_file, page_size, cache_size)
 
   # insert the first assay
