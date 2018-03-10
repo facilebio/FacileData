@@ -120,6 +120,19 @@ as.FacileDataSet.default <- function(x, ...) {
 #' @method as.FacileDataSet list
 #' @export
 #' @rdname as.FacileDataSet
+#' @param x
+#' @param path
+#' @param assay_name
+#' @param assay_type
+#' @param source_assay
+#' @param organism
+#' @param dataset_name
+#' @param page_size
+#' @param cache_size
+#' @param chunk_rows
+#' @param chunk_cols
+#' @param chunk_compression
+#' @param ...
 as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
                                   source_assay,
                                   organism = c("unspecified", "Homo sapiens", "Mus musculus"),
@@ -207,7 +220,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     default_assay = assay_name,
     datasets = ds_list,
     sample_covariates = eav.meta
-  )
+   )
 
   meta_yaml = paste0(tempfile(), ".yaml")
   write_yaml(meta, meta_yaml)
@@ -218,18 +231,20 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
 
   ## Check for duplicates as SQLite will raise exception
   stopifnot(nrow(duplicated(pdat_eav %>% select(dataset, sample_id, variable))) == 0)
-browser()
+
   ## Register sample covariate info into Facile SQLite
   sample.covs <- pdat_eav %>%
-      mutate(date_entered = as.integer(Sys.time())) %>%
-        append_facile_table(fds, 'sample_covariate')
+      mutate(
+          type = "general",  ## FIXME: care about type later
+          date_entered = as.integer(Sys.time())
+      ) %>% append_facile_table(fds, 'sample_covariate')
 
   ## Register sample info into Facile SQLite
   sample.info <- pdat_eav %>%
       select(dataset, sample_id) %>%
       distinct(dataset, sample_id) %>%
       mutate(parent_id =  "") %>%
-        append_facile_table(tfds, 'sample_info')
+        append_facile_table(fds, 'sample_info')
 
   ## insert the first assay
   if (is.integer(adat[[1]]))
