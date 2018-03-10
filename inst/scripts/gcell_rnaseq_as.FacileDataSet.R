@@ -19,6 +19,9 @@ ds = lapply(ds,
                 mcols(x)$source = "IGIS"
                 mcols(x)$feature_type = "entrez"
                 mcols(x)$feature_id = rownames(x)
+                colData(x) = colData(x)[,c("SAMPLE_ID","CLID","AGE","TISSUE_METACLASS_ONCOLOGY")]
+                colnames(colData(x)) = c("samid","clid","age","tissue")
+                metadata(colData(x)) = list(samid = "Sample Hub ID", clid = "gCell Cell Line ID", age = "age in years", tissue = "Tissue Group")
                 x
             })
 

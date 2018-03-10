@@ -120,6 +120,16 @@ as.FacileDataSet.default <- function(x, ...) {
 #' @method as.FacileDataSet list
 #' @export
 #' @rdname as.FacileDataSet
+#' @param x
+#' @param path
+#' @param assay_name
+#' @param assay_type
+#' @param metayaml
+#' @param source_assay
+#' @param covariate_def
+#' @param organism
+#' @param dataset_name
+#' @param ...
 as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
                                   metayaml = NULL, source_assay = NULL,
                                   covariate_def = list(),
@@ -169,20 +179,34 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
 
   finfo <- fdata(first, validate = TRUE)
   pdats <- lapply(names(x), function(dname) {
-    obj <- x[[dname]]
-    out <- dplyr::mutate(pdata(obj), dataset = dname, sample_id = colnames(obj))
-    dplyr::select(out, dataset, sample_id, everything())
+      obj <- x[[dname]]
+      out <- pdata(obj)
+      out$dataset <- dname # Avoid dplyr::mutate to keep label attribute
+      out$sample_id <- colnames(obj)
+      dplyr::select(out, dataset, sample_id, everything())
   })
+
   pdat <- dplyr::bind_rows(pdats)
+  col_descs = unlist(lapply(pdats, attr, which = "label"))
+  col_descs = col_descs[!duplicated(names(col_descs))]
+  attr(pdat, "label") <- col_descs
+
   eav.meta <- eav_metadata_create(pdat, covariate_def = covariate_def)
 
-  adat <- lapply(x, adata, assay = source_assay)
+  adat <- lapply(names(x),
+                 function(dname) {
+                     adata(x[[dname]], assay = source_assay)
+                 })
+
+  ds_list = sapply(names(x), function(dname) {
+      ds_annot(x[[dname]])
+  }, simplify = FALSE)
 
   meta <- list(
     name = dataset_name,
     organism = organism,
     default_assay = assay_name,
-    datasets = lapply(x, ds_annot),
+    datasets = ds_list,
     sample_covariates = eav.meta)
   list(fdata = finfo, pdata = pdat, meta = meta, adata = adat)
 }
@@ -269,8 +293,12 @@ pdata <- function(x, ...) {
   UseMethod("pdata")
 }
 pdata.SummarizedExperiment <- function(x, ...) {
-  stopifnot(requireNamespace("SummarizedExperiment", quietly = TRUE))
-  validate.pdata(as.data.frame(SummarizedExperiment::colData(x)), ...)
+    stopifnot(requireNamespace("SummarizedExperiment", quietly = TRUE))
+    df = SummarizedExperiment::colData(x)
+    ds = as.data.frame(df)
+    if (length(metadata(df) > 0))
+        attr(ds, "label") = unlist(metadata(df))
+    validate.pdata(ds, ...)
 }
 pdata.ExpressionSet <- function(x, ...) {
   stopifnot(requireNamespace("Biobase", quietly = TRUE))

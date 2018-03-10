@@ -410,7 +410,7 @@ eav_metadata_create <- function(x, covariate_def = list()) {
   names(gcd) <- colnames(x)
 
   # remove definitions in gcd that are provided in covariate_def
-  # TODO: FIXTHIS to use arguments instead of colnames
+  # TODO: FIX this to use arguments instead of colnames
   axe <- lapply(covariate_def, '[[', 'colnames')
   axe <- unique(unlist(axe, recursive = TRUE, use.names = FALSE))
   gcd[axe] <- NULL
@@ -444,7 +444,7 @@ eavdef_for_column <- function(x, column) {
   if (is(x,"DataFrame")) {
       col_descs = unlist(metadata(x))
   } else {
-      col_descs = as.character(attr(x,"label"))
+      col_descs = attr(x,"label")
   }
 
   if (!is.null(col_descs)) {
