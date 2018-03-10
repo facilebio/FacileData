@@ -32,9 +32,19 @@ DIR = "/gne/research/workspace/phaverty/FDS"
 unlink(DIR, recursive = TRUE)
 gcell_fds = as.FacileDataSet(ds,
                        path = DIR,
-                       assay_name = "Expression",
+                       assay_name = "rnaseq",
                        assay_type = "rnaseq",
-                       source_assay = "rpkms",
+                       source_assay = "counts",
                        dataset_name = "gCell",
                        organism = "Homo sapiens"
                        )
+
+
+## Try it out
+library(dplyr)
+library(reshape2)
+
+samples <- sample_info_tbl(gcell_fds) %>% filter(tissue == "Breast") %>% collect
+genes <- c(A = 'GeneID:1', B = 'GeneID:2')
+exprs <- gcell_fds %>% fetch_assay_data(genes, samples, 'rnaseq', normalized = TRUE)
+ew <- exprs %>% dcast(dataset + sample_id ~ feature_name, value.var = 'value')

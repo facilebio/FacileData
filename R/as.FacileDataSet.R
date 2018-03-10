@@ -87,6 +87,7 @@
 #' @param chunk_compression parameter to tweak HDF5
 #' @param ... more args
 #' @return a [FacileDataSet()]
+#' @importFrom yaml write_yaml
 as.FacileDataSet <- function(x, path, assay_name, assay_type, source_assay,
                              dataset_name = "DEFAULT_NAME",
                              organism = c("unspecified", "Homo sapiens", "Mus musculus"),
@@ -183,14 +184,19 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   col_descs = unlist(lapply(pdats, attr, which = "label"))
   col_descs = col_descs[!duplicated(names(col_descs))]
   attr(pdat, "label") <- col_descs
+  pdat$sample_id = gsub("__", "",  pdat$sample_id) # __ has as special meaning for Facile
 
   eav.meta <- eav_metadata_create(pdat, covariate_def = NULL)
 
   adat <- sapply(names(x),
                  function(dname) {
-                     adata(x[[dname]], assay = source_assay)
+                     ds = adata(x[[dname]], assay = source_assay)
+                     colnames(ds) = gsub("__", "", colnames(ds)) # __ has as special meaning for Facile
+                     ds
                  }, simplify = FALSE)
 
+
+  ## Make YAML and Initialize FDS
   ds_list = sapply(names(x), function(dname) {
       ds_annot(x[[dname]])
   }, simplify = FALSE)
@@ -206,6 +212,24 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   meta_yaml = paste0(tempfile(), ".yaml")
   write_yaml(meta, meta_yaml)
   fds <- initializeFacileDataSet(path, meta_yaml)
+
+  ## FIXME: make pdat_eav
+  pdat_eav = as.EAVtable(pdat, eav.meta)
+
+  ## Check for duplicates as SQLite will raise exception
+  stopifnot(nrow(duplicated(pdat_eav %>% select(dataset, sample_id, variable))) == 0)
+browser()
+  ## Register sample covariate info into Facile SQLite
+  sample.covs <- pdat_eav %>%
+      mutate(date_entered = as.integer(Sys.time())) %>%
+        append_facile_table(fds, 'sample_covariate')
+
+  ## Register sample info into Facile SQLite
+  sample.info <- pdat_eav %>%
+      select(dataset, sample_id) %>%
+      distinct(dataset, sample_id) %>%
+      mutate(parent_id =  "") %>%
+        append_facile_table(tfds, 'sample_info')
 
   ## insert the first assay
   if (is.integer(adat[[1]]))
@@ -366,50 +390,4 @@ adata.DGEList <- function(x, assay = NULL, ...) {
   # stopifnot(requireNamespace("edgeR", quietly = TRUE))
   # DGEList only has one assay
   x$counts
-}
-
-#' Finalizes conversion of bioconductor containers into a FacileDataSet.
-#'
-#' After converting one or more BioC containers with as.FacileDataSet,
-#' call this to
-#' actually create the `FacileDataSet` on disk. It is used to put all of the
-#' minimal "bits" for a valid `FacileDataSet` into place, and is only meant to
-#' initialize it with data from one assay type.
-#'
-#' To add more assays to the `FacileDataSet`, use the [addFacileAssaySet()]
-#' function.
-#' @md
-#' @export
-#' @param x list, the output of as.FacileDataSet
-#' @param path the path to the folder that will contain the facile contents
-#' @param page_size parameter to tweak SQLite
-#' @param cache_size parameter to tweak SQLite
-#' @param assay_type the type of assay (ie. `"rnaseq"`, `"affymetrix"`, etc.)
-saveFacileDataSet <- function(x, assay_name, assay_type,
-                             assay_feature_type, assay_feature_info,
-                             assay_description=assay_name,
-                             path, page_size=2**12, cache_size=2e5,
-                             chunk_rows=5000, chunk_cols="ncol",
-                             chunk_compression=5,
-                             ...) {
-  meta_yaml = file.path(path, "meta.yaml")
-  write_yaml(x$meta, meta_yaml)
-
-  # initialize directory structure with meta.yaml
-  fds <- initializeFacileDataSet(path, meta_yaml, page_size, cache_size)
-
-  # insert the first assay
-  tstart <- Sys.time()
-  samples <- addFacileAssaySet(
-    fds,
-    x$adata,
-    facile_assay_name=x$meta$default_assay,
-    facile_assay_type='rnaseq',
-    facile_feature_type=x$fdata$feature_type[1],
-    facile_feature_info=x$fdata,
-    facile_assay_description=facile_assay_description,
-    storage_mode=storage.mode(fds$adata[[1]]),
-    chunk_rows=chunk_rows, chunk_cols=chunk_cols, chunk_compression=chunk_compression)
-  tend <- Sys.time()
-  message("Time taken: ", tend - tstart) ## ~ 30 seconds
 }

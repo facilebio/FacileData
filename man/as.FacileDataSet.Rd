@@ -5,12 +5,15 @@
 \alias{as.FacileDataSet.list}
 \title{Converts bioconductor assay containers into a FacileDataSet.}
 \usage{
-as.FacileDataSet(x, path, assay_name, assay_type, source_assay = NULL,
+as.FacileDataSet(x, path, assay_name, assay_type, source_assay,
   dataset_name = "DEFAULT_NAME", organism = c("unspecified", "Homo sapiens",
-  "Mus musculus"), ...)
+  "Mus musculus"), page_size = 2^12, cache_size = 2e+05,
+  chunk_rows = 5000, chunk_cols = "ncol", chunk_compression = 5, ...)
 
 \method{as.FacileDataSet}{list}(x, path, assay_name, assay_type, source_assay,
-  organism, dataset_name, ...)
+  organism = c("unspecified", "Homo sapiens", "Mus musculus"), dataset_name,
+  page_size = 2^12, cache_size = 2e+05, chunk_rows = 5000,
+  chunk_cols = "ncol", chunk_compression = 5, ...)
 }
 \arguments{
 \item{x}{The bioconductor assay container to extract data from}
@@ -34,6 +37,16 @@ file.}
 \item{organism}{This is used to fetch the appropriate genesets when this
 dataset is used with the facileexplorer. Currently supported values are:
 \code{c("Homo sapiens", "Mus musculus", "unspecified")}.}
+
+\item{page_size}{parameter to tweak SQLite}
+
+\item{cache_size}{parameter to tweak SQLite}
+
+\item{chunk_rows}{parameter to tweak HDF5}
+
+\item{chunk_cols}{parameter to tweak HDF5}
+
+\item{chunk_compression}{parameter to tweak HDF5}
 
 \item{...}{more args}
 }
