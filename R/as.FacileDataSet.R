@@ -73,16 +73,8 @@
 #'   `x` into the faciledataset.
 #' @param assay_type what type of assay is this? rnaseq, microarray, nanostring,
 #'   isoseq (isoform expression), etc.
-#' @param metayaml a yaml file (or list of lists) that describes the covariates
-#'   in the pData/colData of `x`. If not provided, a default one will be
-#'   generated
 #' @param source_assay the name of the assay element in `x` to extract
 #'   for use.
-#' @param covariate_def a list-of-list covariate definition map to encode
-#'   complex covariates into the internal entity-attribute-value
-#'   `sample_covariate` table. Refer to the help in the [eav_metadata_create()]
-#'   function man page for further details on its use, specifically the
-#'   "Encoding Survival Covariates" section.
 #' @param organism This is used to fetch the appropriate genesets when this
 #'   dataset is used with the facileexplorer. Currently supported values are:
 #'   `c("Homo sapiens", "Mus musculus", "unspecified")`.
@@ -91,11 +83,11 @@
 #' @param ... more args
 #' @return a [FacileDataSet()]
 as.FacileDataSet <- function(x, path, assay_name, assay_type,
-                             metayaml = NULL, source_assay = NULL,
-                             covariate_def = list(),
-                             dataset_name = "NAME_ME",
-                             organism = "unspecified",
+                             source_assay = NULL,
+                             dataset_name = "DEFAULT_NAME",
+                             organism = c("unspecified", "Homo sapiens", "Mus musculus"),
                              ...) {
+  organism = match.arg(organism)
   UseMethod("as.FacileDataSet")
 }
 
@@ -120,21 +112,10 @@ as.FacileDataSet.default <- function(x, ...) {
 #' @method as.FacileDataSet list
 #' @export
 #' @rdname as.FacileDataSet
-#' @param x
-#' @param path
-#' @param assay_name
-#' @param assay_type
-#' @param metayaml
-#' @param source_assay
-#' @param covariate_def
-#' @param organism
-#' @param dataset_name
-#' @param ...
 as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
-                                  metayaml = NULL, source_assay = NULL,
-                                  covariate_def = list(),
-                                  organism = "unspecified",
-                                  dataset_name = "NAME_ME", ...) {
+                                  source_assay,
+                                  organism,
+                                  dataset_name, ...) {
   stopifnot(is.list(x))
   stopifnot(length(x) >= 1L)
   if (file.exists(path)) {
@@ -191,7 +172,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   col_descs = col_descs[!duplicated(names(col_descs))]
   attr(pdat, "label") <- col_descs
 
-  eav.meta <- eav_metadata_create(pdat, covariate_def = covariate_def)
+  eav.meta <- eav_metadata_create(pdat, covariate_def = NULL)
 
   adat <- lapply(names(x),
                  function(dname) {
