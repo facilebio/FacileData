@@ -44,7 +44,11 @@ gcell_fds = as.FacileDataSet(ds,
 library(dplyr)
 library(reshape2)
 
-samples <- sample_info_tbl(gcell_fds) %>% filter(tissue == "Breast") %>% collect
-genes <- c(A = 'GeneID:1', B = 'GeneID:2')
-exprs <- gcell_fds %>% fetch_assay_data(genes, samples, 'rnaseq', normalized = TRUE)
+samples <- sample_info_tbl(gcell_fds) %>% collect
+samples <- fetch_sample_covariates(gcell_fds, samples, "tissue") %>%
+    filter(variable == "tissue" & value == "Breast") %>%
+    collect
+genes <- c(ERBB2 = 'GeneID:2064', GRB7 = 'GeneID:2886')
+exprs <- gcell_fds %>% fetch_assay_data(genes, foo, 'rnaseq', normalized = TRUE)
 ew <- exprs %>% dcast(dataset + sample_id ~ feature_name, value.var = 'value')
+stopifnot(cor(ew[,"ERBB2"], ew[,"GRB7"]) > 0.6)

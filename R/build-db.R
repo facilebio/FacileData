@@ -79,7 +79,7 @@ createWarehouse <- function(db.path, datasets, gene.info=fData(datasets[[1]]),
   initializeWithExpressionData(db, datasets)
 
   ## 3. sample meta (grouping)
-  ## Add "now" unix time stame
+  ## Add "now" unix time stamp
   sample.meta <- sample.meta %>%
     transform(date_entered=as.integer(Sys.time())) %>%
     as.data.frame
