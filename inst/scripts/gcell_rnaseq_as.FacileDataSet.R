@@ -30,8 +30,7 @@ metadata(ds[[2]]) = list(url = "http://gene.com", description = "This is NGS171"
 
 DIR = "/gne/research/workspace/phaverty/FDS"
 unlink(DIR, recursive = TRUE)
-
-fds = as.FacileDataSet(ds,
+gcell_fds = as.FacileDataSet(ds,
                        path = DIR,
                        assay_name = "Expression",
                        assay_type = "rnaseq",

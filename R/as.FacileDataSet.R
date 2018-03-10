@@ -80,11 +80,19 @@
 #'   `c("Homo sapiens", "Mus musculus", "unspecified")`.
 #' @param dataset_name the `name` attribute of the FacileDataSet `meta.yaml`
 #'   file.
+#' @param page_size parameter to tweak SQLite
+#' @param cache_size parameter to tweak SQLite
+#' @param chunk_rows parameter to tweak HDF5
+#' @param chunk_cols parameter to tweak HDF5
+#' @param chunk_compression parameter to tweak HDF5
 #' @param ... more args
 #' @return a [FacileDataSet()]
 as.FacileDataSet <- function(x, path, assay_name, assay_type, source_assay,
                              dataset_name = "DEFAULT_NAME",
                              organism = c("unspecified", "Homo sapiens", "Mus musculus"),
+                             page_size=2**12, cache_size=2e5,
+                             chunk_rows=5000, chunk_cols="ncol",
+                             chunk_compression=5,
                              ...) {
   organism = match.arg(organism)
   UseMethod("as.FacileDataSet")
@@ -111,6 +119,14 @@ as.FacileDataSet.default <- function(x, ...) {
 #' @method as.FacileDataSet list
 #' @export
 #' @rdname as.FacileDataSet
+#' @param x
+#' @param path
+#' @param assay_name
+#' @param assay_type
+#' @param source_assay
+#' @param organism
+#' @param dataset_name
+#' @param ...
 as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
                                   source_assay,
                                   organism,
@@ -187,10 +203,14 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     organism = organism,
     default_assay = assay_name,
     datasets = ds_list,
-    sample_covariates = eav.meta)
-  #write_yaml(meta, "/gne/home/phaverty/foo.yaml")
+    sample_covariates = eav.meta
+  )
+  meta_yaml = paste0(tempfile(), ".yaml")
+  write_yaml(meta, meta_yaml)
+  fds <- initializeFacileDataSet(path, meta_yaml)
+  ##  list(fdata = finfo, pdata = pdat, meta = meta, adata = adat)
 
-  list(fdata = finfo, pdata = pdat, meta = meta, adata = adat)
+  fds
 }
 
 #' Bioc-container specific data set annotation extraction functions
@@ -326,67 +346,48 @@ adata.DGEList <- function(x, assay = NULL, ...) {
   x$counts
 }
 
-# Internal functions to finalize as.FacileDataSet.* ============================
-
 #' Finalizes conversion of bioconductor containers into a FacileDataSet.
 #'
-#' This is the final call that the various
-#' `as.FacileDataSet.(SummarizedExperiment)` functions delegate to in order to
+#' After converting one or more BioC containers with as.FacileDataSet,
+#' call this to
 #' actually create the `FacileDataSet` on disk. It is used to put all of the
 #' minimal "bits" for a valid `FacileDataSet` into place, and is only meant to
 #' initialize it with data from one assay type.
 #'
 #' To add more assays to the `FacileDataSet`, use the [addFacileAssaySet()]
 #' function.
-#'
-#' **This function is intentionally not exported**, however a savvy user may
-#' find themselves calling it to fill out a complete FacileDataSet after it has
-#' been initially constructed via a call to `as.FacileDataSet(stuff, ...)`
-#'
 #' @md
-#'
+#' @export
+#' @param x list, the output of as.FacileDataSet
 #' @param path the path to the folder that will contain the facile contents
-#' @param meta_file the path on disk where the `meta.yaml` file exists for
-#'   this `FacileDataSet`. Reference the help in [FacileDataSet()] for a more
-#'   complete description of what is expected in the `meta.yaml` file.
 #' @param page_size parameter to tweak SQLite
 #' @param cache_size parameter to tweak SQLite
-#' @param sample_covariates (named) list of pData `data.frame`s that will be
-#'   inserted into the `FacileDataSet`.
-#' @param assays a (named) list of assay matrices for the samples across the
-#'   datasets
-#' @param assay_name the name to use for the assay data in `assays`.
 #' @param assay_type the type of assay (ie. `"rnaseq"`, `"affymetrix"`, etc.)
-#' @param assay_feature_type the name of the "feature space" over the rows
-#'   of this assay, something like `"entrez"`, `"ensgid"`, `"enstid"`, etc.
-#' @param assay_feature_info the `feature_info` `data.frame` for the features
-#'   in the rows of `assays`
-as_FacileDataSet <- function(sample_covariates, assays, assay_name, assay_type,
+saveFacileDataSet <- function(x, assay_name, assay_type,
                              assay_feature_type, assay_feature_info,
                              assay_description=assay_name,
-                             path, meta_file, page_size=2**12, cache_size=2e5,
+                             path, page_size=2**12, cache_size=2e5,
                              chunk_rows=5000, chunk_cols="ncol",
-                             chunk_compression=5, covariate_def=list(),
-                             metayaml=NULL, ...) {
-  # combine list of `pData` data.frames into one, generate default yaml file
-  # and generate long-form sample_covariate_table
-  scovs <- df2eav(sample_covariates, covariate_def, metayaml, ...)
+                             chunk_compression=5,
+                             ...) {
+  meta_yaml = file.path(path, "meta.yaml")
+  write_yaml(x$meta, meta_yaml)
 
   # initialize directory structure with meta.yaml
-  fds <- initializeFacileDataSet(path, meta_file, page_size, cache_size)
+  fds <- initializeFacileDataSet(path, meta_yaml, page_size, cache_size)
 
   # insert the first assay
   tstart <- Sys.time()
   samples <- addFacileAssaySet(
     fds,
-    assays,
-    facile_assay_name='rnaseq',
+    x$adata,
+    facile_assay_name=x$meta$default_assay,
     facile_assay_type='rnaseq',
-    facile_feature_type='entrez',
-    facile_feature_info=facile_feature_info,
-    facile_assay_description="Recounted RNA-seq data from first batch of Atezo Trials",
-    storage_mode='integer',
-    chunk_rows=5000, chunk_cols='ncol', chunk_compression=4)
+    facile_feature_type=x$fdata$feature_type[1],
+    facile_feature_info=x$fdata,
+    facile_assay_description=facile_assay_description,
+    storage_mode=storage.mode(fds$adata[[1]]),
+    chunk_rows=chunk_rows, chunk_cols=chunk_cols, chunk_compression=chunk_compression)
   tend <- Sys.time()
   message("Time taken: ", tend - tstart) ## ~ 30 seconds
 }
