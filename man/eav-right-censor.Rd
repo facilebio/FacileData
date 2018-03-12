@@ -23,7 +23,7 @@ right censored.}
 
 \item{def}{the covariate definition for this variable}
 
-\item{suffix}{adds \code{_<suffix>} to the \code{tte} and \code{event} columns of the
+\item{suffix}{adds \code{_&lt;suffix&gt;} to the \code{tte} and \code{event} columns of the
 outgoing \code{data.frame}}
 }
 \value{
@@ -43,7 +43,7 @@ time, or if it was censored. A \code{FacileDataSet} stores these two \code{pData
 columns into one "value" column in its entity-atribute-value
 \code{sample_covariate} table.
 
-The \code{encode_right_censored} function takes the ime-to-event and censoring
+The \code{encode_right_censored} function takes the time-to-event and censoring
 vectors and encodes them into a single signed time-to-event numeric value.
 Positive values indicate an event, and negative value are censored.
 

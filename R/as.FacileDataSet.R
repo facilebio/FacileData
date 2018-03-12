@@ -2,6 +2,7 @@
 #
 # The easiest way to create a FacileDataSet is to start from a well manicured
 # SummarizeExperiment (or list of them).
+
 #' Converts bioconductor assay containers into a FacileDataSet.
 #'
 #' @description
@@ -23,7 +24,7 @@
 #' A `FacileDataSet` can be created from a number of different Bioconductor
 #' containers, such as a [Biobase::ExpressionSet],
 #' [SummarizedExperiment::SummarizedExperiment], or an [edgeR::DGEList]. To
-#' create a `FacileDataSet` that spans multiple Bioc containters, ie. you may
+#' create a `FacileDataSet` that spans multiple Bioc containters, i.e. you may
 #' have one ExpressionSet per indication in the TCGA. You can make
 #' `FacileDataSet` to encompass the data from *all* of these indications by
 #' providing a `list` of `ExpressionSet`s. The `list` should have its `names()`
@@ -120,19 +121,6 @@ as.FacileDataSet.default <- function(x, ...) {
 #' @method as.FacileDataSet list
 #' @export
 #' @rdname as.FacileDataSet
-#' @param x
-#' @param path
-#' @param assay_name
-#' @param assay_type
-#' @param source_assay
-#' @param organism
-#' @param dataset_name
-#' @param page_size
-#' @param cache_size
-#' @param chunk_rows
-#' @param chunk_cols
-#' @param chunk_compression
-#' @param ...
 as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
                                   source_assay,
                                   organism = c("unspecified", "Homo sapiens", "Mus musculus"),

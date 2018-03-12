@@ -153,6 +153,18 @@ eav_decode_logical <- function(x, attrname = character(), def = list(), ...) {
   out
 }
 
+eav_encode_Surv <- function(x, ...) {
+    stopifnot(is(x, "Surv"))
+    out <- as.character(x)
+    attr(out, "eavclass") <- "Surv"
+    out
+}
+
+eav_decode_Surv <- function(x, attrname = character(), def = list(), ...) {
+    out <- as(x, "Surv")
+    out
+}
+
 #' Entity-attribute-value decoding for categorical (character) values.
 #'
 #' This is essentially a pass through function for categorical/character
@@ -195,7 +207,7 @@ eav_encode_factor <- eav_encode_categorical
 #' columns into one "value" column in its entity-atribute-value
 #' `sample_covariate` table.
 #'
-#' The `encode_right_censored` function takes the ime-to-event and censoring
+#' The `encode_right_censored` function takes the time-to-event and censoring
 #' vectors and encodes them into a single signed time-to-event numeric value.
 #' Positive values indicate an event, and negative value are censored.
 #'
@@ -286,6 +298,10 @@ eav_decode_right_censored <- function(x, attrname=character(), def=list(),
 #' some more information.
 #'
 #' @section Encoding Survival Covariates:
+#'
+#' UPDATE: FacileData can now use survival data encoded as a `survival::Surv` object
+#' stored as a pData column. Read on for the original encoding strategy, which
+#' is still implemented.
 #'
 #' Survival data in R is typically encoded by two vectors. One vector that
 #' indicates the "time to event" (tte), and a second to indicate whether or not
@@ -461,7 +477,7 @@ eavdef_for_column <- function(x, column) {
     out[['levels']] <- levels(vals)
   }
   if (is(vals, "Surv")) {
-      out[['class']] <- 'right_censored'
+      out[['class']] <- 'Surv'
   }
   out
 }

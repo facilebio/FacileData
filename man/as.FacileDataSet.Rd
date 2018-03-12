@@ -71,7 +71,7 @@ you will be creating.
 A \code{FacileDataSet} can be created from a number of different Bioconductor
 containers, such as a \link[Biobase:ExpressionSet]{Biobase::ExpressionSet},
 \link[SummarizedExperiment:SummarizedExperiment]{SummarizedExperiment::SummarizedExperiment}, or an \link[edgeR:DGEList]{edgeR::DGEList}. To
-create a \code{FacileDataSet} that spans multiple Bioc containters, ie. you may
+create a \code{FacileDataSet} that spans multiple Bioc containters, i.e. you may
 have one ExpressionSet per indication in the TCGA. You can make
 \code{FacileDataSet} to encompass the data from \emph{all} of these indications by
 providing a \code{list} of \code{ExpressionSet}s. The \code{list} should have its \code{names()}
