@@ -45,7 +45,7 @@ package provides two things:
    *FacileData Access API* called a *FacileDataSet*. The `FacileDataSet`
    provides efficient storage and retrieval of arbitrarily large high-throughput
    genomics datasets. For example, a single `FacileDataSet` can be used to store
-   *all* of the RNA-seq, microarray, RPPA, etc. data from the 
+   *all* of the RNA-seq, microarray, RPPA, etc. data from the
    [The Cancer Genome Atlas][tcga]. This singular `FacileDataSet` allows
    analysts easy access to arbitrary subsets of these data without having to
    load all of it into memory.
@@ -73,7 +73,7 @@ Storing data in these containers, however, is sub-optimal in a few situations:
    *the entirety* of the data from [The Cancer Genome Atlas][tcga] (TCGA),
    particularly due to the fact that these data containers want to store all of
    the data in RAM.
-   
+
 The fluent and efficient analysis of data from the TCGA poses even more problems
 since a multitude of assays have been run over each sample, such as RNA-seq,
 microarrays, exome-seq, etc. With all of this data in hand, analysts may want to
@@ -89,7 +89,7 @@ scenarios: consider processing an RNA-seq assay into two different feature
 spaces, (1) gene-level counts; and (2) transcript-level counts. One would have
 to create two separate `SummarizedExperiments` with the same columns and
 `colData`, but different assay matrices given the different feature-spaces
-(genes vs transcripts).
+(genes vs. transcripts).
 
 Using a single `FacileDataSet`, all of these data can be stored in the same
 data container, and the *FacileData API* allows analysts to retrieve data from
@@ -106,14 +106,14 @@ multi-assay genomics datasets that fits into the [tidyverse][tidyverse].
 <div class="note">
 To provide illustrative examples of the utility of the *FacileData API*,
 we rely on the `FacileTCGADataSet` package, which provides the full RNA-seq
-expression, miRNA expresion, and copy number data across all 33 indications 
+expression, miRNA expresion, and copy number data across all 33 indications
 (11,000+ samples) from the TCGA. Please see the `FacileTCGADataSet` package
 for more information regarding how these data were put together, and how to
 extend it.
 </div>
 
 As a teaser, we provide code snippets that show how to plot HER2 copy number
-vs expression across the TCGA "BLCA" and "BRCA" indications using the=
+vs. expression across the TCGA "BLCA" and "BRCA" indications using the
 `FacileDataSet`. We'll then compare that to how the same code might be written
 using more traditional bioconductor containers.
 
@@ -125,9 +125,9 @@ tcga <- FacileTCGADataSet()
 samples <- filter_samples(tcga, indication %in% c("BLCA", "BRCA"))
 features <- filter_features(tcga, name == "ERBB2")
 
-fdat <- samples %>% 
+fdat <- samples %>%
   with_assay_data(features, assay_name = "rnaseq", normalized = TRUE) %>%
-  with_assay_data(features, assay_name = "cnv_score") %>% 
+  with_assay_data(features, assay_name = "cnv_score") %>%
   with_sample_covariates(c("indication", "sex"))
 
 ggplot(fdat, aes(cnv_score_ERBB2, ERBB2, color=sex)) +
@@ -135,9 +135,7 @@ ggplot(fdat, aes(cnv_score_ERBB2, ERBB2, color=sex)) +
   facet_wrap(~ indication)
 ```
 
-**TODO: Write a fair traditional bioc-style implementation**
-
-(use biobroom?)
+# Example Analysis
 
 ```{r tcga-sample-distribution}
 library(FacileDataSet)
@@ -150,26 +148,22 @@ ggplot(distro, aes(indication, fill=sample_type)) +
   theme(axis.text.x=element_text(angle=90, hjust=1))
 ```
 
-
-
 # FacileData Access API
 
 The base interface is the `FacileDataStore`. There are no objects of this class,
-it rather serves as an interface that should be implemented by a subclass, ie.
+it rather serves as an interface that should be implemented by a subclass, i.e.
 a `FacileDataSet`, or a `FacileSummarizedExperiment`. An object that
 `is(x, "FacileDataStore") == TRUE` is assumed to implement the entire
 *FacileData API*.
 
-(unimplemented)
 Broadly speaking, there are two classes of functions that are used to pull data
 out of a `FacileDataSet`, the `fetch_*` and `with_*` functions. To a first
 approximation, we can consider the `fetch_*` functions to be the lowest level
 functions, and the `with_*` functions are higher-level accessors.
 
-The `with_*` functions are *a bit* fast-and-loose. These are written to more
-naturally combine in pipe (`%>%`) data manipulation chains and provide analysts
-with a more fluent and succinct API with which to perform exploratory data
-analyses.
+The `with_*` functions were written naturally combine in pipe (`%>%`) data manipulation
+chains and provide analysts with a fluent and succinct API with which to perform
+exploratory data analyses.
 
 For example, to retrieve normalized RNA-seq expression values for CXCL9 and GZMA
 along with survival and sex information for the samples in the samples in the
@@ -179,30 +173,10 @@ TCGA bladder ("BLCA") indication, you can write:
 features <- filter_features(tcga, name %in% c("CXCL9", "GZMA"))
 
 blca.dat <- tcga %>%
-  filter_samples(indication == "BLCA") %>% 
-  with_assay_data(features, assay_name="rnaseq") %>% 
+  filter_samples(indication == "BLCA") %>%
+  with_assay_data(features, assay_name="rnaseq") %>%
   with_sample_covariates(c("OS", "sex"))
 
 ggplot(blca.dat, aes(CXCL9, GZMA, color=sex)) +
   geom_point()
 ```
-
-
-
-# Exemplar Analyses
-
-Provide a number of common anlaysis examples using the FacileTCGADataSet.
-
-## Pan-cancer transcriptomics with RPPA
-
-Should we try to reconstruct an analysis from Avi Ma'ayan's recent paper?:
-http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005911
-
-
-# Data Model
-
-The pData data.frame is stored in the sample_covariate table in the internal
-database using an [entity-attribute-value model][EAV].
-
-[EAV]: https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model
-
