@@ -33,7 +33,7 @@ The `FacileDataSet` is a reference implementation of a multi-assay datastore
 that implements the *FacileData* API. It uses a SQLite database to store
 feature- and sample-level metadata, and an HDF5 file to store any number of
 assays over its samples. Both of these technologies allow quick and efficient
-access to arbitrary subsets of data stored on disk wihtout having to load all
+access to arbitrary subsets of data stored on disk without having to load all
 of the data into RAM, making this datastore ideal for housing data like
 *the entirety* of the data from [The Cancer Genome Atlas][tcga].
 
@@ -57,13 +57,13 @@ A `FacileDataSet` is stored on disk as a well-structured directory. You can
 look at the [FacileDataSet Architecture](#faciledataset-architecture) section
 for the full details, but the important information to know is that:
 
-1. The dense assay matrices of the `SummarizedExperiment` are stored in 
+1. The dense assay matrices of the `SummarizedExperiment` are stored in
    an HDF5 file.
-2. Feature (row) and sample (column) metadata (`fData` and `pData`, 
+2. Feature (row) and sample (column) metadata (`fData` and `pData`,
    respectively) are stored in an SQLite database.
 3. The `pData`/`colData` data.frames of each `SummarizedExperiment` are stored
-   in an SQLite table in an [entity-attribute-value][EAV] format in order to
-   supoport covariates that are both common to all `SummarizedExperiment`s and
+   in an SQLite table in an entity-attribute-value-table (EAV) format in order to
+   support covariates that are both common to all `SummarizedExperiment`s and
    unique to others.
 4. There is a `meta.yaml` file that stores important information about the
    dataset itself. Perhaps most important is the `sample_covariates` section
@@ -71,29 +71,9 @@ for the full details, but the important information to know is that:
    into its native R-representation. More details are provided in the
    [Entity-Attribute-Value Table](#entity-attribute-value-table) section.
 
-## The meta.yaml File
-
-Perhaps the most important file to be concerned with when creating a 
-`FacileDataSet` is the `meta.yaml` file.
-
-Upon `FacileDataSet` creation, the `meta.yaml` file can be used to correctly
-encode the sample covariates from the `pData` into its appropriate value
-representation in the EAV table. If one isn't provided, a default one will
-be created on-the-fly.
-
-After the FacileDataSet has been created, the information in the 
-`sample_covariates` section of the `meta.yaml` is used to decode them back into
-R.
-
-yaml files are easily manipulated with your favorite text editor, so I
-recommend you use the `metayaml_skeleton(se.list, ...)` function to first
-create it. You can then modify it by hand, and finally use the hand tweaked
-version of it in your call to `as.FacileDatSet(se.list, yaml, ...)`
-
-
-
 ## Well Groomed Datasets
 
+TODO: Section on eset annotation, pData column labels
 TODO: Explain what I mean by a "well-groomed" list of `SummarizedExperiment`s.
 
 ### Well Groomed pData
@@ -103,8 +83,8 @@ Given a list of `SummarizedExperiment`s, we collect the individual
 assume that the covariates *mean the same thing* and are
 *encoded using the same scheme* (ie. factor levels match).
 
-Where `colnames()` differ between `pData` `data.frame`s, even if it is just by a 
-single letter, or their caseb, are treated as being different.
+Where `colnames()` differ between `pData` `data.frame`s, even if it is just by a
+single letter, or their case, are treated as being different.
 
 
 # FacileDataSet Architecture
@@ -118,7 +98,7 @@ The `FacileDataSet` stores the following data:
 2. A `data.h5` HDF5 file that stores a multitude of dense assay matrices that
    are generated from the assays performed on the samples in the
    `FacileDataSet`.
-3. A `meta.yaml` file tha contains informaiton about the `FacileDataSet`.
+3. A `meta.yaml` file tha contains information about the `FacileDataSet`.
    To better understasnd the structure and contents of this file, you can
    refer to the following:
     a. The included `testdata/expected-meta.yaml` file for, which is an
@@ -130,19 +110,19 @@ The `FacileDataSet` stores the following data:
    In the meantime, a short description of the entries found in the
    `meta.yaml` file is provded here:
     - `name`: the name of the dataset (ie. `"FacileTCGADataSet"`)
-    - `organism`: `"Homo sapiens"`, `"Mus musculus"`, ec.
+    - `organism`: `"Homo sapiens"`, `"Mus musculus"`, etc.
     - `default_assay`: the name of the assay to use by default if none is
       specified in calls to [fetch_assay_data()], [with_assay_data()], etc.
       (kind of like how `"exprs"` is the default assay used when working with
       a [Biobase::ExpressionSet])
-    - `datasets`: a section tha enumerates the datases included internally.
+    - `datasets`: a section tha enumerates the datasets included internally.
       The datasets are further enumerated.
     - `sample_covariates`: a section that enumerates the covariatets that
       are tracked over the samples inside the `FacileDataSet` (ie. a mapping
       of the `pData` for the samples). Reference `?create_eav_metadata`
       for more information.
 4. A `custom-annotation` directory, which stores custom `sample_covariate`
-   (aka "pData") informaiton that analysts can identify and describe during
+   (aka "pData") information that analysts can identify and describe during
    the course of an analysis, or even add from external sources. Although
    this directory is required in the directory structure of a valid
    `FacileDataSet`, the `FacileDataSet()` constructor can be called with
@@ -161,7 +141,7 @@ stored in the EAV table to its native R type. This function generates the
 list-of-list structure to represent the `sample_covariates` section of the
 `meta.yaml` file.
 
-For simple `pData` covariates, each column is treated independantly from the
+For simple `pData` covariates, each column is treated independently from the
 rest. There are some types of covariates which require multiple columns for
 proper encoding, such as encoding of survival information, which requires
 a pair of values that indicate the "time to event" and the status of the
@@ -170,13 +150,17 @@ entry in the `covariate_def` list that describes which `pData` columns
 (`varname`) goes into the single facile covariate value.
 
 Please refer to the **Encoding Survival Covariates** section for a more
-detailed description of how to define encoding survival informaiton into the
+detailed description of how to define encoding survival information into the
 EAV table using the `covariate_def` parameter. Further examples of how to
 encode other complex atributes will be added as they are required, but you
 can reference the **Encoding Arbitrarily Complex Covariates** section for
 some more information.
 
 ### Encoding Survival Covariates:
+
+*UPDATE* Survival covariates can now be encoded simply as a `survival::Surv`
+object and provided as on column in the pData data.frame. The following
+describes the previous, and still supported, method.
 
 Survival data in R is typically encoded by two vectors. One vector that
 indicates the "time to event" (tte), and a second to indicate whether or not
@@ -223,9 +207,6 @@ sample_covariates:
     argnames: ["time", "event"]
 ```
 
-Note that the `varname` entry in the `meta.yaml` file isn't used for
-anything. It is just kept for posterity.
-
 ### Encoding Arbitrarily Complex Covariates:
 
 To encode a new type of complex covariate from a wide `pData` data.frame,
@@ -237,7 +218,7 @@ we need to:
    R data vectors (arg1, arg2) and converts them into a single value for the
    EAV table.
 3. Define a `eav_decode_<class>(x, attrname, def, ...)` function which takes
-   the single value in the EAV table and casts it back into the R-naive data
+   the single value in the EAV table and casts it back into the R-native data
    vector(s).
     - `x` is the vector of (character) values from the EAV table
     - `attrname` is the name of the covariate in the EAV table
@@ -248,7 +229,7 @@ we need to:
 ### HDF5 File Assay Data
 
 The HDF5 file has one directory per assay. These directories have one matrix
-per dataset for the given assay. 
+per dataset for the given assay.
 
 For instance, the `FacileTCGADataSet` HDF5 file has this structure:
 
