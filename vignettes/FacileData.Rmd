@@ -34,7 +34,7 @@ theme_set(theme_bw())
 # Overview
 
 The `FacileData` package was written to facilitate easier analysis of large,
-multi-assay high-throughput genomics datasets. To this end, the `FacileData`
+multi-assay, high-throughput genomics datasets. To this end, the `FacileData`
 package provides two things:
 
 1. A *FacileData Access API* that defines a fluent interface over multi-assay
@@ -120,6 +120,7 @@ using more traditional bioconductor containers.
 ```{r her2-cnv-expression}
 library(FacileData)
 library(FacileTCGADataSet)
+library(ggplot2)
 tcga <- FacileTCGADataSet()
 
 samples <- filter_samples(tcga, indication %in% c("BLCA", "BRCA"))
@@ -138,7 +139,7 @@ ggplot(fdat, aes(cnv_score_ERBB2, ERBB2, color=sex)) +
 # Example Analysis
 
 ```{r tcga-sample-distribution}
-library(FacileDataSet)
+library(FacileData)
 library(FacileTCGADataSet)
 tcga <- FacileTCGADataSet()
 distro <- samples(tcga) %>%
