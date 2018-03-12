@@ -72,9 +72,29 @@ for the full details, but the important information to know is that:
    [Entity-Attribute-Value Table](#entity-attribute-value-table) section.
 
 ## Well Groomed Datasets
+A FacileDataSet generally contains two or more facets, or related data
+collections. For example facets may be the various tissue data sets from the TCGA
+or a various clinical trial for a the same drug. A FacileDataSet should be prepared
+as a *named* list of `SummarizedExperiment`s or a *named* list of `ExpressionSets`.
+It is expected that these objects will share some, but not necessarily all, of their
+sample annotation columns (`colData` or `pData`). Columns with the same names
+should also have the same encoding, factor levels, etc.
 
-TODO: Section on eset annotation, pData column labels
-TODO: Explain what I mean by a "well-groomed" list of `SummarizedExperiment`s.
+Annotations on the `SummarizedExperiment`s themselves and on the `colData` columns
+are also used to fill out the meta.yaml file described above.
+
+`ExpressionSet` pData `data.frames` should have an attribute named 'label', which
+will be a named character vector with a description for each column. In the case of
+a `SummarizedExperiment`, the `colData` should have named list in the `metadata`
+slot with a character description of each column.
+
+`ExpressionSet`s should have a short textual description of the facet/dataset in
+the `annotation` slot. Similarly, `SummarizedExperiment`s should have a list
+in the `metadata` slot with `url` and `description` for the facet/dataset.
+
+The `fData` or `mcols` for the `ExpressionSet` or `SummarizedExperiment`, respectively,
+should have `feature_type`, `feature_id`, `name`, `meta`, `effective_length` and
+`source` columns. See the manpage for `as.FacileDataSet` for more details.
 
 ### Well Groomed pData
 
@@ -99,7 +119,7 @@ The `FacileDataSet` stores the following data:
    are generated from the assays performed on the samples in the
    `FacileDataSet`.
 3. A `meta.yaml` file tha contains information about the `FacileDataSet`.
-   To better understasnd the structure and contents of this file, you can
+   To better understand the structure and contents of this file, you can
    refer to the following:
     a. The included `testdata/expected-meta.yaml` file for, which is an
        exemplar file for the `testdata/TestFacileTcgaDataSet`, which consists
@@ -108,8 +128,8 @@ The `FacileDataSet` stores the following data:
        describes in greater detail how we track a dataset's sample-level
        covariates (aka, "pData" in the bioconductor world).
    In the meantime, a short description of the entries found in the
-   `meta.yaml` file is provded here:
-    - `name`: the name of the dataset (ie. `"FacileTCGADataSet"`)
+   `meta.yaml` file is provided here:
+    - `name`: the name of the dataset (i.e. `"FacileTCGADataSet"`)
     - `organism`: `"Homo sapiens"`, `"Mus musculus"`, etc.
     - `default_assay`: the name of the assay to use by default if none is
       specified in calls to [fetch_assay_data()], [with_assay_data()], etc.
@@ -117,7 +137,7 @@ The `FacileDataSet` stores the following data:
       a [Biobase::ExpressionSet])
     - `datasets`: a section tha enumerates the datasets included internally.
       The datasets are further enumerated.
-    - `sample_covariates`: a section that enumerates the covariatets that
+    - `sample_covariates`: a section that enumerates the covariates that
       are tracked over the samples inside the `FacileDataSet` (ie. a mapping
       of the `pData` for the samples). Reference `?create_eav_metadata`
       for more information.
@@ -158,9 +178,9 @@ some more information.
 
 ### Encoding Survival Covariates:
 
-*UPDATE* Survival covariates can now be encoded simply as a `survival::Surv`
-object and provided as on column in the pData data.frame. The following
-describes the previous, and still supported, method.
+*UPDATE:* Survival covariates can now be encoded simply as a `survival::Surv`
+object and provided as a column in the pData data.frame. The following
+describes the original, and still supported, method.
 
 Survival data in R is typically encoded by two vectors. One vector that
 indicates the "time to event" (tte), and a second to indicate whether or not
