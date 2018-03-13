@@ -7,7 +7,6 @@
 #' interactively, and with extreme caution ... programatically specifcying
 #' the covariates, for instance, does not work right now.
 #'
-#' TODO: Professionaly implement this. You will minimally want to use `tidyeval`
 #'
 #' @md
 #' @export
@@ -28,7 +27,9 @@
 #'   filter(variable == "subtype_crc_cms", value %in% c("CMS3", "CMS4")) %>%
 #'   collect
 #' setequal(crc.34$sample_id, eav.query$sample_id)
+#' @family API
 filter_samples <- function(x, ..., with_covariates=FALSE) {
+  ## TODO: You will minimally want to use `tidyeval`
   stopifnot(is.FacileDataSet(x))
   dots <- lazy_dots(...)
   cov.table <- .create_wide_covariate_table(x, dots)

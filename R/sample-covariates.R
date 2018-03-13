@@ -7,6 +7,7 @@
 #' @param custom_key The key to use to fetch more custom annotations over
 #'   the given samples
 #' @return rows from the \code{sample_covariate} table
+#' @family API
 fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                     custom_key=Sys.getenv("USER")) {
   stopifnot(is.FacileDataSet(x))
@@ -53,6 +54,7 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
 #' @param samples the facile sample descriptor
 #' @param custom_key The key to use for the custom annotation
 #' @return covariate tbl
+#' @family API
 fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                            custom_key=Sys.getenv("USER"),
                                            file.prefix="facile") {

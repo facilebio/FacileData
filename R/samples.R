@@ -60,6 +60,7 @@ subtype_map <- function(x) {
 #' @param x A \code{FacileDataRepository}
 #' @param ... the NSE boolean filter criteria
 #' @return a facile sample descriptor
+#' @family API
 fetch_samples <- function(x, samples=NULL, assay="rnaseq", ...) {
   stopifnot(is.FacileDataSet(x))
   dots <- lazy_dots(...)

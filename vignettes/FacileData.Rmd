@@ -181,3 +181,17 @@ blca.dat <- tcga %>%
 ggplot(blca.dat, aes(CXCL9, GZMA, color=sex)) +
   geom_point()
 ```
+
+## Function list
+Currently the API consists of:
+
+ - filter_features
+ - filter_samples
+ - fetch_assay_data
+ - fetch_assay_score
+ - fetch_custom_sample_covariates
+ - fetch_sample_covariates
+ - fetch_sample_statistics
+ - fetch_samples
+
+Please see the manpages for these functions for more details.

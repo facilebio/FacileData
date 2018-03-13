@@ -38,11 +38,20 @@
 #' `dataset` and `sample_id` columns will be forcibly added (or modified) as
 #' columns to all of the individual `pData` data.frames.
 #'
-#' In order to insert the entirety of the `pData` elements into the inernal
+#' In order to insert the entirety of the `pData` elements into the internal
 #' `sample_covariate` table, we rely on the `dplyr::bind_rows` function to
 #' create an uber `data.frame` which will be converted into an
 #' entity-attribute-value table. Note that when row-binding, columns are matched
 #' by name, and any missing columns with be filled with `NA`.
+#'
+#' `ExpressionSet` pData `data.frames` should have an attribute called 'label', which
+#' will be a named character vector with a description for each column. In the case of
+#' a `SummarizedExperiment`, the `colData` should have named list in the `metadata`
+#' slot with a character description of each column.
+#'
+#' `ExpressionSet`s should have a short textual description of the facet/dataset in
+#' the `annotation` slot. Similarly, `SummarizedExperiment`s should have a list
+#' in the `metadata` slot with `url` and `description` for the facet/dataset.
 #'
 #' Please ensure that the covariates across the `pData` data.frames have already
 #' been harmonized!

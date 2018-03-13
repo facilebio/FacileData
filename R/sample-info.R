@@ -12,6 +12,7 @@
 #' @param assay_name parameter added to keep old API same with new "unhinged"
 #'   FacileDataSets.
 #' @return a tbl_df or tbl_sqlite result from the sample_stats table
+#' @family API
 fetch_sample_statistics <- function(x, samples=NULL, semi=TRUE,
                                     assay_name='rnaseq') {
   stopifnot(is.FacileDataSet(x))
@@ -34,4 +35,3 @@ fetch_sample_statistics <- function(x, samples=NULL, semi=TRUE,
 
   set_fds(out, x)
 }
-

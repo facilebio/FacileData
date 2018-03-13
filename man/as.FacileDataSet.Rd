@@ -86,11 +86,20 @@ provided in the list of datasets you are using to create the FacileDataSet.
 \code{dataset} and \code{sample_id} columns will be forcibly added (or modified) as
 columns to all of the individual \code{pData} data.frames.
 
-In order to insert the entirety of the \code{pData} elements into the inernal
+In order to insert the entirety of the \code{pData} elements into the internal
 \code{sample_covariate} table, we rely on the \code{dplyr::bind_rows} function to
 create an uber \code{data.frame} which will be converted into an
 entity-attribute-value table. Note that when row-binding, columns are matched
 by name, and any missing columns with be filled with \code{NA}.
+
+\code{ExpressionSet} pData \code{data.frames} should have an attribute called 'label', which
+will be a named character vector with a description for each column. In the case of
+a \code{SummarizedExperiment}, the \code{colData} should have named list in the \code{metadata}
+slot with a character description of each column.
+
+\code{ExpressionSet}s should have a short textual description of the facet/dataset in
+the \code{annotation} slot. Similarly, \code{SummarizedExperiment}s should have a list
+in the \code{metadata} slot with \code{url} and \code{description} for the facet/dataset.
 
 Please ensure that the covariates across the \code{pData} data.frames have already
 been harmonized!

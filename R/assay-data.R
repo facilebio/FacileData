@@ -22,7 +22,8 @@
 #'   scores? Use 'ewm' for eigenWeightedMean, and that's all.
 #' @return A lazy \code{\link[dplyr]{tbl}} object with the expression
 #'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
-#'   othwerise a \code{tbl_df} of the results.
+#'   otherwise a \code{tbl_df} of the results.
+#' @family API
 fetch_assay_data <- function(x, features, samples=NULL,
                              assay_name=default_assay(x),
                              normalized=FALSE, as.matrix=FALSE, ...,
@@ -224,6 +225,7 @@ fetch_assay_data <- function(x, features, samples=NULL,
 
 #' Helper function to get sample assay data from single or aggregate features
 #' @export
+#' @family API
 fetch_assay_score <- function(x, features, samples=NULL, assay_name=NULL,
                               as.matrix=FALSE, ..., subset.threshold=700) {
   if (is.null(assay_name)) {
