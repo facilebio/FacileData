@@ -40,7 +40,7 @@ Entity-attribute-value encodings for survival data.
 Encoding of survival data in R requires two columns, one to store
 the time-to-event and another to indicate if there was an "event" at stored
 time, or if it was censored. A \code{FacileDataSet} stores these two \code{pData}
-columns into one "value" column in its entity-atribute-value
+columns into one "value" column in its entity-attribute-value
 \code{sample_covariate} table.
 
 The \code{encode_right_censored} function takes the time-to-event and censoring

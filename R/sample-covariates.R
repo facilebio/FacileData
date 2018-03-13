@@ -93,9 +93,6 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
 
 #' Saves custom sample covariates to a FacileDataSet
 #'
-#' TODO: Figure out how to encode sample_fiter_criteria into serlized
-#' (JSON) annotation file
-#'
 #' @export
 #' @importFrom jsonlite stream_out
 #'
@@ -113,6 +110,8 @@ save_custom_sample_covariates <- function(x, annotation, name=NULL,
                                           custom_key=Sys.getenv("USER"),
                                           file.prefix="facile",
                                           sample_filter_critera=NULL) {
+  #' TODO: Figure out how to encode sample_filter_criteria into serialized
+  #' (JSON) annotation file
   stopifnot(is.FacileDataSet(x))
   annotation <- collect(annotation, n=Inf)
   assert_columns(annotation, c('dataset', 'sample_id', 'value'))

@@ -2,12 +2,6 @@
 #'
 #' This allows the user to query the `FacileDataSet` as if it were a wide
 #' `pData` `data.frame` of all its covariates.
-#'
-#' This feature is implemented so poorly. It's only really meant to be used
-#' interactively, and with extreme caution ... programatically specifcying
-#' the covariates, for instance, does not work right now.
-#'
-#'
 #' @md
 #' @export
 #' @importFrom lazyeval lazy_dots auto_name
@@ -29,7 +23,11 @@
 #' setequal(crc.34$sample_id, eav.query$sample_id)
 #' @family API
 filter_samples <- function(x, ..., with_covariates=FALSE) {
-  ## TODO: You will minimally want to use `tidyeval`
+    ## TODO: You will minimally want to use `tidyeval`
+    #' This feature is implemented so poorly. It's only really meant to be used
+    #' interactively, and with extreme caution ... programatically specifying
+    #' the covariates, for instance, does not work right now.
+
   stopifnot(is.FacileDataSet(x))
   dots <- lazy_dots(...)
   cov.table <- .create_wide_covariate_table(x, dots)

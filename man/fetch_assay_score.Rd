@@ -10,3 +10,12 @@ fetch_assay_score(x, features, samples = NULL, assay_name = NULL,
 \description{
 Helper function to get sample assay data from single or aggregate features
 }
+\seealso{
+Other API: \code{\link{fetch_assay_data}},
+  \code{\link{fetch_custom_sample_covariates}},
+  \code{\link{fetch_sample_covariates}},
+  \code{\link{fetch_sample_statistics}},
+  \code{\link{fetch_samples}},
+  \code{\link{filter_features}}
+}
+\concept{API}

@@ -2,7 +2,7 @@
 #'
 #' This function is primarily used to add data to the FacileDataSet's SQLite
 #' database. \code{x} is new data to add, and \code{to} is the a table of
-#' the form that is expected in the data base. We check that the columns of
+#' the form that is expected in the database. We check that the columns of
 #' \code{x} are a superset of columns in \code{x} and the matching columns are
 #' all of the same class.
 #'
@@ -42,10 +42,9 @@ conform_data_frame <- function(x, to) {
 #' @param data a \code{data.frame} to whip into a matrix
 #' @param formula the pivot formula
 #' @param fun.aggregate the aggregate function
-#' @param ... args past down to \code{\link[reshape2]{dcast}}.
+#' @param ... args passed down to \code{\link[reshape2]{dcast}}.
 mcast <- function(data, formula, fun.aggregate=NULL, ...) {
   warning("Use acast, not mcast(?)")
   d <- dcast(data, formula, fun.aggregate, ...)
   set_rownames(as.matrix(d[, -1L, drop=FALSE]), d[[1L]])
 }
-

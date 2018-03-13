@@ -11,7 +11,7 @@
 \alias{as.SummarizedExperiment}
 \alias{as.SummarizedExperiment.data.frame}
 \alias{as.SummarizedExperiment.FacileDataSet}
-\title{Converts a facile result into a traditional Bioconductor assay containers.}
+\title{Converts a facile result into a traditional Bioconductor assay container}
 \usage{
 as.DGEList(x, ...)
 
@@ -65,17 +65,17 @@ the DGEList. This can take the following forms:
 \item{feature_ids}{the features to get expression for (if not specified
 in \code{x} descriptor)}
 
-\item{.fds}{The \code{FacileDataSet} that \code{x} was retrieved from.}
+\item{.fds}{The \code{FacileDataSet} that \code{x} was retrieved from}
 
 \item{custom_key}{the custom key to use to fetch custom annotations from
-\code{.fds}.}
+\code{.fds}}
 
 \item{assay}{the assay matrix to use when populating the default assay
-matrix of the bioconductor container, ie. the \code{$counts} matrix of a
+matrix of the bioconductor container, i.e. the \code{$counts} matrix of a
 \code{DGEList}, the \code{exprs()} of an \code{ExpressionSet}, etc.}
 }
 \value{
-the appropriae bioconductor assay container, ie. a \link[edgeR:DGEList]{edgeR::DGEList}
+the appropriate bioconductor assay container, ie. a \link[edgeR:DGEList]{edgeR::DGEList}
 for \code{as.DGEList}, an \link[Biobase:ExpressionSet]{Biobase::ExpressionSet} for \code{as.ExpressionSet}, or
 a \link[SummarizedExperiment:SummarizedExperiment]{SummarizedExperiment::SummarizedExperiment} for
 \code{as.SummarizedExperiment}.
@@ -88,6 +88,5 @@ a \code{\link[SummarizedExperiment]{SummarizedExperiment}}
 Even though the faciledata API provides functionality to access your data
 in useful ways, it is still conceivable that you \emph{might} prefer to work
 with these data using a more traditional bioconductor container like a
-\code{SummarizedExperiment}, \code{DGEList}, \code{ExpressionSet}, etc.These functions are
-here for you.
+\code{SummarizedExperiment}, \code{DGEList}, \code{ExpressionSet}, etc.
 }

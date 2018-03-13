@@ -26,7 +26,7 @@ a `numeric` vector of `length(x)`
 This is a simple function to handle converting numeric values in the EAV
 table to numeric data in R.
 
-This is essentially a pass through function for categorical/character
+This is essentially a pass through-function for categorical/character
 values in the EAV table. If the `def` list contains a `levels` entry, then
 the returned value is converted to a factor, with the levels in the order
 as defined in `def$levels`. If more levels appear in `x` than exist in

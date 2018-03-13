@@ -69,7 +69,7 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   ## Update some parameters in the connection for increased speed
   ## http://stackoverflow.com/questions/1711631
   ##
-  ## Explains some pragme setting:
+  ## Explains some pragma setting:
   ##   http://www.codificar.com.br/blog/sqlite-optimization-faq/
   ##
   ## The following PRAGMA are of likely interest:
@@ -119,7 +119,7 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
 
 #' @export
 is.FacileDataSet <- function(x) {
-  ## `is` and `validate` funcitonality confused in here.
+  ## `is` and `validate` functionality conflated here
   is(x, 'FacileDataSet') &&
     'con' %in% names(x) && is(x$con, 'DBIObject') &&
     'anno.dir' %in% names(x) && dir.exists(x$anno.dir) &&

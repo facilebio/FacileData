@@ -1,4 +1,3 @@
-
 #' Creates tbl that associates a sample with all of its indication/subtypes
 #'
 #' @export
@@ -28,25 +27,7 @@ subtype_map <- function(x) {
     set_fds(x)
 }
 
-# ##' Fetches a sample descriptor that matches filter criterion over covariates.
-# ##'
-# ##' @export
-# ##' @param x A \code{FacileDataSet} object
-# ##' @param ... filter clause to apply to \code{sample_covariate_tbl(x)}
-# ##' @return a facile sample descriptor with a \code{FacileDataSet} connection.
-# ##' @examples
-# ##' exampleFacileDataSet() %>%
-# ##'   fetch_samples(indication %in% c('BRCA', 'COAD'))
-# fetch_samples <- function(x, ...) {
-#   stopifnot(is.FacileDataSet(x))
-#   sample_covariate_tbl(x) %>%
-#     filter(...) %>%
-#     collect(n=Inf) %>%
-#     distinct(dataset, sample_id) %>%
-#     set_fds(x)
-# }
-
-#' Fetches a sample descriptor that matches the filter criterion.
+#' Fetches a sample descriptor that matches the filter criterion
 #'
 #' Use \code{...} as if this is a dplyr::filter call, and our
 #' sample_covariate_tbl was "wide".

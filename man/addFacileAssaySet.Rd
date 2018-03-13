@@ -22,7 +22,7 @@ addFacileAssaySet(x, datasets, facile_assay_name,
 'affymetrix', etc.)}
 
 \item{facile_feature_type}{a string indicating the universe the features in
-this assay refer to, ie. "entrez", "ensgid", "enstid", etc.}
+this assay refer to, i.e. "entrez", "ensgid", "enstid", etc.}
 
 \item{facile_feature_info}{a \code{data.frame} with the required \code{feature_info}
 columns that describe the features in this assay. Please refer to the
@@ -55,7 +55,7 @@ features that were added to the internal \code{feature_info_tbl}.
 Once a FacileDataSet has been created and initialized, either via a
 low-level call to \code{\link[=initializeFacileDataSet]{initializeFacileDataSet()}}, or a call to
 \code{\link[=as.FacileDataSet]{as.FacileDataSet()}} over a list of BiocAssayContainers, you can add more
-assays (ie. RNA-seq, microarray, etc) to the FacileDataSet using this
+assays (i.e. RNA-seq, microarray, etc.) to the FacileDataSet using this
 function.
 }
 \details{

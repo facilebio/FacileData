@@ -19,7 +19,7 @@ the \code{tibble} version of \code{x} that is arranged to look
 \description{
 This function is primarily used to add data to the FacileDataSet's SQLite
 database. \code{x} is new data to add, and \code{to} is the a table of
-the form that is expected in the data base. We check that the columns of
+the form that is expected in the database. We check that the columns of
 \code{x} are a superset of columns in \code{x} and the matching columns are
 all of the same class.
 }

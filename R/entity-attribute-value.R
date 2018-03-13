@@ -167,7 +167,7 @@ eav_decode_Surv <- function(x, attrname = character(), def = list(), ...) {
 
 #' Entity-attribute-value decoding for categorical (character) values.
 #'
-#' This is essentially a pass through function for categorical/character
+#' This is essentially a pass through-function for categorical/character
 #' values in the EAV table. If the `def` list contains a `levels` entry, then
 #' the returned value is converted to a factor, with the levels in the order
 #' as defined in `def$levels`. If more levels appear in `x` than exist in
@@ -204,7 +204,7 @@ eav_encode_factor <- eav_encode_categorical
 #' Encoding of survival data in R requires two columns, one to store
 #' the time-to-event and another to indicate if there was an "event" at stored
 #' time, or if it was censored. A `FacileDataSet` stores these two `pData`
-#' columns into one "value" column in its entity-atribute-value
+#' columns into one "value" column in its entity-attribute-value
 #' `sample_covariate` table.
 #'
 #' The `encode_right_censored` function takes the time-to-event and censoring
@@ -350,9 +350,6 @@ eav_decode_right_censored <- function(x, attrname=character(), def=list(),
 #'     description: "Overall survival in days"
 #' ```
 #'
-#' Note that the `varname` entry in the `meta.yaml` file isn't used for
-#' anything. It is just kept for posterity.
-#'
 #' @section Encoding Arbitrarily Complex Covariates:
 #'
 #' To encode a new type of complex covariate from a wide `pData` data.frame,
@@ -393,9 +390,7 @@ eav_decode_right_censored <- function(x, attrname=character(), def=list(),
 #'     factor if it isn't already encoded as such in the `pData` itself, or if
 #'     you want to rearrange the factor levels.
 #'   * `type`: (optional) this is used a a "grouping" level, particularly in
-#'     the FacileExplorer. Not including this won't matter.
-#'     TODO: talk about covariate groupings in
-#'     `FacileExplorer::categoricalCovariateSelect`
+#'     the FacileExplorer.
 #' @return a list-of-lists that encodes the `sample_covariate` section of the
 #'   `meta.yaml` file for a `FacileDataSet`.
 #'
@@ -571,7 +566,7 @@ as.EAVtable <- function(x, eav_metadata = NULL, covariate_def = list()) {
   long
 }
 
-#' Encodes column(s) from `pData` into value
+#' Encodes column(s) from `pData` into character values
 #'
 #' This function is not exported, and should only be called from within the
 #' [as.EAVtable()] function because we rely on validity checks that are

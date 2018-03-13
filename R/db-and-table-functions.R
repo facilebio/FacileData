@@ -59,8 +59,6 @@ append_facile_table <- function(dat, x, table_name) {
   invisible(dat)
 }
 
-
-
 ## Database Table Accessors ====================================================
 
 #' @export
@@ -102,10 +100,10 @@ feature_info_tbl <- function(x, assay_name=NULL) {
 
 #' Mimics the old `gene_info` table.
 #'
-#' This function needs to be removed and the code that relies on gene_info_tbl
-#' be update.
 #' @export
 gene_info_tbl <- function(x) {
+  # TODO: This function needs to be removed and the code that relies on gene_info_tbl
+  # should be updated.
   stopifnot(is.FacileDataSet(x))
   ## Columns:
   ## feature_id|feature_type|symbol|n_exons|length|source|hdf5_index

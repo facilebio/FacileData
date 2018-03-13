@@ -13,6 +13,5 @@ exampleFacileDataSet(db.type = c("sqlite", "monetdblite"))
 the covariate definitions}
 }
 \description{
-TODO: This function currently uses the Atezo database as a test. We need to
-      create a REAL testing database.
+Creates a FacileDb connection to a test database
 }

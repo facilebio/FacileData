@@ -2,7 +2,7 @@
 % Please edit documentation in R/assay-data.R
 \name{spread_assay_data}
 \alias{spread_assay_data}
-\title{Takes a result from fetch_expression and spreads out genes acorss columns}
+\title{Takes a result from fetch_expression and spreads out genes across columns}
 \usage{
 spread_assay_data(x, assay_name, key = c("name", "feature_id"),
   value = c("cpm", "value", "count"), .fds = fds(x))

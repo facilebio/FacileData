@@ -1,11 +1,9 @@
-#' Converts a facile result into a traditional Bioconductor assay containers.
+#' Converts a facile result into a traditional Bioconductor assay container
 #'
 #' Even though the faciledata API provides functionality to access your data
 #' in useful ways, it is still conceivable that you *might* prefer to work
 #' with these data using a more traditional bioconductor container like a
-#' `SummarizedExperiment`, `DGEList`, `ExpressionSet`, etc.These functions are
-#' here for you.
-#'
+#' `SummarizedExperiment`, `DGEList`, `ExpressionSet`, etc.
 #' @md
 #' @rdname as.BiocContainer
 #'
@@ -25,12 +23,12 @@
 #' @param feature_ids the features to get expression for (if not specified
 #'   in `x` descriptor)
 #' @param assay the assay matrix to use when populating the default assay
-#'   matrix of the bioconductor container, ie. the `$counts` matrix of a
+#'   matrix of the bioconductor container, i.e. the `$counts` matrix of a
 #'   `DGEList`, the `exprs()` of an `ExpressionSet`, etc.
-#' @param .fds The `FacileDataSet` that `x` was retrieved from.
+#' @param .fds The `FacileDataSet` that `x` was retrieved from
 #' @param custom_key the custom key to use to fetch custom annotations from
-#'   `.fds`.
-#' @return the appropriae bioconductor assay container, ie. a [edgeR::DGEList]
+#'   `.fds`
+#' @return the appropriate bioconductor assay container, ie. a [edgeR::DGEList]
 #'   for `as.DGEList`, an [Biobase::ExpressionSet] for `as.ExpressionSet`, or
 #'   a [SummarizedExperiment::SummarizedExperiment] for
 #'   `as.SummarizedExperiment`.

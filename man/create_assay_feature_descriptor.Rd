@@ -20,5 +20,5 @@ a feature descriptor with feature_id and assay_name, which can be
   used to absolutely find features
 }
 \description{
-cretes a data.frame of features and assays they come from
+Creates a data.frame of features and assays they come from
 }

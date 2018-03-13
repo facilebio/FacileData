@@ -8,15 +8,6 @@
 createWarehouse <- function(db.path, datasets, gene.info=fData(datasets[[1]]),
                             sample.meta, pragma.page_size=2**12,
                             db.type='sqlite', ...) {
-  if (FALSE) {
-    ## Run build-db.R in
-    ## ~/workspace/projects/CIT/clinx/clinXwarehouse/inst/build-db/2016-04-20
-    ## to load up db.fn and spiffy
-    db.path <- db.fn
-    datasets <- dat
-    sample.meta <- smeta.all
-    db.type='monetdblite'
-  }
 
   db.type <- match.arg(tolower(db.type), c('monetdblite', 'sqlite'))
 
@@ -26,7 +17,6 @@ createWarehouse <- function(db.path, datasets, gene.info=fData(datasets[[1]]),
   } else if (db.type == 'monetdblite'){
     db.path <- paste0(db.path, '.monetdblite')
   }
-
 
   ## Check arguments -----------------------------------------------------------
   assertPathForOutput(db.path)
@@ -40,7 +30,7 @@ createWarehouse <- function(db.path, datasets, gene.info=fData(datasets[[1]]),
   stopifnot(all(sapply(datasets, function(x) all.equal(rownames(x), rownames(datasets[[1]])))))
   stopifnot(all(rownames(datasets[[1]]) %in% gene.info$feature_id))
 
-  ## we 'sample_id' and 'dataset' are special names (they will always be column
+  ## 'sample_id' and 'dataset' are special names (they will always be column
   ## names of a tbl returned from the FacileDb) so we can't have variables named
   ## that way, too.
   if (any(sample.meta$variable %in% c('dataset', 'sample_id'))) {

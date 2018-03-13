@@ -27,9 +27,7 @@ scenarios in the facileverse.
 factor if it isn't already encoded as such in the \code{pData} itself, or if
 you want to rearrange the factor levels.
 \item \code{type}: (optional) this is used a a "grouping" level, particularly in
-the FacileExplorer. Not including this won't matter.
-TODO: talk about covariate groupings in
-\code{FacileExplorer::categoricalCovariateSelect}
+the FacileExplorer.
 }}
 }
 \value{
@@ -108,9 +106,6 @@ the \code{"OS"} \code{covariate_def} entry looks like so:\preformatted{sample_co
     type: "clinical"
     description: "Overall survival in days"
 }
-
-Note that the \code{varname} entry in the \code{meta.yaml} file isn't used for
-anything. It is just kept for posterity.
 }
 
 \section{Encoding Arbitrarily Complex Covariates}{

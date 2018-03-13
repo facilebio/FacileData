@@ -13,9 +13,15 @@ filter_features(x, ...)
 }
 \description{
 This feature is implemented so poorly. It's only really meant to be used
-interactively, and with extreme caution ... programatically specifcying
+interactively, and with extreme caution ... programatically specifying
 column names in feature table, for instance, does not work right now.
 }
-\details{
-TODO: Professionaly implement this.
+\seealso{
+Other API: \code{\link{fetch_assay_data}},
+  \code{\link{fetch_assay_score}},
+  \code{\link{fetch_custom_sample_covariates}},
+  \code{\link{fetch_sample_covariates}},
+  \code{\link{fetch_sample_statistics}},
+  \code{\link{fetch_samples}}
 }
+\concept{API}

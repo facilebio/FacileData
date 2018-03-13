@@ -335,7 +335,7 @@ assay_feature_type <- function(x, assay_name) {
 #' DEBUG: This logic is unnecessarily complex because I make sure to collect
 #' all tables from the database as opposed to copying external tables in and
 #' doing an inner_join in the database. I'm doing this becuase we are getting
-#' name collections on some of the temporary tables. We get erros like:
+#' name collections on some of the temporary tables. We get errors like:
 #'     Warning: Error in : Table pkdtpohpsu already exists.
 #'
 #' This fetches the hdf5_index for the assays as well
@@ -428,7 +428,7 @@ assay_info_over_samples <- function(x, samples) {
 
 
 
-## helper functino to fetch_assay_data
+## helper function to fetch_assay_data
 normalize.assay.matrix <- function(vals, feature.info, sample.info,
                                    log=TRUE, prior.count=5, ...,
                                    verbose=FALSE) {
@@ -461,7 +461,7 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info,
 
 #' Creates a feature descriptor for interactive ease
 #'
-#' cretes a data.frame of features and assays they come from
+#' Creates a data.frame of features and assays they come from
 #' @export
 #' @param x FacileDataSet
 #' @param features a character string of fearture ids (requires assay_name)
@@ -565,7 +565,7 @@ can.spread.assay.by.name <- function(x, assay_name) {
   TRUE
 }
 
-#' Takes a result from fetch_expression and spreads out genes acorss columns
+#' Takes a result from fetch_expression and spreads out genes across columns
 #'
 #' This is a convenience function, and will try to guess what you mean if you
 #' don't explicitly specify which columns to spread and what to call them.

@@ -19,13 +19,6 @@ pairs that match the virtual \code{filter(covaries, ...)} clause executed here.
 This allows the user to query the \code{FacileDataSet} as if it were a wide
 \code{pData} \code{data.frame} of all its covariates.
 }
-\details{
-This feature is implemented so poorly. It's only really meant to be used
-interactively, and with extreme caution ... programatically specifcying
-the covariates, for instance, does not work right now.
-
-TODO: Professionaly implement this. You will minimally want to use \code{tidyeval}
-}
 \examples{
 fds <- exampleFacileDataSet()
 
@@ -37,3 +30,7 @@ eav.query <- sample_covariate_tbl(fds) \%>\%
   collect
 setequal(crc.34$sample_id, eav.query$sample_id)
 }
+\concept{API
+This feature is implemented so poorly. It's only really meant to be used
+interactively, and with extreme caution ... programatically specifying
+the covariates, for instance, does not work right now.}

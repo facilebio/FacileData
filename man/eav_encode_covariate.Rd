@@ -2,7 +2,7 @@
 % Please edit documentation in R/entity-attribute-value.R
 \name{eav_encode_covariate}
 \alias{eav_encode_covariate}
-\title{Encodes column(s) from \code{pData} into value}
+\title{Encodes column(s) from \code{pData} into character values}
 \usage{
 eav_encode_covariate(pdata, covariate_def, aname = "variable")
 }

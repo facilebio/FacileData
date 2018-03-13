@@ -75,7 +75,6 @@ supported.assay.container <- function(x) {
 }
 
 extract.assay <- function(x, assay_name=NULL) {
-  ## OO? We don't need no stinking OO
   if (is(x, 'DGEList')) {
     out <- x$counts
   } else if (is(x, 'eSet')) {
@@ -162,7 +161,7 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
 #' Once a FacileDataSet has been created and initialized, either via a
 #' low-level call to [initializeFacileDataSet()], or a call to
 #' [as.FacileDataSet()] over a list of BiocAssayContainers, you can add more
-#' assays (ie. RNA-seq, microarray, etc) to the FacileDataSet using this
+#' assays (i.e. RNA-seq, microarray, etc.) to the FacileDataSet using this
 #' function.
 #'
 #' Note that you cannot add assay data piecemeal. That is to say, you can not call
@@ -183,7 +182,7 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
 #' @param facile_assay_type string indicating the assay_type ('rnaseq',
 #'   'affymetrix', etc.)
 #' @param facile_feature_type a string indicating the universe the features in
-#'   this assay refer to, ie. "entrez", "ensgid", "enstid", etc.
+#'   this assay refer to, i.e. "entrez", "ensgid", "enstid", etc.
 #' @param facie_assay_description a string that allows the caller to provide
 #'   a "freeform" description of the assay (platform, protocol, whatever).
 #' @param facile_feature_info a `data.frame` with the required `feature_info`
