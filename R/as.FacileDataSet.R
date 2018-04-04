@@ -190,7 +190,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
       dplyr::select(out, dataset, sample_id, everything())
   })
 
-  pdat <- dplyr::bind_rows(pdats)
+  pdat <- bind_pdata_rows(pdats)
   col_descs = unlist(lapply(pdats, attr, which = "label"))
   col_descs = col_descs[!duplicated(names(col_descs))]
   attr(pdat, "label") <- col_descs
