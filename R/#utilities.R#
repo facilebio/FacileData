@@ -50,5 +50,5 @@ mcast <- function(data, formula, fun.aggregate=NULL, ...) {
 }
 
 bind_rows <- function(df_list) {
-
+    
 }

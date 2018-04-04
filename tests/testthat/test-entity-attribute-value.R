@@ -89,6 +89,6 @@ test_that("basic encoding and decoding of EAV columns works", {
     y1 = c("1+","2 ","3+")
     attr(y1, "eavclass") = "Surv"
     expect_identical(y, y1)
-    z = eav_decode_Surv(x)
+    z = eav_decode_Surv(y)
     expect_identical(x,z)
 })
