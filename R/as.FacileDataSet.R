@@ -175,9 +175,9 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   }
 
   # feature-space of assay containers must be identical
-  same.fspace <- sapply(x, function(xx) {
+  same.fspace <- vapply(x, function(xx) {
     nrow(xx) == nrow(first) && all.equal(rownames(xx), rownames(first))
-  })
+  }, logical(1))
   stopifnot(all(same.fspace))
 
   finfo <- fdata(first, validate = TRUE)
@@ -185,18 +185,20 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   pdats <- lapply(names(x), function(dname) {
       obj <- x[[dname]]
       out <- pdata(obj)
-      out$dataset <- dname # Avoid dplyr::mutate to keep label attribute
+      out$dataset <- dname
       out$sample_id <- colnames(obj)
       dplyr::select(out, dataset, sample_id, everything())
   })
 
   pdat <- bind_pdata_rows(pdats)
-  col_descs = unlist(lapply(pdats, attr, which = "label"))
-  col_descs = col_descs[!duplicated(names(col_descs))]
-  attr(pdat, "label") <- col_descs
   pdat$sample_id = gsub("__", "",  pdat$sample_id) # __ has as special meaning for Facile
 
-  eav.meta <- eav_metadata_create(pdat, covariate_def = NULL)
+  col_descs_list = lapply(x, pdata_metadata)
+  col_descs = unlist(col_descs_list, FALSE, FALSE)
+  names(col_descs) = unlist(sapply(col_descs_list, names, simplify = FALSE), FALSE, FALSE)
+  col_descs = col_descs[!duplicated(names(col_descs))]
+
+  eav.meta <- eav_metadata_create(pdat, col_descs)
 
   adat <- sapply(names(x),
                  function(dname) {
@@ -216,7 +218,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     organism = organism,
     default_assay = assay_name,
     datasets = ds_list,
-    sample_covariates = eav.meta
+    sample_covariates = col_descs
    )
 
   meta_yaml = paste0(tempfile(), ".yaml")
@@ -348,7 +350,7 @@ validate.fdata <- function(x, ...) {
 
 #' Bioc-container specific pData extraction functions
 #'
-#' not exported on purpose
+#' not for export
 pdata <- function(x, ...) {
   UseMethod("pdata")
 }
@@ -356,8 +358,6 @@ pdata.SummarizedExperiment <- function(x, ...) {
     stopifnot(requireNamespace("SummarizedExperiment", quietly = TRUE))
     df = SummarizedExperiment::colData(x)
     ds = as.data.frame(df)
-    if (length(metadata(df) > 0))
-        attr(ds, "label") = unlist(metadata(df))
     validate.pdata(ds, ...)
 }
 pdata.ExpressionSet <- function(x, ...) {
@@ -370,6 +370,30 @@ pdata.DGEList <- function(x, ...) {
 }
 validate.pdata <- function(x, ...) {
   x
+}
+
+pdata_metadata <- function(x, ...) {
+  UseMethod("pdata_metadata")
+}
+pdata_metadata.SummarizedExperiment <- function(x, ...) {
+    stopifnot(requireNamespace("SummarizedExperiment", quietly = TRUE))
+    sinfo = SummarizedExperiment::colData(x)
+    defs = S4Vectors::metadata(sinfo)
+    defs
+}
+pdata_metadata.ExpressionSet <- function(x, ...) {
+    sinfo = pdata(x)
+    defs = attributes(sinfo)$label
+    names(defs) = colnames(sinfo)
+    defs = lapply(defs, function(el) { list(description = el) })
+    defs
+}
+pdata_metadata.DGEList <- function(x, ...) {
+    sinfo = x$samples
+    defs = sapply(colnames(sinfo), function(el) {
+        list(description = el, label = el, type = "general")
+    }, simplify = FALSE)
+    defs
 }
 
 #' Bioc-container specific assay data extraction functions

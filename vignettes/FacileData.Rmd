@@ -188,9 +188,11 @@ Currently the API consists of:
  - filter_features
  - filter_samples
  - fetch_assay_data
+ - with_assay_data
  - fetch_assay_score
  - fetch_custom_sample_covariates
  - fetch_sample_covariates
+ - with_sample_covariates
  - fetch_sample_statistics
  - fetch_samples
 

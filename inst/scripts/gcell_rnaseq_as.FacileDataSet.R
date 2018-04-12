@@ -21,7 +21,24 @@ ds = lapply(ds,
                 mcols(x)$feature_id = rownames(x)
                 colData(x) = colData(x)[,c("SAMPLE_ID","CLID","AGE","TISSUE_METACLASS_ONCOLOGY")]
                 colnames(colData(x)) = c("samid","clid","age","tissue")
-                metadata(colData(x)) = list(samid = "Sample Hub ID", clid = "gCell Cell Line ID", age = "age in years", tissue = "Tissue Group")
+                metadata(colData(x)) = list(
+                    samid = list(label = "Sample Hub ID",
+                                 description = "This is a sample ID",
+                                 type = "general"
+                                 ),
+                    clid = list(label = "gCell Cell Line ID",
+                                description = "This is another ID",
+                                type = "general"
+                                ),
+                    age = list(label = "age in years",
+                               description = "The age of the patient",
+                               type = "general"
+                               ),
+                    tissue = list(label = "Tissue Group",
+                                  description = "Rollup of tissue type to defined vocab",
+                                  type = "clinical"
+                                  )
+                )
                 x
             })
 

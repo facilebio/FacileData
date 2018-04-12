@@ -410,15 +410,15 @@ eav_metadata_create <- function(x, covariate_def = list()) {
   stopifnot(is.data.frame(x))
   if (is.null(covariate_def)) covariate_def <- list()
   stopifnot(is.list(covariate_def))
-  if (length(covariate_def)) {
-    validate_covariate_def_list(covariate_def, x)
-  }
 
-  if ("dataset" %in% colnames(x)) x[['dataset']] <- NULL
-  if ("sample_id" %in% colnames(x)) x[['sample_id']] <- NULL
+  x$dataset = NULL
+  x$sample_id = NULL
+
+  if (length(covariate_def) > 1)
+      stopifnot(identical(colnames(x), names(covariate_def)))
 
   # generate generic covariate definitions for all columns
-  gcd <- lapply(colnames(x), function(name) eavdef_for_column(x, name))
+  gcd <- lapply(colnames(x), function(name) eavdef_for_column(name, x))
   names(gcd) <- colnames(x)
 
   # remove definitions in gcd that are provided in covariate_def
@@ -427,7 +427,14 @@ eav_metadata_create <- function(x, covariate_def = list()) {
   axe <- unique(unlist(axe, recursive = TRUE, use.names = FALSE))
   gcd[axe] <- NULL
 
-  out <- c(gcd, covariate_def)
+  out <- mapply(covariate_def, gcd,
+                FUN = function(a,b) {
+                    def = c(a,b)
+                    def = def[!duplicated(names(def))]
+                    def
+                }, SIMPLIFY = FALSE)
+
+  validate_covariate_def_list(out, x)
   out
 }
 
@@ -440,40 +447,28 @@ eav_metadata_create <- function(x, covariate_def = list()) {
 #'
 #' @md
 #'
-#' @param x a `data.frame`
-#' @param column the name of the column in the `x` to parse.
-#' @return a generic list-of-list defintion for `x[[column]]`
-eavdef_for_column <- function(x, column) {
-  vals <- x[[column]]
-  if (is.null(vals)) stop("Unknown column in x: ", column)
-
+#' @param column a vector, e.g. a column out of a pdata
+#' @param column_name single character, name of the colum
+#' @return a generic list-of-list definition column
+eavdef_for_column <- function(column_name, column) {
   out <- list(
-      arguments = list(x = column),
+      arguments = list(x = column_name),
       class = "categorical",
-      description="no description provided"
+      label = column_name,
+      description = column_name,
+      type = "general"
   )
 
-  if (is(x,"DataFrame")) {
-      col_descs = unlist(metadata(x))
-  } else {
-      col_descs = attr(x,"label")
-  }
-
-  if (!is.null(col_descs)) {
-      if (column %in% names(col_descs)) {
-          out$description = col_descs[column]
-      }
-  }
-  if (is.numeric(vals)) {
+  if (is.numeric(column)) {
     out[['class']] <- "real"
   }
-  if (is.logical(vals)) {
+  if (is.logical(column)) {
     out[['class']] <- 'logical'
   }
-  if (is.factor(vals)) {
-    out[['levels']] <- levels(vals)
+  if (is.factor(column)) {
+    out[['levels']] <- levels(column)
   }
-  if (is(vals, "Surv")) {
+  if (is(column, "Surv")) {
       out[['class']] <- 'Surv'
   }
   out
@@ -485,6 +480,7 @@ eavdef_for_column <- function(x, column) {
 #' @param pdata a `data.frame`
 validate_covariate_def_list <- function(x, pdata) {
   # this is named a list of lists
+
   stopifnot(is.list(x), is.character(names(x)))
   is.lists <- sapply(x, is.list)
   stopifnot(all(is.lists))
