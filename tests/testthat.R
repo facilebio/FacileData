@@ -3,5 +3,6 @@ library("magrittr")
 library("reshape2")
 library("tidyr")
 library("FacileData")
-
+library("survival")
+library("Biobase")
 test_check("FacileData")

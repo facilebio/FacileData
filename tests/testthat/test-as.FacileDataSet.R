@@ -1,7 +1,5 @@
 context("as.FacileDataSet")
 
-library(survival)
-
 #es <- multiGSEA::exampleExpressionSet(do.voom=FALSE)
 #esl <- list(first=es, second=es)
 #colnames(esl[['second']]) <- paste0('two_', colnames(esl[['second']]))
@@ -11,7 +9,6 @@ library(survival)
 #
 #test_that("list of ExpressionSets convert to FacileDataSet", {
 #})
-
 
 test_that("We can get pdata metadata", {
     sinfo = data.frame(a = 1:4,
@@ -26,6 +23,5 @@ test_that("We can get pdata metadata", {
     expect_identical(
         FacileData:::pdata_metadata(es), list(a = list(description = "a is a"), b = list(description = "b is b"))
     )
-
 
 })
