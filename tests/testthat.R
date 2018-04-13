@@ -2,7 +2,6 @@ library("testthat")
 library("magrittr")
 library("reshape2")
 library("tidyr")
-library("FacileDataSet")
+library("FacileData")
 
-test_check("FacileDataSet")
-
+test_check("FacileData")
