@@ -4,12 +4,12 @@
 \alias{eavdef_for_column}
 \title{Generate entity-attribute-value definition for a column in a data.frame}
 \usage{
-eavdef_for_column(column_name, column)
+eavdef_for_column(column, column_name)
 }
 \arguments{
-\item{column_name}{single character, name of the colum}
-
 \item{column}{a vector, e.g. a column out of a pdata}
+
+\item{column_name}{single character, name of the colum}
 }
 \value{
 a generic list-of-list definition column

@@ -198,7 +198,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   names(col_descs) = unlist(sapply(col_descs_list, names, simplify = FALSE), FALSE, FALSE)
   col_descs = col_descs[!duplicated(names(col_descs))]
 
-  eav.meta <- eav_metadata_create(pdat, col_descs)
+  eav.meta <- eav_metadata_merge(pdat, col_descs)
 
   adat <- sapply(names(x),
                  function(dname) {

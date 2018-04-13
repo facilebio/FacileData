@@ -31,4 +31,3 @@ Other API: \code{\link{fetch_assay_data}},
   \code{\link{fetch_samples}},
   \code{\link{filter_features}}
 }
-\concept{API}
