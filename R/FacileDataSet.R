@@ -231,8 +231,11 @@ dataset_definitions <- function(x, as.list=TRUE) {
   defs
 }
 
+#' Get description of sample metadata columns
 #' @export
 #' @importFrom yaml yaml.load_file
+#' @param x FacileDataSet
+#' @param as.list single logical, return tibble or list
 covariate_definitions <- function(x, as.list=TRUE) {
   out <- meta_info(x)$sample_covariates
   if (!as.list) {
@@ -249,7 +252,12 @@ covariate_definitions <- function(x, as.list=TRUE) {
   out %>% set_fds(x)
 }
 
-#' @export
+##' Get tibble of sample information
+##'
+##' Get tibble of sample information
+##' @param x FacileDataSet
+##' @return tibble of sample attributes
+##' @export
 samples <- function(x) {
   stopifnot(is.FacileDataSet(x))
   sample_info_tbl(x) %>%
@@ -271,7 +279,10 @@ facet_frame.default <- function(x, ...) {
   tibble(facet=character(), dataset=facet, sample_id=facet)
 }
 
+#' Print a FacileDataSet
 #' @export
+#' @param x FacileDataSet
+#' @param ... additional args (ignored)
 print.FacileDataSet <- function(x, ...) {
   ns <- RSQLite::dbGetQuery(x$con, "SELECT COUNT(*) FROM sample_info;")
   nds <- RSQLite::dbGetQuery(x$con, "SELECT COUNT (DISTINCT dataset) FROM sample_info;")
