@@ -1,9 +1,10 @@
-##' @import checkmate
-##' @import magrittr
-##' @import RSQLite
-##' @import dplyr
-##' @import dtplyr
-##' @import reshape2
-##' @import data.table
-##' @import tidyr
-NULL
+#' @import checkmate
+#' @import magrittr
+#' @import RSQLite
+#' @import dtplyr
+#' @import reshape2
+#' @import data.table
+#' @import tidyr
+#' @import methods
+#' @import survival
+"_PACKAGE"

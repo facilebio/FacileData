@@ -6,11 +6,11 @@
 \alias{organism}
 \alias{default_assay}
 \alias{dataset_definitions}
-\title{Path to the meta information file}
+\title{Path to the meta information YAML file}
 \usage{
 meta_file(x)
 
-meta_info(x)
+meta_info(x, fn = meta_file(x))
 
 organism(x)
 
@@ -21,14 +21,25 @@ dataset_definitions(x, as.list = TRUE)
 \arguments{
 \item{x}{\code{FacileDataSet}}
 
+\item{fn}{The path to the \code{meta.yaml} file.}
+
+\item{as.list}{single logical if FALSE, condense to a tibble}
+
+\item{x}{\code{FacileDataSet}}
+
 \item{x}{\code{FacileDataSet}}
 
 \item{x}{\code{FacileDataSet}}
 
 \item{x}{\code{FacileDataSet}}
 }
+\value{
+The \code{meta.yaml} file parsed into a list-of-lists representation
+}
 \description{
-Path to the meta information file
+Path to the meta information YAML file
 
 Get meta information for dataset
+
+Get URL and description of datasets in a FacileDataSet
 }

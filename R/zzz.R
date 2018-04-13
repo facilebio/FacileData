@@ -1,7 +1,7 @@
 # .onLoad <- function(libname, pkgname) {
 #   impl.prefix <- 'ftest'
 #   ## This package serves as an "abstract implementation" to a FacileDb database.
-#   ## The packages that implement acces to a FacileWareshouse should define
+#   ## The packages that implement access to a FacileWareHouse should define
 #   ## the following options:
 #   ##
 #   ##   - *.datapath
@@ -26,7 +26,7 @@
 #   ## affraid we can't avoid explicity defining the *.datapath. This is because
 #   ## the unit tests are run in a "clean" (R --vanilla) environment which doesn't
 #   ## load the stuff in your .Rprofile
-#   ## dpath <- system.file('extdata', 'test', package='FacileRepo')
+#   ## dpath <- system.file('extdata', 'test', package='FacileData')
 #   if (dir.exists('/gne')) {
 #     dpath <- '/gne/home/lianogls/workspace/data/facile/test'
 #   } else {

@@ -2,8 +2,7 @@
 % Please edit documentation in R/construction.R
 \name{addFacileAssaySet}
 \alias{addFacileAssaySet}
-\title{Adds a complete set of assay data for all samples across datasets in the
-FacileDataSet}
+\title{Adds new set of assay data for all samples in a FacileDataSet}
 \usage{
 addFacileAssaySet(x, datasets, facile_assay_name,
   facile_assay_type = .assay.types, facile_feature_type = .feature.types,
@@ -12,18 +11,58 @@ addFacileAssaySet(x, datasets, facile_assay_name,
   chunk_compression = 4, assay_name = NULL)
 }
 \arguments{
-\item{x}{The \code{FacileDataSeta}}
+\item{x}{The \code{FacileDataSet}}
 
-\item{facile_assay_name}{the name of the assay to store in the FacileDataSet}
+\item{datasets}{list of \code{ExpressionSet}, \code{SummarizedExperiment}, or
+\code{DGEList}s that have the new assay data across all of the datasets in \code{x}.}
 
-\item{facile_assay_type}{string indicating the assay_type}
+\item{facile_assay_name}{the name of the assay in the source dataset object}
 
-\item{assay_name}{the name of the assay in the source dataset object}
+\item{facile_assay_type}{string indicating the assay_type ('rnaseq',
+'affymetrix', etc.)}
 
-\item{dat}{list of ExpressionSet, SummarizedExperiment, or DGELists that
-have the assay data for the given assay across all of our datasets}
+\item{facile_feature_type}{a string indicating the universe the features in
+this assay refer to, i.e. "entrez", "ensgid", "enstid", etc.}
+
+\item{facile_feature_info}{a \code{data.frame} with the required \code{feature_info}
+columns that describe the features in this assay. Please refer to the
+"Features" section of the \code{FacileDataSet} vignette for more complete
+description.}
+
+\item{storage_mode}{either \code{"integer"} or \code{"numeric"}, maps to the
+\code{storage.mode} parameter in \code{\link[rhdf5:h5createDataset]{rhdf5::h5createDataset()}}}
+
+\item{chunk_rows}{the first entry in the \code{chunk} parameter in
+\code{\link[rhdf5:h5createDataset]{rhdf5::h5createDataset()}} (\code{integer})}
+
+\item{chunk_cols}{the second entry in the \code{chunk} parameter in
+\code{\link[rhdf5:h5createDataset]{rhdf5::h5createDataset()}}. If this is \code{"ncol"}, it is set to the number
+of columns in each of the internal dataset matrices being added.}
+
+\item{chunk_compression}{the \code{level} parameter in \code{\link[rhdf5:h5createDataset]{rhdf5::h5createDataset()}}}
+
+\item{assay_name}{the assay name in the data containers provided in the
+\code{datasets} list.}
+
+\item{facie_assay_description}{a string that allows the caller to provide
+a "freeform" description of the assay (platform, protocol, whatever).}
+}
+\value{
+a \code{tibble} subset of \code{facile_feature_info} that indicates the \emph{new}
+features that were added to the internal \code{feature_info_tbl}.
 }
 \description{
-This needs to be busted up into functions Minimally loop over datasets to
-addFacileAssay
+Once a FacileDataSet has been created and initialized, either via a
+low-level call to \code{\link[=initializeFacileDataSet]{initializeFacileDataSet()}}, or a call to
+\code{\link[=as.FacileDataSet]{as.FacileDataSet()}} over a list of BiocAssayContainers, you can add more
+assays (i.e. RNA-seq, microarray, etc.) to the FacileDataSet using this
+function.
+}
+\details{
+Note that you cannot add assay data piecemeal. That is to say, you can not call
+this function once to add copynumber data
+(addFacileAssaySet(..., facile_assay_type = "cnv") to a subset of samples
+and later call this function again to add copynumber to the rest of the
+samples. The function will throw an error if
+facile_assay_type %in% assay_names(x) == TRUE.
 }

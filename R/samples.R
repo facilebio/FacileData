@@ -1,10 +1,9 @@
-
-##' Creates tbl that associates a sample with all of its indication/subtypes
-##'
-##' @export
-##' @param x a \code{FacileDataSet} object
-##' @return a \code{tbl} with indication and subtype information for all samples
-##'   in the database
+#' Creates tbl that associates a sample with all of its indication/subtypes
+#'
+#' @export
+#' @param x a \code{FacileDataSet} object
+#' @return a \code{tbl} with indication and subtype information for all samples
+#'   in the database
 subtype_map <- function(x) {
   stopifnot(is.FacileDataSet(x))
   sample.map <- sample_covariate_tbl(x) %>%
@@ -28,40 +27,24 @@ subtype_map <- function(x) {
     set_fds(x)
 }
 
-# ##' Fetches a sample descriptor that matches filter criterion over covariates.
-# ##'
-# ##' @export
-# ##' @param x A \code{FacileDataSet} object
-# ##' @param ... filter clause to apply to \code{sample_covariate_tbl(x)}
-# ##' @return a facile sample descriptor with a \code{FacileDataSet} connection.
-# ##' @examples
-# ##' exampleFacileDataSet() %>%
-# ##'   fetch_samples(indication %in% c('BRCA', 'COAD'))
-# fetch_samples <- function(x, ...) {
-#   stopifnot(is.FacileDataSet(x))
-#   sample_covariate_tbl(x) %>%
-#     filter(...) %>%
-#     collect(n=Inf) %>%
-#     distinct(dataset, sample_id) %>%
-#     set_fds(x)
-# }
-
-##' Fetches a sample descriptor that matches the filter criterion.
-##'
-##' Use \code{...} as if this is a dplyr::filter call, and our
-##' sample_covariate_tbl was "wide".
-##'
-##' This is experimental, so each "term" in the filter criteria should be
-##' just one boolean operation. Multiple terms passed into \code{...} will be
-##' "AND"ed together.
-##'
-##' @export
-##' @param x A \code{FacileDataRepository}
-##' @param ... the NSE boolean filter criteria
-##' @return a facile sample descriptor
+#' Fetches a sample descriptor that matches the filter criterion
+#'
+#' Use \code{...} as if this is a dplyr::filter call, and our
+#' sample_covariate_tbl was "wide".
+#'
+#' This is experimental, so each "term" in the filter criteria should be
+#' just one boolean operation. Multiple terms passed into \code{...} will be
+#' "AND"ed together.
+#'
+#' @export
+#' @importFrom lazyeval lazy_dots
+#' @param x A \code{FacileDataRepository}
+#' @param ... the NSE boolean filter criteria
+#' @return a facile sample descriptor
+#' @family API
 fetch_samples <- function(x, samples=NULL, assay="rnaseq", ...) {
   stopifnot(is.FacileDataSet(x))
-  dots <- lazyeval::lazy_dots(...)
+  dots <- lazy_dots(...)
   if (length(dots)) {
     stop("Currently rethinking how to make fetching samples intuitive, ie. ",
          "see fetch_samples.old")
@@ -90,58 +73,23 @@ fetch_samples <- function(x, samples=NULL, assay="rnaseq", ...) {
     set_fds(x)
 }
 
-## This was when I was trying to enable sample retrieval by making the
-## sample_covariate table "look wide" so the caller can use `filter` in an
-## expected way.
-## I think this is still a worthwhile endeavor, but me and NSE don't play well
-## together ... and I swear I did well in my programming languages and
-## compilers class ...
-fetch_samples.old <- function(x, ...) {
-  stopifnot(is.FacileDataSet(x))
-  dots <- lazyeval::lazy_dots(...)
 
-  if (length(dots)) {
-    crit <- lapply(as.list(dots), function(crit) {
-      expr <- as.character(crit$expr)
-      stopifnot(length(expr) == 3L)
-      op <- expr[1]
-      if (!op %in% c('==', '%in%')) {
-        stop("Only '==' and '%in%' operators allowed: ", expr)
-      }
-      # browser()
-      var <- expr[2L]
-      values <- expr[3]
-      list(variable=var, value=values)
-    })
-
-    covs <- unique(sapply(crit, '[[', 'variable'))
-    wcovs <- sample_covariate_tbl(x)
-    if (length(covs) == 1) {
-      wcovs <- filter(wcovs, variable == covs)
-    } else {
-      wcovs <- filter(wcovs, variable %in% covs)
-    }
-    out <- spread_covariates(wcovs, x)
-    filter(out, ...)
-  }
-}
-
-##' Filters the samples down in a dataset to ones specified
-##'
-##' Tables like \code{expression} and \code{sample_covariate} house different
-##' datapoints per sample, and we often want to only retreive data points over
-##' a subset of samples.
-##'
-##' @export
-##' @param x likely a \code{tbl_sqlite} object, but a \code{tbl_df}-like
-##'   object should work as well.
-##' @param samples a sample descriptor \code{tbl_df}-like object (likely a
-##'   \code{tbl_sqlite} object) that has \code{"dataset"} and \code{"samle_id"}
-##'   columns.
-##' @param semi if \code{TRUE}, appropximates a semi-join on the \code{samples},
-##'   otherwise does an inner_join between \code{x} and \code{samples}
-##'   (default \code{FALSE}).
-##' @return joined result between \code{x} and \code{samples}
+#' Filters the samples down in a dataset to ones specified
+#'
+#' Tables like \code{expression} and \code{sample_covariate} house different
+#' datapoints per sample, and we often want to only retreive data points over
+#' a subset of samples.
+#'
+#' @export
+#' @param x likely a \code{tbl_sqlite} object, but a \code{tbl_df}-like
+#'   object should work as well.
+#' @param samples a sample descriptor \code{tbl_df}-like object (likely a
+#'   \code{tbl_sqlite} object) that has \code{"dataset"} and \code{"samle_id"}
+#'   columns.
+#' @param semi if \code{TRUE}, appropximates a semi-join on the \code{samples},
+#'   otherwise does an inner_join between \code{x} and \code{samples}
+#'   (default \code{FALSE}).
+#' @return joined result between \code{x} and \code{samples}
 join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
   if (is.null(samples)) {
     return(x)
@@ -177,7 +125,7 @@ join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
 
 ## FacileExplorer's filter_active_samples ======================================
 
-##' @export
+#' @export
 retrieve_samples_in_memory <- function(criteria, cov.table=NULL) {
   if(length(criteria)==0){
     # case where no filters have been defined
@@ -210,21 +158,21 @@ retrieve_samples_in_memory <- function(criteria, cov.table=NULL) {
     arrange(dataset, sample_id)
 }
 
-##' Creates a filter expression to select samples based on value of a covariate
-##'
-##' This leverages dplyr's standard (vs non-standard) evaluation mojo. There is
-##' likely a cleaner way to do this, but to be honest I still find the
-##' \code{\link[lazyeval]{interp}} stuff rather confusing
-##'
-##' @seealso \href{https://cran.r-project.org/web/packages/dplyr/vignettes/nse.html}{dplyr non-standard evaluation}
-##'
-##' @importFrom lazyeval interp
-##'
-##' @param variable the name of the variable to look for in the sample_covariate
-##'   \code{variable} column
-##' @param value \code{character} vector of values for the \code{variable} that
-##'   you want your samples to have.
-##' @return a
+#' Creates a filter expression to select samples based on value of a covariate
+#'
+#' This leverages dplyr's standard (vs non-standard) evaluation mojo. There is
+#' likely a cleaner way to do this, but to be honest I still find the
+#' \code{\link[lazyeval]{interp}} stuff rather confusing
+#'
+#' @seealso \href{https://cran.r-project.org/web/packages/dplyr/vignettes/nse.html}{dplyr non-standard evaluation}
+#'
+#' @importFrom lazyeval interp
+#' @importFrom stats formula
+#' @param variable the name of the variable to look for in the sample_covariate
+#'   \code{variable} column
+#' @param value \code{character} vector of values for the \code{variable} that
+#'   you want your samples to have.
+#' @return a
 parse_sample_criterion <- function(variable, value) {
   stopifnot(is.character(variable) && length(variable) == 1L)
   stopifnot(is.character(value) && length(value) >= 1)

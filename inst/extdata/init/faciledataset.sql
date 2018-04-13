@@ -21,10 +21,10 @@ CREATE TABLE feature_info (
   feature_id TEXT ,   -- "29126", "ENSG00000120217", etc.
   name TEXT ,         -- "CD274" (if this is a gene, this will be 'symbol')
   meta TEXT ,         -- some unforseen information (maybe PTM (phosphorylated(?)))
-  seqnames TEXT,
-  start INTEGER,
-  end INTEGER,
-  strand INTEGER,    -- 1, -1, 0: positive, negative, unstranded
+--  seqnames TEXT,
+--  start INTEGER,
+--  end INTEGER,
+--  strand INTEGER,    -- 1, -1, 0: positive, negative, unstranded
   effective_length INTEGER,
   source TEXT,
   PRIMARY KEY (feature_type, feature_id));

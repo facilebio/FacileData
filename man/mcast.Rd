@@ -13,7 +13,7 @@ mcast(data, formula, fun.aggregate = NULL, ...)
 
 \item{fun.aggregate}{the aggregate function}
 
-\item{...}{args past down to \code{\link[reshape2]{dcast}}.}
+\item{...}{args passed down to \code{\link[reshape2]{dcast}}.}
 }
 \description{
 This is a simple wrapper to \code{\link[reshape2]{dcast}} which converts

@@ -7,6 +7,5 @@
 gene_info_tbl(x)
 }
 \description{
-This function needs to be removed and the code that relies on gene_info_tbl
-be update.
+Mimics the old `gene_info` table.
 }

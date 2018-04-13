@@ -38,8 +38,16 @@ scores? Use 'ewm' for eigenWeightedMean, and that's all.}
 \value{
 A lazy \code{\link[dplyr]{tbl}} object with the expression
   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
-  othwerise a \code{tbl_df} of the results.
+  otherwise a \code{tbl_df} of the results.
 }
 \description{
 Fetch data from single assay of choice
+}
+\seealso{
+Other API: \code{\link{fetch_assay_score}},
+  \code{\link{fetch_custom_sample_covariates}},
+  \code{\link{fetch_sample_covariates}},
+  \code{\link{fetch_sample_statistics}},
+  \code{\link{fetch_samples}},
+  \code{\link{filter_features}}
 }

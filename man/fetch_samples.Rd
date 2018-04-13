@@ -2,7 +2,7 @@
 % Please edit documentation in R/samples.R
 \name{fetch_samples}
 \alias{fetch_samples}
-\title{Fetches a sample descriptor that matches the filter criterion.}
+\title{Fetches a sample descriptor that matches the filter criterion}
 \usage{
 fetch_samples(x, samples = NULL, assay = "rnaseq", ...)
 }
@@ -22,4 +22,12 @@ sample_covariate_tbl was "wide".
 This is experimental, so each "term" in the filter criteria should be
 just one boolean operation. Multiple terms passed into \code{...} will be
 "AND"ed together.
+}
+\seealso{
+Other API: \code{\link{fetch_assay_data}},
+  \code{\link{fetch_assay_score}},
+  \code{\link{fetch_custom_sample_covariates}},
+  \code{\link{fetch_sample_covariates}},
+  \code{\link{fetch_sample_statistics}},
+  \code{\link{filter_features}}
 }

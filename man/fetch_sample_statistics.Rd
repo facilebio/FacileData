@@ -27,3 +27,11 @@ NOTE: this function needs the axe. It has been changed to use the
 assay_sample_info_table, but the way we handle this with the new unhinged
 assay needs to change.
 }
+\seealso{
+Other API: \code{\link{fetch_assay_data}},
+  \code{\link{fetch_assay_score}},
+  \code{\link{fetch_custom_sample_covariates}},
+  \code{\link{fetch_sample_covariates}},
+  \code{\link{fetch_samples}},
+  \code{\link{filter_features}}
+}

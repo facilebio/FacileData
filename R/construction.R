@@ -1,16 +1,16 @@
 ## The code in here builds FacileDataSets from Bioconductor like objects
 
-##' Create an empty FacileDataSet
-##'
-##' @importFrom rhdf5 h5createFile h5createGroup H5close
-##' @export
-##'
-##' @param path the directory to create which will house the
-##'   \code{FacileDataSet}
-##' @param covariate_definition the path to the covariate definition file
-##' @param page_size,cache_size \code{pragma} values to setup the backend SQLite
-##'   database
-##' @return inivisibly returns the \code{FaclieDataSet} you just made
+#' Create an empty FacileDataSet
+#'
+#' @importFrom rhdf5 h5createFile h5createGroup H5close
+#' @export
+#'
+#' @param path the directory to create which will house the
+#'   \code{FacileDataSet}
+#' @param covariate_definition the path to the covariate definition file
+#' @param page_size,cache_size \code{pragma} values to setup the backend SQLite
+#'   database
+#' @return inivisibly returns the \code{FaclieDataSet} you just made
 initializeFacileDataSet <- function(path, meta_file,
                                     page_size=2**12, cache_size=2e5) {
   assert_valid_meta_file(meta_file)
@@ -35,7 +35,7 @@ initializeFacileDataSet <- function(path, meta_file,
   dbGetQuery(con, sprintf('pragma page_size=%d', page_size))
   dbGetQuery(con, sprintf('pragma cache_size=%d;', cache_size))
   sql.fn <- system.file('extdata', 'init', 'faciledataset.sql',
-                        package='FacileDataSet')
+                        package='FacileData')
   db.sql <- sqlFromFile(sql.fn)
   dbGetQueries(con, db.sql)
 
@@ -43,14 +43,13 @@ initializeFacileDataSet <- function(path, meta_file,
   hd5.fn <- file.path(path, 'data.h5')
   h5createFile(hd5.fn)
   h5createGroup(hd5.fn, 'assay')
-  H5close()
-
+  # H5close()
   invisible(FacileDataSet(path))
 }
 
-##' @export
-##' @importFrom tools file_ext
-assert_valid_meta_file <- function(fn) {
+#' @export
+#' @importFrom tools file_ext
+assert_valid_meta_file <- function(fn, as.list = FALSE) {
   assert_file(fn)
   if (!tolower(file_ext(fn)) ==  'yaml') {
     stop("meta file must be a yaml file")
@@ -63,7 +62,7 @@ assert_valid_meta_file <- function(fn) {
     stop("Missing the following definitions in meta file: ",
          paste(miss.toplevel, collapse=","))
   }
-  fn
+  if (as.list) dat else fn
 }
 
 .feature.types <- c('entrez', 'ensgid', 'enstid')
@@ -76,7 +75,6 @@ supported.assay.container <- function(x) {
 }
 
 extract.assay <- function(x, assay_name=NULL) {
-  ## OO? We don't need no stinking OO
   if (is(x, 'DGEList')) {
     out <- x$counts
   } else if (is(x, 'eSet')) {
@@ -85,7 +83,11 @@ extract.assay <- function(x, assay_name=NULL) {
     out <- ns$assayDataElement(x, assay_name)
   } else if (is(x, 'SummarizedExperiment')) {
     ns <- loadNamespace("SummarizedExperiment")
-    out <- if (is.null(assay_name)) assays(x)[[1L]] else assay(x, assay_name)
+    out <- if (is.null(assay_name)) {
+      ns$assays(x)[[1L]]
+    } else {
+      ns$assay(x, assay_name)
+    }
   } else if (is(x, 'matrix')) {
     out <- x
   } else {
@@ -154,21 +156,51 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
 }
 
 
-##' Adds a complete set of assay data for all samples across datasets in the
-##' FacileDataSet
-##'
-##' This needs to be busted up into functions Minimally loop over datasets to
-##' addFacileAssay
-##'
-##' @importFrom rhdf5 h5createFile h5createDataset h5write
-##' @export
-##'
-##' @param x The \code{FacileDataSeta}
-##' @param dat list of ExpressionSet, SummarizedExperiment, or DGELists that
-##'   have the assay data for the given assay across all of our datasets
-##' @param assay_name the name of the assay in the source dataset object
-##' @param facile_assay_name the name of the assay to store in the FacileDataSet
-##' @param facile_assay_type string indicating the assay_type
+#' Adds new set of assay data for all samples in a FacileDataSet
+#'
+#' Once a FacileDataSet has been created and initialized, either via a
+#' low-level call to [initializeFacileDataSet()], or a call to
+#' [as.FacileDataSet()] over a list of BiocAssayContainers, you can add more
+#' assays (i.e. RNA-seq, microarray, etc.) to the FacileDataSet using this
+#' function.
+#'
+#' Note that you cannot add assay data piecemeal. That is to say, you can not call
+#' this function once to add copynumber data
+#' (addFacileAssaySet(..., facile_assay_type = "cnv") to a subset of samples
+#' and later call this function again to add copynumber to the rest of the
+#' samples. The function will throw an error if
+#' facile_assay_type %in% assay_names(x) == TRUE.
+#'
+#' @md
+#' @importFrom rhdf5 h5createFile h5createDataset h5write
+#' @export
+#'
+#' @param x The `FacileDataSet`
+#' @param datasets list of `ExpressionSet`, `SummarizedExperiment`, or
+#'   `DGEList`s that have the new assay data across all of the datasets in `x`.
+#' @param facile_assay_name the name of the assay in the source dataset object
+#' @param facile_assay_type string indicating the assay_type ('rnaseq',
+#'   'affymetrix', etc.)
+#' @param facile_feature_type a string indicating the universe the features in
+#'   this assay refer to, i.e. "entrez", "ensgid", "enstid", etc.
+#' @param facie_assay_description a string that allows the caller to provide
+#'   a "freeform" description of the assay (platform, protocol, whatever).
+#' @param facile_feature_info a `data.frame` with the required `feature_info`
+#'   columns that describe the features in this assay. Please refer to the
+#'   "Features" section of the `FacileDataSet` vignette for more complete
+#'   description.
+#' @param storage_mode either `"integer"` or `"numeric"`, maps to the
+#'   `storage.mode` parameter in [rhdf5::h5createDataset()]
+#' @param chunk_rows the first entry in the `chunk` parameter in
+#'   [rhdf5::h5createDataset()] (`integer`)
+#' @param chunk_cols the second entry in the `chunk` parameter in
+#'   [rhdf5::h5createDataset()]. If this is `"ncol"`, it is set to the number
+#'   of columns in each of the internal dataset matrices being added.
+#' @param chunk_compression the `level` parameter in [rhdf5::h5createDataset()]
+#' @param assay_name the assay name in the data containers provided in the
+#'   `datasets` list.
+#' @return a `tibble` subset of `facile_feature_info` that indicates the *new*
+#'   features that were added to the internal `feature_info_tbl`.
 addFacileAssaySet <- function(x, datasets, facile_assay_name,
                               facile_assay_type=.assay.types,
                               facile_feature_type=.feature.types,
@@ -315,21 +347,21 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   invisible(list(samples=samples, assay_sample_info=asi))
 }
 
-##' Appends new features to \code{feature_info} table
-##'
-##' This function only adds features (feature_type, feature_id) that are not
-##' in the \code{feature_info} table already
-##'
-##' @export
-##' @param x The \code{FacileDataSet}
-##' @param feature_info a table of new features that provides all columns
-##'   in \code{feature_info_tbl(x)}
-##' @param type A way to override (or set) the \code{feature_type} column of the
-##'   \code{feature_info} table
-##' @return invisible returns an annotated version of the \code{feature_info}
-##'   table with an \code{$added} column with \code{TRUE/FALSE} values for the
-##'   features that were new (and added) to the repository or \code{FALSE} to
-##'   indicate that they were already in the database.
+#' Appends new features to \code{feature_info} table
+#'
+#' This function only adds features (feature_type, feature_id) that are not
+#' in the \code{feature_info} table already
+#'
+#' @export
+#' @param x The \code{FacileDataSet}
+#' @param feature_info a table of new features that provides all columns
+#'   in \code{feature_info_tbl(x)}
+#' @param type A way to override (or set) the \code{feature_type} column of the
+#'   \code{feature_info} table
+#' @return invisible returns an annotated version of the \code{feature_info}
+#'   table with an \code{$added} column with \code{TRUE/FALSE} values for the
+#'   features that were new (and added) to the repository or \code{FALSE} to
+#'   indicate that they were already in the database.
 append_facile_feature_info <- function(x, feature_info,
                                        type=feature_info$feature_type) {
   ## Argument Checking

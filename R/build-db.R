@@ -1,22 +1,13 @@
-##' Creates the database
-##'
-##' @export
-##' @importFrom edgeR cpm calcNormFactors
-##' @importClassesFrom edgeR DGEList
-##' @importFrom RSQLite dbGetQuery dbSendQuery dbWriteTable dbDisconnect
-##' @importFrom RSQLite dbConnect dbWriteTable dbSendQuery
+#' Creates the database
+#'
+#' @export
+#' @importFrom edgeR cpm calcNormFactors
+#' @importClassesFrom edgeR DGEList
+#' @importFrom RSQLite dbGetQuery dbSendQuery dbWriteTable dbDisconnect
+#' @importFrom RSQLite dbConnect dbWriteTable dbSendQuery
 createWarehouse <- function(db.path, datasets, gene.info=fData(datasets[[1]]),
                             sample.meta, pragma.page_size=2**12,
                             db.type='sqlite', ...) {
-  if (FALSE) {
-    ## Run build-db.R in
-    ## ~/workspace/projects/CIT/clinx/clinXwarehouse/inst/build-db/2016-04-20
-    ## to load up db.fn and spiffy
-    db.path <- db.fn
-    datasets <- dat
-    sample.meta <- smeta.all
-    db.type='monetdblite'
-  }
 
   db.type <- match.arg(tolower(db.type), c('monetdblite', 'sqlite'))
 
@@ -26,7 +17,6 @@ createWarehouse <- function(db.path, datasets, gene.info=fData(datasets[[1]]),
   } else if (db.type == 'monetdblite'){
     db.path <- paste0(db.path, '.monetdblite')
   }
-
 
   ## Check arguments -----------------------------------------------------------
   assertPathForOutput(db.path)
@@ -40,7 +30,7 @@ createWarehouse <- function(db.path, datasets, gene.info=fData(datasets[[1]]),
   stopifnot(all(sapply(datasets, function(x) all.equal(rownames(x), rownames(datasets[[1]])))))
   stopifnot(all(rownames(datasets[[1]]) %in% gene.info$feature_id))
 
-  ## we 'sample_id' and 'dataset' are special names (they will always be column
+  ## 'sample_id' and 'dataset' are special names (they will always be column
   ## names of a tbl returned from the FacileDb) so we can't have variables named
   ## that way, too.
   if (any(sample.meta$variable %in% c('dataset', 'sample_id'))) {
@@ -79,7 +69,7 @@ createWarehouse <- function(db.path, datasets, gene.info=fData(datasets[[1]]),
   initializeWithExpressionData(db, datasets)
 
   ## 3. sample meta (grouping)
-  ## Add "now" unix time stame
+  ## Add "now" unix time stamp
   sample.meta <- sample.meta %>%
     transform(date_entered=as.integer(Sys.time())) %>%
     as.data.frame
@@ -111,10 +101,11 @@ createWarehouse <- function(db.path, datasets, gene.info=fData(datasets[[1]]),
 
 ## Create and initialize the warehouse database --------------------------------
 
-##' Creates the expression and sample_stats table, initialize with all data.
-##' @importFrom reshape2 melt
-##' @param db the db connection
-##' @param datasets a list of expression sets to load up databases with
+#' Creates the expression and sample_stats table, initialize with all data.
+#' @importFrom reshape2 melt
+#' @importFrom stats setNames
+#' @param db the db connection
+#' @param datasets a list of expression sets to load up databases with
 initializeWithExpressionData <- function(db, datasets) {
   counts <- lapply(datasets, exprs)
   counts <- do.call(cbind, counts)
@@ -161,9 +152,9 @@ createGeneTable <- function(db) {
   dbSendQuery(db, table.sql)
 }
 
-##' Creates the table that holds gene counts and meta information about data
-##'
-##' @importFrom reshape2 melt
+#' Creates the table that holds gene counts and meta information about data
+#'
+#' @importFrom reshape2 melt
 createExpressionTables <- function(db) {
   ## table.sql <- paste0(
   ##   "CREATE TABLE expression (",
@@ -194,10 +185,10 @@ createSampleCovariateTable <- function(db) {
   dbSendQuery(db, table.sql)
 }
 
-##' Update or add new sample covariate annotation
-##'
-##' @param db a \code{FacileDb} object
-##' @param covariates the covariate table to insert/replace
+#' Update or add new sample covariate annotation
+#'
+#' @param db a \code{FacileDb} object
+#' @param covariates the covariate table to insert/replace
 updateSampleCovariates <- function(db, covariates) {
   if (FALSE) {
     library(FacileTCGA)

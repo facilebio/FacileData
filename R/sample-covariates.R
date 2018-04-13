@@ -1,12 +1,13 @@
-##' Fetch rows from sample_covariate table for specified samples and covariates
-##'
-##' @export
-##' @param db a \code{FacileDataSet} connection
-##' @param samples a samples descriptor \code{tbl_*}
-##' @param covariates character vector of covariate names
-##' @param custom_key The key to use to fetch more custom annotations over
-##'   the given samples
-##' @return rows from the \code{sample_covariate} table
+#' Fetch rows from sample_covariate table for specified samples and covariates
+#'
+#' @export
+#' @param db a \code{FacileDataSet} connection
+#' @param samples a samples descriptor \code{tbl_*}
+#' @param covariates character vector of covariate names
+#' @param custom_key The key to use to fetch more custom annotations over
+#'   the given samples
+#' @return rows from the \code{sample_covariate} table
+#' @family API
 fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                     custom_key=Sys.getenv("USER")) {
   stopifnot(is.FacileDataSet(x))
@@ -45,14 +46,15 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
   set_fds(out, x)
 }
 
-##' Fetches custom (user) annotations for a given user prefix
-##'
-##' @export
-##' @importFrom jsonlite stream_in
-##' @param fds The \code{FacileDataSet}
-##' @param samples the facile sample descriptor
-##' @param custom_key The key to use for the custom annotation
-##' @return covariate tbl
+#' Fetches custom (user) annotations for a given user prefix
+#'
+#' @export
+#' @importFrom jsonlite stream_in
+#' @param fds The \code{FacileDataSet}
+#' @param samples the facile sample descriptor
+#' @param custom_key The key to use for the custom annotation
+#' @return covariate tbl
+#' @family API
 fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                            custom_key=Sys.getenv("USER"),
                                            file.prefix="facile") {
@@ -89,28 +91,27 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
   out %>% set_fds(x)
 }
 
-##' Saves custom sample covariates to a FacileDataSet
-##'
-##' TODO: Figure out how to encode sample_fiter_criteria into serlized
-##' (JSON) annotation file
-##'
-##' @export
-##' @importFrom jsonlite stream_out
-##'
-##' @param x the \code{FacileDataSet}
-##' @param annotation the annotation table of covariate vaues to a
-##'   sample-descriptor-like table
-##' @param name the variable name of the covariate
-##' @param custom_key the custom key (likely userid) for the annotation
-##' @param file.prefix Vincent uses this
-##' @param sample_filter_criteria optional list of filtering criteria that were
-##'   used to drill down into the samples we have the \code{annotatino}
-##'   data.frame for
+#' Saves custom sample covariates to a FacileDataSet
+#'
+#' @export
+#' @importFrom jsonlite stream_out
+#'
+#' @param x the \code{FacileDataSet}
+#' @param annotation the annotation table of covariate vaues to a
+#'   sample-descriptor-like table
+#' @param name the variable name of the covariate
+#' @param custom_key the custom key (likely userid) for the annotation
+#' @param file.prefix Vincent uses this
+#' @param sample_filter_criteria optional list of filtering criteria that were
+#'   used to drill down into the samples we have the \code{annotatino}
+#'   data.frame for
 save_custom_sample_covariates <- function(x, annotation, name=NULL,
                                           class='categorical',
                                           custom_key=Sys.getenv("USER"),
                                           file.prefix="facile",
                                           sample_filter_critera=NULL) {
+  #' TODO: Figure out how to encode sample_filter_criteria into serialized
+  #' (JSON) annotation file
   stopifnot(is.FacileDataSet(x))
   annotation <- collect(annotation, n=Inf)
   assert_columns(annotation, c('dataset', 'sample_id', 'value'))
@@ -132,23 +133,24 @@ save_custom_sample_covariates <- function(x, annotation, name=NULL,
   invisible(set_fds(annotation, x))
 }
 
-##' Appends covariate columns to a query result
-##'
-##' Note that this function will force the collection of \code{x}
-##'
-##' @export
-##' @param x a facile sample descriptor
-##' @param covariates character vector of covariate names. If \code{NULL}
-##'   (default), returns all covariates, if is character and length() == 0, then
-##'   this is a no-op (x is returned)
-##' @param na.rm if \code{TRUE}, filters outgoing result such that only rows
-##'   with nonNA values for the \code{covariates} specified here will be
-##'   returned. Default: \code{FALSE}. Note that this will not check columns
-##'   not specified in \code{covariates} for NA-ness.
-##' @param custom_key The key to use to fetch more custom annotations over
-##'   the given samples
-##' @param .fds A \code{FacileDataSet} object
-##' @return The facile \code{x} object, annotated with the specified covariates.
+#' Appends covariate columns to a query result
+#'
+#' Note that this function will force the collection of \code{x}
+#'
+#' @export
+#' @importFrom stats complete.cases
+#' @param x a facile sample descriptor
+#' @param covariates character vector of covariate names. If \code{NULL}
+#'   (default), returns all covariates, if is character and length() == 0, then
+#'   this is a no-op (x is returned)
+#' @param na.rm if \code{TRUE}, filters outgoing result such that only rows
+#'   with nonNA values for the \code{covariates} specified here will be
+#'   returned. Default: \code{FALSE}. Note that this will not check columns
+#'   not specified in \code{covariates} for NA-ness.
+#' @param custom_key The key to use to fetch more custom annotations over
+#'   the given samples
+#' @param .fds A \code{FacileDataSet} object
+#' @return The facile \code{x} object, annotated with the specified covariates.
 with_sample_covariates <- function(x, covariates=NULL, na.rm=FALSE,
                                    custom_key=Sys.getenv("USER"), .fds=fds(x)) {
   stopifnot(is.FacileDataSet(.fds))
@@ -166,7 +168,7 @@ with_sample_covariates <- function(x, covariates=NULL, na.rm=FALSE,
                                   custom_key=custom_key)
   covs <- spread_covariates(covs, .fds)
 
-  out <- left_join(x, covs, by=c('dataset', 'sample_id'))
+  out <- left_join(x, covs, by=c("dataset", "sample_id"), suffix = c("", ".x"))
 
   if (na.rm && length(covariates)) {
     keep <- complete.cases(select_(out, .dots=covariates))
@@ -176,15 +178,15 @@ with_sample_covariates <- function(x, covariates=NULL, na.rm=FALSE,
   set_fds(out, .fds)
 }
 
-##' Spreads the covariates returned from database into wide data.frame
-##'
-##' Samples that did not have a value for a specific covariate are assigned to
-##' have NA.
-##'
-##' @export
-##' @param x output from \code{fetch_sample_covariates}
-##' @param .fds A \code{FacileDataSet} object
-##' @return a wide \code{tbl_df}-like object
+#' Spreads the covariates returned from database into wide data.frame
+#'
+#' Samples that did not have a value for a specific covariate are assigned to
+#' have NA.
+#'
+#' @export
+#' @param x output from \code{fetch_sample_covariates}
+#' @param .fds A \code{FacileDataSet} object
+#' @return a wide \code{tbl_df}-like object
 spread_covariates <- function(x, .fds=fds(x)) {
   stopifnot(is.FacileDataSet(.fds))
   x <- assert_sample_covariates(x) %>%
@@ -228,80 +230,3 @@ spread_covariates <- function(x, .fds=fds(x)) {
 
   set_fds(out, .fds)
 }
-
-##' Casts the character values of the covariates to their defined types.
-##'
-##' For most things, a single value will be returned from each cast, but in the
-##' case of "time_to_event" data, the value is expended to a two column
-##' data.frame with a \code{tte_<covariate>} column for time to event, and an
-##' \code{event_<covariate>} column to indicate event (1) or right censored (2).
-##'
-##' @export
-##' @param covariate the name of the covariate
-##' @param values the covariate values (which is a \code{character}) as it is
-##'   pulled from the database.
-##' @param cov.def the un-yamled covariate definitions, if missing we rely on
-##'   pulling this out from the \code{FacileDataSet} object \code{.fds}
-##' @param .fds If \code{missing(cov.def)}, this is the \code{FacileDataSet} to
-##'   get the covariate definitions from.
-##' @return values cast to appropriate type if a valid definition was found for
-##'   \code{covariate}, otherwise values is returned "as is". Most of the time
-##'   this is a single vector, but others it can be a data.frame (for
-##'   \code{right_censored} data, for instance)
-cast_covariate <- function(covariate, values, cov.def, .fds) {
-  if (missing(cov.def)) {
-    stopifnot(is.FacileDataSet(.fds))
-    cov.def <- covariate_definitions(.fds)
-  }
-  stopifnot(is(cov.def, 'CovariateDefinitions'))
-  stopifnot(is.character(values))
-  stopifnot(is.character(covariate) && length(covariate) == 1L)
-
-  def <- cov.def[[covariate]]
-  if (is.list(def)) {
-    if (def$class == 'real') {
-      values <- as.numeric(values)
-    }
-    if (def$class == 'right_censored') {
-      values <- decode_right_censored(values, suffix=covariate)
-    }
-    if (is.character(def$levels)) {
-      ## protect against NAing a long list of values in the event that the
-      ## levels provided in the meta.yaml file don't include all levels observed
-      ## here
-      lvls <- c(def$levels, setdiff(values, def$levels))
-      values <- factor(values, lvls)
-    }
-  } else {
-    if (covariate != '.dummy.') {
-      warning("No covariate definition found for: ", covariate, immediate.=TRUE)
-    }
-  }
-
-  values
-}
-
-##' Retrieve the meta information about a covariate
-##'
-##' @export
-##' @param covariate the name of the covariate
-##' @param .fds the \code{FacileDataSet}
-##' @param covdefs The \code{covariate_definitions(.fds)} list
-##' @return a list of covariate information with the following elements:
-##'   \code{$name}, \code{$type}, \code{$class}, \code{$description},
-##'   \code{$label}, \code{$is.factor}, (and maybe \code{$levels})
-covariate_meta_info <- function(covariate, .fds, covdefs=NULL) {
-  if (is.null(covdefs)) {
-    stopifnot(is.FacileDataSet(.fds))
-    covdefs <- covariate_definitions(.fds)
-  }
-  assert_covariate_definitions(covdefs)
-  meta <- covdefs[[covariate]]
-  if (!is.list(meta)) {
-    stop("Covariate `", covariate, "` not found in covariate_definition file")
-  }
-  meta$name <- covariate
-  meta$is.factor <- meta$class == 'categorical' && is.character(meta$levels)
-  meta
-}
-

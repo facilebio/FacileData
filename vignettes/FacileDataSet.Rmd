@@ -2,7 +2,7 @@
 title: "FacileDataSet Overview"
 author: "Steve Lianoglou"
 date: "`r Sys.Date()`"
-package: "`r BiocStyle::pkg_ver('FacileDataSet')`"
+package: "`r BiocStyle::pkg_ver('FacileData')`"
 output:
   html_document:
     code_folding: show
@@ -29,60 +29,248 @@ library(cowplot)
 
 # Overview
 
-The `FacileDataSet` is a container that stores multi-assy high throughput
-genomics data across large datasets.
+The `FacileDataSet` is a reference implementation of a multi-assay datastore
+that implements the *FacileData* API. It uses a SQLite database to store
+feature- and sample-level metadata, and an HDF5 file to store any number of
+assays over its samples. Both of these technologies allow quick and efficient
+access to arbitrary subsets of data stored on disk without having to load all
+of the data into RAM, making this datastore ideal for housing data like
+*the entirety* of the data from [The Cancer Genome Atlas][tcga].
 
-We will use the multi-assay, multi-dataset (indication) TCGA resource as a
-data source to showcase how programming against a FacileDataSet faciliates
-easier exploratory data analyses.
+This document first shows you how to create a `FacileDataSet`, and later gets
+into the design and implentation details of the `FacileDataSet`. These details
+are helpful to understand its performance characterstics (which are awesome),
+and how you might go about tweaking/improving them.
 
-The `FacileTCGADataSet` provides the full RNA-seq expression, miRNA expresion,
-and copy number data across all 11,000+ samples from the TCGA. These are the
-number of normal/tumor samples available across all indications:
+**Warning:** Once you get start to use a `FacileDataSet`, you will find it hard
+to go back to "the normal way" of doing this!
 
-```{r tcga-sample-distribution}
-library(FacileDataSet)
-library(FacileTCGADataSet)
-tcga <- FacileTCGADataSet()
-distro <- samples(tcga) %>%
-  with_sample_covariates(c("indication", "sample_type"))
-ggplot(distro, aes(indication, fill=sample_type)) +
-  geom_bar() +
-  theme(axis.text.x=element_text(angle=90, hjust=1))
+[tcga]: https://cancergenome.nih.gov/
+
+# FacileDataSet Creation
+
+The easiest way to create a `FacileDataSet` is to pass a list of
+[well-groomed](#well-groomed-datasets) `list` of `SummarizedExperiment`s
+(or `ExpressionSet`s) to the `as.FacileDataSet` function.
+
+A `FacileDataSet` is stored on disk as a well-structured directory. You can
+look at the [FacileDataSet Architecture](#faciledataset-architecture) section
+for the full details, but the important information to know is that:
+
+1. The dense assay matrices of the `SummarizedExperiment` are stored in
+   an HDF5 file.
+2. Feature (row) and sample (column) metadata (`fData` and `pData`,
+   respectively) are stored in an SQLite database.
+3. The `pData`/`colData` data.frames of each `SummarizedExperiment` are stored
+   in an SQLite table in an entity-attribute-value-table (EAV) format in order to
+   support covariates that are both common to all `SummarizedExperiment`s and
+   unique to others.
+4. There is a `meta.yaml` file that stores important information about the
+   dataset itself. Perhaps most important is the `sample_covariates` section
+   that dictates how each covariate stored in the EAV table is decoded back
+   into its native R-representation. More details are provided in the
+   [Entity-Attribute-Value Table](#entity-attribute-value-table) section.
+
+## Well Groomed Datasets
+A FacileDataSet generally contains two or more facets, or related data
+collections. For example facets may be the various tissue data sets from the TCGA
+or a various clinical trial for a the same drug. A FacileDataSet should be prepared
+as a *named* list of `SummarizedExperiment`s or a *named* list of `ExpressionSets`.
+It is expected that these objects will share some, but not necessarily all, of their
+sample annotation columns (`colData` or `pData`). Columns with the same names
+should also have the same encoding, factor levels, etc.
+
+Annotations on the `SummarizedExperiment`s themselves and on the `colData` columns
+are also used to fill out the meta.yaml file described above.
+
+`ExpressionSet` pData `data.frames` should have an attribute named 'label', which
+will be a named character vector with a description for each column. In the case of
+a `SummarizedExperiment`, the `colData` should have named list in the `metadata`
+slot with a character description of each column.
+
+`ExpressionSet`s should have a short textual description of the facet/dataset in
+the `annotation` slot. Similarly, `SummarizedExperiment`s should have a list
+in the `metadata` slot with `url` and `description` for the facet/dataset.
+
+The `fData` or `mcols` for the `ExpressionSet` or `SummarizedExperiment`, respectively,
+should have `feature_type`, `feature_id`, `name`, `meta`, `effective_length` and
+`source` columns. See the manpage for `as.FacileDataSet` for more details.
+
+### Well Groomed pData
+
+Given a list of `SummarizedExperiment`s, we collect the individual
+`pData()`/`mcols()`. When `colnames()` match across these `data.frame`s, we
+assume that the covariates *mean the same thing* and are
+*encoded using the same scheme* (ie. factor levels match).
+
+Where `colnames()` differ between `pData` `data.frame`s, even if it is just by a
+single letter, or their case, are treated as being different.
+
+
+# FacileDataSet Architecture
+
+## Hybrid Data Storage
+
+The `FacileDataSet` stores the following data:
+
+1. A `data.sqlite` SQLite database that stores feature- and sample-level
+   metadata.
+2. A `data.h5` HDF5 file that stores a multitude of dense assay matrices that
+   are generated from the assays performed on the samples in the
+   `FacileDataSet`.
+3. A `meta.yaml` file tha contains information about the `FacileDataSet`.
+   To better understand the structure and contents of this file, you can
+   refer to the following:
+    a. The included `testdata/expected-meta.yaml` file for, which is an
+       exemplar file for the `testdata/TestFacileTcgaDataSet`, which consists
+       of data extracted from two datasets (BLCA and BRCA) from the TCGA.
+    b. The help file provided by the `eav_metadata_create` function, which
+       describes in greater detail how we track a dataset's sample-level
+       covariates (aka, "pData" in the bioconductor world).
+   In the meantime, a short description of the entries found in the
+   `meta.yaml` file is provided here:
+    - `name`: the name of the dataset (i.e. `"FacileTCGADataSet"`)
+    - `organism`: `"Homo sapiens"`, `"Mus musculus"`, etc.
+    - `default_assay`: the name of the assay to use by default if none is
+      specified in calls to [fetch_assay_data()], [with_assay_data()], etc.
+      (kind of like how `"exprs"` is the default assay used when working with
+      a [Biobase::ExpressionSet])
+    - `datasets`: a section tha enumerates the datasets included internally.
+      The datasets are further enumerated.
+    - `sample_covariates`: a section that enumerates the covariates that
+      are tracked over the samples inside the `FacileDataSet` (ie. a mapping
+      of the `pData` for the samples). Reference `?create_eav_metadata`
+      for more information.
+4. A `custom-annotation` directory, which stores custom `sample_covariate`
+   (aka "pData") information that analysts can identify and describe during
+   the course of an analysis, or even add from external sources. Although
+   this directory is required in the directory structure of a valid
+   `FacileDataSet`, the `FacileDataSet()` constructor can be called with
+   a custom `anno.dir` parameter so that custom annotations are stored
+   elsewhere.
+
+### SQLite Schema
+
+### Entity-Attribute-Value Table
+
+Sample covariates (aka `pData`) are encoded in an
+[entity-attribute-value (EAV) table][EAV].
+Metadata about these covariates are stored in a `meta.yaml` file in the
+`FacileDataSet` directory which enables the `FacileDataSet` to cast the value
+stored in the EAV table to its native R type. This function generates the
+list-of-list structure to represent the `sample_covariates` section of the
+`meta.yaml` file.
+
+For simple `pData` covariates, each column is treated independently from the
+rest. There are some types of covariates which require multiple columns for
+proper encoding, such as encoding of survival information, which requires
+a pair of values that indicate the "time to event" and the status of the
+event (death or censored). In these cases, the caller needs to provide an
+entry in the `covariate_def` list that describes which `pData` columns
+(`varname`) goes into the single facile covariate value.
+
+Please refer to the **Encoding Survival Covariates** section for a more
+detailed description of how to define encoding survival information into the
+EAV table using the `covariate_def` parameter. Further examples of how to
+encode other complex atributes will be added as they are required, but you
+can reference the **Encoding Arbitrarily Complex Covariates** section for
+some more information.
+
+### Encoding Survival Covariates:
+
+*UPDATE:* Survival covariates can now be encoded simply as a `survival::Surv`
+object and provided as a column in the pData data.frame. The following
+describes the original, and still supported, method.
+
+Survival data in R is typically encoded by two vectors. One vector that
+indicates the "time to event" (tte), and a second to indicate whether or not
+the denoted tte is an "event" (1) or "censored" (0).
+
+Normally these vectors appear as two columns in an experiment's `pData`,
+and therefore need to be encoded into the `FacileDataSet`'s EAV table. To do
+so, the pair of vectors are turned into a signed numeric value. The absolute
+value of the numeric indicates the "time to event" and the sign of the value
+indicates its censoring status.
+
+Let's assume we have `tte_OS` and `event_OS` column that are used to encode
+a patient's overall survival (time and censor status). To store this as an
+"OS" covariate in the EAV table, a `covariate_def` list-of-list definition
+that captures this encoding would look like this:
+
+```
+covariate_def <- list(
+  OS=list(
+    class="right_censored",
+    arguments=c(time="tte_OS", event="event_OS"),
+    label="Overall Survival",
+    type="clinical",
+    description="Overall survival in days"))
 ```
 
+Note how the name of the list-entry in `covariate_def` defines the name of
+the covariate in the `FacileDataSet`. The `class` entry for the `OS`
+definition indicates the type of variable this is. The `varname` entry
+lists the columns in the `pData` that are combined to make this value.
+The `names(varnames)` correspond to the parameters in the
+[eav_encode_right_censored()] function. The analagous `meta.yaml` entry in
+the `sample_covariates` section for the `"OS"` `covariate_def` entry looks
+like so:
 
-
-# Fast and Efficient Data Retrieval
-
-Broadly speaking, there are two classes of functions that are used to pull data
-out of a `FacileDataSet`, the `fetch_*` and `with_*` functions. To a first
-approximation, we can consider the `fetch_*` functions to be the lowest level
-functions, and the `with_*` functions are higher-level accessors.
-
-The `with_*` functions are *a bit* fast-and-loose. These are written to more
-naturally combine in pipe (`%>%`) data manipulation chains and provide analysts
-with a more fluent and succinct API with which to perform exploratory data
-analyses.
-
-For example, to retrieve normalized RNA-seq expression values for CXCL9 and GZMA
-along with survival and sex information for the samples in the samples in the
-TCGA bladder ("BLCA") indication, you can write:
-
-```{r quick-blca-example}
-features <- filter_features(tcga, name %in% c("CXCL9", "GZMA"))
-
-blca.dat <- tcga %>%
-  filter_samples(indication == "BLCA") %>% 
-  with_assay_data(features, assay_name="rnaseq") %>% 
-  with_sample_covariates(c("OS", "sex"))
-
-ggplot(blca.dat, aes(CXCL9, GZMA, color=sex)) +
-  geom_point()
+```
+sample_covariates:
+  OS:
+    class: right_censored
+    label: "Overall Survival"
+    type: "clinical"
+    description: "Overall survival in days"
+    colnames: ["tte_OS", "event_OS"]
+    argnames: ["time", "event"]
 ```
 
+### Encoding Arbitrarily Complex Covariates:
 
+To encode a new type of complex covariate from a wide `pData` data.frame,
+we need to:
 
-# Exemplar Analyses
+1. Specify a new `class` (like `"right_censored"`) for use within a
+   `FacileDataSet`.
+2. Define an `eav_encode_<class>(arg1, arg2, ...)` function which takes the
+   R data vectors (arg1, arg2) and converts them into a single value for the
+   EAV table.
+3. Define a `eav_decode_<class>(x, attrname, def, ...)` function which takes
+   the single value in the EAV table and casts it back into the R-native data
+   vector(s).
+    - `x` is the vector of (character) values from the EAV table
+    - `attrname` is the name of the covariate in the EAV table
+    - `def` is the definition-list for this covariate.
+    - `...` allows each decode function to be further customized.
+[EAV]: https://en.wikipedia.org/wiki/Entity-attribute-value_model
 
-Provide a number of common anlaysis examples using the FacileTCGADataSet.
+### HDF5 File Assay Data
+
+The HDF5 file has one directory per assay. These directories have one matrix
+per dataset for the given assay.
+
+For instance, the `FacileTCGADataSet` HDF5 file has this structure:
+
+```
+. data.h5
+├── rnaseq
+│   ├── ACC
+│   ├── BLCA
+│   ├── BRCA
+│   ├── CESC
+│   ├── ...
+├── cnv_score
+│   ├── ACC
+│   ├── BLCA
+│   ├── BRCA
+│   ├── CESC
+│   ├── ...
+├── mirnaseq
+│   ├── ACC
+│   ├── BLCA
+│   ├── BRCA
+│   ├── CESC
+│   ├── ...
+```
