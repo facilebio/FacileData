@@ -6,6 +6,13 @@
 \usage{
 ds_annot(x, validate = FALSE, ...)
 }
+\arguments{
+\item{x}{SummarizedExperiment, ExpressionSet or DGEList}
+
+\item{validate}{single logical, check results}
+
+\item{...}{additional args (ignored for now)}
+}
 \description{
 Takes dataset-level annotion as stored by each type. DGEList has
 no such slot, unfortunately, and thus gets the default. SE has a

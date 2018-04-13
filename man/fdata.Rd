@@ -2,10 +2,17 @@
 % Please edit documentation in R/as.FacileDataSet.R
 \name{fdata}
 \alias{fdata}
-\title{Bioc-container specific fData extraction functions}
+\title{BioC-container specific fData extraction functions}
 \usage{
 fdata(x, validate = FALSE, ...)
 }
+\arguments{
+\item{x}{SummarizedExperiment, ExpressionSet or DGEList}
+
+\item{validate}{single logical, check results}
+
+\item{...}{additional args (ignored for now)}
+}
 \description{
-not exported on purpose
+not for export
 }

@@ -6,6 +6,11 @@
 \usage{
 pdata(x, ...)
 }
+\arguments{
+\item{x}{SummarizedExperiment, ExpressionSet or DGEList}
+
+\item{...}{additional args, ignored for now}
+}
 \description{
 not for export
 }

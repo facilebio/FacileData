@@ -277,6 +277,9 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
 #' no such slot, unfortunately, and thus gets the default. SE has a
 #' metadata slot and can provide url and description. eSet just has
 #' a character annotation and can provide a description.
+#' @param x SummarizedExperiment, ExpressionSet or DGEList
+#' @param validate single logical, check results
+#' @param ... additional args (ignored for now)
 ds_annot <- function(x, validate = FALSE, ...) {
   UseMethod("ds_annot")
 }
@@ -301,9 +304,12 @@ ds_annot.default <- function(x, validate = FALSE) {
     list(url = "http://google.com", description = "NoDescription")
 }
 
-#' Bioc-container specific fData extraction functions
+#' BioC-container specific fData extraction functions
 #'
-#' not exported on purpose
+#' not for export
+#' @param x SummarizedExperiment, ExpressionSet or DGEList
+#' @param validate single logical, check results
+#' @param ... additional args (ignored for now)
 fdata <- function(x, validate = FALSE, ...) {
   UseMethod("fdata")
 }
@@ -351,6 +357,8 @@ validate.fdata <- function(x, ...) {
 #' Bioc-container specific pData extraction functions
 #'
 #' not for export
+#' @param x SummarizedExperiment, ExpressionSet or DGEList
+#' @param ... additional args, ignored for now
 pdata <- function(x, ...) {
   UseMethod("pdata")
 }
@@ -372,6 +380,13 @@ validate.pdata <- function(x, ...) {
   x
 }
 
+#' Bioc-container specific pData extraction functions
+#'
+#' Get metadata on columns of sample info data.frame (label, etc.) for
+#' inclusion in metadata YAML.
+#' not for export
+#' @param x SummarizedExperiment, ExpressionSet or DGEList
+#' @param ... additional args, ignored for now
 pdata_metadata <- function(x, ...) {
   UseMethod("pdata_metadata")
 }
@@ -398,7 +413,9 @@ pdata_metadata.DGEList <- function(x, ...) {
 
 #' Bioc-container specific assay data extraction functions
 #'
-#' not exported on purpose
+#' Get assay matrix
+#' @param x SummarizedExperiment, ExpressionSet or DGEList
+#' @param ... additional args, ignored for now
 adata <- function(x, assay = NULL, ...) {
   UseMethod("adata")
 }
