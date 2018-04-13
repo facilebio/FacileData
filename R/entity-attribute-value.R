@@ -410,22 +410,51 @@ eav_metadata_create <- function(x, covariate_def = list()) {
   stopifnot(is.data.frame(x))
   if (is.null(covariate_def)) covariate_def <- list()
   stopifnot(is.list(covariate_def))
+  if (length(covariate_def)) {
+    validate_covariate_def_list(covariate_def, x)
+  }
 
-  x$dataset = NULL
-  x$sample_id = NULL
-
-  if (length(covariate_def) > 1)
-      stopifnot(identical(colnames(x), names(covariate_def)))
+  if ("dataset" %in% colnames(x)) x[['dataset']] <- NULL
+  if ("sample_id" %in% colnames(x)) x[['sample_id']] <- NULL
 
   # generate generic covariate definitions for all columns
-  gcd <- lapply(colnames(x), function(name) eavdef_for_column(name, x))
+  gcd <- lapply(colnames(x), function(name) eavdef_for_column(x[[name]], name))
   names(gcd) <- colnames(x)
 
   # remove definitions in gcd that are provided in covariate_def
-  # TODO: FIX this to use arguments instead of colnames
-  axe <- lapply(covariate_def, '[[', 'colnames')
+  axe <- lapply(covariate_def, '[[', 'arguments')
   axe <- unique(unlist(axe, recursive = TRUE, use.names = FALSE))
   gcd[axe] <- NULL
+
+  out <- c(gcd, covariate_def)
+  out
+}
+
+##' Merge inferred and explicit pdata column metadata
+##'
+##' Inferred metadata comes from inspecting the types of each column
+##' of the sample info data frame. Explicit metadata enters
+##' as.FacileDataSet attached to the incoming BioC object and is read
+##' by calling pdata_metadata on that object. The colnames of 'pdat'
+##' must match the names of 'covariate_def'.
+##' @param pdat data.frame, from one or more datasets, bind_rows-d together
+##' @param covariate_def list of additional covariate info, such as 'label'.
+##' @return
+##' @export
+eav_metadata_merge <- function(pdat, covariate_def) {
+  stopifnot(is.data.frame(pdat))
+  if (is.null(covariate_def)) covariate_def <- list()
+  stopifnot(is.list(covariate_def))
+
+  pdat$dataset = NULL
+  pdatx$sample_id = NULL
+
+  if (length(covariate_def) > 0)
+      stopifnot(identical(colnames(pdat), names(covariate_def)))
+
+  # generate generic covariate definitions for all columns
+  gcd <- lapply(colnames(pdat), function(name) eavdef_for_column(pdat[[name]], name))
+  names(gcd) <- colnames(pdat)
 
   out <- mapply(covariate_def, gcd,
                 FUN = function(a,b) {
@@ -434,7 +463,7 @@ eav_metadata_create <- function(x, covariate_def = list()) {
                     def
                 }, SIMPLIFY = FALSE)
 
-  validate_covariate_def_list(out, x)
+  validate_covariate_def_list(out, pdat)
   out
 }
 
@@ -450,7 +479,7 @@ eav_metadata_create <- function(x, covariate_def = list()) {
 #' @param column a vector, e.g. a column out of a pdata
 #' @param column_name single character, name of the colum
 #' @return a generic list-of-list definition column
-eavdef_for_column <- function(column_name, column) {
+eavdef_for_column <- function(column, column_name) {
   out <- list(
       arguments = list(x = column_name),
       class = "categorical",

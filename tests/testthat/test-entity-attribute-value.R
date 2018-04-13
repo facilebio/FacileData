@@ -30,10 +30,9 @@ test_that("pData -> meta.yaml covariate encoding works (simple & compound)", {
   # define covariate_def(-inition) for the compound OS facile covariate:
   covdef <- list(
     OS=list(
-      colnames=c(time="tte_OS", event="event_OS"),
+      arguments=c(time="tte_OS", event="event_OS"),
       class="right_censored",
       label="Overall survival",
-
       type="clinical",
       description="Overall Survival in months"
     ))
@@ -44,14 +43,14 @@ test_that("pData -> meta.yaml covariate encoding works (simple & compound)", {
   relol <- yaml::read_yaml(fn)
 
   # Explicitly test that the tte_OS and event_OS columns from `pDat` were
-  # compounded into the OS covariatel.
+  # compounded into the OS covariate.
   # Reference the "Encoding Survival Covariates" section in the
   # `?eav_metadata_create` helpf file for what the expected behavior of how this
   # compounded, multi-column-to-single-value mapping should work.
   compounded <- c("tte_OS", "event_OS")
   expect_true(all(compounded %in% names(pdat))) # in pData
   expect_true(!any(c("tte_OS", "event_OS") %in% names(relol))) # not in yaml
-  expect_true(setequal(relol$OS$colnames, compounded)) # names of columns saved for posterity
+  expect_true(setequal(relol$OS$arguments, compounded)) # names of columns saved for posterity
 
   # ensure that variables from encoded yaml file match test meta.yaml file
   expect_true(setequal(names(relol), names(lol)))
