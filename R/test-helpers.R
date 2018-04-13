@@ -6,7 +6,7 @@
 #'   the covariate definitions
 exampleFacileDataSet <- function(db.type=c('sqlite', 'monetdblite')) {
   fn <- system.file('extdata', 'exampleFacileDataSet', package='FacileData')
-  FacileData(fn)
+  FacileDataSet(fn)
 }
 
 ## This uses GenomicsTools to create a test database

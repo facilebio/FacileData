@@ -16,7 +16,7 @@ this list are the names the covariates will be called in the target
 \item \code{varname}: a \code{character()} of the column name(s) in \code{x} that this
 sample covariate was derived from. If more than one column is to be used
 for the facile covariate conversion (e.g. if we are encoding survival),
-then provide a \code{length() &gt; 1} character vector with the names of the
+then provide a \code{length() > 1} character vector with the names of the
 columns in \code{x} that were used for the encoding. If this were encoding
 survival this might be \code{c("time", "event")} columns, in that order.
 \item \code{label}: a human readable label to use for this covariate in user facing
@@ -116,10 +116,10 @@ we need to:
 \enumerate{
 \item Specify a new \code{class} (like \code{"right_censored"}) for use within a
 \code{FacileDataSet}.
-\item Define an \code{eav_encode_&lt;class&gt;(arg1, arg2, ...)} function which takes the
+\item Define an \code{eav_encode_<class>(arg1, arg2, ...)} function which takes the
 R data vectors (arg1, arg2) and converts them into a single value for the
 EAV table.
-\item Define a \code{eav_decode_&lt;class&gt;(x, attrname, def, ...)} function which takes
+\item Define a \code{eav_decode_<class>(x, attrname, def, ...)} function which takes
 the single value in the EAV table and casts it back into the R-naive data
 vector(s).
 \itemize{

@@ -4,17 +4,15 @@
 \alias{eavdef_for_column}
 \title{Generate entity-attribute-value definition for a column in a data.frame}
 \usage{
-eavdef_for_column(x, column)
+eavdef_for_column(column_name, column)
 }
 \arguments{
-\item{x}{a \code{data.frame}}
+\item{column_name}{single character, name of the colum}
 
-\item{column}{the name of the column in the \code{x} to parse.}
+\item{column}{a vector, e.g. a column out of a pdata}
 }
 \value{
-a generic list-of-list defintion for \code{x[[column]]}
-
-[[column]: R:[column
+a generic list-of-list definition column
 }
 \description{
 Creates the minimal list-definition for a single column in a \code{pData}

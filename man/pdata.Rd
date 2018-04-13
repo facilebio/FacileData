@@ -7,5 +7,5 @@
 pdata(x, ...)
 }
 \description{
-not exported on purpose
+not for export
 }
