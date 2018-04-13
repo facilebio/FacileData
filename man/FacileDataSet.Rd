@@ -15,9 +15,19 @@ FacileDataSet(path, data.fn = file.path(path, "data.sqlite"),
 
 \item{data.fn}{A custom path to the database (probably don't mess with this)}
 
+\item{sqlite.fn}{name of SQLite data file in FacileDataSet}
+
+\item{hdf5.fn}{name of HDF5 data file in FacileDataSet}
+
+\item{meta.fn}{name of metadata YAML data file in FacileDataSet}
+
 \item{anno.dir}{A directory to house custom annotations/sample covariates}
 
 \item{cache_size}{A custom paramter for the SQLite database}
+
+\item{db.loc}{single character, location for the data}
+
+\item{...}{other args to pass down, not used at the moment}
 
 \item{covdef.fn}{A custom path to the yaml file that has covariate mapping info}
 }

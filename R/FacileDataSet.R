@@ -51,9 +51,14 @@
 #'
 #' @param path The path to the FacileData repository
 #' @param data.fn A custom path to the database (probably don't mess with this)
-#' @param covdef.fn A custom path to the yaml file that has covariate mapping info
+#' @param sqlite.fn name of SQLite data file in FacileDataSet
+#' @param hdf5.fn name of HDF5 data file in FacileDataSet
+#' @param meta.fn name of metadata YAML data file in FacileDataSet
 #' @param anno.dir A directory to house custom annotations/sample covariates
 #' @param cache_size A custom paramter for the SQLite database
+#' @param db.loc single character, location for the data
+#' @param ... other args to pass down, not used at the moment
+#' @param covdef.fn A custom path to the yaml file that has covariate mapping info
 #' @return a `FacileDataSet` object
 FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
                           sqlite.fn=file.path(path, 'data.sqlite'),
@@ -118,6 +123,7 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
 }
 
 #' @export
+#' @param x object to test for Facile-ness
 is.FacileDataSet <- function(x) {
   ## `is` and `validate` functionality conflated here
   is(x, 'FacileDataSet') &&
@@ -126,6 +132,11 @@ is.FacileDataSet <- function(x) {
     'hdf5.fn' %in% names(x) && file.exists(x$hdf5.fn)
 }
 
+##' Get location of the FacileDataSet database
+##' @param x FacileDataSet
+##' @param mustWork single logical
+##' @return single character, path to database
+##' @export
 dbfn <- function(x, mustWork=TRUE) {
   base.fn <- 'data.sqlite'
   if (is.FacileDataSet(x)) {
@@ -139,6 +150,11 @@ dbfn <- function(x, mustWork=TRUE) {
   out
 }
 
+##' Get location of the FacileDataSet HDF5 file
+##' @param x FacileDataSet
+##' @param mustWork single logical
+##' @return single character, path to HDF5 file
+##' @export
 hdf5fn <- function(x, mustWork=TRUE) {
   base.fn <- 'data.h5'
   if (is.FacileDataSet(x)) {
@@ -152,7 +168,7 @@ hdf5fn <- function(x, mustWork=TRUE) {
   out
 }
 
-#' Path to the meta information file
+#' Path to the meta information YAML file
 #'
 #' @rdname meta-info
 #' @export
@@ -199,8 +215,11 @@ default_assay <- function(x) {
   out
 }
 
+#' Get URL and description of datasets in a FacileDataSet
 #' @rdname meta-info
 #' @export
+#' @param x \code{FacileDataSet}
+#' @param as.list single logical if FALSE, condense to a tibble
 dataset_definitions <- function(x, as.list=TRUE) {
   defs <- meta_info(x)$datasets
   if (!as.list) {

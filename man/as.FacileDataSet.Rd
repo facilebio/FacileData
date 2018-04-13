@@ -11,7 +11,7 @@ as.FacileDataSet(x, path, assay_name, assay_type, source_assay,
   chunk_rows = 5000, chunk_cols = "ncol", chunk_compression = 5, ...)
 
 \method{as.FacileDataSet}{list}(x, path, assay_name, assay_type, source_assay,
-  organism = c("unspecified", "Homo sapiens", "Mus musculus"), dataset_name,
+  dataset_name, organism = c("unspecified", "Homo sapiens", "Mus musculus"),
   page_size = 2^12, cache_size = 2e+05, chunk_rows = 5000,
   chunk_cols = "ncol", chunk_compression = 5, ...)
 }

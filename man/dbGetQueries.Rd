@@ -6,6 +6,11 @@
 \usage{
 dbGetQueries(con, sql)
 }
+\arguments{
+\item{con}{database handle}
+
+\item{sql}{list of charvecs (SQL statements)}
+}
 \description{
 Execute multiple queries against a database
 }

@@ -6,6 +6,9 @@
 \usage{
 sqlFromFile(file)
 }
+\arguments{
+\item{file}{single character, name of file with SQL statements}
+}
 \description{
 Copied from http://stackoverflow.com/questions/18914283
 }

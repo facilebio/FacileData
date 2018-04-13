@@ -132,8 +132,8 @@ as.FacileDataSet.default <- function(x, ...) {
 #' @rdname as.FacileDataSet
 as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
                                   source_assay,
-                                  organism = c("unspecified", "Homo sapiens", "Mus musculus"),
                                   dataset_name,
+                                  organism = c("unspecified", "Homo sapiens", "Mus musculus"),
                                   page_size=2**12, cache_size=2e5,
                                   chunk_rows=5000, chunk_cols="ncol",
                                   chunk_compression=5,

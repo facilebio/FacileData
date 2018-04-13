@@ -39,10 +39,10 @@ conform_data_frame <- function(x, to) {
 #' first column as the rownames.
 #'
 #' @export
-#' @param data a \code{data.frame} to whip into a matrix
-#' @param formula the pivot formula
-#' @param fun.aggregate the aggregate function
-#' @param ... args passed down to \code{\link[reshape2]{dcast}}.
+##' @param data a \code{data.frame} to whip into a matrix
+##' @param formula the pivot formula
+##' @param fun.aggregate the aggregate function
+##' @param ... args passed down to \code{\link[reshape2]{dcast}}.
 mcast <- function(data, formula, fun.aggregate=NULL, ...) {
   warning("Use acast, not mcast(?)")
   d <- dcast(data, formula, fun.aggregate, ...)
