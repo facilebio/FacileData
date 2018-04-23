@@ -41,9 +41,7 @@ will want to install three `FacileData*` packages to appreciate the its utility:
 
 ```{r gh-installation, eval = FALSE}
 # install.packages("devtools")
-devtools::install_github("faciledata/FacileData")
-devtools::install_github("faciledata/FacileExplorer")
-devtools::install_github("faciledata/FacileTCGADataSet")
+devtools::install_github("Genentech/FacileData")
 ```
 
 # Example Usage
