@@ -15,9 +15,7 @@ The FacileData suite of packages is only available from github from now. You wil
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("faciledata/FacileData")
-devtools::install_github("faciledata/FacileExplorer")
-devtools::install_github("faciledata/FacileTCGADataSet")
+devtools::install_github("Genentech/FacileData")
 ```
 
 Example Usage
