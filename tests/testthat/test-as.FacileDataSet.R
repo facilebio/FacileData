@@ -11,17 +11,21 @@ context("as.FacileDataSet")
 #})
 
 test_that("We can get pdata metadata", {
-    sinfo = data.frame(a = 1:4,
-                       b = Surv(1:4, c(1,1,0,1)),
-                       stringsAsFactors = FALSE
-                       )
-    rownames(sinfo) = letters[1:4]
-    attr(sinfo, "label") = c(a = "a is a", b = "b is b")
-    vals = matrix(1:16, ncol = 4, dimnames = list(LETTERS[1:4], letters[1:4]))
-    es = ExpressionSet(vals, AnnotatedDataFrame(sinfo))
+  stopifnot(requireNamespace("Biobase", quitely = TRUE))
+  stopifnot(requireNamespace("survival", quietly = TRUE))
+  sinfo = data.frame(a = 1:4,
+                     b = survival::Surv(1:4, c(1,1,0,1)),
+                     stringsAsFactors = FALSE
+  )
+  rownames(sinfo) = letters[1:4]
+  attr(sinfo, "label") = c(a = "a is a", b = "b is b")
+  vals = matrix(1:16, ncol = 4, dimnames = list(LETTERS[1:4], letters[1:4]))
+  es = Biobase::ExpressionSet(vals, Biobase::AnnotatedDataFrame(sinfo))
 
-    expect_identical(
-        FacileData:::pdata_metadata(es), list(a = list(description = "a is a"), b = list(description = "b is b"))
-    )
+  expect_identical(
+    FacileData:::pdata_metadata(es),
+    list(a = list(description = "a is a"),
+         b = list(description = "b is b"))
+  )
 
 })
