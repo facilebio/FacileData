@@ -584,6 +584,7 @@ as.EAVtable <- function(x, eav_metadata = NULL, covariate_def = list()) {
   long = dplyr::bind_rows(eav)
   long = cbind(dplyr::select(x, dataset, sample_id), long)
   long = melt(long, id.vars = c("dataset","sample_id"))
+  long[["variable"]] <- as.character(long[["variable"]])
   clazz = vapply(eav_metadata, "[[", character(1), "class")
   long = left_join(
       long,
