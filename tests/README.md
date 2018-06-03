@@ -1,6 +1,6 @@
 Tests and Coverage
 ================
-01 June, 2018 23:41:44
+04 June, 2018 08:06:13
 
 -   [Coverage](#coverage)
 -   [Unit Tests](#unit-tests)
@@ -43,32 +43,32 @@ Unit Test summary is created using the [testthat](https://github.com/r-lib/testt
 
 | file                                                                    |    n|   time|  error|  failed|  skipped|  warning|
 |:------------------------------------------------------------------------|----:|------:|------:|-------:|--------:|--------:|
-| [test-as.FacileDataSet.R](testthat/test-as.FacileDataSet.R)             |    0|  0.084|      1|       0|        0|        0|
-| [test-assay-data.R](testthat/test-assay-data.R)                         |    4|  1.910|      0|       0|        0|        0|
-| [test-bioc-assay-containers.R](testthat/test-bioc-assay-containers.R)   |   14|  0.706|      0|       0|        0|        0|
-| [test-entity-attribute-value.R](testthat/test-entity-attribute-value.R) |   44|  0.077|      1|       0|        0|        0|
-| [test-FacileDataSet.R](testthat/test-FacileDataSet.R)                   |    3|  0.013|      0|       0|        0|        0|
-| [test-sample-covariates.R](testthat/test-sample-covariates.R)           |   24|  1.043|      0|       0|        0|        0|
-| [test-samples.R](testthat/test-samples.R)                               |    1|  0.034|      0|       0|        0|        0|
-| [test-utilities.R](testthat/test-utilities.R)                           |    2|  0.016|      0|       0|        0|        0|
+| [test-as.FacileDataSet.R](testthat/test-as.FacileDataSet.R)             |    1|  0.138|      0|       0|        0|        0|
+| [test-assay-data.R](testthat/test-assay-data.R)                         |    4|  1.872|      0|       0|        0|        0|
+| [test-bioc-assay-containers.R](testthat/test-bioc-assay-containers.R)   |   14|  1.151|      0|       0|        0|        0|
+| [test-entity-attribute-value.R](testthat/test-entity-attribute-value.R) |   46|  0.165|      0|       0|        0|        0|
+| [test-FacileDataSet.R](testthat/test-FacileDataSet.R)                   |    3|  0.023|      0|       0|        0|        0|
+| [test-sample-covariates.R](testthat/test-sample-covariates.R)           |   24|  1.035|      0|       0|        0|        0|
+| [test-samples.R](testthat/test-samples.R)                               |    1|  0.032|      0|       0|        0|        0|
+| [test-utilities.R](testthat/test-utilities.R)                           |    2|  0.014|      0|       0|        0|        0|
 
 | file                                                                    | test                                                                | context                                          | status |    n|   time|
 |:------------------------------------------------------------------------|:--------------------------------------------------------------------|:-------------------------------------------------|:-------|----:|------:|
-| [test-as.FacileDataSet.R](testthat/test-as.FacileDataSet.R)             | We can get pdata metadata                                           | as.FacileDataSet                                 | ERROR  |    0|  0.084|
-| [test-assay-data.R](testthat/test-assay-data.R)                         | fetch\_assay\_data limits samples correctly                         | Fetching assay level data                        | PASS   |    2|  0.834|
-| [test-assay-data.R](testthat/test-assay-data.R)                         | spreading data works with\_assay\_data                              | Fetching assay level data                        | PASS   |    1|  0.597|
-| [test-assay-data.R](testthat/test-assay-data.R)                         | fetch\_assay\_data(..., aggregate.by='ewm') provides scores         | Fetching assay level data                        | PASS   |    1|  0.479|
-| [test-bioc-assay-containers.R](testthat/test-bioc-assay-containers.R)   | fetch\_assay\_data results converted to DGEList                     | Testing conversion to Bioc Expression Containers | PASS   |   14|  0.706|
-| [test-entity-attribute-value.R](testthat/test-entity-attribute-value.R) | pData -&gt; meta.yaml covariate encoding works (simple & compound)  | Entity-Attribute-Value conversions               | PASS   |   44|  0.076|
-| [test-entity-attribute-value.R](testthat/test-entity-attribute-value.R) | basic encoding and decoding of EAV columns works                    | Entity-Attribute-Value conversions               | ERROR  |    0|  0.001|
-| [test-FacileDataSet.R](testthat/test-FacileDataSet.R)                   | Fetching various database tables from FacileDataSet                 | Basic FacileDataSet functions                    | PASS   |    3|  0.013|
-| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | fetch\_sample\_covariates retrieves all covariates if not specified | Sample Covariates                                | PASS   |    1|  0.069|
-| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | fetch\_sample\_covariates::samples arg limits samples correctly     | Sample Covariates                                | PASS   |    1|  0.046|
-| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | cast\_covariate converts simple variables to correct type           | Sample Covariates                                | PASS   |    6|  0.092|
-| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | cast\_covariate converts right\_censored data correctly             | Sample Covariates                                | PASS   |    8|  0.057|
-| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | spread\_covariates casts simple covariates to correct class         | Sample Covariates                                | PASS   |    4|  0.086|
-| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | spread\_covariates works with both simple and complex types         | Sample Covariates                                | PASS   |    2|  0.110|
-| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | with\_sample\_covariates returns long input with wide covariates    | Sample Covariates                                | PASS   |    1|  0.492|
-| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | successive with\_sample\_covariate calls build correct frame        | Sample Covariates                                | PASS   |    1|  0.091|
-| [test-samples.R](testthat/test-samples.R)                               | fetch samples returns valid sample descriptor absent assay spec     | Retrieving arbitrary samples                     | PASS   |    1|  0.034|
-| [test-utilities.R](testthat/test-utilities.R)                           | We can bind\_rows data.frames with Surv columns                     |                                                  | PASS   |    2|  0.016|
+| [test-as.FacileDataSet.R](testthat/test-as.FacileDataSet.R)             | We can get pdata metadata                                           | as.FacileDataSet                                 | PASS   |    1|  0.138|
+| [test-assay-data.R](testthat/test-assay-data.R)                         | fetch\_assay\_data limits samples correctly                         | Fetching assay level data                        | PASS   |    2|  0.753|
+| [test-assay-data.R](testthat/test-assay-data.R)                         | spreading data works with\_assay\_data                              | Fetching assay level data                        | PASS   |    1|  0.518|
+| [test-assay-data.R](testthat/test-assay-data.R)                         | fetch\_assay\_data(..., aggregate.by='ewm') provides scores         | Fetching assay level data                        | PASS   |    1|  0.601|
+| [test-bioc-assay-containers.R](testthat/test-bioc-assay-containers.R)   | fetch\_assay\_data results converted to DGEList                     | Testing conversion to Bioc Expression Containers | PASS   |   14|  1.151|
+| [test-entity-attribute-value.R](testthat/test-entity-attribute-value.R) | pData -&gt; meta.yaml covariate encoding works (simple & compound)  | Entity-Attribute-Value conversions               | PASS   |   44|  0.162|
+| [test-entity-attribute-value.R](testthat/test-entity-attribute-value.R) | basic encoding and decoding of EAV columns works                    | Entity-Attribute-Value conversions               | PASS   |    2|  0.003|
+| [test-FacileDataSet.R](testthat/test-FacileDataSet.R)                   | Fetching various database tables from FacileDataSet                 | Basic FacileDataSet functions                    | PASS   |    3|  0.023|
+| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | fetch\_sample\_covariates retrieves all covariates if not specified | Sample Covariates                                | PASS   |    1|  0.084|
+| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | fetch\_sample\_covariates::samples arg limits samples correctly     | Sample Covariates                                | PASS   |    1|  0.035|
+| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | cast\_covariate converts simple variables to correct type           | Sample Covariates                                | PASS   |    6|  0.085|
+| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | cast\_covariate converts right\_censored data correctly             | Sample Covariates                                | PASS   |    8|  0.061|
+| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | spread\_covariates casts simple covariates to correct class         | Sample Covariates                                | PASS   |    4|  0.047|
+| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | spread\_covariates works with both simple and complex types         | Sample Covariates                                | PASS   |    2|  0.111|
+| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | with\_sample\_covariates returns long input with wide covariates    | Sample Covariates                                | PASS   |    1|  0.517|
+| [test-sample-covariates.R](testthat/test-sample-covariates.R)           | successive with\_sample\_covariate calls build correct frame        | Sample Covariates                                | PASS   |    1|  0.095|
+| [test-samples.R](testthat/test-samples.R)                               | fetch samples returns valid sample descriptor absent assay spec     | Retrieving arbitrary samples                     | PASS   |    1|  0.032|
+| [test-utilities.R](testthat/test-utilities.R)                           | We can bind\_rows data.frames with Surv columns                     |                                                  | PASS   |    2|  0.014|
