@@ -447,7 +447,7 @@ eav_metadata_merge <- function(pdat, covariate_def) {
   stopifnot(is.list(covariate_def))
 
   pdat$dataset = NULL
-  pdatx$sample_id = NULL
+  pdat$sample_id = NULL
 
   if (length(covariate_def) > 0)
       stopifnot(identical(colnames(pdat), names(covariate_def)))

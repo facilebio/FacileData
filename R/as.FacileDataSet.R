@@ -387,15 +387,22 @@ validate.pdata <- function(x, ...) {
 #' not for export
 #' @param x SummarizedExperiment, ExpressionSet or DGEList
 #' @param ... additional args, ignored for now
+#' @export
 pdata_metadata <- function(x, ...) {
   UseMethod("pdata_metadata")
 }
+
+#' SummarizedExperiment method
+#' @export
 pdata_metadata.SummarizedExperiment <- function(x, ...) {
     stopifnot(requireNamespace("SummarizedExperiment", quietly = TRUE))
     sinfo = SummarizedExperiment::colData(x)
     defs = S4Vectors::metadata(sinfo)
     defs
 }
+
+#' ExpressionSet method
+#' @export
 pdata_metadata.ExpressionSet <- function(x, ...) {
     sinfo = pdata(x)
     defs = attributes(sinfo)$label
@@ -403,6 +410,9 @@ pdata_metadata.ExpressionSet <- function(x, ...) {
     defs = lapply(defs, function(el) { list(description = el) })
     defs
 }
+
+#' DGEList method
+#' @export
 pdata_metadata.DGEList <- function(x, ...) {
     sinfo = x$samples
     defs = sapply(colnames(sinfo), function(el) {
