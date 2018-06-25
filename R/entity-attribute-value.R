@@ -589,7 +589,11 @@ as.EAVtable <- function(x, eav_metadata = NULL, covariate_def = list()) {
       long,
       tibble(variable = names(clazz), class = unname(clazz)),
       by = "variable")
-  ## FIXME: join in type to if available
+  types <- vapply(eav_metadata, "[[", character(1), "type")
+  long = left_join(
+      long,
+      tibble(variable = names(types), type = unname(types)),
+      by = "variable")
   long
 }
 

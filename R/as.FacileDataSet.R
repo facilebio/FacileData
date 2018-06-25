@@ -232,9 +232,11 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   stopifnot(nrow(duplicated(pdat_eav %>% select(dataset, sample_id, variable))) == 0)
 
   ## Register sample covariate info into Facile SQLite
+  known_types <- c("general", "tumor_classification", "data_batch", "IC", "TC", 
+                  "conmeds", "safety", "user_annotation", "active_brush", "mutation")
   sample.covs <- pdat_eav %>%
       mutate(
-          type = "general",  ## FIXME: care about type later
+          type = ifelse(type %in% known_types, type, "general"),
           date_entered = as.integer(Sys.time())
       ) %>% append_facile_table(fds, 'sample_covariate')
 
