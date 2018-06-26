@@ -39,23 +39,23 @@ conform_data_frame <- function(x, to) {
 #' first column as the rownames.
 #'
 #' @export
-##' @param data a \code{data.frame} to whip into a matrix
-##' @param formula the pivot formula
-##' @param fun.aggregate the aggregate function
-##' @param ... args passed down to \code{\link[reshape2]{dcast}}.
+#' @param data a \code{data.frame} to whip into a matrix
+#' @param formula the pivot formula
+#' @param fun.aggregate the aggregate function
+#' @param ... args passed down to \code{\link[reshape2]{dcast}}.
 mcast <- function(data, formula, fun.aggregate=NULL, ...) {
   warning("Use acast, not mcast(?)")
   d <- dcast(data, formula, fun.aggregate, ...)
   set_rownames(as.matrix(d[, -1L, drop=FALSE]), d[[1L]])
 }
 
-##' bind_rows a list of data.frames that might have Surv columns
-##'
-##' Surv columns currently break bind_rows, so we coerce to character, bind_rows,
-##' and coerce back.
-##' @param df_list list of data.frames
-##' @return data.frame
-##' @export
+#' bind_rows a list of data.frames that might have Surv columns
+#'
+#' Surv columns currently break bind_rows, so we coerce to character, bind_rows,
+#' and coerce back.
+#' @param df_list list of data.frames
+#' @return data.frame
+#' @export
 bind_pdata_rows <- function(df_list) {
     ## FIXME: Deprecate in favor of dplyr::bind_rows when they fix #2457
     is_surv = lapply(df_list,

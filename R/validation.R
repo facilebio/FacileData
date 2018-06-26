@@ -143,3 +143,4 @@ is_covariate_definitions <- function(x) {
   }) %>% t
   all(kosher)
 }
+

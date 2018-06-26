@@ -17,9 +17,10 @@ Description: Defines a fluent API over multi-assay high-throughput genomics data
   provide fast and efficient access to arbitrary subsets of these data without
   loading it all into memory.
 Depends:
-  dplyr (>= 0.7.4)
+  R (>= 3.5)
 Imports:
   methods,
+  dplyr (>= 0.7.4),
   dtplyr,
   magrittr,
   yaml,
@@ -40,7 +41,7 @@ Suggests:
   Biobase,
   SummarizedExperiment,
   knitr,
-  roxygen2 (>= 6.0.0)
+  roxygen2 (>= 6.0.1.9000)
 RoxygenNote: 6.0.1.9000
 License: MIT
 Encoding: UTF-8
