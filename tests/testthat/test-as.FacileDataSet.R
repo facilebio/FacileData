@@ -27,5 +27,4 @@ test_that("We can get pdata metadata", {
     list(a = list(description = "a is a"),
          b = list(description = "b is b"))
   )
-
 })

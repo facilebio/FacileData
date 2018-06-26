@@ -232,7 +232,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   stopifnot(nrow(duplicated(pdat_eav %>% select(dataset, sample_id, variable))) == 0)
 
   ## Register sample covariate info into Facile SQLite
-  known_types <- c("general", "tumor_classification", "data_batch", "IC", "TC", 
+  known_types <- c("general", "tumor_classification", "data_batch", "IC", "TC",
                   "conmeds", "safety", "user_annotation", "active_brush", "mutation")
   sample.covs <- pdat_eav %>%
       mutate(
@@ -242,16 +242,16 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
 
   ## Register sample info into Facile SQLite
   sample.info <- pdat_eav %>%
-      select(dataset, sample_id) %>%
-      distinct(dataset, sample_id) %>%
-      mutate(parent_id =  "") %>%
-        append_facile_table(fds, 'sample_info')
+    select(dataset, sample_id) %>%
+    distinct(dataset, sample_id) %>%
+    mutate(parent_id =  "") %>%
+    append_facile_table(fds, 'sample_info')
 
   ## insert the first assay
   if (is.integer(adat[[1]]))
-      storage_mode = "integer"
+    storage_mode = "integer"
   else
-      storage_mode = "numeric"
+    storage_mode = "numeric"
 
   tstart <- Sys.time()
   samples <- addFacileAssaySet(

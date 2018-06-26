@@ -17,34 +17,31 @@ Description: Defines a fluent API over multi-assay high-throughput genomics data
   provide fast and efficient access to arbitrary subsets of these data without
   loading it all into memory.
 Depends:
-  dplyr (>= 0.7.4)
+  R (>= 3.5)
 Imports:
-    methods,
-    dtplyr,
-    magrittr,
-    yaml,
-    checkmate (>= 1.8.5),
-    readxl,
-    RSQLite,
-    reshape2,
-    tidyr,
-    rhdf5,
-    data.table,
-    jsonlite,
-    multiGSEA (>= 0.10.4),
-    edgeR,
-    lazyeval,
-    survival,
-    glue,
-    desc,
-    S4Vectors,
-    devtools
+  methods,
+  dplyr (>= 0.7.4),
+  dtplyr,
+  magrittr,
+  yaml,
+  checkmate (>= 1.8.5),
+  readxl,
+  RSQLite,
+  reshape2,
+  tidyr,
+  rhdf5,
+  data.table,
+  jsonlite,
+  multiGSEA (>= 0.10.4),
+  edgeR,
+  lazyeval,
+  survival
 Suggests:
   testthat (>= 1.0.2),
   Biobase,
   SummarizedExperiment,
   knitr,
-  roxygen2 (>= 6.0.0)
+  roxygen2 (>= 6.0.1.9000)
 RoxygenNote: 6.0.1.9000
 License: MIT
 Encoding: UTF-8
