@@ -46,7 +46,7 @@ The Facile___DataSet needs a name (in the ___ component -- this structure is man
 ```{r define}
 dataset_name <- "GCell"
 FDS_name <- glue::glue("Facile{dataset_name}DataSet")
-FDS_version <- "0.1.1"
+FDS_version <- "0.1.2"
 ```
 
 This will therefore produce a `r FDS_name` package.
@@ -69,17 +69,17 @@ library(FacileData)
 
 # Load data from `ExpressionPlot`
 
-I have converted each of the studies from `RangedSummarizedExperiment` to simply `SummarizedExperiment`as the former is not yet supported by `as.FacileDataSet`.
+Load two datasets directly from `ExpressionPlot`. These have been superseded, so we will skip the warnings.
 
 ```{r load ep data}
 library(ExpressionPlot)
 
-ngs114 <- ep.project.from.id("PRJ0013167")
-ngs171 <- ep.project.from.id("PRJ0013730")
+ngs114 <- ep.project.from.id("PRJ0013166", standard.checks = FALSE)
+ngs171 <- ep.project.from.id("PRJ0013155", standard.checks = FALSE)
 
 ds <- list(
-  NGS114 = as(ep.SummarizedExperiment(ngs114, attach.annot = TRUE), "SummarizedExperiment"),
-  NGS171 = as(ep.SummarizedExperiment(ngs171, attach.annot = TRUE), "SummarizedExperiment")
+  NGS114 = ep.SummarizedExperiment(ngs114, attach.annot = TRUE),
+  NGS171 = ep.SummarizedExperiment(ngs171, attach.annot = TRUE)
 )
 ```
 
@@ -182,7 +182,7 @@ samples <- fetch_sample_covariates(gcell_fds, samples, "tissue") %>%
 genes <- c(ERBB2 = 'GeneID:2064', GRB7 = 'GeneID:2886')
 exprs <- gcell_fds %>% fetch_assay_data(genes, samples, 'rnaseq', normalized = TRUE)
 ew <- exprs %>% dcast(dataset + sample_id ~ feature_name, value.var = 'value')
-cor(ew[,"ERBB2"], ew[,"GRB7"]) # > 0.6
+cor(ew[,"ERBB2"], ew[,"GRB7"]) # ~ 0.76
 
 library(ggplot2)
 theme_set(theme_bw())
