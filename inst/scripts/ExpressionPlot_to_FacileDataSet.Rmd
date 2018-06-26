@@ -37,7 +37,7 @@ The path for now is to go via a `list` of harmonized and annotated `ExpressionSe
 
 This conversion is based on a WIP script found here: https://stash.intranet.roche.com/stash/projects/FACILEDATA/repos/faciledataset/browse/inst/scripts/gcell_rnaseq_as.FacileDataSet.R?at=refs%2Fheads%2Ffeature%2Fas.FacileDataSet
 
-The result of this workflow should be a Facile___DataSet. Let's start by filling in that gap
+The result of this workflow should be a Facile___DataSet R package. Let's start by filling in that gap
 
 # Define the Facile___DataSet
 
@@ -59,11 +59,11 @@ available from ssh://git@stash.intranet.roche.com:7999/faciledata/faciledataset.
 library(FacileData)
 ```
 
-## Note
+## Notes
 
 - This script requires the Genentech bundled R 3.4.3 distribution. The R 3.5.0 distribution is not able to detect the `ExpressionPlot` projects used and complains about `S4Vectors`.
-- PRJ0013166 (NGS114) has been superseded and this script will now use PRJ0013167.
-- PRJ0013155 (NGS171) has been superseded and this script will now use PRJ0013730 (not sure if connected at all).
+- PRJ0013166 (NGS114) has been superseded but we will still use it and skip the warning.
+- PRJ0013155 (NGS171) has been superseded but we will still use it and skip the warning.
 - `ExpressionPlot` R package requires that the calls be made on rescomp, since it uses an internal perl script.
 - If building `FacileData` from source, make sure to document the functions (e.g. `devtools::document` or via Build Tools) as this is not always complete in the repo, and functionality will not be exported otherwise.
 
