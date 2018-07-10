@@ -97,7 +97,7 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
 #' @importFrom jsonlite stream_out
 #'
 #' @param x the \code{FacileDataSet}
-#' @param annotation the annotation table of covariate vaues to a
+#' @param annotation the annotation table of covariate values to a
 #'   sample-descriptor-like table
 #' @param name the variable name of the covariate
 #' @param custom_key the custom key (likely userid) for the annotation
