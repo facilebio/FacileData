@@ -346,24 +346,23 @@ assay_feature_type <- function(x, assay_name) {
 #'   features in a specified assay. This
 assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
   ## NOTE: This is currently limited to a single assay
+  message("here we go")
   ftype <- assay_feature_type(x, assay_name)
   if (!is.null(feature_ids)) {
     assert_character(feature_ids)
-    if (length(feature_ids) == 0) {
-      feature_ids <- NULL
-    } else {
-      feature_ids <- tibble(feature_id=feature_ids)
-    }
   }
 
   afinfo <- assay_feature_info_tbl(x) %>%
-    filter(assay == assay_name) %>%
-    collect(n=Inf)
+    filter(assay == assay_name)
 
-  if (!is.null(feature_ids)) {
-    afinfo <- inner_join(afinfo, feature_ids, by=c('feature_id'))
+  if (!is.null(feature_ids) && length(feature_ids) > 0) {
+    message("ainfo filter")
+    afinfo <- filter(afinfo, feature_id %in% feature_ids)
   }
+  message("afinfo collect")
+  afinfo <- collect(afinfo, n=Inf)
 
+  message("assay.info collect")
   assay.info <- assay_info_tbl(x) %>%
     select(assay, assay_type, feature_type) %>%
     filter(assay == assay_name) %>%
@@ -372,11 +371,8 @@ assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
   out <- afinfo %>% inner_join(assay.info, by='assay')
   ftype <- out$feature_type[1L]
   finfo <- feature_info_tbl(x)
-  if (length(ftype == 1L)) {
-    finfo <- filter(finfo, feature_type == ftype)
-  } else {
-    finfo <- filter(finfo, feature_type %in% ftype)
-  }
+  finfo <- filter(finfo, feature_type %in% ftype)
+  message("finfo collect")
   finfo <- collect(finfo, n=Inf)
 
   out %>%
