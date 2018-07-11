@@ -346,7 +346,6 @@ assay_feature_type <- function(x, assay_name) {
 #'   features in a specified assay. This
 assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
   ## NOTE: This is currently limited to a single assay
-  message("here we go")
   ftype <- assay_feature_type(x, assay_name)
   if (!is.null(feature_ids)) {
     assert_character(feature_ids)
@@ -356,13 +355,10 @@ assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
     filter(assay == assay_name)
 
   if (!is.null(feature_ids) && length(feature_ids) > 0) {
-    message("ainfo filter")
     afinfo <- filter(afinfo, feature_id %in% feature_ids)
   }
-  message("afinfo collect")
   afinfo <- collect(afinfo, n=Inf)
 
-  message("assay.info collect")
   assay.info <- assay_info_tbl(x) %>%
     select(assay, assay_type, feature_type) %>%
     filter(assay == assay_name) %>%
@@ -372,7 +368,6 @@ assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
   ftype <- out$feature_type[1L]
   finfo <- feature_info_tbl(x)
   finfo <- filter(finfo, feature_type %in% ftype)
-  message("finfo collect")
   finfo <- collect(finfo, n=Inf)
 
   out %>%
@@ -391,7 +386,6 @@ assay_feature_name_map <- function(x, assay_name) {
 }
 
 #' Identify the number of each assay run across specific samples
-#'
 #' @export
 #' @param x FacileDataSet
 #' @param samples sample descriptor
@@ -404,25 +398,19 @@ assay_info_over_samples <- function(x, samples) {
   stopifnot(is.FacileDataSet(x))
   assert_sample_subset(samples)
 
-  asi <- assay_sample_info_tbl(x)
+  asi <- assay_sample_info_tbl(x) %>% select(dataset, assay, sample_id)
   if (!same_src(asi, samples)) {
-    asi <- collect(asi, n=Inf)
-    samples <- collect(samples, n=Inf)
+      asi <- collect(asi)
+      samples <- collect(samples)
   }
-  assays <- inner_join(asi, samples, by=c('dataset', 'sample_id'))
+  assays <- inner_join(asi, samples, by = c("dataset","sample_id"))
 
   ## Count number of samples across dataset count for each assay type
   out <- assays %>%
-    group_by(assay, dataset) %>%
-    summarize(nsamples=n()) %>%
-    collect(n=Inf) %>%
     group_by(assay) %>%
-    summarize(ndatasets=length(unique(dataset)), nsamples=sum(nsamples)) %>%
-    ungroup
-  out
+      summarize(ndatasets = n_distinct(dataset), nsamples=n()) %>%
+      ungroup()
 }
-
-
 
 ## helper function to fetch_assay_data
 normalize.assay.matrix <- function(vals, feature.info, sample.info,
