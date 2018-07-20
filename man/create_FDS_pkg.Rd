@@ -2,7 +2,7 @@
 % Please edit documentation in R/create_FDS_pkg.R
 \name{create_FDS_pkg}
 \alias{create_FDS_pkg}
-\title{Create a Facile___DataSet Package from ExpressionPlot Data}
+\title{Create a Facile___DataSet Package from a list of SummarizedExperiments}
 \usage{
 create_FDS_pkg(data_list = NULL, slug = NULL, version = "0.0.1",
   parent_path = ".", covariates = NULL, cov_metadata = NULL,
@@ -31,7 +31,7 @@ create_FDS_pkg(data_list = NULL, slug = NULL, version = "0.0.1",
 Builds and installs a \code{Facile___DataSet} package, leaving a source tarball in \code{parent_path} directory.
 }
 \description{
-Accepts a list of datasets extracted from ExpressionPlot and
+Accepts a list of datasets (SummarizedExperiments) and metadata and
 builds/installs a Facile___DataSet based on this.
 }
 \examples{

@@ -1,6 +1,6 @@
-#' Create a Facile___DataSet Package from ExpressionPlot Data
+#' Create a Facile___DataSet Package from a list of SummarizedExperiments
 #'
-#' Accepts a list of datasets extracted from ExpressionPlot and 
+#' Accepts a list of datasets (SummarizedExperiments) and metadata and  
 #' builds/installs a Facile___DataSet based on this.
 #' 
 #' @md
@@ -120,8 +120,10 @@ create_FDS_pkg <- function(data_list = NULL,
     
     new_colnames <- c("aliases", "effective_length", "feature_type", "name", "meta")
     if (!identical(colnames(mcols(x)), new_colnames)) {
-      message("Renaming rowData columns:")
-      invisible(sapply(paste(colnames(mcols(x)), new_colnames, sep = " --> "), message))
+      if (i == 1) { # quiet on subsequent elements
+        message("* Renaming rowData columns:")
+        invisible(sapply(paste(colnames(mcols(x)), new_colnames, sep = " --> "), message))
+      }
       colnames(mcols(x)) = new_colnames
     }
     
@@ -175,6 +177,8 @@ create_FDS_pkg <- function(data_list = NULL,
   dir.create(file.path(DIR, "inst", "extdata"), recursive = TRUE) 
   
   ## create FDS
+  message(paste0("* Creating ", FDS_name, " object"))
+  message("* This can take some time.")
   as.FacileDataSet(curated_data_list,
                    path = file.path(DIR, "inst", "extdata", FDS_name),
                    assay_name = assay_name,
