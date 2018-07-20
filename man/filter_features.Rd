@@ -24,3 +24,4 @@ Other API: \code{\link{fetch_assay_data}},
   \code{\link{fetch_sample_statistics}},
   \code{\link{fetch_samples}}
 }
+\concept{API}

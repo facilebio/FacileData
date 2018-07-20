@@ -232,9 +232,11 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   stopifnot(nrow(duplicated(pdat_eav %>% select(dataset, sample_id, variable))) == 0)
 
   ## Register sample covariate info into Facile SQLite
+  known_types <- c("general", "tumor_classification", "data_batch", "IC", "TC", 
+                  "conmeds", "safety", "user_annotation", "active_brush", "mutation")
   sample.covs <- pdat_eav %>%
       mutate(
-          type = "general",  ## FIXME: care about type later
+          type = ifelse(type %in% known_types, type, "general"),
           date_entered = as.integer(Sys.time())
       ) %>% append_facile_table(fds, 'sample_covariate')
 
@@ -387,15 +389,22 @@ validate.pdata <- function(x, ...) {
 #' not for export
 #' @param x SummarizedExperiment, ExpressionSet or DGEList
 #' @param ... additional args, ignored for now
+#' @export
 pdata_metadata <- function(x, ...) {
   UseMethod("pdata_metadata")
 }
+
+#' SummarizedExperiment method
+#' @export
 pdata_metadata.SummarizedExperiment <- function(x, ...) {
     stopifnot(requireNamespace("SummarizedExperiment", quietly = TRUE))
     sinfo = SummarizedExperiment::colData(x)
     defs = S4Vectors::metadata(sinfo)
     defs
 }
+
+#' ExpressionSet method
+#' @export
 pdata_metadata.ExpressionSet <- function(x, ...) {
     sinfo = pdata(x)
     defs = attributes(sinfo)$label
@@ -403,6 +412,9 @@ pdata_metadata.ExpressionSet <- function(x, ...) {
     defs = lapply(defs, function(el) { list(description = el) })
     defs
 }
+
+#' DGEList method
+#' @export
 pdata_metadata.DGEList <- function(x, ...) {
     sinfo = x$samples
     defs = sapply(colnames(sinfo), function(el) {
