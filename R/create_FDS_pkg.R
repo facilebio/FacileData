@@ -114,9 +114,9 @@ create_FDS_pkg <- function(data_list = NULL,
     if (any(!(covariates %in% names(colData(x))))) stop("All covariates must be present in colData for all datasets")
       
     ## prepend feature_id with "GeneID:"
-    if (!grepl("GeneID", rownames(x)[1])) { 
-      rownames(x) = paste0("GeneID:", rownames(x))
-    }
+    # if (!grepl("GeneID", rownames(x)[1])) { 
+    #   rownames(x) = paste0("GeneID:", rownames(x))
+    # }
     
     new_colnames <- c("aliases", "effective_length", "feature_type", "name", "meta")
     if (!identical(colnames(mcols(x)), new_colnames)) {
