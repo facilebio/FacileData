@@ -8,7 +8,7 @@ sqlFromFile <- function(file){
   requireNamespace("stringr") || stop("Failed to require stringr")
   sql <- readLines(file)
   sql <- gsub("--.*$", '', sql) ## remove comments
-  sql <- unlist(str_split(paste(sql,collapse=" "),";"))
+  sql <- unlist(strsplit(paste(sql,collapse=" "),";"))
   sql <- sql[grep("^ *$", sql, invert=TRUE)]
   sql
 }

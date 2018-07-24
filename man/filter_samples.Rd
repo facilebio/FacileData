@@ -30,3 +30,7 @@ eav.query <- sample_covariate_tbl(fds) \%>\%
   collect
 setequal(crc.34$sample_id, eav.query$sample_id)
 }
+\concept{API
+This feature is implemented so poorly. It's only really meant to be used
+interactively, and with extreme caution ... programatically specifying
+the covariates, for instance, does not work right now.}
