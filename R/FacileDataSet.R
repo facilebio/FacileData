@@ -122,6 +122,7 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   out
 }
 
+#' Class and validity checker for FacileDataSet
 #' @export
 #' @param x object to test for Facile-ness
 is.FacileDataSet <- function(x) {
