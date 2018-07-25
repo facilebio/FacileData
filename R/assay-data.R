@@ -343,7 +343,7 @@ assay_feature_type <- function(x, assay_name) {
 #' @inheritParams assay_feature_type
 #' @param feature_ids a character vector of feature_ids
 #' @return a \code{tbl_sqlite} result with the feature information for the
-#'   features in a specified assay. This
+#'   features in a specified assay
 assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
   ## NOTE: This is currently limited to a single assay
   ftype <- assay_feature_type(x, assay_name)
@@ -364,15 +364,20 @@ assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
     filter(assay == assay_name) %>%
     collect(n=Inf)
 
+  ## FIXME: consider materialized view for this
   out <- afinfo %>% inner_join(assay.info, by='assay')
+
   ftype <- out$feature_type[1L]
   finfo <- feature_info_tbl(x)
   finfo <- filter(finfo, feature_type %in% ftype)
   finfo <- collect(finfo, n=Inf)
 
+  ## FIXME: feature_id should be made unique to feature_type to simplify
+  ## e.g add GeneID: prefix for entrez
+  ## But, still we know out and finfo each only have one feature type now
   out %>%
-    inner_join(finfo, by=c('feature_type', 'feature_id')) %>%
-    set_fds(x)
+      inner_join(finfo, by=c('feature_type', 'feature_id')) %>%
+      set_fds(x)
 }
 
 #' @rdname feature_name_map

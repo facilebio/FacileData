@@ -11,7 +11,7 @@ save_custom_sample_covariates(x, annotation, name = NULL,
 \arguments{
 \item{x}{the \code{FacileDataSet}}
 
-\item{annotation}{the annotation table of covariate vaues to a
+\item{annotation}{the annotation table of covariate values to a
 sample-descriptor-like table}
 
 \item{name}{the variable name of the covariate}
