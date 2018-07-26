@@ -280,6 +280,6 @@ as.SummarizedExperiment.FacileDataSet <- function(x, covariates=TRUE, feature_id
                                                   ...) {
   force(.fds)
   x <- samples(x) %>% collect(n=Inf) %>% set_fds(.fds)
-  as.SummarizedExperimentt(x, covariates, feature_ids, assay_name, x,
+  as.SummarizedExperiment(x, covariates, feature_ids, assay_name, x,
                            custom_key, ...)
 }
