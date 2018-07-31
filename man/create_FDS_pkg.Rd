@@ -6,7 +6,8 @@
 \usage{
 create_FDS_pkg(data_list = NULL, slug = NULL, version = "0.0.1",
   parent_path = ".", covariates = NULL, cov_metadata = NULL,
-  data_metadata = NULL, assay_name = "rnaseq", organism = "Homo sapiens")
+  data_metadata = NULL, assay_name = "rnaseq", source_assay = "counts",
+  organism = "Homo sapiens")
 }
 \arguments{
 \item{data_list}{named \code{list} of data \code{SummarizedExperiment} objects to be converted into a \code{Facile___DataSet} package.}

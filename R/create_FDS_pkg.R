@@ -85,6 +85,7 @@ create_FDS_pkg <- function(data_list = NULL,
                            cov_metadata = NULL,
                            data_metadata = NULL,
                            assay_name = "rnaseq",
+                           source_assay = "counts",
                            organism = "Homo sapiens") {
   
   if (is.null(slug)) stop("Please provide a slug to use in the new dataset name: Facile<slug>DataSet")
@@ -107,11 +108,11 @@ create_FDS_pkg <- function(data_list = NULL,
 
     ## work with the current list element only
     x <- d[[i]]
-        
+
     ## assertions
     if (!inherits(x, "SummarizedExperiment")) stop("Requires SummarizedExperiment objects in data_list")
     if (length(colnames(mcols(x))) != 5L) stop("Requires exactly 5 columns in rowData")
-    if (any(!(covariates %in% names(colData(x))))) stop("All covariates must be present in colData for all datasets")
+    if (any(!(covariates %in% names(cov_metadata)))) stop("All covariates must be present in colData for all datasets")
       
     ## prepend feature_id with "GeneID:"
     # if (!grepl("GeneID", rownames(x)[1])) { 
@@ -183,7 +184,7 @@ create_FDS_pkg <- function(data_list = NULL,
                    path = file.path(DIR, "inst", "extdata", FDS_name),
                    assay_name = assay_name,
                    assay_type = "rnaseq", # required
-                   source_assay = "counts", # required
+                   source_assay = source_assay, 
                    dataset_name = slug,
                    organism = organism
   )
