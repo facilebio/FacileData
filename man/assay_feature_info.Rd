@@ -15,7 +15,7 @@ assay_feature_info(x, assay_name, feature_ids = NULL)
 }
 \value{
 a \code{tbl_sqlite} result with the feature information for the
-  features in a specified assay. This
+  features in a specified assay
 }
 \description{
 DEBUG: This logic is unnecessarily complex because I make sure to collect

@@ -343,45 +343,41 @@ assay_feature_type <- function(x, assay_name) {
 #' @inheritParams assay_feature_type
 #' @param feature_ids a character vector of feature_ids
 #' @return a \code{tbl_sqlite} result with the feature information for the
-#'   features in a specified assay. This
+#'   features in a specified assay
 assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
   ## NOTE: This is currently limited to a single assay
   ftype <- assay_feature_type(x, assay_name)
   if (!is.null(feature_ids)) {
     assert_character(feature_ids)
-    if (length(feature_ids) == 0) {
-      feature_ids <- NULL
-    } else {
-      feature_ids <- tibble(feature_id=feature_ids)
-    }
   }
 
   afinfo <- assay_feature_info_tbl(x) %>%
-    filter(assay == assay_name) %>%
-    collect(n=Inf)
+    filter(assay == assay_name)
 
-  if (!is.null(feature_ids)) {
-    afinfo <- inner_join(afinfo, feature_ids, by=c('feature_id'))
+  if (!is.null(feature_ids) && length(feature_ids) > 0) {
+    afinfo <- filter(afinfo, feature_id %in% feature_ids)
   }
+  afinfo <- collect(afinfo, n=Inf)
 
   assay.info <- assay_info_tbl(x) %>%
     select(assay, assay_type, feature_type) %>%
     filter(assay == assay_name) %>%
     collect(n=Inf)
 
+  ## FIXME: consider materialized view for this
   out <- afinfo %>% inner_join(assay.info, by='assay')
+
   ftype <- out$feature_type[1L]
   finfo <- feature_info_tbl(x)
-  if (length(ftype == 1L)) {
-    finfo <- filter(finfo, feature_type == ftype)
-  } else {
-    finfo <- filter(finfo, feature_type %in% ftype)
-  }
+  finfo <- filter(finfo, feature_type %in% ftype)
   finfo <- collect(finfo, n=Inf)
 
+  ## FIXME: feature_id should be made unique to feature_type to simplify
+  ## e.g add GeneID: prefix for entrez
+  ## But, still we know out and finfo each only have one feature type now
   out %>%
-    inner_join(finfo, by=c('feature_type', 'feature_id')) %>%
-    set_fds(x)
+      inner_join(finfo, by=c('feature_type', 'feature_id')) %>%
+      set_fds(x)
 }
 
 #' @rdname feature_name_map
@@ -395,7 +391,6 @@ assay_feature_name_map <- function(x, assay_name) {
 }
 
 #' Identify the number of each assay run across specific samples
-#'
 #' @export
 #' @param x FacileDataSet
 #' @param samples sample descriptor
@@ -408,25 +403,19 @@ assay_info_over_samples <- function(x, samples) {
   stopifnot(is.FacileDataSet(x))
   assert_sample_subset(samples)
 
-  asi <- assay_sample_info_tbl(x)
+  asi <- assay_sample_info_tbl(x) %>% select(dataset, assay, sample_id)
   if (!same_src(asi, samples)) {
-    asi <- collect(asi, n=Inf)
-    samples <- collect(samples, n=Inf)
+      asi <- collect(asi)
+      samples <- collect(samples)
   }
-  assays <- inner_join(asi, samples, by=c('dataset', 'sample_id'))
+  assays <- inner_join(asi, samples, by = c("dataset","sample_id"))
 
   ## Count number of samples across dataset count for each assay type
   out <- assays %>%
-    group_by(assay, dataset) %>%
-    summarize(nsamples=n()) %>%
-    collect(n=Inf) %>%
     group_by(assay) %>%
-    summarize(ndatasets=length(unique(dataset)), nsamples=sum(nsamples)) %>%
-    ungroup
-  out
+      summarize(ndatasets = n_distinct(dataset), nsamples=n()) %>%
+      ungroup()
 }
-
-
 
 ## helper function to fetch_assay_data
 normalize.assay.matrix <- function(vals, feature.info, sample.info,
