@@ -6,12 +6,13 @@
 \alias{FacileDataSet-package}
 \title{FacileDataSet: A fluent API for accessing multi-assay high-throughput genomics data.}
 \description{
-Defines a fluent API over multi-assay high-throughput genomics data
-to facilitate exploratory data analysis. This package also defines a
-"FacileDataSet" class, which is a reference implementation of the "FacileData"
-API that uses SQLite and HDF5 files to store arbitrarily large datasets and
-provide fast and efficient access to arbitrary subsets of these data without
-loading it all into memory.
+Defines the "FacileData" API over multi-assay, high-throughput
+  genomics data. The FacileData API is a fluent grammar that facilitates
+  exploratory data analysis. This package also defines a "FacileDataSet" class,
+  which is a reference implementation of the "FacileData" API that uses SQLite
+  and HDF5 files to store arbitrarily large datasets and provide fast and 
+  efficient access to arbitrary subsets of these data without loading it all
+  into memory.
 }
 \author{
 \strong{Maintainer}: Steve Lianoglou \email{slianoglou@gmail.com}

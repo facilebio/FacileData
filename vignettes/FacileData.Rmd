@@ -85,15 +85,21 @@ of storing these data since the "feature-space" (rows of the
 `SummarizedExperiment` must be equal.
 
 These problems manifest themselves when we consider even the simplest of
-scenarios: consider processing an RNA-seq assay into two different feature
-spaces, (1) gene-level counts; and (2) transcript-level counts. One would have
-to create two separate `SummarizedExperiments` with the same columns and
-`colData`, but different assay matrices given the different feature-spaces
+analysis scenarios, suche as processing an RNA-seq assay into two different
+feature spaces, (1) gene-level counts; and (2) transcript-level counts. One
+would have to create two separate `SummarizedExperiments` with the same columns
+and `colData`, but different assay matrices given the different feature-spaces
 (genes vs. transcripts).
 
 Using a single `FacileDataSet`, all of these data can be stored in the same
 data container, and the *FacileData API* allows analysts to retrieve data from
 each effortlessly.
+
+Recently, the Bioconductor community has developed the `MultiAssayExperiment`
+objet to address many of the same issues the `FacileDataSet` was built to
+address. We can consider these complementary efforts, for now. One can imagine
+using a `MultiAssayExperiment` as a backend to store these data, and create
+a thin `FacileData` API wrapper, to create a `FacileMultiAssayExperiment`.
 
 [bioc]: http://bioconductor.org/
 [SummarizedExperiment]: http://bioconductor.org/packages/SummarizedExperiment/
@@ -162,13 +168,13 @@ out of a `FacileDataSet`, the `fetch_*` and `with_*` functions. To a first
 approximation, we can consider the `fetch_*` functions to be the lowest level
 functions, and the `with_*` functions are higher-level accessors.
 
-The `with_*` functions were written naturally combine in pipe (`%>%`) data manipulation
-chains and provide analysts with a fluent and succinct API with which to perform
-exploratory data analyses.
+The `with_*` functions were written so that they can naturally be combined in
+pipe (`%>%`) data-manipulation chains. They provide analysts with a fluent and
+succinct API with which to perform exploratory data analyses.
 
 For example, to retrieve normalized RNA-seq expression values for CXCL9 and GZMA
-along with survival and sex information for the samples in the samples in the
-TCGA bladder ("BLCA") indication, you can write:
+along with survival and sex information for the samples inin the TCGA bladder
+("BLCA") indication, you can write:
 
 ```{r quick-blca-example}
 features <- filter_features(tcga, name %in% c("CXCL9", "GZMA"))

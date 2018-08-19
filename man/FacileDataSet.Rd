@@ -84,3 +84,9 @@ a custom \code{anno.dir} parameter so that custom annotations are stored
 elsewhere.
 }
 }
+\seealso{
+Other FacileDataSet: \code{\link{dbfn}},
+  \code{\link{hdf5fn}}, \code{\link{is.FacileDataSet}},
+  \code{\link{meta_file}}
+}
+\concept{FacileDataSet}

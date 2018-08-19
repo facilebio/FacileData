@@ -16,8 +16,8 @@ assayed over each assay as a column in \code{return}}
 }
 \value{
 rows from assay_info_tbl that correspond to the assays defined
-  over the given samples. If no assays are defined over these samples,
-  you're going to get an empty tibble.
+over the given samples. If no assays are defined over these samples,
+you're going to get an empty tibble.
 }
 \description{
 Identify the number of each assay run across specific samples

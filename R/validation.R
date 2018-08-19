@@ -1,3 +1,74 @@
+# checkmate compliant validations functions ------------------------------------
+
+#' Check if argument is a FacileDataStore
+#'
+#' @export
+#'
+#' @param x The object to check.
+#' @param ... to be determined later
+check_facile_data_store <- function(x, ...) {
+  e <- character()
+  if (!is(x, "FacileDataStore")) {
+    e <- paste0("Must be of type 'FacileDataStore', not '", class(x)[1L], "'")
+  }
+
+  if (length(e)) e else TRUE
+}
+
+#' @export
+#' @rdname check_facile_data_store
+#' @param .var.name Name of the checked object to print in assertions. Defaults
+#'   to the heuristic implemented in [checkmate::vname()].
+#' @param add An [checkmate::AssertCollection()] object. Default is `NULL`.
+assert_facile_data_store <- function(x, ..., .var.name = vname(x), add = NULL) {
+  res <- check_facile_data_store(x, ...)
+  makeAssertion(x, res, .var.name, add)
+}
+
+#' @export
+#' @rdname check_facile_data_store
+test_facile_data_store <- function(x, ...) {
+  identical(check_facile_data_store(x, ...), TRUE)
+}
+
+#' Check if argument is a FacileDataSet
+#'
+#' @export
+#' @inheritParams check_facile_data_store
+check_facile_data_set <- function(x, ...) {
+  e <- character()
+  if (!is(x, "FacileDataSet")) {
+    e <- paste0("Must be of type 'FacileDataSet', not '", class(x)[1L], "'")
+  }
+  if (!("con" %in% names(x) && is(x[["con"]], "DBIObject"))) {
+    e <- c(e, "x$con is not a DBIObject")
+  }
+  if (!("anno.dir" %in% names(x) &&
+        check_directory_exists(x[["anno.dir"]], "w"))) {
+    e <- c(e, "x$anno.dir is not a valid annotation directory")
+  }
+  if (!("hdf5.fn" %in% names(x) &&
+        check_file_exists(x[["hdf5.fn"]], "r"))) {
+    e <- c(e, "x$anno.dir is not a valid HDF5 file")
+  }
+  if (length(e)) e else TRUE
+}
+
+#' @export
+#' @rdname check_facile_data_set
+assert_facile_data_set <- function(x, ..., .var.name = vname(x), add = NULL) {
+  res <- check_facile_data_set(x, ..., )
+  makeAssertion(x, res, .var.name, add)
+}
+
+#' @export
+#' @rdname check_facile_data_set
+test_facile_data_set <- function(x, ...) {
+  identical(check_facile_data_set(x, ...), TRUE)
+}
+
+# checkmate-like validation functios -------------------------------------------
+
 #' Check to see that samples are referenced correctly
 #'
 #' Samples have compound keys: dataset,sample_id. If we want to index into

@@ -26,6 +26,7 @@ Other API: \code{\link{fetch_assay_data}},
   \code{\link{fetch_sample_covariates}},
   \code{\link{fetch_sample_statistics}},
   \code{\link{fetch_samples}},
-  \code{\link{filter_features}}
+  \code{\link{filter_features}},
+  \code{\link{filter_samples}}
 }
 \concept{API}

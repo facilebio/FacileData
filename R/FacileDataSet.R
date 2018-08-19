@@ -45,9 +45,9 @@
 #'    a custom `anno.dir` parameter so that custom annotations are stored
 #'    elsewhere.
 #'
-#' @md
 #' @export
 #' @importFrom RSQLite dbConnect SQLite dbExecute
+#' @family FacileDataSet
 #'
 #' @param path The path to the FacileData repository
 #' @param data.fn A custom path to the database (probably don't mess with this)
@@ -123,27 +123,33 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
 }
 
 #' Class and validity checker for FacileDataSet
+#'
 #' @export
-#' @param x object to test for Facile-ness
+#' @family FacileDataSet
+#'
+#' @param x object to test
+#' @return `TRUE`/`FALSE` indicating that `x` nominally "looks like" a
+#'   `FacileDataSet`
 is.FacileDataSet <- function(x) {
-  ## `is` and `validate` functionality conflated here
-  is(x, 'FacileDataSet') &&
-    'con' %in% names(x) && is(x$con, 'DBIObject') &&
-    'anno.dir' %in% names(x) && dir.exists(x$anno.dir) &&
-    'hdf5.fn' %in% names(x) && file.exists(x$hdf5.fn)
+  test_facile_data_set(x)
 }
 
-##' Get location of the FacileDataSet database
-##' @param x FacileDataSet
-##' @param mustWork single logical
-##' @return single character, path to database
-##' @export
+#' Get location of the FacileDataSet database
+#'
+#' @export
+#' @family FacileDataSet
+#'
+#' @param x FacileDataSet
+#' @param mustWork boolean, if `TRUE` (default), throws an error if the sqlite
+#'   file does not exist. When `FALSE`, this returns the "expected" path to the
+#'   sqlite file for `x`
+#' @return the filepath to the sqlite database
 dbfn <- function(x, mustWork=TRUE) {
   base.fn <- 'data.sqlite'
   if (is.FacileDataSet(x)) {
     x <- x$parent.dir
   }
-  stopifnot(is.character(x), length(x) == 1L)
+  assert_string(x)
   out <- file.path(x, base.fn)
   if (mustWork && !file.exists(out)) {
     stop("data.sqlite file not found: ", out)
@@ -151,11 +157,14 @@ dbfn <- function(x, mustWork=TRUE) {
   out
 }
 
-##' Get location of the FacileDataSet HDF5 file
-##' @param x FacileDataSet
-##' @param mustWork single logical
-##' @return single character, path to HDF5 file
-##' @export
+#' Get location of the FacileDataSet HDF5 file
+#'
+#' @export
+#' @family FacileDataSet
+#'
+#' @param x FacileDataSet
+#' @param mustWork single logical
+#' @return path to HDF5 file
 hdf5fn <- function(x, mustWork=TRUE) {
   base.fn <- 'data.h5'
   if (is.FacileDataSet(x)) {
@@ -171,40 +180,38 @@ hdf5fn <- function(x, mustWork=TRUE) {
 
 #' Path to the meta information YAML file
 #'
-#' @rdname meta-info
 #' @export
-#' @param x \code{FacileDataSet}
+#' @rdname meta-info
+#' @family FacileDataSet
+#'
+#' @param x A `FacileDataSet`
 meta_file <- function(x) {
-  stopifnot(is.FacileDataSet(x))
+  assert_facile_data_set(x)
   fn <- assert_file(file.path(x$parent.dir, 'meta.yaml'), 'r')
   fn
 }
 
 #' Get meta information for dataset
 #'
-#' @md
-#' @rdname meta-info
 #' @export
-#'
-#' @param x `FacileDataSet`
+#' @rdname meta-info
 #' @param fn The path to the `meta.yaml` file.
 #' @return The `meta.yaml` file parsed into a list-of-lists representation
 meta_info <- function(x, fn = meta_file(x)) {
+  assert_facile_data_set(x)
   out <- assert_valid_meta_file(fn, as.list = TRUE)
   out
 }
 
-#' @rdname meta-info
 #' @export
-#' @param x \code{FacileDataSet}
+#' @rdname meta-info
 organism <- function(x) {
   stopifnot(is.FacileDataSet(x))
   x$organism
 }
 
-#' @rdname meta-info
 #' @export
-#' @param x \code{FacileDataSet}
+#' @rdname meta-info
 default_assay <- function(x) {
   stopifnot(is.FacileDataSet(x))
   if (is.null(x$default_assay)) {
@@ -216,23 +223,27 @@ default_assay <- function(x) {
   out
 }
 
-#' Get URL and description of datasets in a FacileDataSet
+#' Retrieves URL and description of datasets in a FacileDataSet
+#'
 #' @rdname meta-info
 #' @export
-#' @param x \code{FacileDataSet}
-#' @param as.list single logical if FALSE, condense to a tibble
+#' @param as.list boolean, if `FALSE` (default) returns a list, otherwise
+#'   sumarraizes results into a tibble.
+#' @return
 dataset_definitions <- function(x, as.list=TRUE) {
   defs <- meta_info(x)$datasets
   if (!as.list) {
     defs <- lapply(names(defs), function(ds) {
       i <- defs[[ds]]
       tibble(dataset=ds, url=i$url, description=i$description)
-    }) %>% bind_rows
+    })
+    defs <- bind_rows(defs)
   }
   defs
 }
 
 #' Get description of sample metadata columns
+#'
 #' @export
 #' @importFrom yaml yaml.load_file
 #' @param x FacileDataSet
@@ -247,10 +258,11 @@ covariate_definitions <- function(x, as.list=TRUE) {
       lbl <- if (is.null(i$label)) name else i$label
       tibble(variable=name, type=i$type, class=i$class, label=i$label,
              is_factor=is.factor, levels=list(lvls), description=i$description)
-    }) %>% bind_rows
+    })
+    out <- bind_rows(out)
   }
   class(out) <- c('CovariateDefinitions', class(out))
-  out %>% set_fds(x)
+  set_fds(out, x)
 }
 
 ##' Get tibble of sample information
