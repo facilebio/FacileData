@@ -16,12 +16,15 @@ This feature is implemented so poorly. It's only really meant to be used
 interactively, and with extreme caution ... programatically specifying
 column names in feature table, for instance, does not work right now.
 }
+\details{
+TODO: Use tidyeval
+}
 \seealso{
 Other API: \code{\link{fetch_assay_data}},
   \code{\link{fetch_assay_score}},
   \code{\link{fetch_custom_sample_covariates}},
   \code{\link{fetch_sample_covariates}},
   \code{\link{fetch_sample_statistics}},
-  \code{\link{fetch_samples}}
+  \code{\link{fetch_samples}}, \code{\link{filter_samples}}
 }
 \concept{API}

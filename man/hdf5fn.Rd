@@ -17,3 +17,9 @@ single character, path to HDF5 file
 \description{
 Get location of the FacileDataSet HDF5 file
 }
+\seealso{
+Other FacileDataSet: \code{\link{FacileDataSet}},
+  \code{\link{dbfn}}, \code{\link{is.FacileDataSet}},
+  \code{\link{meta_file}}
+}
+\concept{FacileDataSet}

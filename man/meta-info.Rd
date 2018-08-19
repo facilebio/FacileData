@@ -19,19 +19,12 @@ default_assay(x)
 dataset_definitions(x, as.list = TRUE)
 }
 \arguments{
-\item{x}{\code{FacileDataSet}}
+\item{x}{A \code{FacileDataSet}}
 
 \item{fn}{The path to the \code{meta.yaml} file.}
 
-\item{as.list}{single logical if FALSE, condense to a tibble}
-
-\item{x}{\code{FacileDataSet}}
-
-\item{x}{\code{FacileDataSet}}
-
-\item{x}{\code{FacileDataSet}}
-
-\item{x}{\code{FacileDataSet}}
+\item{as.list}{boolean, if \code{FALSE} (default) returns a list, otherwise
+sumarraizes results into a tibble.}
 }
 \value{
 The \code{meta.yaml} file parsed into a list-of-lists representation
@@ -41,5 +34,11 @@ Path to the meta information YAML file
 
 Get meta information for dataset
 
-Get URL and description of datasets in a FacileDataSet
+Retrieves URL and description of datasets in a FacileDataSet
 }
+\seealso{
+Other FacileDataSet: \code{\link{FacileDataSet}},
+  \code{\link{dbfn}}, \code{\link{hdf5fn}},
+  \code{\link{is.FacileDataSet}}
+}
+\concept{FacileDataSet}

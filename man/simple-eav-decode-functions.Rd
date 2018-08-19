@@ -13,23 +13,23 @@ eav_encode_logical(x, ...)
 eav_decode_categorical(x, attrname = character(), def = list(), ...)
 }
 \arguments{
-\item{x}{the values column from the `EAV` table for this covariate}
+\item{x}{the values column from the \code{EAV} table for this covariate}
 
 \item{attrname}{the name of "attribute" (covariate) in the EAV table.}
 
-\item{def}{the `covariate_definition` list for this covariate}
+\item{def}{the \code{covariate_definition} list for this covariate}
 }
 \value{
-a `numeric` vector of `length(x)`
+a \code{numeric} vector of \code{length(x)}
 }
 \description{
 This is a simple function to handle converting numeric values in the EAV
 table to numeric data in R.
 
 This is essentially a pass through-function for categorical/character
-values in the EAV table. If the `def` list contains a `levels` entry, then
+values in the EAV table. If the \code{def} list contains a \code{levels} entry, then
 the returned value is converted to a factor, with the levels in the order
-as defined in `def$levels`. If more levels appear in `x` than exist in
-`def$levels` they are appended to the end of the factor levels in
+as defined in \code{def$levels}. If more levels appear in \code{x} than exist in
+\code{def$levels} they are appended to the end of the factor levels in
 alphabetical order.
 }

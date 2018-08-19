@@ -4,7 +4,8 @@
 \alias{append_facile_feature_info}
 \title{Appends new features to \code{feature_info} table}
 \usage{
-append_facile_feature_info(x, feature_info, type = feature_info$feature_type)
+append_facile_feature_info(x, feature_info,
+  type = feature_info$feature_type)
 }
 \arguments{
 \item{x}{The \code{FacileDataSet}}
@@ -17,9 +18,9 @@ in \code{feature_info_tbl(x)}}
 }
 \value{
 invisible returns an annotated version of the \code{feature_info}
-  table with an \code{$added} column with \code{TRUE/FALSE} values for the
-  features that were new (and added) to the repository or \code{FALSE} to
-  indicate that they were already in the database.
+table with an \code{$added} column with \code{TRUE/FALSE} values for the
+features that were new (and added) to the repository or \code{FALSE} to
+indicate that they were already in the database.
 }
 \description{
 This function only adds features (feature_type, feature_id) that are not

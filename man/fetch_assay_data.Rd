@@ -4,8 +4,9 @@
 \alias{fetch_assay_data}
 \title{Fetch data from single assay of choice}
 \usage{
-fetch_assay_data(x, features, samples = NULL, assay_name = default_assay(x),
-  normalized = FALSE, as.matrix = FALSE, ..., subset.threshold = 700,
+fetch_assay_data(x, features, samples = NULL,
+  assay_name = default_assay(x), normalized = FALSE,
+  as.matrix = FALSE, ..., subset.threshold = 700,
   aggregate.by = NULL, verbose = FALSE)
 }
 \arguments{
@@ -37,8 +38,8 @@ scores? Use 'ewm' for eigenWeightedMean, and that's all.}
 }
 \value{
 A lazy \code{\link[dplyr]{tbl}} object with the expression
-  data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
-  otherwise a \code{tbl_df} of the results.
+data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
+otherwise a \code{tbl_df} of the results.
 }
 \description{
 Fetch data from single assay of choice
@@ -49,6 +50,7 @@ Other API: \code{\link{fetch_assay_score}},
   \code{\link{fetch_sample_covariates}},
   \code{\link{fetch_sample_statistics}},
   \code{\link{fetch_samples}},
-  \code{\link{filter_features}}
+  \code{\link{filter_features}},
+  \code{\link{filter_samples}}
 }
 \concept{API}

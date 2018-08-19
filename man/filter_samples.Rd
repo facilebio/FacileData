@@ -9,7 +9,7 @@ filter_samples(x, ..., with_covariates = FALSE)
 \arguments{
 \item{x}{A \code{FacileDataSet}}
 
-\item{...}{NSE claused to use in \code{\link[dplyr]{filter}} expressions}
+\item{...}{NSE claused to use in \code{\link[dplyr:filter]{dplyr::filter()}} expressions}
 }
 \value{
 a sample-descriptor \code{data.frame} that includes the dataset,sample_id
@@ -18,6 +18,13 @@ pairs that match the virtual \code{filter(covaries, ...)} clause executed here.
 \description{
 This allows the user to query the \code{FacileDataSet} as if it were a wide
 \code{pData} \code{data.frame} of all its covariates.
+}
+\details{
+\strong{NOTE} This feature is implemented so poorly. It's only really meant to be
+used interactively, and with extreme caution ... programatically specifying
+the covariates, for instance, does not work right now.
+
+TODO: Implement using \code{tidyeval}
 }
 \examples{
 fds <- exampleFacileDataSet()
@@ -30,7 +37,13 @@ eav.query <- sample_covariate_tbl(fds) \%>\%
   collect
 setequal(crc.34$sample_id, eav.query$sample_id)
 }
-\concept{API
-This feature is implemented so poorly. It's only really meant to be used
-interactively, and with extreme caution ... programatically specifying
-the covariates, for instance, does not work right now.}
+\seealso{
+Other API: \code{\link{fetch_assay_data}},
+  \code{\link{fetch_assay_score}},
+  \code{\link{fetch_custom_sample_covariates}},
+  \code{\link{fetch_sample_covariates}},
+  \code{\link{fetch_sample_statistics}},
+  \code{\link{fetch_samples}},
+  \code{\link{filter_features}}
+}
+\concept{API}

@@ -7,8 +7,18 @@
 is.FacileDataSet(x)
 }
 \arguments{
-\item{x}{object to test for Facile-ness}
+\item{x}{object to test}
+}
+\value{
+\code{TRUE}/\code{FALSE} indicating that \code{x} nominally "looks like" a
+\code{FacileDataSet}
 }
 \description{
 Class and validity checker for FacileDataSet
 }
+\seealso{
+Other FacileDataSet: \code{\link{FacileDataSet}},
+  \code{\link{dbfn}}, \code{\link{hdf5fn}},
+  \code{\link{meta_file}}
+}
+\concept{FacileDataSet}

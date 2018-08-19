@@ -4,7 +4,8 @@
 \alias{join_samples}
 \title{Filters the samples down in a dataset to ones specified}
 \usage{
-join_samples(x, samples = NULL, semi = FALSE, distinct.samples = FALSE)
+join_samples(x, samples = NULL, semi = FALSE,
+  distinct.samples = FALSE)
 }
 \arguments{
 \item{x}{likely a \code{tbl_sqlite} object, but a \code{tbl_df}-like

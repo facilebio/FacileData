@@ -2,10 +2,10 @@
 % Please edit documentation in R/db-and-table-functions.R
 \name{gene_info_tbl}
 \alias{gene_info_tbl}
-\title{Mimics the old `gene_info` table.}
+\title{Mimics the old \code{gene_info} table.}
 \usage{
 gene_info_tbl(x)
 }
 \description{
-Mimics the old `gene_info` table.
+Mimics the old \code{gene_info} table.
 }
