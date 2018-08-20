@@ -2,7 +2,7 @@
 
 This includes changes that:
 
-1. Lays some groundwork down for factoring out the "FcileData API" from the
+1. Lays some groundwork down for factoring out the "FacileData API" from the
    FacileDataSet.
 2. Largely fills out documentation needed to placate `R CMD check` [WIP]
 3. Fills out some vignettes [WIP]
