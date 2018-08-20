@@ -447,7 +447,7 @@ eav_metadata_merge <- function(pdat, covariate_def) {
   stopifnot(is.list(covariate_def))
 
   pdat$dataset = NULL
-  pdatx$sample_id = NULL
+  pdat$sample_id = NULL
 
   if (length(covariate_def) > 0)
       stopifnot(identical(colnames(pdat), names(covariate_def)))
@@ -590,7 +590,11 @@ as.EAVtable <- function(x, eav_metadata = NULL, covariate_def = list()) {
       long,
       tibble(variable = names(clazz), class = unname(clazz)),
       by = "variable")
-  ## FIXME: join in type to if available
+  types <- vapply(eav_metadata, "[[", character(1), "type")
+  long = left_join(
+      long,
+      tibble(variable = names(types), type = unname(types)),
+      by = "variable")
   long
 }
 
