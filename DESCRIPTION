@@ -26,7 +26,6 @@ Imports:
   magrittr,
   yaml,
   checkmate (>= 1.8.5),
-  readxl,
   RSQLite,
   reshape2,
   tidyr,
