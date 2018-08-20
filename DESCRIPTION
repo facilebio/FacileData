@@ -18,10 +18,10 @@ Description: Defines the "FacileData" API over multi-assay, high-throughput
   efficient access to arbitrary subsets of these data without loading it all
   into memory.
 Depends:
-  R (>= 3.5)
+  R (>= 3.5),
+  dplyr (>= 0.7.4)
 Imports:
   methods,
-  dplyr (>= 0.7.4),
   dtplyr,
   magrittr,
   yaml,
