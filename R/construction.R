@@ -35,7 +35,7 @@ initializeFacileDataSet <- function(path, meta_file,
   dbGetQuery(con, sprintf('pragma page_size=%d', page_size))
   dbGetQuery(con, sprintf('pragma cache_size=%d;', cache_size))
   sql.fn <- system.file('extdata', 'init', 'faciledataset.sql',
-                        package='FacileData')
+                        package='FacileDataSet')
   db.sql <- sqlFromFile(sql.fn)
   dbGetQueries(con, db.sql)
 
