@@ -190,6 +190,7 @@ set_fds <- function(x, value) {
 
 ## Unexported utility functions ================================================
 
+#' Validates the bits required in a legit FacileDataSet directory.
 #' @noRd
 validate.facile.dirs <- function(path, data.fn, sqlite.fn, hdf5.fn, meta.fn,
                                  anno.dir) {

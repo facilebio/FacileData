@@ -38,12 +38,14 @@ eav.query <- sample_covariate_tbl(fds) \%>\%
 setequal(crc.34$sample_id, eav.query$sample_id)
 }
 \seealso{
-Other API: \code{\link{fetch_assay_data}},
+Other API: \code{\link{facet_frame}},
+  \code{\link{fetch_assay_data}},
   \code{\link{fetch_assay_score}},
   \code{\link{fetch_custom_sample_covariates}},
   \code{\link{fetch_sample_covariates}},
   \code{\link{fetch_sample_statistics}},
   \code{\link{fetch_samples}},
-  \code{\link{filter_features}}
+  \code{\link{filter_features}}, \code{\link{organism}},
+  \code{\link{samples}}
 }
 \concept{API}

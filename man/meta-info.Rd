@@ -3,7 +3,6 @@
 \name{meta_file}
 \alias{meta_file}
 \alias{meta_info}
-\alias{organism}
 \alias{default_assay}
 \alias{dataset_definitions}
 \title{Path to the meta information YAML file}
@@ -11,8 +10,6 @@
 meta_file(x)
 
 meta_info(x, fn = meta_file(x))
-
-organism(x)
 
 default_assay(x)
 
@@ -28,17 +25,20 @@ sumarraizes results into a tibble.}
 }
 \value{
 The \code{meta.yaml} file parsed into a list-of-lists representation
+
+meta information about the datasets in \code{x} as a \code{list} or \code{tibble}
 }
 \description{
-Path to the meta information YAML file
+Lots of useful information is stored in a \code{FacileDataSet}'s \code{meta.yaml} file.
+This function returns all of that in a list-of-lists
 
-Get meta information for dataset
-
-Retrieves URL and description of datasets in a FacileDataSet
+A \code{FaclieDataSet} can contain assay data from different "datasets" (such
+as different cancer indications from the TCGA). This functions returns
+description and URL information that describes these datasets in more detail,
+which is specified in the FacileDataSets \code{meta.yaml} file.
 }
 \seealso{
 Other FacileDataSet: \code{\link{FacileDataSet}},
-  \code{\link{dbfn}}, \code{\link{hdf5fn}},
-  \code{\link{is.FacileDataSet}}
+  \code{\link{dbfn}}, \code{\link{hdf5fn}}
 }
 \concept{FacileDataSet}

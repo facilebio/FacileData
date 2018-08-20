@@ -11,6 +11,10 @@ covariate_definitions(x, as.list = TRUE)
 
 \item{as.list}{single logical, return tibble or list}
 }
+\value{
+meta information about the sample covariates in \code{x}
+}
 \description{
-Get description of sample metadata columns
+Descriptions of the sample covariates can be specified in a FacileDataSet's
+\code{meta.yaml} file. This function returns those.
 }

@@ -1,10 +1,15 @@
-#' Converts a facile result into a traditional Bioconductor assay container
+#' Converts a "facile object" to a traditional Bioconductor assay container
 #'
-#' Even though the faciledata API provides functionality to access your data
-#' in useful ways, it is still conceivable that you *might* prefer to work
-#' with these data using a more traditional bioconductor container like a
-#' `SummarizedExperiment`, `DGEList`, `ExpressionSet`, etc.
-#' @md
+#' An entire `FacileDataSet` or a subset of it can be converted into
+#' bioconductor-standard assay containers, like a `SummarizedExperiment`,
+#' `DGEList`, or `ExpressionSet` "at any time" using various `as.XXX` functions,
+#' like `as.DGEList(...)`.
+#'
+#' We use the term "facile object" to refer to either the entirety of a
+#' `FacileDataStore` or any sample-descriptor that specifies subsets of the
+#' data, eg. where `fds(x)` returns a `FacileDataStore`. See examples for
+#' specifics.
+#'
 #' @rdname as.BiocContainer
 #'
 #' @export
@@ -16,15 +21,19 @@
 #'   - `TRUE`: All covariates are retrieved from the `FacileDataSet`
 #'   - `FALSE`: TODO: Better handle FALSE
 #'   - `character`: A vector of covariate names to fetch from the
-#'     `FacileDataSet`
+#'     `FacileDataSet`. Must be elements of `names(sample_definitions(x))`
 #'   - `data.frame`: A table that looks like a subset of the
-#'     `sample_covariate`, which will be transformed into the `pData`
+#'     `sample_covariate` table, which will be transformed into the `pData`.
+#'     This may be external covariates for samples not available within
+#'     `x` (yet), ie. a table of covariates provided by a third party.
 #'   - `NULL`: do not decorate with *any* covariates.
 #' @param feature_ids the features to get expression for (if not specified
-#'   in `x` descriptor)
-#' @param assay the assay matrix to use when populating the default assay
-#'   matrix of the bioconductor container, i.e. the `$counts` matrix of a
-#'   `DGEList`, the `exprs()` of an `ExpressionSet`, etc.
+#'   in `x` descriptor). These correspond to the elements found in the
+#'   `feature_info_tbl(x)$feature_id` column.
+#' @param assay_name the name of the assay matrix to use when populating the
+#'   default assay matrix of the bioconductor container (the `$counts`
+#'   matrix of a `DGEList`, the `exprs()` of an `ExpressionSet`, etc.).
+#'   The default value is the entry provided by [default_assay()]
 #' @param .fds The `FacileDataSet` that `x` was retrieved from
 #' @param custom_key the custom key to use to fetch custom annotations from
 #'   `.fds`
@@ -32,6 +41,18 @@
 #'   for `as.DGEList`, an [Biobase::ExpressionSet] for `as.ExpressionSet`, or
 #'   a [SummarizedExperiment::SummarizedExperiment] for
 #'   `as.SummarizedExperiment`.
+#'
+#' @examples
+#' fds <- exampleFacileDataSet()
+#'
+#' # Retrieve DGEList of gene expression for all samples
+#' y.all <- as.DGEList(fds) # gene expression of all samples
+#'
+#' # Retrieve data for only 3 genes
+#' # Suppose we only wanted female samples in our DGEList
+#' y.fem <- fds %>%
+#'   filter_samples(sex == "f") %>%
+#'   as.DGEList() # or `as.ExpressionSet()`
 as.DGEList <- function(x, ...) {
   UseMethod('as.DGEList')
 }

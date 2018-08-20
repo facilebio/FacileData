@@ -1,4 +1,7 @@
-#' Creates an example FacileDataSet
+#' Retrieves an example FacileDataSet
+#'
+#' A subset of the TCGA data from the BLCA and COAD indications is provided
+#' as a FacileDataSet.
 #'
 #' @export
 exampleFacileDataSet <- function() {
@@ -6,25 +9,16 @@ exampleFacileDataSet <- function() {
   FacileDataSet(fn)
 }
 
-## This uses GenomicsTools to create a test database
-createExampleFacileDataSet <- function(out.fn) {
-  ## I am farming this out to the FacileTCGADataSet package and creating a smaller
-  ## version of the TCGA -- this is circular, I know.
-  ##
-  ## See FacileTCGA/inst/build-test-db
-  stop("This is created in FacileTCGA/inst/build-test-db")
-}
-
-#' Fetches exemplar pData
+#' Fetches exemplar data for unit testing
+#'
 #' @export
 #' @rdname test-helpers
 example_sample_covariates <- function() {
   pdat <- system.file("testdata", "test-sample-covariates.rds",
-                      package = "FacileData")
+                      package = "FacileDataSet")
   readRDS(pdat)
 }
 
-#' Fetches the meta file for the example FacileDataSet
 #' @export
 #' @rdname test-helpers
 #' @param file.path If `TRUE`, returns the path to the yaml file, otherwise
@@ -33,15 +27,13 @@ example_sample_covariates <- function() {
 #'   file where these are defined.
 example_meta <- function(file.path=FALSE) {
   out <- system.file("testdata", "expected-meta.yaml",
-                     package = "FacileData")
+                     package = "FacileDataSet")
   if (!isTRUE(file.path)) {
     out <- yaml::read_yaml(out)
   }
   out
 }
 
-#' Fetches the EAV definitions for the sample covariates
-#'
 #' @export
 #' @importFrom yaml read_yaml
 #' @rdname test-helpers

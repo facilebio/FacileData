@@ -11,7 +11,7 @@
 \alias{as.SummarizedExperiment}
 \alias{as.SummarizedExperiment.data.frame}
 \alias{as.SummarizedExperiment.FacileDataSet}
-\title{Converts a facile result into a traditional Bioconductor assay container}
+\title{Converts a "facile object" to a traditional Bioconductor assay container}
 \usage{
 as.DGEList(x, ...)
 
@@ -56,23 +56,27 @@ the DGEList. This can take the following forms:
 \item \code{TRUE}: All covariates are retrieved from the \code{FacileDataSet}
 \item \code{FALSE}: TODO: Better handle FALSE
 \item \code{character}: A vector of covariate names to fetch from the
-\code{FacileDataSet}
+\code{FacileDataSet}. Must be elements of \code{names(sample_definitions(x))}
 \item \code{data.frame}: A table that looks like a subset of the
-\code{sample_covariate}, which will be transformed into the \code{pData}
+\code{sample_covariate} table, which will be transformed into the \code{pData}.
+This may be external covariates for samples not available within
+\code{x} (yet), ie. a table of covariates provided by a third party.
 \item \code{NULL}: do not decorate with \emph{any} covariates.
 }}
 
 \item{feature_ids}{the features to get expression for (if not specified
-in \code{x} descriptor)}
+in \code{x} descriptor). These correspond to the elements found in the
+\code{feature_info_tbl(x)$feature_id} column.}
+
+\item{assay_name}{the name of the assay matrix to use when populating the
+default assay matrix of the bioconductor container (the \code{$counts}
+matrix of a \code{DGEList}, the \code{exprs()} of an \code{ExpressionSet}, etc.).
+The default value is the entry provided by \code{\link[=default_assay]{default_assay()}}}
 
 \item{.fds}{The \code{FacileDataSet} that \code{x} was retrieved from}
 
 \item{custom_key}{the custom key to use to fetch custom annotations from
 \code{.fds}}
-
-\item{assay}{the assay matrix to use when populating the default assay
-matrix of the bioconductor container, i.e. the \code{$counts} matrix of a
-\code{DGEList}, the \code{exprs()} of an \code{ExpressionSet}, etc.}
 }
 \value{
 the appropriate bioconductor assay container, ie. a \link[edgeR:DGEList]{edgeR::DGEList}
@@ -85,8 +89,26 @@ a \code{\link[Biobase]{ExpressionSet}}
 a \code{\link[SummarizedExperiment]{SummarizedExperiment}}
 }
 \description{
-Even though the faciledata API provides functionality to access your data
-in useful ways, it is still conceivable that you \emph{might} prefer to work
-with these data using a more traditional bioconductor container like a
-\code{SummarizedExperiment}, \code{DGEList}, \code{ExpressionSet}, etc.
+An entire \code{FacileDataSet} or a subset of it can be converted into
+bioconductor-standard assay containers, like a \code{SummarizedExperiment},
+\code{DGEList}, or \code{ExpressionSet} "at any time" using various \code{as.XXX} functions,
+like \code{as.DGEList(...)}.
+}
+\details{
+We use the term "facile object" to refer to either the entirety of a
+\code{FacileDataStore} or any sample-descriptor that specifies subsets of the
+data, eg. where \code{fds(x)} returns a \code{FacileDataStore}. See examples for
+specifics.
+}
+\examples{
+fds <- exampleFacileDataSet()
+
+# Retrieve DGEList of gene expression for all samples
+y.all <- as.DGEList(fds) # gene expression of all samples
+
+# Retrieve data for only 3 genes
+# Suppose we only wanted female samples in our DGEList
+y.fem <- fds \%>\%
+  filter_samples(sex == "f") \%>\%
+  as.DGEList() # or `as.ExpressionSet()`
 }

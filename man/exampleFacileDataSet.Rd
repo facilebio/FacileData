@@ -2,10 +2,11 @@
 % Please edit documentation in R/test-helpers.R
 \name{exampleFacileDataSet}
 \alias{exampleFacileDataSet}
-\title{Creates an example FacileDataSet}
+\title{Retrieves an example FacileDataSet}
 \usage{
 exampleFacileDataSet()
 }
 \description{
-Creates an example FacileDataSet
+A subset of the TCGA data from the BLCA and COAD indications is provided
+as a FacileDataSet.
 }

@@ -53,9 +53,8 @@ are generated from the assays performed on the samples in the
 \item A \code{meta.yaml} file tha contains informaiton about the \code{FacileDataSet}.
 To better understasnd the structure and contents of this file, you can
 refer to the following:
-a. The included \code{testdata/expected-meta.yaml} file for, which is an
-exemplar file for the \code{testdata/TestFacileTcgaDataSet}, which consists
-of data extracted from two datasets (BLCA and BRCA) from the TCGA.
+a. The included \code{testdata/expected-meta.yaml} file, which is an
+exemplar file for \code{\link[=exampleFacileDataSet]{exampleFacileDataSet()}}.
 b. The help file provided by the \code{\link[=eav_metadata_create]{eav_metadata_create()}} function, which
 describes in greater detail how we track a dataset's sample-level
 covariates (aka, "pData" in the bioconductor world).
@@ -84,9 +83,12 @@ a custom \code{anno.dir} parameter so that custom annotations are stored
 elsewhere.
 }
 }
+\examples{
+fn <- system.file("extdata", "exampleFacileDataSet", package = "FacileDataSet")
+fds <- FacileDataSet(fn)
+}
 \seealso{
 Other FacileDataSet: \code{\link{dbfn}},
-  \code{\link{hdf5fn}}, \code{\link{is.FacileDataSet}},
-  \code{\link{meta_file}}
+  \code{\link{hdf5fn}}, \code{\link{meta_file}}
 }
 \concept{FacileDataSet}
