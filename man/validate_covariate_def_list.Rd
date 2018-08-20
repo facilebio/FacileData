@@ -9,7 +9,7 @@ validate_covariate_def_list(x, pdata)
 \arguments{
 \item{x}{a covariate definition list-of-lists}
 
-\item{pdata}{a \code{data.frame}}
+\item{pdata}{a `data.frame`}
 }
 \description{
 Validates that a covariate defintion list reasonably describes a data.frame

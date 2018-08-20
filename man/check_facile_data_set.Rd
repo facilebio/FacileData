@@ -18,9 +18,9 @@ test_facile_data_set(x, ...)
 \item{...}{to be determined later}
 
 \item{.var.name}{Name of the checked object to print in assertions. Defaults
-to the heuristic implemented in \code{\link[checkmate:vname]{checkmate::vname()}}.}
+to the heuristic implemented in [checkmate::vname()].}
 
-\item{add}{An \code{\link[checkmate:AssertCollection]{checkmate::AssertCollection()}} object. Default is \code{NULL}.}
+\item{add}{An [checkmate::AssertCollection()] object. Default is `NULL`.}
 }
 \description{
 Check if argument is a FacileDataSet

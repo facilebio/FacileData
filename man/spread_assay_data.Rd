@@ -20,7 +20,7 @@ to put in the columns of the outgoing data.frame that the values are
 }
 \value{
 a more stout \code{x} with the expression values spread across
-columns.
+  columns.
 }
 \description{
 This is a convenience function, and will try to guess what you mean if you

@@ -7,13 +7,13 @@
 samples(x)
 }
 \arguments{
-\item{x}{a \code{FacileDataSet}}
+\item{x}{a `FacileDataSet`}
 }
 \value{
 tibble of sample attributes
 }
 \description{
-Sample identifiers are provided as \code{dataset,sample_id tuples}.
+Sample identifiers are provided as `dataset,sample_id tuples`.
 }
 \seealso{
 Other API: \code{\link{facet_frame}},

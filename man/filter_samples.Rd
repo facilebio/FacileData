@@ -7,24 +7,24 @@
 filter_samples(x, ..., with_covariates = FALSE)
 }
 \arguments{
-\item{x}{A \code{FacileDataSet}}
+\item{x}{A `FacileDataSet`}
 
-\item{...}{NSE claused to use in \code{\link[dplyr:filter]{dplyr::filter()}} expressions}
+\item{...}{NSE claused to use in [dplyr::filter()] expressions}
 }
 \value{
-a sample-descriptor \code{data.frame} that includes the dataset,sample_id
-pairs that match the virtual \code{filter(covaries, ...)} clause executed here.
+a sample-descriptor `data.frame` that includes the dataset,sample_id
+  pairs that match the virtual `filter(covaries, ...)` clause executed here.
 }
 \description{
-This allows the user to query the \code{FacileDataSet} as if it were a wide
-\code{pData} \code{data.frame} of all its covariates.
+This allows the user to query the `FacileDataSet` as if it were a wide
+`pData` `data.frame` of all its covariates.
 }
 \details{
-\strong{NOTE} This feature is implemented so poorly. It's only really meant to be
+**NOTE** This feature is implemented so poorly. It's only really meant to be
 used interactively, and with extreme caution ... programatically specifying
 the covariates, for instance, does not work right now.
 
-TODO: Implement using \code{tidyeval}
+TODO: Implement using `tidyeval`
 }
 \examples{
 fds <- exampleFacileDataSet()

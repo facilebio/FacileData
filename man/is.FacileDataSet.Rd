@@ -10,8 +10,8 @@ is.FacileDataSet(x)
 \item{x}{object to test}
 }
 \value{
-\code{TRUE}/\code{FALSE} indicating that \code{x} nominally "looks like" a
-\code{FacileDataSet}
+`TRUE`/`FALSE` indicating that `x` nominally "looks like" a
+  `FacileDataSet`
 }
 \description{
 Class and validity checker for FacileDataSet

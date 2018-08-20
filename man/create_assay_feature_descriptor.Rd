@@ -17,7 +17,7 @@ it will trump an already existing assay_name column in \code{features}}
 }
 \value{
 a feature descriptor with feature_id and assay_name, which can be
-used to absolutely find features
+  used to absolutely find features
 }
 \description{
 Creates a data.frame of features and assays they come from

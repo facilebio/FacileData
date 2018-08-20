@@ -11,7 +11,7 @@ subtype_map(x)
 }
 \value{
 a \code{tbl} with indication and subtype information for all samples
-in the database
+  in the database
 }
 \description{
 Creates tbl that associates a sample with all of its indication/subtypes
