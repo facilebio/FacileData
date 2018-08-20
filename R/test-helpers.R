@@ -1,11 +1,8 @@
-#' Creates a FacileDb connection to a test database
+#' Creates an example FacileDataSet
 #'
 #' @export
-#' @param db.fn The path on the filesystem to the facile database
-#' @param covdef The path on the filesystem to the yaml file that provides
-#'   the covariate definitions
-exampleFacileDataSet <- function(db.type=c('sqlite', 'monetdblite')) {
-  fn <- system.file('extdata', 'exampleFacileDataSet', package='FacileData')
+exampleFacileDataSet <- function() {
+  fn <- system.file('extdata', 'exampleFacileDataSet', package='FacileDataSet')
   FacileDataSet(fn)
 }
 

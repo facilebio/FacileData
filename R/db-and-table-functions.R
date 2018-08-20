@@ -190,8 +190,9 @@ set_fds <- function(x, value) {
 
 ## Unexported utility functions ================================================
 
+#' @noRd
 validate.facile.dirs <- function(path, data.fn, sqlite.fn, hdf5.fn, meta.fn,
-                                 anno.dir, db.type=c('sqlite', 'monetdblite')) {
+                                 anno.dir) {
   if (!dir.exists(path)) {
     stop("Top level FacileData directory does not exist: ", path)
   }
@@ -230,7 +231,6 @@ validate.facile.dirs <- function(path, data.fn, sqlite.fn, hdf5.fn, meta.fn,
               immediate.=TRUE)
     }
   }
-  db.type <- match.arg(db.type)
 
   list(path=path, data.fn=data.fn, sqlite.fn=sqlite.fn, hdf5.fn=hdf5.fn,
        meta.fn=meta.fn, anno.dir=anno.dir)
