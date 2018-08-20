@@ -41,14 +41,15 @@ Imports:
   SummarizedExperiment,
   desc,
   devtools,
-  glue,
-  AnnotationDbi
+  glue
 Suggests:
   testthat (>= 1.0.2),
   knitr,
   roxygen2 (>= 6.1.0),
   org.Hs.eg.db,
-  org.Mm.eg.db
+  org.Mm.eg.db,
+  stringr,
+  AnnotationDbi
 RoxygenNote: 6.1.0
 License: MIT
 Encoding: UTF-8

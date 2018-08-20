@@ -113,6 +113,8 @@ cast_covariate <- function(covariate, values, cov.def, .fds) {
 #' @param attrname the name of "attribute" (covariate) in the EAV table.
 #' @param def the `covariate_definition` list for this covariate
 #' @return a `numeric` vector of `length(x)`
+#' @rdname simple-eav-decode-functions
+#' @export
 eav_decode_real <- function(x, attrname = character(), def = list(), ...) {
   out <- as.numeric(x)
   n.na <- sum(is.na(out))
@@ -124,6 +126,8 @@ eav_decode_real <- function(x, attrname = character(), def = list(), ...) {
   out
 }
 
+#' @rdname simple-eav-decode-functions
+#' @export
 eav_encode_real <- function(x, ...) {
   stopifnot(is.numeric(x))
   out <- as.character(x)
@@ -135,6 +139,7 @@ eav_encode_numeric <- eav_encode_real
 eav_encode_integer <- eav_encode_real
 
 #' @rdname simple-eav-decode-functions
+#' @export
 eav_encode_logical <- function(x, ...) {
   stopifnot(is.logical(x))
   out <- as.character(as.integer(x))
@@ -142,6 +147,8 @@ eav_encode_logical <- function(x, ...) {
   out
 }
 
+#' @rdname simple-eav-decode-functions
+#' @export
 eav_decode_logical <- function(x, attrname = character(), def = list(), ...) {
   out <- as.logical(as.integer(x))
   isna <- is.na(out)
@@ -153,6 +160,8 @@ eav_decode_logical <- function(x, attrname = character(), def = list(), ...) {
   out
 }
 
+#' @rdname simple-eav-decode-functions
+#' @export
 eav_encode_Surv <- function(x, ...) {
     stopifnot(is(x, "Surv"))
     out <- as.character(x)
@@ -160,6 +169,8 @@ eav_encode_Surv <- function(x, ...) {
     out
 }
 
+#' @rdname simple-eav-decode-functions
+#' @export
 eav_decode_Surv <- function(x, attrname = character(), def = list(), ...) {
     x = as.character(x) # Both check type and drop attributes
     stopifnot(all(grepl("\\d[\\+ ]$", x)))
@@ -178,6 +189,7 @@ eav_decode_Surv <- function(x, attrname = character(), def = list(), ...) {
 #'
 #' @inheritParams eav_decode_real
 #' @rdname simple-eav-decode-functions
+#' @export
 eav_decode_categorical <- function(x, attrname=character(), def=list(), ...) {
   out <- as.character(x)
   if (is.character(def$levels)) {
@@ -190,6 +202,8 @@ eav_decode_categorical <- function(x, attrname=character(), def=list(), ...) {
   out
 }
 
+#' @rdname simple-eav-decode-functions
+#' @export
 eav_encode_categorical <- function(x, ...) {
   stopifnot(is.factor(x) || is.character(x))
   out <- as.character(x)

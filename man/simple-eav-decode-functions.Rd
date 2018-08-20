@@ -2,15 +2,30 @@
 % Please edit documentation in R/entity-attribute-value.R
 \name{eav_decode_real}
 \alias{eav_decode_real}
+\alias{eav_encode_real}
 \alias{eav_encode_logical}
+\alias{eav_decode_logical}
+\alias{eav_encode_Surv}
+\alias{eav_decode_Surv}
 \alias{eav_decode_categorical}
+\alias{eav_encode_categorical}
 \title{Entity-attribute-value decoding for real values.}
 \usage{
 eav_decode_real(x, attrname = character(), def = list(), ...)
 
+eav_encode_real(x, ...)
+
 eav_encode_logical(x, ...)
 
+eav_decode_logical(x, attrname = character(), def = list(), ...)
+
+eav_encode_Surv(x, ...)
+
+eav_decode_Surv(x, attrname = character(), def = list(), ...)
+
 eav_decode_categorical(x, attrname = character(), def = list(), ...)
+
+eav_encode_categorical(x, ...)
 }
 \arguments{
 \item{x}{the values column from the `EAV` table for this covariate}
