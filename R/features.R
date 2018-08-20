@@ -31,6 +31,7 @@ has_feature_type <- function(x, feature_type) {
 #' @param feature_type a character vector specifying the feature type
 #' @return a tibble with \code{feature_id, name, type} columns, where type
 #'   is "primary" or "alias"
+#' @importFrom AnnotationDbi select
 feature_name_map <- function(x, feature_type) {
   stopifnot(has_feature_type(x, feature_type))
   ## http://jira.gene.com/jira/browse/FACILEDATA-64 will put this in database
