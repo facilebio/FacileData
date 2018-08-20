@@ -21,12 +21,14 @@ covariate tbl
 Fetches custom (user) annotations for a given user prefix
 }
 \seealso{
-Other API: \code{\link{fetch_assay_data}},
+Other API: \code{\link{facet_frame}},
+  \code{\link{fetch_assay_data}},
   \code{\link{fetch_assay_score}},
   \code{\link{fetch_sample_covariates}},
   \code{\link{fetch_sample_statistics}},
   \code{\link{fetch_samples}},
   \code{\link{filter_features}},
-  \code{\link{filter_samples}}
+  \code{\link{filter_samples}}, \code{\link{organism}},
+  \code{\link{samples}}
 }
 \concept{API}

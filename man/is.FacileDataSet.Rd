@@ -16,9 +16,3 @@ is.FacileDataSet(x)
 \description{
 Class and validity checker for FacileDataSet
 }
-\seealso{
-Other FacileDataSet: \code{\link{FacileDataSet}},
-  \code{\link{dbfn}}, \code{\link{hdf5fn}},
-  \code{\link{meta_file}}
-}
-\concept{FacileDataSet}

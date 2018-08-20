@@ -1,4 +1,4 @@
-name: FacileTCGADataSet
+name: ExampleFacileTCGADataSet
 organism: Homo sapiens
 default_assay: rnaseq
 datasets:

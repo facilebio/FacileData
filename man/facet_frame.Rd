@@ -3,12 +3,41 @@
 \name{facet_frame}
 \alias{facet_frame}
 \alias{facet_frame.default}
-\title{A dataset-specific method to overridden that returns default sample grouping}
+\alias{facet_frame.FacileDataStore}
+\title{Retrieves grouping table for samples within a FacileDataSet.}
 \usage{
-facet_frame(x, ...)
+facet_frame(x, name = "default", ...)
 
-\method{facet_frame}{default}(x, ...)
+\method{facet_frame}{default}(x, name = "default", ...)
+
+\method{facet_frame}{FacileDataStore}(x, name = "default", ...)
+}
+\arguments{
+\item{x}{A \code{FacileDataStore}}
+
+\item{name}{The specific facet (grouping) definition to return. Note that
+this parameter isn't yet used. Only one facet table was originally
+defined for each FacileDataSet, but we want to enable different facet
+definitions to be used in the future.}
+}
+\value{
+A \code{tibble} that defines the \code{dataset,sample_id} tuples that belong
+to each "facet" (group).
 }
 \description{
-A dataset-specific method to overridden that returns default sample grouping
+It is natural to define subgroups of samples within larger datasets.
+This function returns grouping definitions (which we call "facets") for
+a \code{FacileDataStore}.
 }
+\seealso{
+Other API: \code{\link{fetch_assay_data}},
+  \code{\link{fetch_assay_score}},
+  \code{\link{fetch_custom_sample_covariates}},
+  \code{\link{fetch_sample_covariates}},
+  \code{\link{fetch_sample_statistics}},
+  \code{\link{fetch_samples}},
+  \code{\link{filter_features}},
+  \code{\link{filter_samples}}, \code{\link{organism}},
+  \code{\link{samples}}
+}
+\concept{API}

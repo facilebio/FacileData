@@ -4,7 +4,7 @@
 \alias{example_sample_covariates}
 \alias{example_meta}
 \alias{example_sample_covariate_definitions}
-\title{Fetches exemplar pData}
+\title{Fetches exemplar data for unit testing}
 \usage{
 example_sample_covariates()
 
@@ -24,9 +24,5 @@ the list-of-list definitions for the example \code{pData} returned from
 \code{\link[=example_sample_covariates]{example_sample_covariates()}}
 }
 \description{
-Fetches exemplar pData
-
-Fetches the meta file for the example FacileDataSet
-
-Fetches the EAV definitions for the sample covariates
+Fetches exemplar data for unit testing
 }

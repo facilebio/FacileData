@@ -17,9 +17,8 @@
 #' 3. A `meta.yaml` file tha contains informaiton about the `FacileDataSet`.
 #'    To better understasnd the structure and contents of this file, you can
 #'    refer to the following:
-#'     a. The included `testdata/expected-meta.yaml` file for, which is an
-#'        exemplar file for the `testdata/TestFacileTcgaDataSet`, which consists
-#'        of data extracted from two datasets (BLCA and BRCA) from the TCGA.
+#'     a. The included `testdata/expected-meta.yaml` file, which is an
+#'        exemplar file for [exampleFacileDataSet()].
 #'     b. The help file provided by the [eav_metadata_create()] function, which
 #'        describes in greater detail how we track a dataset's sample-level
 #'        covariates (aka, "pData" in the bioconductor world).
@@ -60,6 +59,9 @@
 #' @param ... other args to pass down, not used at the moment
 #' @param covdef.fn A custom path to the yaml file that has covariate mapping info
 #' @return a `FacileDataSet` object
+#' @examples
+#' fn <- system.file("extdata", "exampleFacileDataSet", package = "FacileDataSet")
+#' fds <- FacileDataSet(fn)
 FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
                           sqlite.fn=file.path(path, 'data.sqlite'),
                           hdf5.fn=file.path(path, 'data.h5'),
@@ -125,7 +127,6 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
 #' Class and validity checker for FacileDataSet
 #'
 #' @export
-#' @family FacileDataSet
 #'
 #' @param x object to test
 #' @return `TRUE`/`FALSE` indicating that `x` nominally "looks like" a
@@ -191,7 +192,10 @@ meta_file <- function(x) {
   fn
 }
 
-#' Get meta information for dataset
+#' Retrieves the meta information for a FacileDataSet
+#'
+#' Lots of useful information is stored in a `FacileDataSet`'s `meta.yaml` file.
+#' This function returns all of that in a list-of-lists
 #'
 #' @export
 #' @rdname meta-info
@@ -203,10 +207,15 @@ meta_info <- function(x, fn = meta_file(x)) {
   out
 }
 
+#' Retrieves the organism the data is defined over
+#'
+#' A FacileDataStore is only expected to hold data for one organism.
+#'
 #' @export
-#' @rdname meta-info
+#' @family API
+#' @return `"Homo sapiens`", `"Mus musculus"`, etc.
 organism <- function(x) {
-  stopifnot(is.FacileDataSet(x))
+  assert_facile_data_set(x)
   x$organism
 }
 
@@ -225,11 +234,16 @@ default_assay <- function(x) {
 
 #' Retrieves URL and description of datasets in a FacileDataSet
 #'
+#' A `FaclieDataSet` can contain assay data from different "datasets" (such
+#' as different cancer indications from the TCGA). This functions returns
+#' description and URL information that describes these datasets in more detail,
+#' which is specified in the FacileDataSets `meta.yaml` file.
+#'
 #' @rdname meta-info
 #' @export
 #' @param as.list boolean, if `FALSE` (default) returns a list, otherwise
 #'   sumarraizes results into a tibble.
-#' @return
+#' @return meta information about the datasets in `x` as a `list` or `tibble`
 dataset_definitions <- function(x, as.list=TRUE) {
   defs <- meta_info(x)$datasets
   if (!as.list) {
@@ -244,10 +258,14 @@ dataset_definitions <- function(x, as.list=TRUE) {
 
 #' Get description of sample metadata columns
 #'
+#' Descriptions of the sample covariates can be specified in a FacileDataSet's
+#' `meta.yaml` file. This function returns those.
+#'
 #' @export
 #' @importFrom yaml yaml.load_file
 #' @param x FacileDataSet
 #' @param as.list single logical, return tibble or list
+#' @return meta information about the sample covariates in `x`
 covariate_definitions <- function(x, as.list=TRUE) {
   out <- meta_info(x)$sample_covariates
   if (!as.list) {
@@ -265,34 +283,59 @@ covariate_definitions <- function(x, as.list=TRUE) {
   set_fds(out, x)
 }
 
-##' Get tibble of sample information
-##'
-##' Get tibble of sample information
-##' @param x FacileDataSet
-##' @return tibble of sample attributes
-##' @export
+#' Retrieves the sample identifiers for all samples in a FacileDataSet.
+#'
+#' Sample identifiers are provided as `dataset,sample_id tuples`.
+#'
+#' @export
+#' @family API
+#'
+#' @param x a `FacileDataSet`
+#' @return tibble of sample attributes
 samples <- function(x) {
-  stopifnot(is.FacileDataSet(x))
+  assert_facile_data_set(x)
   sample_info_tbl(x) %>%
     select(dataset, sample_id) %>%
     set_fds(x)
 }
 
-#' A dataset-specific method to overridden that returns default sample grouping
+#' Retrieves grouping table for samples within a FacileDataSet.
+#'
+#' It is natural to define subgroups of samples within larger datasets.
+#' This function returns grouping definitions (which we call "facets") for
+#' a `FacileDataStore`.
 #'
 #' @export
-#' @rdname facet_frame
-facet_frame <- function(x, ...) {
+#' @family API
+#'
+#' @param x A `FacileDataStore`
+#' @param name The specific facet (grouping) definition to return. Note that
+#'   this parameter isn't yet used. Only one facet table was originally
+#'   defined for each FacileDataSet, but we want to enable different facet
+#'   definitions to be used in the future.
+#' @return A `tibble` that defines the `dataset,sample_id` tuples that belong
+#'   to each "facet" (group).
+facet_frame <- function(x, name = "default", ...) {
   UseMethod("facet_frame")
 }
 
 #' @export
 #' @rdname facet_frame
-facet_frame.default <- function(x, ...) {
-  tibble(facet=character(), dataset=facet, sample_id=facet)
+facet_frame.default <- function(x, name = "default", ...) {
+  stop("Not implemented for objects that do not descend from a FacileDataStore")
 }
 
-#' Print a FacileDataSet
+#' @export
+#' @rdname facet_frame
+facet_frame.FacileDataStore <- function(x, name = "default", ...) {
+  samples(x) %>%
+    mutate(facet = dataset) %>%
+    select(facet, dataset, sampe_id) %>%
+    set_fds(x)
+}
+
+#' @noRd
+#'
 #' @export
 #' @param x FacileDataSet
 #' @param ... additional args (ignored)
