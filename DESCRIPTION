@@ -41,7 +41,7 @@ Suggests:
   Biobase,
   SummarizedExperiment,
   knitr,
-  roxygen2 (>= 6.0.0)
+  roxygen2 (>= 6.1.0)
 RoxygenNote: 6.1.0
 License: MIT
 Encoding: UTF-8
