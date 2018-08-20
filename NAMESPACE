@@ -132,6 +132,7 @@ importFrom(RSQLite,SQLite)
 importFrom(RSQLite,dbConnect)
 importFrom(RSQLite,dbExecute)
 <<<<<<< HEAD
+<<<<<<< HEAD
 importFrom(RSQLite,dbGetQuery)
 importFrom(RSQLite,dbSendQuery)
 importFrom(RSQLite,dbWriteTable)
@@ -150,6 +151,9 @@ importFrom(glue,glue)
 =======
 importFrom(edgeR,DGEList)
 >>>>>>> I think I'm in the middle of doing something marvelous.
+=======
+importFrom(edgeR,DGEList)
+>>>>>>> abc595d86b5ead12edb72734a212cad8e127a08b
 importFrom(jsonlite,stream_in)
 importFrom(jsonlite,stream_out)
 importFrom(lazyeval,auto_name)
