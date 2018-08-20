@@ -2,16 +2,10 @@
 % Please edit documentation in R/test-helpers.R
 \name{exampleFacileDataSet}
 \alias{exampleFacileDataSet}
-\title{Creates a FacileDb connection to a test database}
+\title{Creates an example FacileDataSet}
 \usage{
-exampleFacileDataSet(db.type = c("sqlite", "monetdblite"))
-}
-\arguments{
-\item{db.fn}{The path on the filesystem to the facile database}
-
-\item{covdef}{The path on the filesystem to the yaml file that provides
-the covariate definitions}
+exampleFacileDataSet()
 }
 \description{
-Creates a FacileDb connection to a test database
+Creates an example FacileDataSet
 }
