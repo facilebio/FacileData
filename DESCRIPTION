@@ -41,6 +41,6 @@ Suggests:
   SummarizedExperiment,
   knitr,
   roxygen2 (>= 6.0.0)
-RoxygenNote: 6.0.1.9000
+RoxygenNote: 6.1.0
 License: MIT
 Encoding: UTF-8

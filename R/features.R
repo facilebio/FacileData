@@ -49,7 +49,7 @@ feature_name_map <- function(x, feature_type) {
         anti_join(finfo, by=c('feature_id', 'name'))
       write.csv(alias, 'inst/extdata/feature-alias-map.human.csv', row.names=FALSE)
     }
-    alias <- system.file('extdata', 'feature-alias-map.human.csv', package='FacileData')
+    alias <- system.file('extdata', 'feature-alias-map.human.csv', package='FacileDataSet')
     alias <- read.csv(alias, colClasses='character')
   } else if (organism(x) == 'Mus musculus') {
     if (FALSE) {
@@ -61,7 +61,7 @@ feature_name_map <- function(x, feature_type) {
         filter(!is.na(name))
       write.csv(alias, 'inst/extdata/feature-alias-map.mouse.csv', row.names=FALSE)
     }
-    alias <- system.file('extdata', 'feature-alias-map.mouse.csv', package='FacileData')
+    alias <- system.file('extdata', 'feature-alias-map.mouse.csv', package='FacileDataSet')
     alias <- read.csv(alias, colClasses='character')
   } else {
     stop("Unsupported organism for now")

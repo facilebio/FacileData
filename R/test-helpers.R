@@ -5,7 +5,7 @@
 #' @param covdef The path on the filesystem to the yaml file that provides
 #'   the covariate definitions
 exampleFacileDataSet <- function(db.type=c('sqlite', 'monetdblite')) {
-  fn <- system.file('extdata', 'exampleFacileDataSet', package='FacileData')
+  fn <- system.file('extdata', 'exampleFacileDataSet', package='FacileDataSet')
   FacileDataSet(fn)
 }
 
@@ -23,7 +23,7 @@ createExampleFacileDataSet <- function(out.fn) {
 #' @rdname test-helpers
 example_sample_covariates <- function() {
   pdat <- system.file("testdata", "test-sample-covariates.rds",
-                      package = "FacileData")
+                      package = "FacileDataSet")
   readRDS(pdat)
 }
 
@@ -36,7 +36,7 @@ example_sample_covariates <- function() {
 #'   file where these are defined.
 example_meta <- function(file.path=FALSE) {
   out <- system.file("testdata", "expected-meta.yaml",
-                     package = "FacileData")
+                     package = "FacileDataSet")
   if (!isTRUE(file.path)) {
     out <- yaml::read_yaml(out)
   }
