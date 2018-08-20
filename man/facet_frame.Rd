@@ -13,7 +13,7 @@ facet_frame(x, name = "default", ...)
 \method{facet_frame}{FacileDataStore}(x, name = "default", ...)
 }
 \arguments{
-\item{x}{A \code{FacileDataStore}}
+\item{x}{A `FacileDataStore`}
 
 \item{name}{The specific facet (grouping) definition to return. Note that
 this parameter isn't yet used. Only one facet table was originally
@@ -21,13 +21,13 @@ defined for each FacileDataSet, but we want to enable different facet
 definitions to be used in the future.}
 }
 \value{
-A \code{tibble} that defines the \code{dataset,sample_id} tuples that belong
-to each "facet" (group).
+A `tibble` that defines the `dataset,sample_id` tuples that belong
+  to each "facet" (group).
 }
 \description{
 It is natural to define subgroups of samples within larger datasets.
 This function returns grouping definitions (which we call "facets") for
-a \code{FacileDataStore}.
+a `FacileDataStore`.
 }
 \seealso{
 Other API: \code{\link{fetch_assay_data}},

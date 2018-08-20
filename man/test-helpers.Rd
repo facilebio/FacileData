@@ -13,15 +13,15 @@ example_meta(file.path = FALSE)
 example_sample_covariate_definitions()
 }
 \arguments{
-\item{file.path}{If \code{TRUE}, returns the path to the yaml file, otherwise
+\item{file.path}{If `TRUE`, returns the path to the yaml file, otherwise
 returns the list-of-list meta definition.}
 }
 \value{
-Either the list-of-list meta definition, or path to the \code{meta.yaml}
-file where these are defined.
+Either the list-of-list meta definition, or path to the `meta.yaml`
+  file where these are defined.
 
-the list-of-list definitions for the example \code{pData} returned from
-\code{\link[=example_sample_covariates]{example_sample_covariates()}}
+the list-of-list definitions for the example `pData` returned from
+  [example_sample_covariates()]
 }
 \description{
 Fetches exemplar data for unit testing

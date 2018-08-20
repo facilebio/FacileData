@@ -15,9 +15,9 @@ assay_sample_info(x, assay_name, samples = NULL)
 }
 \value{
 an updated version of \code{samples} decorated with hd5_index,
-scaling factors, etc. Note that rows in \code{samples} that do not appear
-in \code{assay_name} will be returnd here with NA values for hd5_index and
-such.
+  scaling factors, etc. Note that rows in \code{samples} that do not appear
+  in \code{assay_name} will be returnd here with NA values for hd5_index and
+  such.
 }
 \description{
 This is called to get things like hdf5_index and scaling factors for

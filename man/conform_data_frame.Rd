@@ -14,7 +14,7 @@ against.}
 }
 \value{
 the \code{tibble} version of \code{x} that is arranged to look
-like \code{to}.
+  like \code{to}.
 }
 \description{
 This function is primarily used to add data to the FacileDataSet's SQLite

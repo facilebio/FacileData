@@ -56,11 +56,9 @@ Samples have compound keys: dataset,sample_id. If we want to index into
 them, we can either:
 }
 \details{
-\enumerate{
-\item pass a data.frame around with dataset and sample_id columns
-\item pass a "loaded up" tbl_sqlite" over the sample_covariate table which
-has your filters of interest set
-}
+1. pass a data.frame around with dataset and sample_id columns
+  2. pass a "loaded up" tbl_sqlite" over the sample_covariate table which
+     has your filters of interest set
 }
 \section{assay_feature_descriptor}{
 
