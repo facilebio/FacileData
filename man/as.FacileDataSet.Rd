@@ -6,14 +6,15 @@
 \title{Converts bioconductor assay containers into a FacileDataSet.}
 \usage{
 as.FacileDataSet(x, path, assay_name, assay_type, source_assay,
-  dataset_name = "DEFAULT_NAME", organism = c("unspecified", "Homo sapiens",
+  dataset_name = "DEFAULT_NAME", organism = c("unspecified",
+  "Homo sapiens", "Mus musculus"), page_size = 2^12,
+  cache_size = 2e+05, chunk_rows = 5000, chunk_cols = "ncol",
+  chunk_compression = 5, ...)
+
+\method{as.FacileDataSet}{list}(x, path, assay_name, assay_type,
+  source_assay, dataset_name, organism = c("unspecified", "Homo sapiens",
   "Mus musculus"), page_size = 2^12, cache_size = 2e+05,
   chunk_rows = 5000, chunk_cols = "ncol", chunk_compression = 5, ...)
-
-\method{as.FacileDataSet}{list}(x, path, assay_name, assay_type, source_assay,
-  dataset_name, organism = c("unspecified", "Homo sapiens", "Mus musculus"),
-  page_size = 2^12, cache_size = 2e+05, chunk_rows = 5000,
-  chunk_cols = "ncol", chunk_compression = 5, ...)
 }
 \arguments{
 \item{x}{The bioconductor assay container to extract data from}

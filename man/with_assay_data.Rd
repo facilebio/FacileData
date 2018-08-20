@@ -4,9 +4,9 @@
 \alias{with_assay_data}
 \title{Append expression values to sample-descriptor}
 \usage{
-with_assay_data(samples, features, assay_name = NULL, normalized = TRUE,
-  aggregate.by = NULL, spread = TRUE, with_assay_name = FALSE, ...,
-  verbose = FALSE, .fds = fds(samples))
+with_assay_data(samples, features, assay_name = NULL,
+  normalized = TRUE, aggregate.by = NULL, spread = TRUE,
+  with_assay_name = FALSE, ..., verbose = FALSE, .fds = fds(samples))
 }
 \arguments{
 \item{.fds}{A \code{FacileDataSet} object}

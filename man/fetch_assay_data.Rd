@@ -4,8 +4,9 @@
 \alias{fetch_assay_data}
 \title{Fetch data from single assay of choice}
 \usage{
-fetch_assay_data(x, features, samples = NULL, assay_name = default_assay(x),
-  normalized = FALSE, as.matrix = FALSE, ..., subset.threshold = 700,
+fetch_assay_data(x, features, samples = NULL,
+  assay_name = default_assay(x), normalized = FALSE,
+  as.matrix = FALSE, ..., subset.threshold = 700,
   aggregate.by = NULL, verbose = FALSE)
 }
 \arguments{

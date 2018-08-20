@@ -27,8 +27,8 @@ this is a single vector, but others it can be a data.frame (for
 \description{
 For most things, a single value will be returned from each cast, but in the
 case of "time_to_event" data, the value is expended to a two column
-data.frame with a \code{tte_&lt;covariate&gt;} column for time to event, and an
-\code{event_&lt;covariate&gt;} column to indicate event (1) or right censored (2).
+data.frame with a \code{tte_<covariate>} column for time to event, and an
+\code{event_<covariate>} column to indicate event (1) or right censored (2).
 }
 \details{
 The mechanics of how values in the \code{sample_covariate} table are converted
