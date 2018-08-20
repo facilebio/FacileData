@@ -4,10 +4,11 @@ This includes changes that:
 
 1. Lays some groundwork down for factoring out the "FcileData API" from the
    FacileDataSet.
-2. Largely fills out documentation needed to placate `R CMD check` [not done]
-3. Fills out some vignettes [not done]
-4. pkgdown
-
+2. Largely fills out documentation needed to placate `R CMD check` [WIP]
+3. Fills out some vignettes [WIP]
+4. pkgdown [not started]
+5. Addresses unit test failures introduced by code changes in this branch [not started]
+  
 ## Introduction of FacileDataStore
 
 Introduced a `FacileDataStore` "abstract class" in anticipation of refactoring
