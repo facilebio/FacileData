@@ -2,7 +2,9 @@
 
 S3method("fds<-",data.frame)
 S3method("fds<-",tbl)
+S3method(as.DGEList,FacileDataSet)
 S3method(as.DGEList,data.frame)
+S3method(as.DGEList,matrix)
 S3method(as.DGEList,tbl_sql)
 S3method(as.ExpressionSet,FacileDataSet)
 S3method(as.ExpressionSet,data.frame)

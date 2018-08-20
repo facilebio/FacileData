@@ -53,12 +53,14 @@
 #' y.fem <- fds %>%
 #'   filter_samples(sex == "f") %>%
 #'   as.DGEList() # or `as.ExpressionSet()`
+#' @export
 as.DGEList <- function(x, ...) {
   UseMethod('as.DGEList')
 }
 
 #' @method as.DGEList matrix
 #' @rdname as.BiocContainer
+#' @export
 as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
                               assay_name=default_assay(.fds), .fds=fds(x),
                               custom_key=Sys.getenv("USER"), ...) {
@@ -210,6 +212,9 @@ as.DGEList.tbl_sql <- function(x, covariates=TRUE, feature_ids=NULL,
              custom_key=custom_key, ...)
 }
 
+#' @export
+#' @method as.DGEList FacileDataSet
+#' @rdname as.BiocContainer
 as.DGEList.FacileDataSet <- function(x, covariates=TRUE, feature_ids=NULL,
                                      assay_name=default_assay(x),
                                      custom_key=Sys.getenv("USER"),

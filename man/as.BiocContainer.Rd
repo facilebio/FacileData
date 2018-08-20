@@ -5,6 +5,7 @@
 \alias{as.DGEList.matrix}
 \alias{as.DGEList.data.frame}
 \alias{as.DGEList.tbl_sql}
+\alias{as.DGEList.FacileDataSet}
 \alias{as.ExpressionSet}
 \alias{as.ExpressionSet.data.frame}
 \alias{as.ExpressionSet.FacileDataSet}
@@ -25,6 +26,10 @@ as.DGEList(x, ...)
 
 \method{as.DGEList}{tbl_sql}(x, covariates = TRUE, feature_ids = NULL,
   assay_name = default_assay(.fds), .fds = fds(x),
+  custom_key = Sys.getenv("USER"), ...)
+
+\method{as.DGEList}{FacileDataSet}(x, covariates = TRUE,
+  feature_ids = NULL, assay_name = default_assay(x),
   custom_key = Sys.getenv("USER"), ...)
 
 as.ExpressionSet(x, ...)

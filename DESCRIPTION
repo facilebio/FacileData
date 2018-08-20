@@ -35,11 +35,15 @@ Imports:
   multiGSEA (>= 0.10.4),
   edgeR,
   lazyeval,
-  survival
+  survival,
+  Biobase,
+  S4Vectors,
+  SummarizedExperiment,
+  desc,
+  devtools,
+  glue
 Suggests:
   testthat (>= 1.0.2),
-  Biobase,
-  SummarizedExperiment,
   knitr,
   roxygen2 (>= 6.1.0)
 RoxygenNote: 6.1.0
