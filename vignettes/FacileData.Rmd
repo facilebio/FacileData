@@ -85,7 +85,7 @@ of storing these data since the "feature-space" (rows of the
 `SummarizedExperiment` must be equal.
 
 These problems manifest themselves when we consider even the simplest of
-analysis scenarios, suche as processing an RNA-seq assay into two different
+analysis scenarios, such as processing an RNA-seq assay into two different
 feature spaces, (1) gene-level counts; and (2) transcript-level counts. One
 would have to create two separate `SummarizedExperiments` with the same columns
 and `colData`, but different assay matrices given the different feature-spaces
