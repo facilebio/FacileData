@@ -173,9 +173,9 @@ eav_encode_Surv <- function(x, ...) {
 #' @export
 eav_decode_Surv <- function(x, attrname = character(), def = list(), ...) {
     x = as.character(x) # Both check type and drop attributes
-    stopifnot(all(grepl("\\d[\\+ ]$", x)))
+    stopifnot(all(is.na(x) | grepl("\\d[\\+ ]*$", x)))
     status = ifelse(endsWith(x,"+"), 0, 1)
-    Surv(as.numeric(gsub("[\\+ ]$", "", x)), status)
+    Surv(as.numeric(gsub("[\\+ ]*$", "", x)), status)
 }
 
 #' Entity-attribute-value decoding for categorical (character) values.
