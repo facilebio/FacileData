@@ -4,7 +4,7 @@
 \name{FacileDataSet-package}
 \alias{FacileDataSet}
 \alias{FacileDataSet-package}
-\title{FacileDataSet: A fluent API for accessing multi-assay high-throughput genomics data.}
+\title{FacileDataSet: A fluent API for accessing multi-assay high-throughput genomics data}
 \description{
 Defines the "FacileData" API over multi-assay, high-throughput
   genomics data. The FacileData API is a fluent grammar that facilitates

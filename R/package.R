@@ -8,4 +8,5 @@
 #' @import tidyr
 #' @import methods
 #' @import survival
+#' @importFrom utils read.csv
 "_PACKAGE"

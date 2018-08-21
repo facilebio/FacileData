@@ -12,7 +12,7 @@
 #'
 #' 1. A `data.sqlite` SQLite database that stores feature and sample metadata
 #' 2. A `data.h5` HDF5 file that stores a multitude of dense assay matrices that
-#'    are generated from the assays performed on the samples in the
+n#'    are generated from the assays performed on the samples in the
 #'    `FacileDataSet`.
 #' 3. A `meta.yaml` file tha contains informaiton about the `FacileDataSet`.
 #'    To better understasnd the structure and contents of this file, you can

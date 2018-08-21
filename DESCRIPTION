@@ -41,7 +41,8 @@ Imports:
   SummarizedExperiment,
   desc,
   devtools,
-  glue
+  glue,
+  utils
 Suggests:
   testthat (>= 1.0.2),
   knitr,
