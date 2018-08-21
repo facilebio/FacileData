@@ -247,7 +247,7 @@ assay_types <- function(x) {
 }
 
 #' @export
-assay_names <- function(x, default_first=TRUE) {
+assay_names.FacileDataSet <- function(x, default_first=TRUE) {
   stopifnot(is.FacileDataSet(x))
   anames <- assay_info_tbl(x) %>% collect %$% assay
   if (default_first && length(anames) > 1L) {
