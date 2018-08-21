@@ -214,7 +214,7 @@ meta_info <- function(x, fn = meta_file(x)) {
 #' @export
 #' @family API
 #' @return `"Homo sapiens`", `"Mus musculus"`, etc.
-organism <- function(x) {
+organism.FacileDataSet <- function(x) {
   assert_facile_data_set(x)
   x$organism
 }
@@ -292,42 +292,16 @@ covariate_definitions <- function(x, as.list=TRUE) {
 #'
 #' @param x a `FacileDataSet`
 #' @return tibble of sample attributes
-samples <- function(x) {
+samples.FacileDataSet <- function(x) {
   assert_facile_data_set(x)
   sample_info_tbl(x) %>%
     select(dataset, sample_id) %>%
     set_fds(x)
 }
 
-#' Retrieves grouping table for samples within a FacileDataSet.
-#'
-#' It is natural to define subgroups of samples within larger datasets.
-#' This function returns grouping definitions (which we call "facets") for
-#' a `FacileDataStore`.
-#'
-#' @export
-#' @family API
-#'
-#' @param x A `FacileDataStore`
-#' @param name The specific facet (grouping) definition to return. Note that
-#'   this parameter isn't yet used. Only one facet table was originally
-#'   defined for each FacileDataSet, but we want to enable different facet
-#'   definitions to be used in the future.
-#' @return A `tibble` that defines the `dataset,sample_id` tuples that belong
-#'   to each "facet" (group).
-facet_frame <- function(x, name = "default", ...) {
-  UseMethod("facet_frame")
-}
-
 #' @export
 #' @rdname facet_frame
-facet_frame.default <- function(x, name = "default", ...) {
-  stop("Not implemented for objects that do not descend from a FacileDataStore")
-}
-
-#' @export
-#' @rdname facet_frame
-facet_frame.FacileDataStore <- function(x, name = "default", ...) {
+facet_frame.FacileDataSet <- function(x, name = "default", ...) {
   samples(x) %>%
     mutate(facet = dataset) %>%
     select(facet, dataset, sampe_id) %>%

@@ -13,7 +13,7 @@
 #'   FacileDataSets.
 #' @return a tbl_df or tbl_sqlite result from the sample_stats table
 #' @family API
-fetch_sample_statistics <- function(x, samples=NULL, semi=TRUE,
+fetch_sample_statistics.FacileDataSet <- function(x, samples=NULL, semi=TRUE,
                                     assay_name='rnaseq') {
   stopifnot(is.FacileDataSet(x))
   assert_string(assay_name)
