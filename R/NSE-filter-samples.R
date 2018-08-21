@@ -3,7 +3,7 @@
 #' This allows the user to query the `FacileDataSet` as if it were a wide
 #' `pData` `data.frame` of all its covariates.
 #'
-#' **NOTE** This feature is implemented so poorly. It's only really meant to be
+#' This feature is only really meant to be
 #' used interactively, and with extreme caution ... programatically specifying
 #' the covariates, for instance, does not work right now.
 #'

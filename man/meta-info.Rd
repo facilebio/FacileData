@@ -21,7 +21,7 @@ dataset_definitions(x, as.list = TRUE)
 \item{fn}{The path to the `meta.yaml` file.}
 
 \item{as.list}{boolean, if `FALSE` (default) returns a list, otherwise
-sumarraizes results into a tibble.}
+summarizes results into a tibble.}
 }
 \value{
 The `meta.yaml` file parsed into a list-of-lists representation

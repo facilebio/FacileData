@@ -51,7 +51,7 @@ which minimally includes the following items:
    are generated from the assays performed on the samples in the
    `FacileDataSet`.
 3. A `meta.yaml` file tha contains informaiton about the `FacileDataSet`.
-   To better understasnd the structure and contents of this file, you can
+   To better understand the structure and contents of this file, you can
    refer to the following:
     a. The included `testdata/expected-meta.yaml` file, which is an
        exemplar file for [exampleFacileDataSet()].

@@ -12,10 +12,10 @@
 #'
 #' 1. A `data.sqlite` SQLite database that stores feature and sample metadata
 #' 2. A `data.h5` HDF5 file that stores a multitude of dense assay matrices that
-n#'    are generated from the assays performed on the samples in the
+#'    are generated from the assays performed on the samples in the
 #'    `FacileDataSet`.
 #' 3. A `meta.yaml` file tha contains informaiton about the `FacileDataSet`.
-#'    To better understasnd the structure and contents of this file, you can
+#'    To better understand the structure and contents of this file, you can
 #'    refer to the following:
 #'     a. The included `testdata/expected-meta.yaml` file, which is an
 #'        exemplar file for [exampleFacileDataSet()].
@@ -242,7 +242,7 @@ default_assay <- function(x) {
 #' @rdname meta-info
 #' @export
 #' @param as.list boolean, if `FALSE` (default) returns a list, otherwise
-#'   sumarraizes results into a tibble.
+#'   summarizes results into a tibble.
 #' @return meta information about the datasets in `x` as a `list` or `tibble`
 dataset_definitions <- function(x, as.list=TRUE) {
   defs <- meta_info(x)$datasets
