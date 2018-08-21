@@ -110,7 +110,7 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   out[['cache']] <- list()
 
   ## meta information
-  class(out) <- c("FacileDataSet", "FacileDataStore")
+  class(out) <- c("FacileDataSet", "AbstractFacileDataStore")
 
   mi <- meta_info(out)
   out['organism'] <- mi$organism
