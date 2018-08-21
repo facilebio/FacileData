@@ -1,6 +1,6 @@
 Package: FacileDataSet
 Type: Package
-Title: A fluent API for accessing multi-assay high-throughput genomics data.
+Title: A fluent API for accessing multi-assay high-throughput genomics data
 Version: 0.7.0
 Authors@R: c(
   person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre")),
@@ -51,5 +51,5 @@ Suggests:
   stringr,
   AnnotationDbi
 RoxygenNote: 6.1.0
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
