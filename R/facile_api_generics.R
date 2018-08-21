@@ -30,6 +30,17 @@ samples.default <- function(x, ...) {
     stop("The FacileAPI requires that a specific method be written for this type.")
 }
 
+#' @family FacileInterface
+#' @export
+default_assay <- function(x) {
+    UseMethod("default_assay")
+}
+
+#' @method default_assay default
+default_assay.default <- function(x, ...) {
+    stop("The FacileAPI requires that a specific method be written for this type.")
+}
+
 #' Retrieves grouping table for samples within a FacileDataSet.
 #'
 #' It is natural to define subgroups of samples within larger datasets.
@@ -102,6 +113,17 @@ fetch_sample_statistics <- function(x, samples=NULL, semi=TRUE, assay_name='rnas
 
 #' @method fetch_sample_statistics default
 fetch_sample_statistics.default <- function(x, ...) {
+    stop("The FacileAPI requires that a specific method be written for this type.")
+}
+
+#' @family FacileInterface
+#' @export
+assay_names <- function(x, default_first=TRUE) {
+    UseMethod("assay_names")
+}
+
+#' @method assay_names default
+assay_names.default <- function(x, ...) {
     stop("The FacileAPI requires that a specific method be written for this type.")
 }
 
