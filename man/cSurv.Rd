@@ -6,9 +6,15 @@
 \alias{as_Surv}
 \title{cSurv is a character representation of survival::surv ###}
 \usage{
+<<<<<<< HEAD
 as_cSurv(from)
 
 as_Surv(from)
+=======
+as_cSurv(x)
+
+as_Surv(x)
+>>>>>>> add coercion among Surv, cSurv and character, with tests and docs
 }
 \description{
 cSurv serves as a more reliable way to use Surv objects as data.frame columns. A
@@ -21,15 +27,21 @@ analyses can convert cSurv to Surv as needed. It is assumed that all Surv censor
 is right-censored.
 }
 \examples{
+<<<<<<< HEAD
 library(survival)
+=======
+>>>>>>> add coercion among Surv, cSurv and character, with tests and docs
 x = Surv(c(14,12,3), event = c(1,0,1))
 y = as(x,"cSurv")
 z = as(y, "Surv")
 x2 = as.character(x)
 z2 = as(x2, "Surv")
+<<<<<<< HEAD
 a = as(x, "cSurv")
 b = as(a, "character")
 c = as(b, "cSurv")
 d = as(c, "Surv")
+=======
+>>>>>>> add coercion among Surv, cSurv and character, with tests and docs
 }
 \concept{cSurv}
