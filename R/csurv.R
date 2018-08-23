@@ -76,3 +76,12 @@ setAs(
     as_cSurv(as_Surv(from))
   }
 )
+
+#' @family cSurv
+setAs(
+    from = "character",
+    to = "cSurv",
+    def = function(x) {
+        as_cSurv(as_Surv(x))
+    }
+)
