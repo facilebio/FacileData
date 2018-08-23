@@ -162,20 +162,17 @@ eav_decode_logical <- function(x, attrname = character(), def = list(), ...) {
 
 #' @rdname simple-eav-decode-functions
 #' @export
-eav_encode_Surv <- function(x, ...) {
-    stopifnot(is(x, "Surv"))
-    out <- as.character(x)
-    attr(out, "eavclass") <- "Surv"
+eav_encode_cSurv <- function(x, ...) {
+    stopifnot(is(x, "cSurv"))
+    out <- as(x, "character")
+    attr(out, "eavclass") <- "cSurv"
     out
 }
 
 #' @rdname simple-eav-decode-functions
 #' @export
-eav_decode_Surv <- function(x, attrname = character(), def = list(), ...) {
-    x = as.character(x) # Both check type and drop attributes
-    stopifnot(all(is.na(x) | grepl("\\d[\\+ ]*$", x)))
-    status = ifelse(endsWith(x,"+"), 0, 1)
-    Surv(as.numeric(gsub("[\\+ ]*$", "", x)), status)
+eav_decode_cSurv <- function(x, attrname = character(), def = list(), ...) {
+    as(unclass(x), "cSurv")
 }
 
 #' Entity-attribute-value decoding for categorical (character) values.
@@ -511,8 +508,8 @@ eavdef_for_column <- function(column, column_name) {
   if (is.factor(column)) {
     out[['levels']] <- levels(column)
   }
-  if (is(column, "Surv")) {
-      out[['class']] <- 'Surv'
+  if (is(column, "cSurv")) {
+      out[['class']] <- 'cSurv'
   }
   out
 }
@@ -585,6 +582,15 @@ validate_covariate_def_list <- function(x, pdata) {
 as.EAVtable <- function(x, eav_metadata = NULL, covariate_def = list()) {
   stopifnot(is.data.frame(x))
   assert_columns(x, c("dataset", "sample_id"))
+
+  x[] = lapply(x,
+               function(el) {
+                   if (is(el, "Surv")) {
+                       as_cSurv(el)
+                   } else {
+                       el
+                   }
+               })
 
   if (is.null(eav_metadata)) {
     eav_metadata <- eav_metadata_create(x, covariate_def)
