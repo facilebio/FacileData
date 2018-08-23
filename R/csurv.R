@@ -20,14 +20,15 @@
 #' z = as(y, "Surv")
 #' x2 = as.character(x)
 #' z2 = as(x2, "Surv")
+#' a = as(x, "cSurv")
+#' b = as(a, "character")
+#' c = as(b, "cSurv")
+#' d = as(c, "Surv")
 
 #' @rdname cSurv
 #' @family cSurv
 as_cSurv <- function(x) {
-    stopifnot(is(x, "Surv"))
-    out <- as.character(x)
-    class(out) <- "cSurv"
-    out
+    structure(as.character(x), class = "cSurv")
 }
 
 #' @rdname cSurv

@@ -74,7 +74,7 @@ test_that("pData -> meta.yaml covariate encoding works (simple & compound)", {
       sample_id = c("a","b","c","a","b","c"),
       variable = c("x","x","x","y","y","y"),
       value = c("1+","2","3+","4","5","6"),
-      class = c("Surv","Surv","Surv","real","real","real"),
+      class = c("cSurv","cSurv","cSurv","real","real","real"),
       type = rep("general", 6),
       stringsAsFactors = FALSE
   )

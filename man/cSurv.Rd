@@ -21,10 +21,15 @@ analyses can convert cSurv to Surv as needed. It is assumed that all Surv censor
 is right-censored.
 }
 \examples{
+library(survival)
 x = Surv(c(14,12,3), event = c(1,0,1))
 y = as(x,"cSurv")
 z = as(y, "Surv")
 x2 = as.character(x)
 z2 = as(x2, "Surv")
+a = as(x, "cSurv")
+b = as(a, "character")
+c = as(b, "cSurv")
+d = as(c, "Surv")
 }
 \concept{cSurv}
