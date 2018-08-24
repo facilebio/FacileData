@@ -187,10 +187,18 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
       out <- pdata(obj)
       out$dataset <- dname
       out$sample_id <- colnames(obj)
+      out[] = lapply(out,
+                     function(el) {
+                         if (is(el, "Surv")) {
+                             as_cSurv(el)
+                         } else {
+                             el
+                         }
+                     })
       dplyr::select(out, dataset, sample_id, everything())
   })
 
-  pdat <- bind_pdata_rows(pdats)
+  pdat <- bind_rows(pdats)
   pdat$sample_id = gsub("__", "",  pdat$sample_id) # __ has as special meaning for Facile
 
   col_descs_list = lapply(x, pdata_metadata)
