@@ -6,9 +6,9 @@
 \alias{as_Surv}
 \title{cSurv is a character representation of survival::surv ###}
 \usage{
-as_cSurv(x)
+as_cSurv(from)
 
-as_Surv(x)
+as_Surv(from)
 }
 \description{
 cSurv serves as a more reliable way to use Surv objects as data.frame columns. A
