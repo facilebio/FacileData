@@ -7,6 +7,7 @@
 \title{cSurv is a character representation of survival::surv ###}
 \usage{
 <<<<<<< HEAD
+<<<<<<< HEAD
 as_cSurv(from)
 
 as_Surv(from)
@@ -15,6 +16,11 @@ as_cSurv(x)
 
 as_Surv(x)
 >>>>>>> add coercion among Surv, cSurv and character, with tests and docs
+=======
+as_cSurv(from)
+
+as_Surv(from)
+>>>>>>> finally got setAs right, ML says arg has to be 'from' not 'x'
 }
 \description{
 cSurv serves as a more reliable way to use Surv objects as data.frame columns. A
