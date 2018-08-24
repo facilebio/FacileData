@@ -1,5 +1,6 @@
 library(testthat)
 library(survival)
+library(FacileDataSet)
 
 context("Coercion among Surv, cSurv and character")
 
