@@ -3,7 +3,7 @@
 \name{meta_file}
 \alias{meta_file}
 \alias{meta_info}
-\alias{default_assay}
+\alias{default_assay.FacileDataSet}
 \alias{dataset_definitions}
 \title{Path to the meta information YAML file}
 \usage{
@@ -11,7 +11,7 @@ meta_file(x)
 
 meta_info(x, fn = meta_file(x))
 
-default_assay(x)
+\method{default_assay}{FacileDataSet}(x)
 
 dataset_definitions(x, as.list = TRUE)
 }

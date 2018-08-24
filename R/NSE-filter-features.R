@@ -10,6 +10,6 @@
 #' @param x A \code{FacileDataSet}
 #' @param ... NSE claused to use in \code{\link[dplyr]{filter}} expressions
 #' @family API
-filter_features <- function(x, ...) {
+filter_features.FacileDataSet <- function(x, ...) {
   feature_info_tbl(x) %>% filter(...) %>% set_fds(x)
 }

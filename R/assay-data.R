@@ -24,7 +24,7 @@
 #'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
 #'   otherwise a \code{tbl_df} of the results.
 #' @family API
-fetch_assay_data <- function(x, features, samples=NULL,
+fetch_assay_data.FacileDataSet <- function(x, features, samples=NULL,
                              assay_name=default_assay(x),
                              normalized=FALSE, as.matrix=FALSE, ...,
                              subset.threshold=700, aggregate.by=NULL,
@@ -226,8 +226,8 @@ fetch_assay_data <- function(x, features, samples=NULL,
 #' Helper function to get sample assay data from single or aggregate features
 #' @export
 #' @family API
-fetch_assay_score <- function(x, features, samples=NULL, assay_name=NULL,
-                              as.matrix=FALSE, ..., subset.threshold=700) {
+fetch_assay_score.FacileDataSet <- function(x, features, samples=NULL, assay_name=NULL,
+                                            as.matrix=FALSE, ..., subset.threshold=700) {
   if (is.null(assay_name)) {
     assay_name <- features$assay
   }
@@ -247,8 +247,7 @@ assay_types <- function(x) {
 }
 
 #' @export
-assay_names <- function(x, default_first=TRUE) {
-  stopifnot(is.FacileDataSet(x))
+assay_names.FacileDataSet <- function(x, default_first=TRUE) {
   anames <- assay_info_tbl(x) %>% collect %$% assay
   if (default_first && length(anames) > 1L) {
     dassay <- default_assay(x)
