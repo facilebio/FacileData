@@ -33,18 +33,18 @@ setOldClass("cSurv")
 #' @rdname cSurv
 #' @family cSurv
 #' @export
-as_cSurv <- function(x) {
-  structure(as.character(x), class = "cSurv")
+as_cSurv <- function(from) {
+  structure(as.character(from), class = "cSurv")
 }
 
 #' @rdname cSurv
 #' @family cSurv
 #' @export
-as_Surv <- function(x) {
-  x <- as.character(x) # Both check type and drop attributes
-  stopifnot(all(is.na(x) | grepl("\\d[\\+ ]*$", x)))
-  status <- ifelse(endsWith(x, "+"), 0, 1)
-  Surv(as.numeric(gsub("[\\+ ]*$", "", x)), status)
+as_Surv <- function(from) {
+  from <- as.character(from) # Both check type and drop attributes
+  stopifnot(all(is.na(from) | grepl("\\d[\\+ ]*$", from)))
+  status <- ifelse(endsWith(from, "+"), 0, 1)
+  Surv(as.numeric(gsub("[\\+ ]*$", "", from)), status)
 }
 
 #' @family cSurv
@@ -72,7 +72,7 @@ setAs(
 setAs(
   from = "character",
   to = "cSurv",
-  def = function(x) {
-    as_cSurv(as_Surv(x))
+  def = function(from) {
+    as_cSurv(as_Surv(from))
   }
 )
