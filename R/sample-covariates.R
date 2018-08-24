@@ -10,7 +10,6 @@
 #' @family API
 fetch_sample_covariates.FacileDataSet <- function(x, samples=NULL, covariates=NULL,
                                     custom_key=Sys.getenv("USER")) {
-  stopifnot(is.FacileDataSet(x))
   ## db temp table thing shouldn't be an issue here
   # dat <- sample_covariate_tbl(x) %>% collect(n=Inf) ## #dboptimize# remove to exercise db harder
   dat <- sample_covariate_tbl(x)
@@ -58,7 +57,6 @@ fetch_sample_covariates.FacileDataSet <- function(x, samples=NULL, covariates=NU
 fetch_custom_sample_covariates.FacileDataSet <- function(x, samples=NULL, covariates=NULL,
                                            custom_key=Sys.getenv("USER"),
                                            file.prefix="facile") {
-  stopifnot(is.FacileDataSet(x))
   out.cols <- colnames(sample_covariate_tbl(x))
 
   fpat <- paste0('^', file.prefix, '_', custom_key, "_.*json")

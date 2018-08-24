@@ -157,7 +157,7 @@ fetch_assay_score.default <- function(x, ...) {
 #' @export
 fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                     custom_key=Sys.getenv("USER")) {
-  UseMethod("fetch_assay_score")
+  UseMethod("fetch_sample_covariates")
 }
 
 #' @method fetch_sample_covariates default
@@ -170,7 +170,7 @@ fetch_sample_covariates.default <- function(x, ...) {
 fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                            custom_key=Sys.getenv("USER"),
                                            file.prefix="facile") {
-  UseMethod("fetch_assay_score")
+  UseMethod("fetch_custom_sample_covariates")
 }
 
 #' @method fetch_custom_sample_covariates default

@@ -227,7 +227,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples=NULL,
 #' @export
 #' @family API
 fetch_assay_score.FacileDataSet <- function(x, features, samples=NULL, assay_name=NULL,
-                              as.matrix=FALSE, ..., subset.threshold=700) {
+                                            as.matrix=FALSE, ..., subset.threshold=700) {
   if (is.null(assay_name)) {
     assay_name <- features$assay
   }
@@ -248,7 +248,6 @@ assay_types <- function(x) {
 
 #' @export
 assay_names.FacileDataSet <- function(x, default_first=TRUE) {
-  stopifnot(is.FacileDataSet(x))
   anames <- assay_info_tbl(x) %>% collect %$% assay
   if (default_first && length(anames) > 1L) {
     dassay <- default_assay(x)
