@@ -48,32 +48,3 @@ mcast <- function(data, formula, fun.aggregate=NULL, ...) {
   d <- dcast(data, formula, fun.aggregate, ...)
   set_rownames(as.matrix(d[, -1L, drop=FALSE]), d[[1L]])
 }
-
-#' bind_rows a list of data.frames that might have Surv columns
-#'
-#' Surv columns currently break bind_rows, so we coerce to character, bind_rows,
-#' and coerce back.
-#' @param df_list list of data.frames
-#' @return data.frame
-#' @export
-bind_pdata_rows <- function(df_list) {
-    ## FIXME: Deprecate in favor of dplyr::bind_rows when they fix #2457
-    is_surv = lapply(df_list,
-                     function(x) {
-                         vapply(x, is, logical(1), "Surv")
-                     })
-
-    clean_df_list = mapply(df_list, is_surv,
-                      FUN = function(x,y) {
-                          x[y] = lapply(x[y], as.character)
-                          x
-                      }, SIMPLIFY = FALSE)
-
-    big_df = bind_rows(clean_df_list)
-    is_surv_uniq = unlist(is_surv)
-    is_surv_uniq = is_surv_uniq[!duplicated(names(is_surv_uniq))]
-    stopifnot(setequal(names(is_surv_uniq), colnames(big_df)))
-    is_surv_unique = is_surv_uniq[colnames(big_df)]
-    big_df[is_surv_unique] = lapply(big_df[is_surv_unique], eav_decode_Surv)
-    big_df
-}
