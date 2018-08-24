@@ -1,5 +1,6 @@
 #####################################################################################
 ### Make a type called cSurv that is a character representation of survival::surv ###
+#####################################################################################
 
 #' @name cSurv
 #' @title cSurv is a character representation of survival::surv ###
@@ -28,44 +29,44 @@
 #' @rdname cSurv
 #' @family cSurv
 as_cSurv <- function(x) {
-    structure(as.character(x), class = "cSurv")
+  structure(as.character(x), class = "cSurv")
 }
 
 #' @rdname cSurv
 #' @family cSurv
 as_Surv <- function(x) {
-    x = as.character(x) # Both check type and drop attributes
-    stopifnot(all(is.na(x) | grepl("\\d[\\+ ]*$", x)))
-    status = ifelse(endsWith(x,"+"), 0, 1)
-    Surv(as.numeric(gsub("[\\+ ]*$", "", x)), status)
+  x <- as.character(x) # Both check type and drop attributes
+  stopifnot(all(is.na(x) | grepl("\\d[\\+ ]*$", x)))
+  status <- ifelse(endsWith(x, "+"), 0, 1)
+  Surv(as.numeric(gsub("[\\+ ]*$", "", x)), status)
 }
 
 #' @family cSurv
 setAs(
-    from = "Surv",
-    to = "cSurv",
-    def = as_cSurv
+  from = "Surv",
+  to = "cSurv",
+  def = as_cSurv
 )
 
 #' @family cSurv
 setAs(
-    from = "cSurv",
-    to = "Surv",
-    def = as_Surv
+  from = "cSurv",
+  to = "Surv",
+  def = as_Surv
 )
 
 #' @family cSurv
 setAs(
-    from = "character",
-    to = "Surv",
-    def = as_Surv
+  from = "character",
+  to = "Surv",
+  def = as_Surv
 )
 
 #' @family cSurv
 setAs(
-    from = "character",
-    to = "cSurv",
-    def = function(x) {
-        as_cSurv(as_Surv(x))
-    }
+  from = "character",
+  to = "cSurv",
+  def = function(x) {
+    as_cSurv(as_Surv(x))
+  }
 )
