@@ -25,15 +25,21 @@
 #' b = as(a, "character")
 #' c = as(b, "cSurv")
 #' d = as(c, "Surv")
+NULL
+
+setOldClass("Surv")
+setOldClass("cSurv")
 
 #' @rdname cSurv
 #' @family cSurv
+#' @export
 as_cSurv <- function(x) {
   structure(as.character(x), class = "cSurv")
 }
 
 #' @rdname cSurv
 #' @family cSurv
+#' @export
 as_Surv <- function(x) {
   x <- as.character(x) # Both check type and drop attributes
   stopifnot(all(is.na(x) | grepl("\\d[\\+ ]*$", x)))
