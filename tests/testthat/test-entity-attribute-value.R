@@ -84,11 +84,11 @@ test_that("pData -> meta.yaml covariate encoding works (simple & compound)", {
 
 test_that("basic encoding and decoding of EAV columns works", {
     # survival::Surv
-    x = Surv(1:3, c(0,1,0))
-    y = eav_encode_Surv(x)
+    x = as(Surv(1:3, c(0,1,0)), "cSurv")
+    y = eav_encode_cSurv(x)
     y1 = c("1+","2","3+")
-    attr(y1, "eavclass") = "Surv"
+    attr(y1, "eavclass") = "cSurv"
     expect_identical(y, y1)
-    z = eav_decode_Surv(y)
+    z = eav_decode_cSurv(y)
     expect_identical(x,z)
 })
