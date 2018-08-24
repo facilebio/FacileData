@@ -64,6 +64,7 @@ as.DGEList <- function(x, ...) {
 as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
                               assay_name=default_assay(.fds), .fds=fds(x),
                               custom_key=Sys.getenv("USER"), ...) {
+
   ## NOTE: by now assay_name is ignored
   stopifnot(is(x, 'FacileExpression'))
   requireNamespace("edgeR")
