@@ -29,7 +29,6 @@
 #'   collect
 #' setequal(crc.34$sample_id, eav.query$sample_id)
 filter_samples.FacileDataSet <- function(x, ..., with_covariates=FALSE) {
-  stopifnot(is.FacileDataSet(x))
   dots <- lazy_dots(...)
   cov.table <- .create_wide_covariate_table(x, dots)
   out <- dplyr::filter_(cov.table, .dots=dots)

@@ -29,7 +29,6 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples=NULL,
                              normalized=FALSE, as.matrix=FALSE, ...,
                              subset.threshold=700, aggregate.by=NULL,
                              verbose=FALSE) {
-  stopifnot(is.FacileDataSet(x))
   assert_flag(as.matrix)
   assert_flag(normalized)
   assert_number(subset.threshold)

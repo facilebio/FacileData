@@ -43,7 +43,6 @@ subtype_map <- function(x) {
 #' @return a facile sample descriptor
 #' @family API
 fetch_samples.FacileDataSet <- function(x, samples=NULL, assay="rnaseq", ...) {
-  stopifnot(is.FacileDataSet(x))
   dots <- lazy_dots(...)
   if (length(dots)) {
     stop("Currently rethinking how to make fetching samples intuitive, ie. ",
