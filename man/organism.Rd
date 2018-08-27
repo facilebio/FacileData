@@ -4,7 +4,7 @@
 \alias{organism}
 \title{The Facile API}
 \usage{
-organism(x)
+organism(x, ...)
 }
 \description{
 This is a stub for a manpage all about the FacileAPI
