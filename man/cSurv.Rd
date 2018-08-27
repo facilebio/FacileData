@@ -6,21 +6,9 @@
 \alias{as_Surv}
 \title{cSurv is a character representation of survival::surv ###}
 \usage{
-<<<<<<< HEAD
-<<<<<<< HEAD
 as_cSurv(from)
 
 as_Surv(from)
-=======
-as_cSurv(x)
-
-as_Surv(x)
->>>>>>> add coercion among Surv, cSurv and character, with tests and docs
-=======
-as_cSurv(from)
-
-as_Surv(from)
->>>>>>> finally got setAs right, ML says arg has to be 'from' not 'x'
 }
 \description{
 cSurv serves as a more reliable way to use Surv objects as data.frame columns. A
@@ -33,31 +21,15 @@ analyses can convert cSurv to Surv as needed. It is assumed that all Surv censor
 is right-censored.
 }
 \examples{
-<<<<<<< HEAD
-<<<<<<< HEAD
 library(survival)
-=======
->>>>>>> add coercion among Surv, cSurv and character, with tests and docs
-=======
-library(survival)
->>>>>>> trip through EAV now converts Surv to cSurv before going to EAV
 x = Surv(c(14,12,3), event = c(1,0,1))
 y = as(x,"cSurv")
 z = as(y, "Surv")
 x2 = as.character(x)
 z2 = as(x2, "Surv")
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> trip through EAV now converts Surv to cSurv before going to EAV
 a = as(x, "cSurv")
 b = as(a, "character")
 c = as(b, "cSurv")
 d = as(c, "Surv")
-<<<<<<< HEAD
-=======
->>>>>>> add coercion among Surv, cSurv and character, with tests and docs
-=======
->>>>>>> trip through EAV now converts Surv to cSurv before going to EAV
 }
 \concept{cSurv}
