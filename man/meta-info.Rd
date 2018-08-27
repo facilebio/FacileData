@@ -32,7 +32,7 @@ meta information about the datasets in `x` as a `list` or `tibble`
 Lots of useful information is stored in a `FacileDataSet`'s `meta.yaml` file.
 This function returns all of that in a list-of-lists
 
-A `FaclieDataSet` can contain assay data from different "datasets" (such
+A `FacileDataSet` can contain assay data from different "datasets" (such
 as different cancer indications from the TCGA). This functions returns
 description and URL information that describes these datasets in more detail,
 which is specified in the FacileDataSets `meta.yaml` file.

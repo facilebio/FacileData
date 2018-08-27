@@ -233,7 +233,7 @@ default_assay.FacileDataSet <- function(x) {
 
 #' Retrieves URL and description of datasets in a FacileDataSet
 #'
-#' A `FaclieDataSet` can contain assay data from different "datasets" (such
+#' A `FacileDataSet` can contain assay data from different "datasets" (such
 #' as different cancer indications from the TCGA). This functions returns
 #' description and URL information that describes these datasets in more detail,
 #' which is specified in the FacileDataSets `meta.yaml` file.
