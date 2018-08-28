@@ -201,6 +201,7 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
 #'   `datasets` list.
 #' @return a `tibble` subset of `facile_feature_info` that indicates the *new*
 #'   features that were added to the internal `feature_info_tbl`.
+#' @importFrom edgeR calcNormFactors
 addFacileAssaySet <- function(x, datasets, facile_assay_name,
                               facile_assay_type=.assay.types,
                               facile_feature_type=.feature.types,
