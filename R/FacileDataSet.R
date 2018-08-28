@@ -303,7 +303,7 @@ samples.FacileDataSet <- function(x) {
 facet_frame.FacileDataSet <- function(x, name = "default", ...) {
   samples(x) %>%
     mutate(facet = dataset) %>%
-    select(facet, dataset, sampe_id) %>%
+    select(facet, dataset, sample_id) %>%
     set_fds(x)
 }
 
