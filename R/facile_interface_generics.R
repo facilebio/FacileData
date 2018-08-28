@@ -14,7 +14,7 @@ organism <- function(x, ...) {
   UseMethod("organism")
 }
 
-#' @method organism default
+#' @export
 organism.default <- function(x, ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
@@ -25,7 +25,7 @@ samples <- function(x, ...) {
   UseMethod("samples")
 }
 
-#' @method samples default
+#' @export
 samples.default <- function(x, ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
@@ -36,7 +36,7 @@ default_assay <- function(x, ...) {
   UseMethod("default_assay")
 }
 
-#' @method default_assay default
+#' @export
 default_assay.default <- function(x, ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
@@ -47,7 +47,6 @@ default_assay.default <- function(x, ...) {
 #' This function returns grouping definitions (which we call "facets") for
 #' a `FacileDataStore`.
 #'
-#' @export
 #' @family FacileInterface
 #'
 #' @param x An object of a class implementing the FacileInterface
@@ -63,7 +62,7 @@ facet_frame <- function(x, name = "default", ...) {
 }
 
 #' @family FacileInterface
-#' @method facet_frame default
+#' @export
 facet_frame.default <- function(x, name = "default", ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
@@ -76,8 +75,8 @@ filter_features <- function(x, ...) {
   UseMethod("filter_features")
 }
 
-#' @method filter_features default
-filer_features.default <- function(x, ...) {
+#' @export
+filter_features.default <- function(x, ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
 
@@ -87,7 +86,7 @@ filter_samples <- function(x, ..., with_covariates = FALSE) {
   UseMethod("filter_samples")
 }
 
-#' @method filter_samples default
+#' @export
 filter_samples.default <- function(x, ..., with_covariates = FALSE) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
@@ -100,7 +99,7 @@ fetch_samples <- function(x, samples=NULL, assay="rnaseq", ...) {
   UseMethod("fetch_samples")
 }
 
-#' @method fetch_samples default
+#' @export
 fetch_samples.default <- function(x, samples = NULL, assay = "rnaseq", ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
@@ -111,7 +110,7 @@ fetch_sample_statistics <- function(x, samples=NULL, semi=TRUE, assay_name='rnas
   UseMethod("fetch_sample_statistics")
 }
 
-#' @method fetch_sample_statistics default
+#' @export
 fetch_sample_statistics.default <- function(x, samples=NULL, semi=TRUE, assay_name='rnaseq') {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
@@ -122,7 +121,7 @@ assay_names <- function(x, default_first=TRUE) {
   UseMethod("assay_names")
 }
 
-#' @method assay_names default
+#' @export
 assay_names.default <- function(x, default_first = TRUE) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
@@ -137,7 +136,7 @@ fetch_assay_data <- function(x, features, samples=NULL,
   UseMethod("fetch_assay_data")
 }
 
-#' @method fetch_assay_data default
+#' @export
 fetch_assay_data.default <- function(x, features, samples=NULL,
                              assay_name=default_assay(x),
                              normalized=FALSE, as.matrix=FALSE, ...,
@@ -153,7 +152,7 @@ fetch_assay_score <- function(x, features, samples=NULL, assay_name=NULL,
   UseMethod("fetch_assay_score")
 }
 
-#' @method fetch_assay_score default
+#' @export
 fetch_assay_score.default <- function(x, features, samples=NULL, assay_name=NULL,
                               as.matrix=FALSE, ..., subset.threshold=700) {
 
@@ -167,7 +166,7 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
   UseMethod("fetch_sample_covariates")
 }
 
-#' @method fetch_sample_covariates default
+#' @export
 fetch_sample_covariates.default <- function(x, samples=NULL, covariates=NULL,
                                     custom_key=Sys.getenv("USER")) {
   stop("The FacileAPI requires that a specific method be written for this type.")
@@ -181,7 +180,7 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
   UseMethod("fetch_custom_sample_covariates")
 }
 
-#' @method fetch_custom_sample_covariates default
+#' @export
 fetch_custom_sample_covariates.default <- function(x, samples=NULL, covariates=NULL,
                                            custom_key=Sys.getenv("USER"),
                                            file.prefix="facile") {
