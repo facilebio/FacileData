@@ -100,6 +100,12 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   dbExecute(con, 'pragma temp_store=MEMORY;')
   dbExecute(con, sprintf('pragma cache_size=%d;', cache_size))
 
+  if (!dir.exists(anno.dir)) {
+    if (!dir.create(anno.dir, recursive =  TRUE))
+      stop(sprintf("%s: failed to create annotation directory: ", FDS.name),
+           anno.dir)
+  }
+
   out <- list(con=con)
   out['parent.dir'] <- paths$path
   out['data.fn'] <- paths$sqlite.fn ## paths$data.fn
