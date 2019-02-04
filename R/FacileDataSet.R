@@ -60,7 +60,7 @@
 #' @param covdef.fn A custom path to the yaml file that has covariate mapping info
 #' @return a `FacileDataSet` object
 #' @examples
-#' fn <- system.file("extdata", "exampleFacileDataSet", package = "FacileDataSet")
+#' fn <- system.file("extdata", "exampleFacileDataSet", package = "FacileData")
 #' fds <- FacileDataSet(fn)
 FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
                           sqlite.fn=file.path(path, 'data.sqlite'),

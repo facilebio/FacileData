@@ -1,7 +1,25 @@
+#' Fetches summary information about sample covariates
+#'
+#' @param x a \code{FacileDataSet} connection
+#' @param samples a samples descriptor, used to narrow the universe of samples
+#'   to get sample covariate information from.
+#' @param ... extras
+#' @return a tibble of sample covariate information
+sample_covariates.FacileDataSet <- function(x, samples = NULL, ...) {
+  dat <- sample_covariate_tbl(x)
+  if (!is.null(samples)) {
+    assert_sample_subset(samples)
+    .copy <- !same_src(dat, samples)
+    dat <- semi_join(dat, samples, by = c("dataset", "sample_id"), copy = .copy)
+  }
+  res <- distinct(dat, variable, class)
+  collect(res, n = Inf)
+}
+
 #' Fetch rows from sample_covariate table for specified samples and covariates
 #'
 #' @export
-#' @param db a \code{FacileDataSet} connection
+#' @param x a \code{FacileDataSet} connection
 #' @param samples a samples descriptor \code{tbl_*}
 #' @param covariates character vector of covariate names
 #' @param custom_key The key to use to fetch more custom annotations over

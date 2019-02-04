@@ -1,15 +1,15 @@
-Package: FacileDataSet
+Package: FacileData
 Type: Package
 Title: A fluent API for accessing multi-assay high-throughput genomics data
-Version: 0.8.0
+Version: 2.0.0
 Authors@R: c(
   person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre")),
   person("Vincent", "Rouilly", , "rouilly.vincent@gene.com", role = "ctb"),
-  person("Peter", "Haverty", , "haverty.peter@gene.com", role = "ctb"),
+  person("Peter", "Haverty", , "haverty.peter@gene.com", role = "aut"),
   person("Genentech", role = c("cph", "fnd"))
   )
 Author: Steve Lianoglou <slianoglou@gmail.com>
-Maintainer: Peter M. Haverty <phaverty@gene.com>
+Maintainer: Steve Lianoglou <slianoglou@gmail.com>
 Description: Defines the "FacileData" API over multi-assay, high-throughput
   genomics data. The FacileData API is a fluent grammar that facilitates
   exploratory data analysis. This package also defines a "FacileDataSet" class,
@@ -21,6 +21,7 @@ Depends:
   R (>= 3.4.3),
   dplyr (>= 0.7.4)
 Imports:
+  broom,
   methods,
   dtplyr,
   magrittr,
@@ -50,7 +51,10 @@ Suggests:
   org.Hs.eg.db,
   org.Mm.eg.db,
   stringr,
-  AnnotationDbi
+  AnnotationDbi,
+  SummarizedExperiment,
+Remotes:
+  lianos/multiGSEA@develop
 RoxygenNote: 6.1.1
 License: MIT + file LICENSE
 Encoding: UTF-8

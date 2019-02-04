@@ -5,7 +5,7 @@
 #'
 #' @export
 exampleFacileDataSet <- function() {
-  fn <- system.file('extdata', 'exampleFacileDataSet', package='FacileDataSet')
+  fn <- system.file('extdata', 'exampleFacileDataSet', package='FacileData')
   FacileDataSet(fn)
 }
 
@@ -15,7 +15,7 @@ exampleFacileDataSet <- function() {
 #' @rdname test-helpers
 example_sample_covariates <- function() {
   pdat <- system.file("testdata", "test-sample-covariates.rds",
-                      package = "FacileDataSet")
+                      package = "FacileData")
   readRDS(pdat)
 }
 
@@ -27,7 +27,7 @@ example_sample_covariates <- function() {
 #'   file where these are defined.
 example_meta <- function(file.path=FALSE) {
   out <- system.file("testdata", "expected-meta.yaml",
-                     package = "FacileDataSet")
+                     package = "FacileData")
   if (!isTRUE(file.path)) {
     out <- yaml::read_yaml(out)
   }
