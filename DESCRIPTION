@@ -51,6 +51,6 @@ Suggests:
   org.Mm.eg.db,
   stringr,
   AnnotationDbi
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 License: MIT + file LICENSE
 Encoding: UTF-8
