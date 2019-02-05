@@ -2,18 +2,18 @@ context("Retrieving arbitrary samples")
 
 FDS <- exampleFacileDataSet()
 
-test_that("fetch samples returns valid sample descriptor absent assay spec", {
-  s.query <- sample_info_tbl(FDS) %>%
-    collect %>%
-    sample_n(10)
-
-  s.res <- fetch_samples(FDS, s.query) %>% collect
-  diffs <- s.query %>%
-    anti_join(s.res, by=c('dataset', 'sample_id'))
-
-  ## these two tables should be the same
-  expect_true(nrow(diffs) == 0L)
-})
+# test_that("fetch samples returns valid sample descriptor absent assay spec", {
+#   s.query <- sample_info_tbl(FDS) %>%
+#     collect %>%
+#     sample_n(10)
+#
+#   s.res <- fetch_samples(FDS, s.query) %>% collect
+#   diffs <- s.query %>%
+#     anti_join(s.res, by=c('dataset', 'sample_id'))
+#
+#   ## these two tables should be the same
+#   expect_true(nrow(diffs) == 0L)
+# })
 
 # test_that("fetch_samples allows filtering covariate table as if it were wide", {
 #   is.tcga <- length(grep('tcga', dbfn(FDS), ignore.case=TRUE)) > 0

@@ -79,16 +79,19 @@ test_facile_data_set <- function(x, ...) {
 #'      has your filters of interest set
 #' @export
 #' @rdname assertions
-assert_sample_subset <- function(x) {
-  stopifnot(is_sample_subset(x))
+assert_sample_subset <- function(x, fds = NULL, ...) {
+  stopifnot(is_sample_subset(x, fds))
   invisible(x)
 }
 
 #' @export
 #' @rdname assertions
-is_sample_subset <- function(x) {
+is_sample_subset <- function(x, fds = NULL, ...) {
   if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
   if (!has_columns(x, c('dataset', 'sample_id'))) return(FALSE)
+  if (!is.null(fds)) {
+    # TODO: Check that `x` enumerates a valid subset of samples in `fds`
+  }
   TRUE
 }
 

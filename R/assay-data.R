@@ -24,11 +24,15 @@
 #'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
 #'   otherwise a \code{tbl_df} of the results.
 #' @family API
-fetch_assay_data.FacileDataSet <- function(x, features, samples=NULL,
-                             assay_name=default_assay(x),
-                             normalized=FALSE, as.matrix=FALSE, ...,
-                             subset.threshold=700, aggregate.by=NULL,
-                             verbose=FALSE) {
+fetch_assay_data.FacileDataSet <- function(x, features,
+                                           samples = active_samples(x),
+                                           assay_name = default_assay(x),
+                                           normalized = FALSE,
+                                           as.matrix = FALSE,
+                                           ...,
+                                           subset.threshold = 700,
+                                           aggregate.by = NULL,
+                                           verbose = FALSE) {
   assert_flag(as.matrix)
   assert_flag(normalized)
   assert_number(subset.threshold)
@@ -225,8 +229,11 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples=NULL,
 #' Helper function to get sample assay data from single or aggregate features
 #' @export
 #' @family API
-fetch_assay_score.FacileDataSet <- function(x, features, samples=NULL, assay_name=NULL,
-                                            as.matrix=FALSE, ..., subset.threshold=700) {
+fetch_assay_score.FacileDataSet <- function(x, features,
+                                            samples = active_samples(x),
+                                            assay_name=NULL,
+                                            as.matrix=FALSE, ...,
+                                            subset.threshold=700) {
   if (is.null(assay_name)) {
     assay_name <- features$assay
   }
@@ -287,7 +294,7 @@ has_assay <- function(x, assay_name) {
 #'   scaling factors, etc. Note that rows in \code{samples} that do not appear
 #'   in \code{assay_name} will be returnd here with NA values for hd5_index and
 #'   such.
-assay_sample_info <- function(x, assay_name, samples=NULL) {
+assay_sample_info <- function(x, assay_name, samples = active_samples(x)) {
   stopifnot(is.FacileDataSet(x))
   if (!is.null(samples)) {
     samples <- assert_sample_subset(samples) %>%
@@ -487,7 +494,7 @@ create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
 #' \code{normalize} defaults to \code{TRUE}
 #'
 #' @export
-#' @param x a samples descriptor
+#' @param samples a samples descriptor
 #' @param feature_ids character vector of feature_ids
 #' @param with_symbols Do you want gene symbols returned, too?
 #' @param .fds A \code{FacileDataSet} object
@@ -496,10 +503,10 @@ with_assay_data <- function(samples, features, assay_name=NULL,
                             normalized=TRUE, aggregate.by=NULL,
                             spread=TRUE, with_assay_name=FALSE, ...,
                             verbose=FALSE, .fds=fds(samples)) {
-  if (is.FacileDataSet(samples)) {
-    .fds <- samples(samples)
-    samples(samples(.fds))
-  }
+  # if (is.FacileDataSet(samples)) {
+  #   .fds <- samples(samples)
+  #   samples(samples(.fds))
+  # }
   stopifnot(is.FacileDataSet(.fds))
   assert_sample_subset(samples)
   assert_flag(normalized)

@@ -19,10 +19,10 @@ Description: Defines the "FacileData" API over multi-assay, high-throughput
   into memory.
 Depends:
   R (>= 3.4.3),
-  dplyr (>= 0.7.4)
 Imports:
   broom,
   methods,
+  dplyr,
   dtplyr,
   magrittr,
   yaml,

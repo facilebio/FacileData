@@ -1,30 +1,46 @@
-#' Creates tbl that associates a sample with all of its indication/subtypes
+#' Manipulate / query the "active samples" from a FacileDataStore
 #'
+#' A FacileDataStore can house an enormous set of samples, however we can
+#' configure it to work only on a subset of them at a time. The subset of
+#' samples currently under scrutiny are the "active samples"
+#'
+#' @rdname active_samples
 #' @export
-#' @param x a \code{FacileDataSet} object
-#' @return a \code{tbl} with indication and subtype information for all samples
-#'   in the database
-subtype_map <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  sample.map <- sample_covariate_tbl(x) %>%
-    filter(type == 'tumor_classification') %>%
-    with_sample_covariates('sample_type', .fds=x)
+#' @param x A `FacileDataStore`
+#' @param value a sample descriptor
+active_samples <- function(x, ...) {
+  UseMethod("active_samples", x)
+}
 
-  main <- sample.map %>%
-    filter(variable == 'indication') %>%
-    transmute(indication=value, subtype='all', dataset=dataset,
-              sample_id=sample_id, sample_type=sample_type)
+#' @rdname active_samples
+active_samples.default <- function(x, ....) {
+  stop("Implement active_samples for: ", class(x)[1L])
+}
 
-  subs <- sample.map %>%
-    filter(variable != 'indication') %>%
-    transmute(subtype=value, dataset=dataset, sample_id=sample_id,
-              sample_type=sample_type) %>% ## add indication
-    left_join(select(main, dataset, sample_id, indication),
-              by=c('dataset', 'sample_id'))
+#' @rdname active_samples
+#' @export
+active_samples.FacileDataSet <- function(x, ...) {
+  x[["active_samples"]]
+}
 
-  bind_rows(main, subs) %>%
-    arrange(indication, subtype, dataset) %>%
-    set_fds(x)
+#' @rdname active_samples
+#' @export
+`active_samples<-` <- function(x, value) {
+  UseMethod("active_samples<-", x)
+}
+
+`active_samples<-.default` <- function(x, value) {
+  stop("Implement active_samples<- for: ", class(x)[1L])
+}
+
+#' @rdname active_samples
+#' @export
+`active_samples<-.FacileDataSet` <- function(x, value) {
+  if (!is.null(value)) {
+    value <- assert_sample_subset(value, x) %>% collect(n = Inf)
+  }
+  x[["active_samples"]] <- value
+  x
 }
 
 #' Fetches a sample descriptor that matches the filter criterion
@@ -42,13 +58,15 @@ subtype_map <- function(x) {
 #' @param ... the NSE boolean filter criteria
 #' @return a facile sample descriptor
 #' @family API
-fetch_samples.FacileDataSet <- function(x, samples=NULL, assay="rnaseq", ...) {
+fetch_samples.FacileDataSet <- function(x, samples = active_samples(x),
+                                        assay = "rnaseq", ...) {
+  stop("This shouldn't be used")
   dots <- lazy_dots(...)
   if (length(dots)) {
     stop("Currently rethinking how to make fetching samples intuitive, ie. ",
          "see fetch_samples.old")
   }
-  if (is.null(samples)) samples <- sample_info_tbl(x)
+  # if (is.null(samples)) samples <- sample_info_tbl(x)
   samples <- assert_sample_subset(samples) %>% collect(n=Inf)
 
   if (!missing(assay)) {

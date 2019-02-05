@@ -19,9 +19,9 @@
 \alias{is_covariate_definitions}
 \title{Check to see that samples are referenced correctly}
 \usage{
-assert_sample_subset(x)
+assert_sample_subset(x, fds = NULL, ...)
 
-is_sample_subset(x)
+is_sample_subset(x, fds = NULL, ...)
 
 assert_facet_descriptor(x)
 

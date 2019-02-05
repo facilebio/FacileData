@@ -9,9 +9,9 @@ with_assay_data(samples, features, assay_name = NULL,
   with_assay_name = FALSE, ..., verbose = FALSE, .fds = fds(samples))
 }
 \arguments{
-\item{.fds}{A \code{FacileDataSet} object}
+\item{samples}{a samples descriptor}
 
-\item{x}{a samples descriptor}
+\item{.fds}{A \code{FacileDataSet} object}
 
 \item{feature_ids}{character vector of feature_ids}
 

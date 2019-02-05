@@ -4,18 +4,19 @@
 \alias{fetch_sample_covariates.FacileDataSet}
 \title{Fetch rows from sample_covariate table for specified samples and covariates}
 \usage{
-\method{fetch_sample_covariates}{FacileDataSet}(x, samples = NULL,
-  covariates = NULL, custom_key = Sys.getenv("USER"))
+\method{fetch_sample_covariates}{FacileDataSet}(x,
+  samples = active_samples(x), covariates = NULL,
+  custom_key = Sys.getenv("USER"))
 }
 \arguments{
+\item{x}{a \code{FacileDataSet} connection}
+
 \item{samples}{a samples descriptor \code{tbl_*}}
 
 \item{covariates}{character vector of covariate names}
 
 \item{custom_key}{The key to use to fetch more custom annotations over
 the given samples}
-
-\item{db}{a \code{FacileDataSet} connection}
 }
 \value{
 rows from the \code{sample_covariate} table

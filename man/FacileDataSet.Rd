@@ -81,7 +81,7 @@ which minimally includes the following items:
    elsewhere.
 }
 \examples{
-fn <- system.file("extdata", "exampleFacileDataSet", package = "FacileDataSet")
+fn <- system.file("extdata", "exampleFacileDataSet", package = "FacileData")
 fds <- FacileDataSet(fn)
 }
 \seealso{

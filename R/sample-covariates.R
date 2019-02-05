@@ -5,7 +5,8 @@
 #'   to get sample covariate information from.
 #' @param ... extras
 #' @return a tibble of sample covariate information
-sample_covariates.FacileDataSet <- function(x, samples = NULL, ...) {
+sample_covariates.FacileDataSet <- function(x, samples = active_samples(x),
+                                            ...) {
   dat <- sample_covariate_tbl(x)
   if (!is.null(samples)) {
     assert_sample_subset(samples)
@@ -26,8 +27,10 @@ sample_covariates.FacileDataSet <- function(x, samples = NULL, ...) {
 #'   the given samples
 #' @return rows from the \code{sample_covariate} table
 #' @family API
-fetch_sample_covariates.FacileDataSet <- function(x, samples=NULL, covariates=NULL,
-                                    custom_key=Sys.getenv("USER")) {
+fetch_sample_covariates.FacileDataSet <- function(x,
+                                                  samples = active_samples(x),
+                                                  covariates = NULL,
+                                                  custom_key = Sys.getenv("USER")) {
   ## db temp table thing shouldn't be an issue here
   # dat <- sample_covariate_tbl(x) %>% collect(n=Inf) ## #dboptimize# remove to exercise db harder
   dat <- sample_covariate_tbl(x)
@@ -72,9 +75,11 @@ fetch_sample_covariates.FacileDataSet <- function(x, samples=NULL, covariates=NU
 #' @param custom_key The key to use for the custom annotation
 #' @return covariate tbl
 #' @family API
-fetch_custom_sample_covariates.FacileDataSet <- function(x, samples=NULL, covariates=NULL,
-                                           custom_key=Sys.getenv("USER"),
-                                           file.prefix="facile") {
+fetch_custom_sample_covariates.FacileDataSet <- function(x,
+                                                         samples = active_samples(x),
+                                                         covariates = NULL,
+                                                         custom_key = Sys.getenv("USER"),
+                                                         file.prefix = "facile") {
   out.cols <- colnames(sample_covariate_tbl(x))
 
   fpat <- paste0('^', file.prefix, '_', custom_key, "_.*json")

@@ -4,9 +4,9 @@
 \alias{fetch_custom_sample_covariates.FacileDataSet}
 \title{Fetches custom (user) annotations for a given user prefix}
 \usage{
-\method{fetch_custom_sample_covariates}{FacileDataSet}(x, samples = NULL,
-  covariates = NULL, custom_key = Sys.getenv("USER"),
-  file.prefix = "facile")
+\method{fetch_custom_sample_covariates}{FacileDataSet}(x,
+  samples = active_samples(x), covariates = NULL,
+  custom_key = Sys.getenv("USER"), file.prefix = "facile")
 }
 \arguments{
 \item{samples}{the facile sample descriptor}
