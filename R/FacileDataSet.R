@@ -113,10 +113,11 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   out['hdf5.fn'] <- paths$hdf5.fn
   out['anno.dir'] <- paths$anno.dir
   out['db.loc'] <- db.loc
-  out[['cache']] <- list()
+  out[['cache']] <- new.env()
 
   ## meta information
   class(out) <- c("FacileDataSet", "FacileDataStore")
+  active_samples(out) <- samples(out)
 
   mi <- meta_info(out)
   out['organism'] <- mi$organism
@@ -125,7 +126,7 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
     mi$default_assay <- assay_names(out)[1L]
   }
   out['default_assay'] <- mi$default_assay
-  out[['active_samples']] <- samples(out)
+
   class(out) <- c(mi$name, class(out))
   out
 }

@@ -20,7 +20,7 @@ active_samples.default <- function(x, ....) {
 #' @rdname active_samples
 #' @export
 active_samples.FacileDataSet <- function(x, ...) {
-  x[["active_samples"]]
+  x[["cache"]][["active_samples"]] %>% set_fds(x)
 }
 
 #' @rdname active_samples
@@ -36,10 +36,12 @@ active_samples.FacileDataSet <- function(x, ...) {
 #' @rdname active_samples
 #' @export
 `active_samples<-.FacileDataSet` <- function(x, value) {
-  if (!is.null(value)) {
+  if (is.null(value)) {
+    value <- samples(x)
+  } else {
     value <- assert_sample_subset(value, x) %>% collect(n = Inf)
   }
-  x[["active_samples"]] <- value
+  x[["cache"]][["active_samples"]] <- value
   x
 }
 
