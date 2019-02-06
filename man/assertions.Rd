@@ -2,7 +2,8 @@
 % Please edit documentation in R/validation.R
 \name{assert_sample_subset}
 \alias{assert_sample_subset}
-\alias{is_sample_subset}
+\alias{check_sample_subset}
+\alias{test_sample_subset}
 \alias{assert_facet_descriptor}
 \alias{is_facet_descriptor}
 \alias{assert_assay_feature_descriptor}
@@ -19,9 +20,12 @@
 \alias{is_covariate_definitions}
 \title{Check to see that samples are referenced correctly}
 \usage{
-assert_sample_subset(x, fds = NULL, ...)
+assert_sample_subset(x, fds = NULL, ..., .var.name = vname(x),
+  add = NULL)
 
-is_sample_subset(x, fds = NULL, ...)
+check_sample_subset(x, fds = NULL, ...)
+
+test_sample_subset(x, fds = NULL, ...)
 
 assert_facet_descriptor(x)
 

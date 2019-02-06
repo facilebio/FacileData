@@ -21,7 +21,7 @@ organism.default <- function(x, ...) {
 
 #' @family FacileInterface
 #' @export
-sample_covariates <- function(x, ...) {
+sample_covariates <- function(x, samples = NULL, ...) {
   UseMethod("sample_covariates")
 }
 

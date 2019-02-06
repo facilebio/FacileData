@@ -79,20 +79,40 @@ test_facile_data_set <- function(x, ...) {
 #'      has your filters of interest set
 #' @export
 #' @rdname assertions
-assert_sample_subset <- function(x, fds = NULL, ...) {
-  stopifnot(is_sample_subset(x, fds))
-  invisible(x)
+assert_sample_subset <- function(x, fds = NULL, ..., .var.name = vname(x),
+                                 add = NULL) {
+  res <- check_sample_subset(x, fds, ...)
+  makeAssertion(x, res, .var.name, add)
 }
 
 #' @export
 #' @rdname assertions
-is_sample_subset <- function(x, fds = NULL, ...) {
-  if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
-  if (!has_columns(x, c('dataset', 'sample_id'))) return(FALSE)
-  if (!is.null(fds)) {
-    # TODO: Check that `x` enumerates a valid subset of samples in `fds`
+check_sample_subset <- function(x, fds = NULL, ...) {
+  e <- character()
+  if (!(is(x, 'tbl') || is(x, 'data.frame'))) {
+    e <- "Sample descriptor is not data.frame/tbl-like"
   }
-  TRUE
+  if (!has_columns(x, c('dataset', 'sample_id'))) {
+    e <- c(e, "'dataset' and 'sample_id' columns required in sample descriptor")
+  }
+  if (!is.null(fds)) {
+    .samples <- samples(fds)
+    bad.samples <- anti_join(x, .samples, by = c("dataset", "sample_id"),
+                             copy = !same_src(.samples, x))
+    bad.samples <- collect(bad.samples, n = Inf)
+    nbad <- nrow(bad.samples)
+    if (nbad > 0L) {
+      e <- c(e, paste(nbad, "samples not found in FacileDataStore"))
+    }
+  }
+
+  if (length(e)) e else TRUE
+}
+
+#' @export
+#' @rdname assertions
+test_sample_subset <- function(x, fds = NULL, ...) {
+  identical(check_sample_subset(x, fds, ...), TRUE)
 }
 
 #' @export

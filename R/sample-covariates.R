@@ -1,5 +1,6 @@
 #' Fetches summary information about sample covariates
 #'
+#' @export
 #' @param x a \code{FacileDataSet} connection
 #' @param samples a samples descriptor, used to narrow the universe of samples
 #'   to get sample covariate information from.
