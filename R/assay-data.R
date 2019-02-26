@@ -396,6 +396,7 @@ assay_feature_name_map <- function(x, assay_name) {
 }
 
 #' Identify the number of each assay run across specific samples
+#'
 #' @export
 #' @param x FacileDataSet
 #' @param samples sample descriptor
@@ -404,7 +405,7 @@ assay_feature_name_map <- function(x, assay_name) {
 #' @return rows from assay_info_tbl that correspond to the assays defined
 #'   over the given samples. If no assays are defined over these samples,
 #'   you're going to get an empty tibble.
-assay_info_over_samples <- function(x, samples) {
+assay_info_over_samples <- function(x, samples = active_samples(x)) {
   stopifnot(is.FacileDataSet(x))
   assert_sample_subset(samples)
 
@@ -420,6 +421,8 @@ assay_info_over_samples <- function(x, samples) {
     group_by(assay) %>%
       summarize(ndatasets = n_distinct(dataset), nsamples=n()) %>%
       ungroup()
+
+  out
 }
 
 ## helper function to fetch_assay_data
@@ -549,8 +552,8 @@ with_assay_data <- function(samples, features, assay_name=NULL,
     adata <- set_fds(adata, .fds)
   }
 
-  # join_samples(adata, samples)
-  join_samples(samples, adata)
+  out <- join_samples(samples, adata)
+  as_facile_frame(out, .fds)
 }
 
 can.spread.assay.by.name <- function(x, assay_name) {

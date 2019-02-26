@@ -20,7 +20,8 @@ active_samples.default <- function(x, ....) {
 #' @rdname active_samples
 #' @export
 active_samples.FacileDataSet <- function(x, ...) {
-  x[["cache"]][["active_samples"]] %>% set_fds(x)
+  out <- x[["cache"]][["active_samples"]]
+  as_facile_frame(out, fds(x))
 }
 
 #' @rdname active_samples
@@ -89,7 +90,7 @@ fetch_samples.FacileDataSet <- function(x, samples = active_samples(x),
 
   tbl(x$con, fds.tbl) %>%
     semi_join(samples, by=pk, copy=copy, auto_index=copy) %>%
-    set_fds(x)
+    as_facile_frame(x)
 }
 
 
@@ -128,8 +129,7 @@ join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
   }
 
   inner_join(x, samples, by=c('dataset', 'sample_id'),
-             copy=internalize, auto_index=internalize) %>%
-    set_fds(fds(x))
+             copy=internalize, auto_index=internalize)
 }
 
 ## Filter x down to specific samples

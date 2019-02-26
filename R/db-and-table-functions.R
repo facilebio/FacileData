@@ -147,11 +147,24 @@ sample_info_tbl <- function(x) {
 #' @export
 #' @param x the object
 #' @param db The \code{FacileDb} object
-fds <- function(x) {
-  if (is.FacileDataSet(x)) return(x)
+fds <- function(x, ...) {
+  UseMethod("fds", x)
+}
+
+#' @export
+#' @rdname getsetdb
+fds.FacileDataStore <- function(x) {
+  return(x)
+}
+
+
+#' @export
+#' @rdname getsetdb
+fds.default <- function(x, ...) {
   out <- attr(x, 'fds')
   if (is.null(out)) {
-    warning("No FacileDataSet found in x (", class(x)[1L], ")", immediate.=TRUE)
+    warning("No FacileDataStore found in x (", class(x)[1L], ")",
+            immediate.=TRUE)
   }
   out
 }

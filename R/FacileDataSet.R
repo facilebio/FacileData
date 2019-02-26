@@ -298,11 +298,11 @@ covariate_definitions <- function(x, as.list=TRUE) {
 #'
 #' @param x a `FacileDataSet`
 #' @return tibble of sample attributes
-samples.FacileDataSet <- function(x) {
+samples.FacileDataSet <- function(x, ...) {
   assert_facile_data_set(x)
   sample_info_tbl(x) %>%
     select(dataset, sample_id) %>%
-    set_fds(x)
+    as_facile_frame(x, ...)
 }
 
 #' @export
@@ -311,7 +311,7 @@ facet_frame.FacileDataSet <- function(x, name = "default", ...) {
   samples(x) %>%
     mutate(facet = dataset) %>%
     select(facet, dataset, sample_id) %>%
-    set_fds(x)
+    as_facile_frame(x)
 }
 
 #' @noRd

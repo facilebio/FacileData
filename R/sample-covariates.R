@@ -1,5 +1,4 @@
-#' Fetches summary information about sample covariates
-#'
+#' @rdname sample_covariates
 #' @export
 #' @param x a \code{FacileDataSet} connection
 #' @param samples a samples descriptor, used to narrow the universe of samples
@@ -14,8 +13,18 @@ sample_covariates.FacileDataSet <- function(x, samples = active_samples(x),
     .copy <- !same_src(dat, samples)
     dat <- semi_join(dat, samples, by = c("dataset", "sample_id"), copy = .copy)
   }
-  res <- distinct(dat, variable, class)
-  collect(res, n = Inf)
+  res <- dat %>%
+    group_by(variable, class) %>%
+    summarize(nsamples = n()) %>%
+    ungroup()
+
+  out <- collect(res, n = Inf)
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
+}
+
+sample_covariates.facile_frame <- function(x, ...){
+  .fds <- fds(x)
+  sample_covariates(.fds, x)
 }
 
 #' Fetch rows from sample_covariate table for specified samples and covariates
@@ -64,7 +73,7 @@ fetch_sample_covariates.FacileDataSet <- function(x,
     out <- bind_rows(collect(out, n=Inf), custom)
   }
 
-  set_fds(out, x)
+  as_facile_frame(out, x)
 }
 
 #' Fetches custom (user) annotations for a given user prefix
@@ -197,7 +206,7 @@ with_sample_covariates <- function(x, covariates=NULL, na.rm=FALSE,
     out <- out[keep,,drop=FALSE]
   }
 
-  set_fds(out, .fds)
+  as_facile_frame(out, .fds, .valid_sample_check = FALSE)
 }
 
 #' Spreads the covariates returned from database into wide data.frame
@@ -250,5 +259,5 @@ spread_covariates <- function(x, .fds=fds(x)) {
     }
   }
 
-  set_fds(out, .fds)
+  as_facile_frame(out, .fds, .valid_sample_check = FALSE)
 }

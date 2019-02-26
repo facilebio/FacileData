@@ -4,7 +4,7 @@
 \alias{pdata}
 \title{Bioc-container specific pData extraction functions}
 \usage{
-pdata(x, ...)
+pdata(x, covariate_metadata = NULL, ...)
 }
 \arguments{
 \item{x}{SummarizedExperiment, ExpressionSet or DGEList}

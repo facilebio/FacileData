@@ -48,3 +48,12 @@ mcast <- function(data, formula, fun.aggregate=NULL, ...) {
   d <- dcast(data, formula, fun.aggregate, ...)
   set_rownames(as.matrix(d[, -1L, drop=FALSE]), d[[1L]])
 }
+
+#' Set the class of an object and return the object
+#'
+#' @export
+set_class <- function(x, .class, ...) {
+  assert_character(.class)
+  class(x) <- unique(c(.class, class(x)))
+  x
+}

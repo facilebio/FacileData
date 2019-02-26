@@ -35,7 +35,7 @@ filter_samples.FacileDataSet <- function(x, ..., with_covariates=FALSE) {
   if (!with_covariates) {
     out <- select(out, dataset, sample_id)
   }
-  set_fds(out, x)
+  as_facile_frame(out, x)
 }
 
 .create_wide_covariate_table <- function(x, dots) {

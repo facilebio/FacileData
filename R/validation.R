@@ -1,5 +1,32 @@
 # checkmate compliant validations functions ------------------------------------
 
+#' Check to see if a vector is categorical (character or string)
+#'
+#' @export
+#' @param x a vector of things
+#' @param ... dots
+check_categorical <- function(x, ...) {
+  e <- character()
+  if (!is.character(x) && !is.factor(x)) {
+    e <- c(e, "e is not a character or factor vector")
+  }
+  if (length(e)) e else TRUE
+}
+
+#' @rdname check_categorical
+#' @export
+assert_categorical <- function(x, ..., .var.name = vname(x), add = NULL) {
+  res <- check_categorical(x, ...)
+  makeAssertion(x, res, .var.name, add)
+}
+
+#' @rdname check_categorical
+#' @export
+test_categorical <- function(x, ...) {
+  identical(check_categorical(x, ...), TRUE)
+}
+
+
 #' Check if argument is a FacileDataStore
 #'
 #' @export
@@ -95,8 +122,8 @@ check_sample_subset <- function(x, fds = NULL, ...) {
   if (!has_columns(x, c('dataset', 'sample_id'))) {
     e <- c(e, "'dataset' and 'sample_id' columns required in sample descriptor")
   }
-  if (!is.null(fds)) {
-    .samples <- samples(fds)
+  if (length(e) == 0L && !is.null(fds)) {
+    .samples <- samples(fds, .valid_sample_check = FALSE)
     bad.samples <- anti_join(x, .samples, by = c("dataset", "sample_id"),
                              copy = !same_src(.samples, x))
     bad.samples <- collect(bad.samples, n = Inf)

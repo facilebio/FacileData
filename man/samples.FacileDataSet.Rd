@@ -4,7 +4,7 @@
 \alias{samples.FacileDataSet}
 \title{Retrieves the sample identifiers for all samples in a FacileDataSet.}
 \usage{
-\method{samples}{FacileDataSet}(x)
+\method{samples}{FacileDataSet}(x, ...)
 }
 \arguments{
 \item{x}{a `FacileDataSet`}

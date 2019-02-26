@@ -203,3 +203,11 @@ Currently the API consists of:
  - fetch_samples
 
 Please see the manpages for these functions for more details.
+
+## Classes
+
+* `facile_frame`: this works like a `tibble`, but has a handle to the
+  `FacileDataStore` that it came from in a slot. We provide `.facet_frame`
+  implementations for the dplyr and `base::subset` like verbs, as well as
+  `[` and `[[` so that we can manipulate this as transparently as possible.
+

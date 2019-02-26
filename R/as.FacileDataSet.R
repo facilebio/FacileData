@@ -137,7 +137,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
                                   page_size=2**12, cache_size=2e5,
                                   chunk_rows=5000, chunk_cols="ncol",
                                   chunk_compression=5,
-                                  ...) {
+                                  covariate_metadata = NULL, ...) {
   stopifnot(is.list(x))
   stopifnot(length(x) >= 1L)
   if (file.exists(path)) {
@@ -201,7 +201,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   pdat <- bind_rows(pdats)
   pdat$sample_id = gsub("__", "",  pdat$sample_id) # __ has as special meaning for Facile
 
-  col_descs_list = lapply(x, pdata_metadata)
+  col_descs_list = lapply(x, pdata_metadata, covariate_metadata)
   col_descs = unlist(col_descs_list, FALSE, FALSE)
   names(col_descs) = unlist(sapply(col_descs_list, names, simplify = FALSE), FALSE, FALSE)
   col_descs = col_descs[!duplicated(names(col_descs))]
@@ -369,23 +369,24 @@ validate.fdata <- function(x, ...) {
 #' not for export
 #' @param x SummarizedExperiment, ExpressionSet or DGEList
 #' @param ... additional args, ignored for now
-pdata <- function(x, ...) {
+pdata <- function(x, covariate_metadata = NULL, ...) {
   UseMethod("pdata")
 }
-pdata.SummarizedExperiment <- function(x, ...) {
+pdata.SummarizedExperiment <- function(x, covariate_metadata = NULL,  ...) {
     stopifnot(requireNamespace("SummarizedExperiment", quietly = TRUE))
     df = SummarizedExperiment::colData(x)
     ds = as.data.frame(df)
     validate.pdata(ds, ...)
 }
-pdata.ExpressionSet <- function(x, ...) {
+pdata.ExpressionSet <- function(x, covariate_metadata = NULL,  ...) {
   stopifnot(requireNamespace("Biobase", quietly = TRUE))
   validate.pdata(Biobase::pData(x), ...)
 }
-pdata.DGEList <- function(x, ...) {
+pdata.DGEList <- function(x, covariate_metadata = NULL,  ...) {
   # stopifnot(requireNamespace("edgeR", quietly = TRUE))
   validate.pdata(x$samples, ...)
 }
+
 validate.pdata <- function(x, ...) {
   x
 }
