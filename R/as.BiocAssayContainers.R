@@ -10,6 +10,9 @@
 #' data, eg. where `fds(x)` returns a `FacileDataStore`. See examples for
 #' specifics.
 #'
+#' Note that the order that the samples and features are materialized into the
+#' expression container are not guaranteed.
+#'
 #' @rdname as.BiocContainer
 #'
 #' @export
@@ -22,8 +25,7 @@
 #'   - `FALSE`: TODO: Better handle FALSE
 #'   - `character`: A vector of covariate names to fetch from the
 #'     `FacileDataSet`. Must be elements of `names(sample_definitions(x))`
-#'   - `data.frame`: A table that looks like a subset of the
-#'     `sample_covariate` table, which will be transformed into the `pData`.
+#'   - `data.frame`: A wide covariate table (dataset, sample_id, covariates ...)
 #'     This may be external covariates for samples not available within
 #'     `x` (yet), ie. a table of covariates provided by a third party.
 #'   - `NULL`: do not decorate with *any* covariates.
@@ -90,10 +92,17 @@ as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
   if (!is.null(covariates)) {
     if (isTRUE(covariates)) {
       covariates <- fetch_sample_covariates(.fds, samples)
+      covariates <- spread_covariates(covariates)
     } else if (is.character(covariates)) {
       covariates <- fetch_sample_covariates(.fds, samples, covariates)
+      covariates <- spread_covariates(covariates)
     }
-    assert_sample_covariates(covariates)
+    assert_subset(c("dataset", "sample_id"), colnames(covariates))
+    assert_true(nrow(covariates) == nrow(distinct(covariates)))
+    covariates <- as.data.frame(covariates, stringsAsFactors = FALSE)
+    rownames(covariates) <-  paste(covariates$dataset,
+                                   covariates$sample_id,
+                                   sep="__")
   }
 
   fids <- rownames(x)
@@ -134,10 +143,7 @@ as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
     sample.stats[colnames(y), c('dataset', 'sample_id', 'samid'), drop=FALSE])
 
   if (!is.null(covariates)) {
-    covs <- spread_covariates(covariates, .fds) %>%
-      as.data.frame %>%
-      set_rownames(., paste(.$dataset, .$sample_id, sep='__')) %>%
-      select(-dataset, -sample_id)
+    covs <- select(covariates, -dataset, -sample_id)
     y$samples <- cbind(y$samples, covs[colnames(y),,drop=FALSE])
   }
 

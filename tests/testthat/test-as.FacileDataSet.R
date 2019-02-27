@@ -23,7 +23,7 @@ test_that("We can get pdata metadata", {
   es = Biobase::ExpressionSet(vals, Biobase::AnnotatedDataFrame(sinfo))
 
   expect_identical(
-    FacileDataSet::pdata_metadata(es),
+    FacileData::pdata_metadata(es),
     list(a = list(description = "a is a"),
          b = list(description = "b is b"))
   )

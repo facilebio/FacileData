@@ -18,6 +18,13 @@ as_facile_frame <- function(x, .fds = fds(x), ..., .valid_sample_check = TRUE) {
 
 #' @export
 #' @noRd
+arrange.facile_frame <- function(.data, ...) {
+  res <- NextMethod()
+  as_facile_frame(res, fds(.data), .valid_sample_check = FALSE)
+}
+
+#' @export
+#' @noRd
 collect.facile_frame <- function(x, ...) {
   res <- NextMethod()
   as_facile_frame(res, fds(x), .valid_sample_check = FALSE)
@@ -39,6 +46,21 @@ filter.facile_frame <- function(.data, ...) {
 
 #' @export
 #' @noRd
+group_by.facile_frame <- function(.data, ..., add = FALSE) {
+  res <- NextMethod()
+  # as_facile_frame(res, fds(.data), .valid_sample_check = FALSE)
+  res
+}
+
+#' @export
+#' @noRd
+mutate.facile_frame <- function(.data, ...) {
+  res <- NextMethod()
+  as_facile_frame(res, fds(.data), .valid_sample_check = FALSE)
+}
+
+#' @export
+#' @noRd
 select.facile_frame <- function(.data, ...) {
   res <- NextMethod()
   as_facile_frame(res, fds(.data), .valid_sample_check = FALSE)
@@ -49,6 +71,21 @@ select.facile_frame <- function(.data, ...) {
 subset.facile_frame <- function(x, ...) {
   res <- NextMethod()
   as_facile_frame(res, fds(.data), .valid_sample_check = FALSE)
+}
+
+#' @export
+#' @noRd
+transmute.facile_frame <- function(.data, ...) {
+  res <- NextMethod()
+  as_facile_frame(res, fds(.data), .valid_sample_check = FALSE)
+}
+
+#' @export
+#' @noRd
+ungroup.facile_frame <- function(x, ...) {
+  res <- NextMethod()
+  # as_facile_frame(res, fds(x), .valid_sample_check = FALSE)
+  res
 }
 
 # Joins ========================================================================

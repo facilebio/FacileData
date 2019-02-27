@@ -61,8 +61,7 @@ the DGEList. This can take the following forms:
 - `FALSE`: TODO: Better handle FALSE
 - `character`: A vector of covariate names to fetch from the
   `FacileDataSet`. Must be elements of `names(sample_definitions(x))`
-- `data.frame`: A table that looks like a subset of the
-  `sample_covariate` table, which will be transformed into the `pData`.
+- `data.frame`: A wide covariate table (dataset, sample_id, covariates ...)
   This may be external covariates for samples not available within
   `x` (yet), ie. a table of covariates provided by a third party.
 - `NULL`: do not decorate with *any* covariates.}

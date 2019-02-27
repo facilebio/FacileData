@@ -246,12 +246,8 @@ fetch_assay_score.FacileDataSet <- function(x, features,
   }
 
 }
-#' @export
-assay_types <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  assay_info_tbl(x) %>% collect(n=Inf) %$% assay_type
-}
 
+#' @noRd
 #' @export
 assay_names.FacileDataSet <- function(x, default_first=TRUE) {
   anames <- assay_info_tbl(x) %>% collect %$% assay
@@ -262,7 +258,12 @@ assay_names.FacileDataSet <- function(x, default_first=TRUE) {
   anames
 }
 
+#' Fetches assay meta information for the assays stored in a FacileDataStore
+#'
 #' @export
+#' @param x A `FacileDataStore`
+#' @param assay_name optional name of the assay to get information for
+#' @return a tibble of meta information for the assays stored in `x`
 assay_info <- function(x, assay_name=NULL) {
   stopifnot(is.FacileDataSet(x))
   ainfo <- assay_info_tbl(x) %>% collect(n=Inf)

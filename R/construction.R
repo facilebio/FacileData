@@ -217,8 +217,10 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   if (facile_assay_name %in% assay_names(x)) {
     stop("`", facile_assay_name, "` assay already stored in FacileDataSet")
   }
+
   # facile_assay_type <- match.arg(facile_assay_type, .assay.types)
-  if (facile_assay_type %in% assay_types(x)) {
+  ainfo <- assay_info(x)
+  if (facile_assay_type %in% ainfo$assay_type) {
     warning("assay exists of this type already: ", facile_assay_type,
             immediate.=TRUE)
   }

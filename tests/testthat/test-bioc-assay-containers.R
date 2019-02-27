@@ -36,3 +36,25 @@ test_that("fetch_assay_data results converted to DGEList", {
   expect_true(setequal(colnames(m), colnames(y)))
   expect_equal(m[rownames(y), colnames(y)], y$counts)
 })
+
+test_that("as.DGEList appends custom covaraite table correctly", {
+  custom.covs <- c("sex", "subtype_molecular")
+  with.covs <- with_sample_covariates(samples, custom.covs)
+
+  y.ref <- as.DGEList(with.covs)
+  y.test <- as.DGEList(with.covs, covariates = with.covs)
+
+  expect_equal(dim(y.test), dim(y.ref))
+  expect_equal(colnames(y.test), colnames(y.ref))
+
+  expected.scols <- c(
+    "group", "lib.size", "norm.factors", "dataset", "sample_id", "samid",
+    custom.covs)
+
+  expect_set_equal(colnames(y.test$samples), expected.scols)
+
+  for (cov in custom.covs) {
+    expect_equal(y.test$samples[[cov]], y.ref$samples[[cov]],
+                 info = paste("sample <-> custom covariate match:", cov))
+  }
+})
