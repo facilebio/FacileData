@@ -1,7 +1,3 @@
-library(survival)
-library(testthat)
-library(FacileDataSet)
-
 context("Entity-Attribute-Value conversions")
 
 # Checks the yaml encoding for the variable is as expected by using the

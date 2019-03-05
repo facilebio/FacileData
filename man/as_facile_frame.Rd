@@ -4,12 +4,15 @@
 \alias{as_facile_frame}
 \title{Converts a normal tibble/data.frame to a facile_frame}
 \usage{
-as_facile_frame(x, .fds = fds(x), ..., .valid_sample_check = TRUE)
+as_facile_frame(x, datastore = fds(x), classes = NULL, ...,
+  .valid_sample_check = TRUE)
 }
 \arguments{
 \item{x}{a sample-like descriptor}
 
-\item{.fds}{the FacileDataStore tied to x}
+\item{datastore}{the FacileDataStore tied to x}
+
+\item{classes}{more classes to append to the outgoing object}
 
 \item{...}{dots}
 

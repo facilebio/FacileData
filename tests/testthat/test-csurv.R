@@ -1,7 +1,3 @@
-library(testthat)
-library(survival)
-library(FacileDataSet)
-
 context("Coercion among Surv, cSurv and character")
 
 test_that("We can convert among Surv, cSurv and character", {

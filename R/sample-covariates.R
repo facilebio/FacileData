@@ -1,35 +1,74 @@
-#' Provides a summary table of the (sample) covariates in a FacileDataStore
+#' Provides a summary table of sample covariates.
 #'
+#' Sumamrizes a set of sample covariates (returned from
+#' [fetch_sample_covariates()] at different granulaities.
 #'
-#' @family FacileInterface
+#' @md
 #' @export
 #'
-#' @param x a \code{FacileDataSet} connection
-#' @param samples a samples descriptor, used to narrow the universe of samples
-#'   to get sample covariate information from.
-#' @param ... extras
+#' @param x A sample covariate table, the likes returned from
+#'   [fetch_sample_covariates()].
+#' @param expanded includes details (rows) for each covariate per level
+#'   (or quantile), depending on the covariates `"class"` attribute.
 #' @return a tibble of summary sample covariate information with the following
 #'   columns:
 #'   * `variable`: name of the variable
 #'   * `class`: class of variable (real, categorical)
 #'   * `nsamples`: the number of samples that have this variable defined
-covariate_summary.FacileDataSet <- function(x, samples = active_samples(x),
-                                            custom_key = Sys.getenv("USER"),
-                                            covariate_type = c("samples"),
-                                            with_source = FALSE, ...) {
-  covariate_type <- match.arg(covariate_type)
+#'   * `level`: the level (or quantile) of the covariate
+#'     (included only when `expanded == TRUE`)
+#'   * `ninlevel`: the number of samples with this covariate value
+#'     (included only when `expanded == TRUE`)
+#' @examples
+#' fds <- exampleFacileDataSet()
+#' covs <- fetch_sample_covariates(fds)
+#' smry <- summary(covs)
+#' details <- summary(covs, expanded = TRUE)
+#' catdeetz <- covs %>%
+#'   filter(class == "categorical") %>%
+#'   summary(expanded = TRUE)
+summary.eav_covariates <- function(x, expanded = FALSE, ...) {
+  x <- assert_sample_covariates(x)
+  .fds <- assert_facile_data_store(fds(x))
+  with.source <- is.character(x[["source"]])
 
-  dat <- fetch_sample_covariates(x, samples, custom_key = custom_key,
-                                 with_source = with_source, ...)
-  res <- dat %>%
-    group_by(variable, class) %>%
-    summarize(nsamples = n(), source = source[1L]) %>%
-    ungroup()
-  out <- collect(res, n = Inf)
-  if (!with_source) {
-    out <- mutate(out, soure = NULL)
+  dat <- collect(x, n = Inf)
+  if (!with.source) dat <- mutate(dat, source = NA)
+
+  if (expanded) {
+    covdef <- covariate_definitions(.fds)
+    res <- dat %>%
+      group_by(variable, class) %>%
+      do({
+        value <- cast_covariate(.$variable[1L], .$value, covdef, .fds)
+        clz <- .$class[1L]
+
+        if (clz == "categorical" && is.vector(value)) {
+          levels <- table(value)
+        } else if (clz == "real" && is.vector(value)) {
+          qtl <- quantile(value)
+          bins <- cut(value, qtl)
+          levels <- table(bins)
+        } else {
+          levels <- c(all = length(value))
+        }
+        tibble(nsamples = length(value),
+               source = .$source[1L],
+               level = names(levels),
+               ninlevel = as.integer(levels))
+      })
+  } else {
+    res <- dat %>%
+      group_by(variable, class) %>%
+      summarize(nsamples = n(), source = source[1L])
   }
-  as_facile_frame(out, x, .valid_sample_check = FALSE)
+
+  res <- ungroup(res)
+  if (!with.source) {
+    res <- mutate(res, source = NULL)
+  }
+
+  as_facile_frame(res, .fds, .valid_sample_check = FALSE)
 }
 
 sample_covariates.facile_frame <- function(x, ...){
@@ -87,7 +126,7 @@ fetch_sample_covariates.FacileDataSet <- function(
     out <- bind_rows(collect(out, n=Inf), custom)
   }
 
-  as_facile_frame(out, x, .valid_sample_check = FALSE)
+  as_facile_frame(out, x, "eav_covariates", .valid_sample_check = FALSE)
 }
 
 #' Fetches custom (user) annotations for a given user prefix
@@ -138,7 +177,7 @@ fetch_custom_sample_covariates.FacileDataSet <- function(x,
     out <- mutate(out, source = "userstore")
   }
 
-  as_facile_frame(out, x, .valid_sample_check = FALSE)
+  as_facile_frame(out, x, "eav_covariates", .valid_sample_check = FALSE)
 }
 
 #' Saves custom sample covariates to a FacileDataSet
@@ -225,7 +264,7 @@ with_sample_covariates <- function(x, covariates=NULL, na.rm=FALSE,
     out <- out[keep,,drop=FALSE]
   }
 
-  as_facile_frame(out, .fds, .valid_sample_check = FALSE)
+  as_facile_frame(out, .fds, "wide_covariates", .valid_sample_check = FALSE)
 }
 
 #' Spreads the covariates returned from database into wide data.frame
@@ -278,5 +317,5 @@ spread_covariates <- function(x, .fds=fds(x)) {
     }
   }
 
-  as_facile_frame(out, .fds, .valid_sample_check = FALSE)
+  as_facile_frame(out, .fds, "wide_covariates", .valid_sample_check = FALSE)
 }

@@ -19,17 +19,6 @@ organism.default <- function(x, ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
 
-#' Fetches summary information about sample covariates
-#'
-#' Returns a table with variable,class,nsamples columns
-#'
-#' @rdname sample_covariates
-#' @family FacileInterface
-#' @export
-sample_covariates <- function(x, samples = NULL, ...) {
-  UseMethod("sample_covariates")
-}
-
 #' @family FacileInterface
 #' @export
 samples <- function(x, ...) {
