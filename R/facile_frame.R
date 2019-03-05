@@ -1,5 +1,7 @@
 #' Converts a normal tibble/data.frame to a facile_frame
 #'
+#' @export
+#'
 #' @param x a sample-like descriptor
 #' @param .fds the FacileDataStore tied to x
 #' @param ... dots
@@ -118,4 +120,3 @@ anti_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, ...) {
   res <- NextMethod()
   as_facile_frame(res, fds(x), .valid_sample_check = FALSE)
 }
-

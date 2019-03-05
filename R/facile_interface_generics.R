@@ -173,13 +173,14 @@ fetch_assay_score.default <- function(x, features, samples=NULL, assay_name=NULL
 #' @family FacileInterface
 #' @export
 fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
-                                    custom_key=Sys.getenv("USER")) {
+                                    custom_key=Sys.getenv("USER"),
+                                    with_source = FALSE, ...) {
   UseMethod("fetch_sample_covariates")
 }
 
 #' @export
 fetch_sample_covariates.default <- function(x, samples=NULL, covariates=NULL,
-                                    custom_key=Sys.getenv("USER")) {
+                                    custom_key=Sys.getenv("USER"), ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
 
@@ -187,13 +188,13 @@ fetch_sample_covariates.default <- function(x, samples=NULL, covariates=NULL,
 #' @export
 fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                            custom_key=Sys.getenv("USER"),
-                                           file.prefix="facile") {
+                                           file.prefix="facile", ...) {
   UseMethod("fetch_custom_sample_covariates")
 }
 
 #' @export
 fetch_custom_sample_covariates.default <- function(x, samples=NULL, covariates=NULL,
                                            custom_key=Sys.getenv("USER"),
-                                           file.prefix="facile") {
+                                           file.prefix="facile", ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }

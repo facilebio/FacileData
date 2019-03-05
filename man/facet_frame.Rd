@@ -27,7 +27,7 @@ This function returns grouping definitions (which we call "facets") for
 a `FacileDataStore`.
 }
 \seealso{
-Other FacileInterface: \code{\link{organism}},
-  \code{\link{sample_covariates}}
+Other FacileInterface: \code{\link{covariate_summary.FacileDataSet}},
+  \code{\link{organism}}, \code{\link{sample_covariates}}
 }
 \concept{FacileInterface}

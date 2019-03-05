@@ -19,13 +19,14 @@ Defines the "FacileData" API over multi-assay, high-throughput
 
 Authors:
 \itemize{
+  \item Vincent Rouilly \email{rouilly.vincent@gene.com}
   \item Peter Haverty \email{haverty.peter@gene.com}
 }
 
 Other contributors:
 \itemize{
-  \item Vincent Rouilly \email{rouilly.vincent@gene.com} [contributor]
   \item Genentech [copyright holder, funder]
+  \item Denali Therapeutics [funder]
 }
 
 }

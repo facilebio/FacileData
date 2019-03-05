@@ -4,10 +4,10 @@ Title: A fluent API for accessing multi-assay high-throughput genomics data
 Version: 2.0.0
 Authors@R: c(
   person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre")),
-  person("Vincent", "Rouilly", , "rouilly.vincent@gene.com", role = "ctb"),
+  person("Vincent", "Rouilly", , "rouilly.vincent@gene.com", role = "aut"),
   person("Peter", "Haverty", , "haverty.peter@gene.com", role = "aut"),
-  person("Genentech", role = c("cph", "fnd"))
-  )
+  person("Genentech", role = c("cph", "fnd")),
+  person("Denali Therapeutics", role = c("fnd")))
 Author: Steve Lianoglou <slianoglou@gmail.com>
 Maintainer: Steve Lianoglou <slianoglou@gmail.com>
 Description: Defines the "FacileData" API over multi-assay, high-throughput

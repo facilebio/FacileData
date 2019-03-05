@@ -6,7 +6,8 @@
 \usage{
 \method{fetch_custom_sample_covariates}{FacileDataSet}(x,
   samples = active_samples(x), covariates = NULL,
-  custom_key = Sys.getenv("USER"), file.prefix = "facile")
+  custom_key = Sys.getenv("USER"), with_source = FALSE,
+  file.prefix = "facile")
 }
 \arguments{
 \item{samples}{the facile sample descriptor}

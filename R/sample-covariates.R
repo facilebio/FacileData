@@ -1,24 +1,34 @@
-#' @rdname sample_covariates
+#' Provides a summary table of the (sample) covariates in a FacileDataStore
+#'
+#'
+#' @family FacileInterface
 #' @export
+#'
 #' @param x a \code{FacileDataSet} connection
 #' @param samples a samples descriptor, used to narrow the universe of samples
 #'   to get sample covariate information from.
 #' @param ... extras
-#' @return a tibble of sample covariate information
-sample_covariates.FacileDataSet <- function(x, samples = active_samples(x),
-                                            ...) {
-  dat <- sample_covariate_tbl(x)
-  if (!is.null(samples)) {
-    assert_sample_subset(samples)
-    .copy <- !same_src(dat, samples)
-    dat <- semi_join(dat, samples, by = c("dataset", "sample_id"), copy = .copy)
-  }
+#' @return a tibble of summary sample covariate information with the following
+#'   columns:
+#'   * `variable`: name of the variable
+#'   * `class`: class of variable (real, categorical)
+#'   * `nsamples`: the number of samples that have this variable defined
+covariate_summary.FacileDataSet <- function(x, samples = active_samples(x),
+                                            custom_key = Sys.getenv("USER"),
+                                            covariate_type = c("samples"),
+                                            with_source = FALSE, ...) {
+  covariate_type <- match.arg(covariate_type)
+
+  dat <- fetch_sample_covariates(x, samples, custom_key = custom_key,
+                                 with_source = with_source, ...)
   res <- dat %>%
     group_by(variable, class) %>%
-    summarize(nsamples = n()) %>%
+    summarize(nsamples = n(), source = source[1L]) %>%
     ungroup()
-
   out <- collect(res, n = Inf)
+  if (!with_source) {
+    out <- mutate(out, soure = NULL)
+  }
   as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
@@ -37,10 +47,9 @@ sample_covariates.facile_frame <- function(x, ...){
 #'   the given samples
 #' @return rows from the \code{sample_covariate} table
 #' @family API
-fetch_sample_covariates.FacileDataSet <- function(x,
-                                                  samples = active_samples(x),
-                                                  covariates = NULL,
-                                                  custom_key = Sys.getenv("USER")) {
+fetch_sample_covariates.FacileDataSet <- function(
+    x, samples = active_samples(x), covariates = NULL,
+    custom_key = Sys.getenv("USER"), with_source = FALSE, ...) {
   ## db temp table thing shouldn't be an issue here
   # dat <- sample_covariate_tbl(x) %>% collect(n=Inf) ## #dboptimize# remove to exercise db harder
   dat <- sample_covariate_tbl(x)
@@ -65,15 +74,20 @@ fetch_sample_covariates.FacileDataSet <- function(x,
   }
   # out <- filter_samples(dat, samples)
   out <- join_samples(dat, samples, semi=TRUE)
+  out <- collect(out, n = Inf)
+  if (with_source) {
+    out <- mutate(out, source = "datastore")
+  }
 
   if (!is.null(custom_key)) {
     custom <- fetch_custom_sample_covariates(x, samples,
-                                             covariates=covariates,
-                                             custom_key)
+                                             covariates = covariates,
+                                             custom_key,
+                                             with_source = with_source)
     out <- bind_rows(collect(out, n=Inf), custom)
   }
 
-  as_facile_frame(out, x)
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' Fetches custom (user) annotations for a given user prefix
@@ -89,6 +103,7 @@ fetch_custom_sample_covariates.FacileDataSet <- function(x,
                                                          samples = active_samples(x),
                                                          covariates = NULL,
                                                          custom_key = Sys.getenv("USER"),
+                                                         with_source = FALSE,
                                                          file.prefix = "facile") {
   out.cols <- colnames(sample_covariate_tbl(x))
 
@@ -119,7 +134,11 @@ fetch_custom_sample_covariates.FacileDataSet <- function(x,
     out <- filter(out, variable %in% covariates)
   }
 
-  out %>% set_fds(x)
+  if (with_source) {
+    out <- mutate(out, source = "userstore")
+  }
+
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' Saves custom sample covariates to a FacileDataSet

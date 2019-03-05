@@ -420,8 +420,8 @@ assay_info_over_samples <- function(x, samples = active_samples(x)) {
   ## Count number of samples across dataset count for each assay type
   out <- assays %>%
     group_by(assay) %>%
-      summarize(ndatasets = n_distinct(dataset), nsamples=n()) %>%
-      ungroup()
+    summarize(ndatasets = n_distinct(dataset), nsamples=n()) %>%
+    ungroup()
 
   out
 }

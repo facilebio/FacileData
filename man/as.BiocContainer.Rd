@@ -101,6 +101,9 @@ We use the term "facile object" to refer to either the entirety of a
 `FacileDataStore` or any sample-descriptor that specifies subsets of the
 data, eg. where `fds(x)` returns a `FacileDataStore`. See examples for
 specifics.
+
+Note that the order that the samples and features are materialized into the
+expression container are not guaranteed.
 }
 \examples{
 fds <- exampleFacileDataSet()

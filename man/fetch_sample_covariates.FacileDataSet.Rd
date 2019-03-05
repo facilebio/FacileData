@@ -6,7 +6,7 @@
 \usage{
 \method{fetch_sample_covariates}{FacileDataSet}(x,
   samples = active_samples(x), covariates = NULL,
-  custom_key = Sys.getenv("USER"))
+  custom_key = Sys.getenv("USER"), with_source = FALSE, ...)
 }
 \arguments{
 \item{x}{a \code{FacileDataSet} connection}
