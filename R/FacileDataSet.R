@@ -117,7 +117,6 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
 
   ## meta information
   class(out) <- c("FacileDataSet", "FacileDataStore")
-  active_samples(out) <- samples(out)
 
   mi <- meta_info(out)
   out['organism'] <- mi$organism

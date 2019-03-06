@@ -33,9 +33,9 @@ Sumamrizes a set of sample covariates (returned from
 \examples{
 fds <- exampleFacileDataSet()
 covs <- fetch_sample_covariates(fds)
-smry <- sample_covariate_summary(covs)
-details <- sample_covariate_summary(covs, expanded = TRUE)
+smry <- summary(covs)
+details <- summary(covs, expanded = TRUE)
 catdeetz <- covs \%>\%
   filter(class == "categorical") \%>\%
-  sample_covariate_summary(expanded = TRUE)
+  summary(expanded = TRUE)
 }

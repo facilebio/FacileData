@@ -1,51 +1,3 @@
-#' Manipulate / query the "active samples" from a FacileDataStore
-#'
-#' A FacileDataStore can house an enormous set of samples, however we can
-#' configure it to work only on a subset of them at a time. The subset of
-#' samples currently under scrutiny are the "active samples"
-#'
-#' @rdname active_samples
-#' @export
-#' @param x A `FacileDataStore`
-#' @param value a sample descriptor
-active_samples <- function(x, ...) {
-  UseMethod("active_samples", x)
-}
-
-#' @rdname active_samples
-active_samples.default <- function(x, ....) {
-  stop("Implement active_samples for: ", class(x)[1L])
-}
-
-#' @rdname active_samples
-#' @export
-active_samples.FacileDataSet <- function(x, ...) {
-  out <- x[["cache"]][["active_samples"]]
-  as_facile_frame(out, fds(x))
-}
-
-#' @rdname active_samples
-#' @export
-`active_samples<-` <- function(x, value) {
-  UseMethod("active_samples<-", x)
-}
-
-`active_samples<-.default` <- function(x, value) {
-  stop("Implement active_samples<- for: ", class(x)[1L])
-}
-
-#' @rdname active_samples
-#' @export
-`active_samples<-.FacileDataSet` <- function(x, value) {
-  if (is.null(value)) {
-    value <- samples(x)
-  } else {
-    value <- assert_sample_subset(value, x) %>% collect(n = Inf)
-  }
-  x[["cache"]][["active_samples"]] <- value
-  x
-}
-
 #' Fetches a sample descriptor that matches the filter criterion
 #'
 #' Use \code{...} as if this is a dplyr::filter call, and our
@@ -61,7 +13,7 @@ active_samples.FacileDataSet <- function(x, ...) {
 #' @param ... the NSE boolean filter criteria
 #' @return a facile sample descriptor
 #' @family API
-fetch_samples.FacileDataSet <- function(x, samples = active_samples(x),
+fetch_samples.FacileDataSet <- function(x, samples = samples(x),
                                         assay = "rnaseq", ...) {
   stop("This shouldn't be used")
   dots <- lazy_dots(...)

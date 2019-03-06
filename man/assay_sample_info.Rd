@@ -4,7 +4,7 @@
 \alias{assay_sample_info}
 \title{Utility functions to get row and column indices of rnaseq hdf5 files.}
 \usage{
-assay_sample_info(x, assay_name, samples = active_samples(x))
+assay_sample_info(x, assay_name, samples = samples(x))
 }
 \arguments{
 \item{x}{\code{FacileDataSet}}

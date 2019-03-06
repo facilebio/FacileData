@@ -5,7 +5,7 @@
 \title{Fetch data from single assay of choice}
 \usage{
 \method{fetch_assay_data}{FacileDataSet}(x, features,
-  samples = active_samples(x), assay_name = default_assay(x),
+  samples = samples(x), assay_name = default_assay(x),
   normalized = FALSE, as.matrix = FALSE, ..., subset.threshold = 700,
   aggregate.by = NULL, verbose = FALSE)
 }

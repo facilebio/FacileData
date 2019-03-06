@@ -4,9 +4,9 @@
 \alias{fetch_sample_covariates.FacileDataSet}
 \title{Fetch rows from sample_covariate table for specified samples and covariates}
 \usage{
-\method{fetch_sample_covariates}{FacileDataSet}(x,
-  samples = active_samples(x), covariates = NULL,
-  custom_key = Sys.getenv("USER"), with_source = FALSE, ...)
+\method{fetch_sample_covariates}{FacileDataSet}(x, samples = samples(x),
+  covariates = NULL, custom_key = Sys.getenv("USER"),
+  with_source = FALSE, ...)
 }
 \arguments{
 \item{x}{a \code{FacileDataSet} connection}

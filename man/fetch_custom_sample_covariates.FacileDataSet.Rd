@@ -5,7 +5,7 @@
 \title{Fetches custom (user) annotations for a given user prefix}
 \usage{
 \method{fetch_custom_sample_covariates}{FacileDataSet}(x,
-  samples = active_samples(x), covariates = NULL,
+  samples = samples(x), covariates = NULL,
   custom_key = Sys.getenv("USER"), with_source = FALSE,
   file.prefix = "facile")
 }

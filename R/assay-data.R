@@ -25,7 +25,7 @@
 #'   otherwise a \code{tbl_df} of the results.
 #' @family API
 fetch_assay_data.FacileDataSet <- function(x, features,
-                                           samples = active_samples(x),
+                                           samples = samples(x),
                                            assay_name = default_assay(x),
                                            normalized = FALSE,
                                            as.matrix = FALSE,
@@ -230,7 +230,7 @@ fetch_assay_data.FacileDataSet <- function(x, features,
 #' @export
 #' @family API
 fetch_assay_score.FacileDataSet <- function(x, features,
-                                            samples = active_samples(x),
+                                            samples = samples(x),
                                             assay_name=NULL,
                                             as.matrix=FALSE, ...,
                                             subset.threshold=700) {
@@ -295,7 +295,7 @@ has_assay <- function(x, assay_name) {
 #'   scaling factors, etc. Note that rows in \code{samples} that do not appear
 #'   in \code{assay_name} will be returnd here with NA values for hd5_index and
 #'   such.
-assay_sample_info <- function(x, assay_name, samples = active_samples(x)) {
+assay_sample_info <- function(x, assay_name, samples = samples(x)) {
   stopifnot(is.FacileDataSet(x))
   if (!is.null(samples)) {
     samples <- assert_sample_subset(samples) %>%
@@ -406,7 +406,7 @@ assay_feature_name_map <- function(x, assay_name) {
 #' @return rows from assay_info_tbl that correspond to the assays defined
 #'   over the given samples. If no assays are defined over these samples,
 #'   you're going to get an empty tibble.
-assay_info_over_samples <- function(x, samples = active_samples(x)) {
+assay_info_over_samples <- function(x, samples = samples(x)) {
   stopifnot(is.FacileDataSet(x))
   assert_sample_subset(samples)
 

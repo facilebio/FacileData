@@ -12,7 +12,8 @@ as_facile_frame(x, datastore = fds(x), classes = NULL, ...,
 
 \item{datastore}{the FacileDataStore tied to x}
 
-\item{classes}{more classes to append to the outgoing object}
+\item{classes}{more classes to append to the outgoing object. The
+`"facile_frame"` class entry is always the last one of the bunch.}
 
 \item{...}{dots}
 

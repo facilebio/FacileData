@@ -43,9 +43,9 @@ summary.eav_covariates <- function(x, expanded = FALSE, ...) {
         value <- cast_covariate(.$variable[1L], .$value, covdef, .fds)
         clz <- .$class[1L]
 
-        if (clz == "categorical" && is.vector(value)) {
+        if (clz == "categorical" && is.atomic(value)) {
           levels <- table(value)
-        } else if (clz == "real" && is.vector(value)) {
+        } else if (clz == "real" && is.atomic(value)) {
           qtl <- quantile(value)
           bins <- cut(value, qtl)
           levels <- table(bins)
@@ -87,7 +87,7 @@ sample_covariates.facile_frame <- function(x, ...){
 #' @return rows from the \code{sample_covariate} table
 #' @family API
 fetch_sample_covariates.FacileDataSet <- function(
-    x, samples = active_samples(x), covariates = NULL,
+    x, samples = samples(x), covariates = NULL,
     custom_key = Sys.getenv("USER"), with_source = FALSE, ...) {
   ## db temp table thing shouldn't be an issue here
   # dat <- sample_covariate_tbl(x) %>% collect(n=Inf) ## #dboptimize# remove to exercise db harder
@@ -139,7 +139,7 @@ fetch_sample_covariates.FacileDataSet <- function(
 #' @return covariate tbl
 #' @family API
 fetch_custom_sample_covariates.FacileDataSet <- function(x,
-                                                         samples = active_samples(x),
+                                                         samples = samples(x),
                                                          covariates = NULL,
                                                          custom_key = Sys.getenv("USER"),
                                                          with_source = FALSE,

@@ -14,7 +14,7 @@
 #' @return a tbl_df or tbl_sqlite result from the sample_stats table
 #' @family API
 fetch_sample_statistics.FacileDataSet <- function(x,
-                                                  samples = active_samples(x),
+                                                  samples = samples(x),
                                                   semi = TRUE,
                                                   assay_name = "rnaseq") {
   assert_string(assay_name)
