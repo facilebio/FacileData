@@ -13,7 +13,11 @@
 #'   recursion in the call to `assert_sample_subset`.
 as_facile_frame <- function(x, datastore = fds(x), classes = NULL, ...,
                             .valid_sample_check = TRUE) {
+  stopifnot(is.tbl(x) || is.data.frame(x))
+  .valid_sample_check <- .valid_sample_check &&
+    has_columns(x, c("dataset", "sample_id"), warn = FALSE)
   if (.valid_sample_check) assert_sample_subset(x, datastore)
+
   assert_class(datastore, "FacileDataStore")
   if (!is.null(classes)) assert_character(classes)
   class(x) <- unique(c(classes, "facile_frame", class(x)))

@@ -119,7 +119,7 @@ check_sample_subset <- function(x, fds = NULL, ...) {
   if (!(is(x, 'tbl') || is(x, 'data.frame'))) {
     e <- "Sample descriptor is not data.frame/tbl-like"
   }
-  if (!has_columns(x, c('dataset', 'sample_id'))) {
+  if (!has_columns(x, c('dataset', 'sample_id'), warn = FALSE)) {
     e <- c(e, "'dataset' and 'sample_id' columns required in sample descriptor")
   }
   if (length(e) == 0L && !is.null(fds)) {
@@ -235,14 +235,13 @@ assert_columns <- function(x, req.cols) {
 
 #' @export
 #' @rdname assertions
-has_columns <- function(x, req.cols) {
+has_columns <- function(x, req.cols, warn = TRUE) {
   missed <- setdiff(req.cols, colnames(x))
-  if (length(missed)) {
+  any.missing <- length(missed) > 0L
+  if (any.missing && warn) {
     warning("missing columns: ", paste(missed, collpase=', '), immediate.=TRUE)
-    FALSE
-  } else {
-    TRUE
   }
+  !any.missing
 }
 
 #' @export
