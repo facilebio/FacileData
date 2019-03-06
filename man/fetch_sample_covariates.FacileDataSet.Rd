@@ -4,7 +4,7 @@
 \alias{fetch_sample_covariates.FacileDataSet}
 \title{Fetch rows from sample_covariate table for specified samples and covariates}
 \usage{
-\method{fetch_sample_covariates}{FacileDataSet}(x, samples = samples(x),
+\method{fetch_sample_covariates}{FacileDataSet}(x, samples = NULL,
   covariates = NULL, custom_key = Sys.getenv("USER"),
   with_source = FALSE, ...)
 }

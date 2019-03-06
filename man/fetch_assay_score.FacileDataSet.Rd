@@ -4,9 +4,8 @@
 \alias{fetch_assay_score.FacileDataSet}
 \title{Helper function to get sample assay data from single or aggregate features}
 \usage{
-\method{fetch_assay_score}{FacileDataSet}(x, features,
-  samples = samples(x), assay_name = NULL, as.matrix = FALSE, ...,
-  subset.threshold = 700)
+\method{fetch_assay_score}{FacileDataSet}(x, features, samples = NULL,
+  assay_name = NULL, as.matrix = FALSE, ..., subset.threshold = 700)
 }
 \description{
 Helper function to get sample assay data from single or aggregate features

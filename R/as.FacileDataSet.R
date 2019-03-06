@@ -250,16 +250,16 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
 
   ## Register sample info into Facile SQLite
   sample.info <- pdat_eav %>%
-    select(dataset, sample_id) %>%
     distinct(dataset, sample_id) %>%
     mutate(parent_id =  "") %>%
     append_facile_table(fds, 'sample_info')
 
   ## insert the first assay
-  if (is.integer(adat[[1]]))
+  if (is.integer(adat[[1]])) {
     storage_mode = "integer"
-  else
+  } else {
     storage_mode = "numeric"
+  }
 
   tstart <- Sys.time()
   samples <- addFacileAssaySet(

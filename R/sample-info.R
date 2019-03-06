@@ -13,14 +13,12 @@
 #'   FacileDataSets.
 #' @return a tbl_df or tbl_sqlite result from the sample_stats table
 #' @family API
-fetch_sample_statistics.FacileDataSet <- function(x,
-                                                  samples = samples(x),
+fetch_sample_statistics.FacileDataSet <- function(x, samples = NULL,
                                                   semi = TRUE,
                                                   assay_name = "rnaseq") {
   assert_string(assay_name)
   stopifnot(assay_name %in% assay_names(x))
 
-  # ss <- sample_stats_tbl(x)
   ss <- assay_sample_info_tbl(x) %>%
     filter(assay == assay_name) %>%
     set_fds(x)
@@ -28,8 +26,8 @@ fetch_sample_statistics.FacileDataSet <- function(x,
   if (is.null(samples)) {
     out <- ss
   } else {
-    ## TODO: Need to write unit tests here to exercise what we want to do with
-    ##       these results when samples are provided
+    # TODO: Need to write unit tests here to exercise what we want to do with
+    #       these results when samples are provided
     samples <- assert_sample_subset(samples)
     out <- join_samples(ss, samples, semi)
   }

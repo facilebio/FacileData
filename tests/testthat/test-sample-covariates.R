@@ -4,8 +4,13 @@ FDS <- exampleFacileDataSet()
 COV.DEF <- covariate_definitions(FDS)
 samples <- sample_covariate_tbl(FDS) %>%
   filter(variable == 'stage' & value == 'III') %>%
-  select(dataset, sample_id)
+  distinct(dataset, sample_id)
 genes <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
+
+test_that("fetch_sample_covariates queries all samples if not specified", {
+  covs <- fetch_sample_covariates(FDS, covariate = "sample_type")
+  expect_setequal(covs[["sample_id"]], collect(samples(FDS))[["sample_id"]])
+})
 
 test_that("fetch_sample_covariates retrieves all covariates if not specified", {
   covs <- fetch_sample_covariates(FDS, samples, custom_key='lianogls') %>%

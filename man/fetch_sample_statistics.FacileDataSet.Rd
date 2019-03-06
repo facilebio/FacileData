@@ -4,7 +4,7 @@
 \alias{fetch_sample_statistics.FacileDataSet}
 \title{Fetch the sample statistics for sets of samples in the warehouse}
 \usage{
-\method{fetch_sample_statistics}{FacileDataSet}(x, samples = samples(x),
+\method{fetch_sample_statistics}{FacileDataSet}(x, samples = NULL,
   semi = TRUE, assay_name = "rnaseq")
 }
 \arguments{

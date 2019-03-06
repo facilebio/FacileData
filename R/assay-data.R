@@ -24,8 +24,7 @@
 #'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
 #'   otherwise a \code{tbl_df} of the results.
 #' @family API
-fetch_assay_data.FacileDataSet <- function(x, features,
-                                           samples = samples(x),
+fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
                                            assay_name = default_assay(x),
                                            normalized = FALSE,
                                            as.matrix = FALSE,
@@ -229,20 +228,19 @@ fetch_assay_data.FacileDataSet <- function(x, features,
 #' Helper function to get sample assay data from single or aggregate features
 #' @export
 #' @family API
-fetch_assay_score.FacileDataSet <- function(x, features,
-                                            samples = samples(x),
-                                            assay_name=NULL,
-                                            as.matrix=FALSE, ...,
-                                            subset.threshold=700) {
+fetch_assay_score.FacileDataSet <- function(x, features, samples = NULL,
+                                            assay_name = NULL,
+                                            as.matrix = FALSE, ...,
+                                            subset.threshold = 700) {
   if (is.null(assay_name)) {
     assay_name <- features$assay
   }
   stopifnot(is.character(assay_name), length(unique(asssay_name)) == 1L)
-  dat <- fetch_assay_data(x, features, samples=samples, assay_name=NULL,
-                          as.matrix=TRUE, normalized=TRUE,
-                          subset.threshold=subset.threshold)
+  dat <- fetch_assay_data(x, features, samples = samples, assay_name = NULL,
+                          as.matrix = TRUE, normalized = TRUE,
+                          subset.threshold = subset.threshold)
   if (nrow(dat) > 1) {
-    dat <- matrix(eigenWeightedMean(dat)$score, nrow=1)
+    dat <- matrix(eigenWeightedMean(dat)$score, nrow = 1)
   }
 
 }
@@ -295,14 +293,18 @@ has_assay <- function(x, assay_name) {
 #'   scaling factors, etc. Note that rows in \code{samples} that do not appear
 #'   in \code{assay_name} will be returnd here with NA values for hd5_index and
 #'   such.
-assay_sample_info <- function(x, assay_name, samples = samples(x)) {
-  stopifnot(is.FacileDataSet(x))
-  if (!is.null(samples)) {
-    samples <- assert_sample_subset(samples) %>%
-      distinct(dataset, sample_id) %>%
-      collect(n=Inf)
+assay_sample_info <- function(x, assay_name, samples = NULL) {
+  assert_facile_data_store(x)
+
+  if (is.null(samples)) {
+    samples <- samples(x)
+  } else {
+    assert_sample_subset(samples, x)
+    samples <- distinct(samples, dataset, sample_id)
   }
-  feature.type <- assay_feature_type(x, assay_name) ## validate assay_name
+  samples <- collect(samples, n = Inf)
+
+  feature.type <- assay_feature_type(x, assay_name)
 
   asi <- assay_sample_info_tbl(x) %>%
     filter(assay == assay_name) %>%
@@ -406,24 +408,29 @@ assay_feature_name_map <- function(x, assay_name) {
 #' @return rows from assay_info_tbl that correspond to the assays defined
 #'   over the given samples. If no assays are defined over these samples,
 #'   you're going to get an empty tibble.
-assay_info_over_samples <- function(x, samples = samples(x)) {
-  stopifnot(is.FacileDataSet(x))
-  assert_sample_subset(samples)
+assay_info_over_samples <- function(x, samples = NULL) {
+  assert_facile_data_store(x)
+  if (is.null(samples)) {
+    samples <- samples(x)
+  } else {
+    assert_sample_subset(samples, x)
+    samples <- distinct(samples, dataset, sample_id)
+  }
 
-  asi <- assay_sample_info_tbl(x) %>% select(dataset, assay, sample_id)
+  asi <- select(assay_sample_info_tbl(x), dataset, assay, sample_id)
   if (!same_src(asi, samples)) {
-      asi <- collect(asi)
-      samples <- collect(samples)
+      asi <- collect(asi, n = Inf)
+      samples <- collect(samples, n = Inf)
   }
   assays <- inner_join(asi, samples, by = c("dataset","sample_id"))
 
-  ## Count number of samples across dataset count for each assay type
+  # Count number of samples across dataset count for each assay type
   out <- assays %>%
     group_by(assay) %>%
-    summarize(ndatasets = n_distinct(dataset), nsamples=n()) %>%
+    summarize(ndatasets = n_distinct(dataset), nsamples = n()) %>%
     ungroup()
 
-  out
+  as_facile_frame(out, x)
 }
 
 ## helper function to fetch_assay_data

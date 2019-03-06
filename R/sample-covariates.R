@@ -87,10 +87,16 @@ sample_covariates.facile_frame <- function(x, ...){
 #' @return rows from the \code{sample_covariate} table
 #' @family API
 fetch_sample_covariates.FacileDataSet <- function(
-    x, samples = samples(x), covariates = NULL,
+    x, samples = NULL, covariates = NULL,
     custom_key = Sys.getenv("USER"), with_source = FALSE, ...) {
-  ## db temp table thing shouldn't be an issue here
-  # dat <- sample_covariate_tbl(x) %>% collect(n=Inf) ## #dboptimize# remove to exercise db harder
+  if (is.null(samples)) {
+    samples <- samples(x)
+  } else {
+    assert_sample_subset(samples, x)
+    samples <- distinct(samples, dataset, sample_id)
+  }
+  samples <- collect(samples, n = Inf)
+
   dat <- sample_covariate_tbl(x)
   if (is.character(covariates)) {
     if (length(covariates) == 1L) {
@@ -102,16 +108,6 @@ fetch_sample_covariates.FacileDataSet <- function(
   dat <- collect(dat, n=Inf)
   dat <- set_fds(dat, x) ## explicitly added here to do `collect` above
 
-  ## If the samples descriptor is defined over the sample_covariate table,
-  ## this thing explodes (inner joining within itself, I guess). We defensively
-  ## copy the sample descriptor, but in future maybe better to test if the
-  ## dat and samples sqlite tables are pointing to the same thing
-  if (!is.null(samples)) {
-    samples <- assert_sample_subset(samples) %>%
-      distinct(dataset, sample_id) %>%
-      collect(n=Inf)
-  }
-  # out <- filter_samples(dat, samples)
   out <- join_samples(dat, samples, semi=TRUE)
   out <- collect(out, n = Inf)
   if (with_source) {
@@ -138,14 +134,20 @@ fetch_sample_covariates.FacileDataSet <- function(
 #' @param custom_key The key to use for the custom annotation
 #' @return covariate tbl
 #' @family API
-fetch_custom_sample_covariates.FacileDataSet <- function(x,
-                                                         samples = samples(x),
+fetch_custom_sample_covariates.FacileDataSet <- function(x, samples = NULL,
                                                          covariates = NULL,
                                                          custom_key = Sys.getenv("USER"),
                                                          with_source = FALSE,
                                                          file.prefix = "facile") {
-  out.cols <- colnames(sample_covariate_tbl(x))
+  if (is.null(samples)) {
+    samples <- samples(x)
+  } else {
+    assert_sample_subset(samples, x)
+    samples <- distinct(samples, dataset, sample_id)
+  }
+  samples <- collect(samples, n = Inf)
 
+  out.cols <- colnames(sample_covariate_tbl(x))
   fpat <- paste0('^', file.prefix, '_', custom_key, "_.*json")
   annot.files <- list.files(path=x$anno.dir, pattern=fpat, full.names=TRUE)
 
@@ -154,7 +156,6 @@ fetch_custom_sample_covariates.FacileDataSet <- function(x,
     out <- bind_rows(annos) %>%
       select_(.dots=out.cols) %>%
       set_fds(x) %>%
-      # filter_samples(samples)
       join_samples(samples, semi=TRUE)
     ## We weren't saving the type == 'categorical' column earlier. So if this
     ## column is.na, then we force it to 'categorical', because that's all it

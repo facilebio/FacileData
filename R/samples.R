@@ -13,9 +13,18 @@
 #' @param ... the NSE boolean filter criteria
 #' @return a facile sample descriptor
 #' @family API
-fetch_samples.FacileDataSet <- function(x, samples = samples(x),
+fetch_samples.FacileDataSet <- function(x, samples = NULL,
                                         assay = "rnaseq", ...) {
   stop("This shouldn't be used")
+
+  if (is.null(samples)) {
+    samples <- samples(x)
+  } else {
+    assert_sample_subset(samples, x)
+    samples <- distinct(samples, dataset, sample_id)
+  }
+  samples <- collect(samples, n = Inf)
+
   dots <- lazy_dots(...)
   if (length(dots)) {
     stop("Currently rethinking how to make fetching samples intuitive, ie. ",

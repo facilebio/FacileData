@@ -4,7 +4,7 @@
 \alias{fetch_samples.FacileDataSet}
 \title{Fetches a sample descriptor that matches the filter criterion}
 \usage{
-\method{fetch_samples}{FacileDataSet}(x, samples = samples(x),
+\method{fetch_samples}{FacileDataSet}(x, samples = NULL,
   assay = "rnaseq", ...)
 }
 \arguments{
