@@ -128,6 +128,12 @@ assay_names.default <- function(x, default_first = TRUE) {
 
 #' @family FacileInterface
 #' @export
+assay_feature_info <- function(x, assay_name, feature_ids = NULL, ...) {
+  UseMethod("assay_feature_info", x)
+}
+
+#' @family FacileInterface
+#' @export
 fetch_assay_data <- function(x, features, samples=NULL,
                              assay_name=default_assay(x),
                              normalized=FALSE, as.matrix=FALSE, ...,

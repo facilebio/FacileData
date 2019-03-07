@@ -262,15 +262,15 @@ assay_names.FacileDataSet <- function(x, default_first=TRUE) {
 #' @param x A `FacileDataStore`
 #' @param assay_name optional name of the assay to get information for
 #' @return a tibble of meta information for the assays stored in `x`
-assay_info <- function(x, assay_name=NULL) {
+assay_info <- function(x, assay_name = NULL) {
   stopifnot(is.FacileDataSet(x))
-  ainfo <- assay_info_tbl(x) %>% collect(n=Inf)
+  ainfo <- assay_info_tbl(x) %>% collect(n = Inf)
   if (!is.null(assay_name)) {
     assert_string(assay_name)
     assert_choice(assay_name, ainfo$assay)
     ainfo <- filter(ainfo, assay == assay_name)
   }
-  ainfo
+  as_facile_frame(ainfo, x)
 }
 
 #' @export
@@ -347,12 +347,14 @@ assay_feature_type <- function(x, assay_name) {
 #'     Warning: Error in : Table pkdtpohpsu already exists.
 #'
 #' This fetches the hdf5_index for the assays as well
+#'
 #' @export
 #' @inheritParams assay_feature_type
 #' @param feature_ids a character vector of feature_ids
 #' @return a \code{tbl_sqlite} result with the feature information for the
 #'   features in a specified assay
-assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
+assay_feature_info.FacileDataSet <- function(x, assay_name, feature_ids = NULL,
+                                             ...) {
   ## NOTE: This is currently limited to a single assay
   ftype <- assay_feature_type(x, assay_name)
   if (!is.null(feature_ids)) {
@@ -370,22 +372,21 @@ assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
   assay.info <- assay_info_tbl(x) %>%
     select(assay, assay_type, feature_type) %>%
     filter(assay == assay_name) %>%
-    collect(n=Inf)
+    collect(n = Inf)
 
   ## FIXME: consider materialized view for this
-  out <- afinfo %>% inner_join(assay.info, by='assay')
+  out <- inner_join(afinfo, assay.info, by = "assay")
 
   ftype <- out$feature_type[1L]
   finfo <- feature_info_tbl(x)
   finfo <- filter(finfo, feature_type %in% ftype)
-  finfo <- collect(finfo, n=Inf)
+  finfo <- collect(finfo, n = Inf)
 
   ## FIXME: feature_id should be made unique to feature_type to simplify
   ## e.g add GeneID: prefix for entrez
   ## But, still we know out and finfo each only have one feature type now
-  out %>%
-      inner_join(finfo, by=c('feature_type', 'feature_id')) %>%
-      set_fds(x)
+  out <- inner_join(out, finfo, by=c('feature_type', 'feature_id'))
+  as_facile_frame(out, x)
 }
 
 #' @rdname feature_name_map

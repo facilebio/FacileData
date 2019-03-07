@@ -49,7 +49,7 @@ is_sample_covariates(x)
 
 assert_columns(x, req.cols)
 
-has_columns(x, req.cols)
+has_columns(x, req.cols, warn = TRUE)
 
 assert_covariate_definitions(x)
 

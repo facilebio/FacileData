@@ -18,8 +18,6 @@ columms)}
 \item{samples}{a sample descriptor to specify which samples to return data
 from.}
 
-\item{assay_name}{the name of the assay}
-
 \item{normalized}{return normalize or raw data values, defaults to
 \code{raw}}
 
