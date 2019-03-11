@@ -10,6 +10,8 @@ organism(x, ...)
 This is a stub for a manpage all about the FacileAPI
 }
 \seealso{
-Other FacileInterface: \code{\link{facet_frame.FacileDataSet}}
+Other FacileInterface: \code{\link{facet_frame.FacileDataSet}},
+  \code{\link{fetch_sample_covariates}},
+  \code{\link{with_sample_covariates}}
 }
 \concept{FacileInterface}

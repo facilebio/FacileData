@@ -223,26 +223,36 @@ save_custom_sample_covariates <- function(x, annotation, name=NULL,
   invisible(set_fds(annotation, x))
 }
 
-#' Appends covariate columns to a query result
-#'
-#' Note that this function will force the collection of \code{x}
-#'
 #' @export
-#' @importFrom stats complete.cases
-#' @param x a facile sample descriptor
-#' @param covariates character vector of covariate names. If \code{NULL}
-#'   (default), returns all covariates, if is character and length() == 0, then
-#'   this is a no-op (x is returned)
-#' @param na.rm if \code{TRUE}, filters outgoing result such that only rows
-#'   with nonNA values for the \code{covariates} specified here will be
-#'   returned. Default: \code{FALSE}. Note that this will not check columns
-#'   not specified in \code{covariates} for NA-ness.
-#' @param custom_key The key to use to fetch more custom annotations over
-#'   the given samples
-#' @param .fds A \code{FacileDataSet} object
-#' @return The facile \code{x} object, annotated with the specified covariates.
-with_sample_covariates <- function(x, covariates=NULL, na.rm=FALSE,
-                                   custom_key=Sys.getenv("USER"), .fds=fds(x)) {
+#' @noRd
+with_sample_covariates.facile_frame <- function(x, covariates = NULL,
+                                                na.rm = FALSE,
+                                                custom_key = Sys.getenv("USER"),
+                                                .fds = fds(x), ...) {
+  x <- collect(x, n = Inf)
+  .fds <- assert_facile_data_store(.fds)
+  NextMethod(x, .fds = .fds)
+}
+
+#' @export
+#' @noRd
+with_sample_covariates.tbl <- function(x, covariates = NULL,
+                                       na.rm = FALSE,
+                                       custom_key = Sys.getenv("USER"),
+                                       .fds = NULL, ...) {
+  with_sample_covariates.data.frame(collect(x, n = Inf),
+                                    covariates = covariates,
+                                    na.rm = na.rm, custom_key = custom_key,
+                                    .fds = .fds, ...)
+}
+
+#' @export
+#' @noRd
+#' @method with_sample_covariates data.frame
+with_sample_covariates.data.frame <- function(x, covariates = NULL,
+                                              na.rm = FALSE,
+                                              custom_key = Sys.getenv("USER"),
+                                              .fds = NULL, ...) {
   stopifnot(is.FacileDataSet(.fds))
   x <- assert_sample_subset(x) %>% collect(n=Inf)
   stopifnot(is.character(covariates) || is.null(covariates))

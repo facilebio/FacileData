@@ -57,20 +57,16 @@
 #'   as.DGEList() # or `as.ExpressionSet()`
 #' @export
 as.DGEList <- function(x, ...) {
-  UseMethod('as.DGEList')
+  UseMethod("as.DGEList", x)
 }
 
+#' @noRd
 #' @method as.DGEList matrix
 #' @rdname as.BiocContainer
-as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
-                              assay_name=default_assay(.fds), .fds=fds(x),
-                              custom_key=Sys.getenv("USER"), ...) {
-
-  ## NOTE: by now assay_name is ignored
-  stopifnot(is(x, 'FacileExpression'))
-  requireNamespace("edgeR")
-  .fds <- force(.fds)
-  stopifnot(is.FacileDataSet(.fds))
+#' @importFrom edgeR DGEList
+as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
+                              .fds = NULL, custom_key = Sys.getenv("USER"), ...) {
+  .fds <- assert_facile_data_store(.fds)
 
   ## Construct sample table from colnames of the matrix, and make sure this is
   ## legit
@@ -153,12 +149,15 @@ as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
 #' @export
 #' @method as.DGEList data.frame
 #' @rdname as.BiocContainer
-as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
-                                  assay_name=default_assay(.fds), .fds=fds(x),
-                                  custom_key=Sys.getenv("USER"),
+as.DGEList.data.frame <- function(x, covariates = TRUE, feature_ids = NULL,
+                                  assay_name = NULL, .fds = NULL,
+                                  custom_key = Sys.getenv("USER"),
                                   ...) {
-  .fds <- force(.fds)
-  stopifnot(is.FacileDataSet(.fds))
+  .fds <- assert_facile_data_store(.fds)
+  if (is.null(assay_name)) {
+    assay_name <- default_assay(.fds)
+  }
+  assert_choice(assay_name, assay_names(.fds))
   x <- assert_sample_subset(x)
 
   has.count <- 'value' %in% colnames(x) && is.integer(x[['value']])
@@ -166,7 +165,7 @@ as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
 
   ## Do we want to fetch counts from the FacileDataSet?
   if (has.count) {
-    if (is.character(feature_ids) && all(feature_ids %in% x[['feature_id']])) {
+    if (is.character(feature_ids) && !all(feature_ids %in% x[['feature_id']])) {
       fetch.counts <- TRUE
     }
     if (!missing(feature_ids) && is.null(feature_ids)) {
@@ -185,8 +184,8 @@ as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
     if (ainfo$assay_type != 'rnaseq') {
       warning("Creating DGEList for something other than rnaseq type assay")
     }
-    counts <- fetch_assay_data(.fds, feature_ids, x, assay_name=assay_name,
-                               normalized=FALSE, as.matrix=TRUE)
+    counts <- fetch_assay_data(.fds, feature_ids, x, assay_name = assay_name,
+                               normalized = FALSE, as.matrix = TRUE)
   } else {
     counts.dt <- assert_expression_result(x) %>%
       collect(n=Inf) %>%
@@ -202,31 +201,76 @@ as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
     })
   }
 
-  as.DGEList(counts, covariates=covariates, feature_ids=feature_ids,
-             .fds=.fds, custom_key=custom_key, ...)
+  as.DGEList.matrix(counts, covariates = covariates, feature_ids = feature_ids,
+                    .fds = .fds, custom_key = custom_key, ...)
+}
+
+#' @method as.DGEList tbl
+#' @export
+#' @rdname as.BiocContainer
+as.DGEList.tbl <- function(x, covariates = TRUE, feature_ids = NULL,
+                           assay_name = NULL, .fds = NULL,
+                           custom_key = Sys.getenv("USER"),
+                           ...) {
+  .fds <- assert_facile_data_store(.fds)
+  if (is.null(assay_name)) {
+    assay_name <- default_assay(.fds)
+  }
+  assert_choice(assay_name, assay_names(.fds))
+  x <- collect(x, n = Inf)
+  # NextMethod()
+  as.DGEList.data.frame(x, covariates, feature_ids, assay_name, .fds = .fds,
+                        custom_key = custom_key, ...)
 }
 
 #' @export
-#' @method as.DGEList tbl_sql
 #' @rdname as.BiocContainer
-as.DGEList.tbl_sql <- function(x, covariates=TRUE, feature_ids=NULL,
-                               assay_name=default_assay(.fds), .fds=fds(x),
-                               custom_key=Sys.getenv("USER"),
-                               ...) {
-  x <- collect(x, n=Inf) %>% set_fds(.fds)
-  as.DGEList(x, covariates, feature_ids, assay_name, .fds=.fds,
-             custom_key=custom_key, ...)
+as.DGEList.facile_frame <- function(x, covariates = TRUE, feature_ids = NULL,
+                                    assay_name = NULL,
+                                    custom_key = Sys.getenv("USER"),
+                                    ...) {
+  x <- collect(x, n = Inf)
+  .fds <- assert_facile_data_store(fds(x))
+  if (is.null(assay_name)) {
+    assay_name <- default_assay(.fds)
+  }
+  assert_choice(assay_name, assay_names(.fds))
+
+  # force(.fds)
+  # force(assay_name)
+  # .fds <- assert_facile_data_store(.fds)
+  # browser()
+  # NextMethod(.fds = .fds)
+  # NextMethod(.fds = .fds)
+  # NextMethod()
+  # browser()
+
+  has.count <- "value" %in% colnames(x) &&
+    is.integer(x[["value"]]) &&
+    is.character("feature_id")
+
+  if (has.count && is.null(feature_ids)) {
+    feature_ids <- unique(x[["feature_id"]])
+  }
+
+  as.DGEList.tbl(x, covariates, feature_ids, assay_name, .fds = .fds,
+                 custom_key = custom_key, ...)
 }
 
+
 #' @export
-#' @method as.DGEList FacileDataSet
 #' @rdname as.BiocContainer
-as.DGEList.FacileDataSet <- function(x, covariates=TRUE, feature_ids=NULL,
-                                     assay_name=default_assay(x),
-                                     custom_key=Sys.getenv("USER"),
+as.DGEList.FacileDataSet <- function(x, covariates = TRUE, feature_ids = NULL,
+                                     assay_name = NULL,
+                                     custom_key = Sys.getenv("USER"),
                                      ...) {
-  as.DGEList(samples(x), covariates, feature_ids, assay_name, x, custom_key,
-             ...)
+  xs <- samples(x)
+  if (is.null(assay_name)) {
+    assay_name <- default_assay(x)
+  }
+  assert_choice(assay_name, assay_names(x))
+  as.DGEList(xs, covariates = covariates, feature_ids = feature_ids,
+             assay_name = assay_name, custom_key = custom_key, ...)
 }
 
 #' @rdname as.BiocContainer

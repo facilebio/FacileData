@@ -89,10 +89,14 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
 
   if (length(out) == 1L) {
     out <- out[[1L]]
-  } else if (!as.matrix) {
+  } else {
     ## We stop if we are asking for a matrix across multiple assays, but maybe
     ## we don't have to ... (in the future, I mean)
     out <- bind_rows(out)
+  }
+
+  if (!as.matrix) {
+    out <- as_facile_frame(out, x)
   }
 
   out
@@ -202,7 +206,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     vals <- as.tbl(setDF(vals))
   }
 
-  class(vals) <- c('FacileExpression', class(vals))
+  # class(vals) <- c('FacileExpression', class(vals))
   set_fds(vals, x)
 }
 
@@ -434,7 +438,10 @@ assay_info_over_samples <- function(x, samples = NULL) {
   as_facile_frame(out, x)
 }
 
-## helper function to fetch_assay_data
+#' Helper function to fetch_assay_data
+#'
+#' @noRd
+#' @importFrom edgeR cpm
 normalize.assay.matrix <- function(vals, feature.info, sample.info,
                                    log=TRUE, prior.count=5, ...,
                                    verbose=FALSE) {
@@ -511,16 +518,35 @@ create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
 #' @param with_symbols Do you want gene symbols returned, too?
 #' @param .fds A \code{FacileDataSet} object
 #' @return a tbl-like result
-with_assay_data <- function(samples, features, assay_name=NULL,
-                            normalized=TRUE, aggregate.by=NULL,
-                            spread=TRUE, with_assay_name=FALSE, ...,
-                            verbose=FALSE, .fds=fds(samples)) {
-  # if (is.FacileDataSet(samples)) {
-  #   .fds <- samples(samples)
-  #   samples(samples(.fds))
-  # }
-  stopifnot(is.FacileDataSet(.fds))
-  assert_sample_subset(samples)
+with_assay_data.facile_frame <- function(x, features, assay_name = NULL,
+                                         normalized = TRUE, aggregate.by = NULL,
+                                         spread = TRUE, with_assay_name = FALSE,
+                                         ..., verbose = FALSE, .fds = fds(x)) {
+  x <- collect(x, n = Inf)
+  .fds <- assert_facile_data_store(.fds)
+  NextMethod(x, .fds = .fds)
+}
+
+with_assay_data.tbl <- function(x, features, assay_name = NULL,
+                                normalized = TRUE, aggregate.by = NULL,
+                                spread = TRUE, with_assay_name = FALSE,
+                                ..., verbose = FALSE, .fds = NULL) {
+  with_assay_data.data.frame(collect(x, n = Inf), features = features,
+                             assay_name = assay_name, normalized = normalized,
+                             aggregate.by = aggregate.by, spread = spread,
+                             with_assay_name = with_assay_name, ...,
+                             verbose = verbose, .fds = .fds)
+}
+
+#' @export
+#' @method with_assay_data data.frame
+#' @noRd
+with_assay_data.data.frame <- function(x, features, assay_name=NULL,
+                                       normalized = TRUE, aggregate.by = NULL,
+                                       spread = TRUE, with_assay_name=FALSE,
+                                       ..., verbose = FALSE, .fds = NULL) {
+  .fds <- assert_facile_data_store(.fds)
+  assert_sample_subset(x)
   assert_flag(normalized)
 
   ## Check that parameters are kosher before fetching data
@@ -540,12 +566,12 @@ with_assay_data <- function(samples, features, assay_name=NULL,
   }
 
   ## Hit the datastore
-  adata <- fetch_assay_data(.fds, features, samples, normalized=normalized,
+  adata <- fetch_assay_data(.fds, features, x, normalized=normalized,
                             aggregate.by=aggregate.by, verbose=verbose)
 
   if (is.character(spread)) {
     spread.vals <- unique(adata[[spread]])
-    if (any(spread.vals %in% colnames(samples))) {
+    if (any(spread.vals %in% colnames(x))) {
       if (!with_assay_name && verbose) {
         warning("appending assay_name to spread columns to avoid collision")
       }
@@ -561,7 +587,7 @@ with_assay_data <- function(samples, features, assay_name=NULL,
     adata <- set_fds(adata, .fds)
   }
 
-  out <- join_samples(samples, adata)
+  out <- join_samples(x, adata)
   as_facile_frame(out, .fds)
 }
 

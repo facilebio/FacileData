@@ -167,6 +167,7 @@ fetch_assay_score.default <- function(x, features, samples=NULL, assay_name=NULL
 
 #' @family FacileInterface
 #' @export
+#' @rdname sample-covariates
 fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                     custom_key=Sys.getenv("USER"),
                                     with_source = FALSE, ...) {
@@ -174,22 +175,82 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
 }
 
 #' @export
+#' @noRd
 fetch_sample_covariates.default <- function(x, samples=NULL, covariates=NULL,
                                     custom_key=Sys.getenv("USER"), ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
 
-#' @family FacileInterface
+#' @noRd
+#' @rdname sample-covariates
 #' @export
+#' @family FacileInterface
 fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                            custom_key=Sys.getenv("USER"),
                                            file.prefix="facile", ...) {
   UseMethod("fetch_custom_sample_covariates")
 }
 
+#' @noRd
+#' @rdname sample-covariates
 #' @export
 fetch_custom_sample_covariates.default <- function(x, samples=NULL, covariates=NULL,
                                            custom_key=Sys.getenv("USER"),
                                            file.prefix="facile", ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
+
+#' @export
+#' @family FacileInterface
+with_assay_data <- function(x, features, assay_name = NULL,
+                            normalized = TRUE, aggregate.by = NULL,
+                            spread = TRUE, with_assay_name = FALSE, ...,
+                            verbose = FALSE, .fds = NULL) {
+  UseMethod("with_assay_data", x)
+}
+
+with_assay_data.default <- function(x, features, assay_name = NULL,
+                                    normalized = TRUE, aggregate.by = NULL,
+                                    spread = TRUE, with_assay_name = FALSE, ...,
+                                    verbose = FALSE, .fds = NULL) {
+  stop("The FacileAPI requires a specific method be written for this type.")
+}
+
+#' Appends covariate columns to a query result
+#'
+#' Note that this function will force the collection of \code{x}
+#'
+#' @export
+#' @rdname with_sample_covariates
+#'
+#' @importFrom stats complete.cases
+#' @param x a facile sample descriptor
+#' @param covariates character vector of covariate names. If \code{NULL}
+#'   (default), returns all covariates, if is character and length() == 0, then
+#'   this is a no-op (x is returned)
+#' @param na.rm if \code{TRUE}, filters outgoing result such that only rows
+#'   with nonNA values for the \code{covariates} specified here will be
+#'   returned. Default: \code{FALSE}. Note that this will not check columns
+#'   not specified in \code{covariates} for NA-ness.
+#' @param custom_key The key to use to fetch more custom annotations over
+#'   the given samples
+#' @param .fds A \code{FacileDataSet} object
+#' @return The facile \code{x} object, annotated with the specified covariates.
+#'
+#' @export
+#' @family FacileInterface
+#' @rdname sample-covariates
+with_sample_covariates <- function(x, covariates = NULL, na.rm = FALSE,
+                                   custom_key = Sys.getenv("USER"),
+                                   .fds = NULL, ...) {
+  UseMethod("with_sample_covariates", x)
+}
+
+#' @export
+#' @family FacileInterface
+with_sample_covariates.default <- function(x, covariates = NULL, na.rm = FALSE,
+                                           custom_key = Sys.getenv("USER"),
+                                           .fds = NULL, ...) {
+  stop("The FacileAPI requires a specific method be written for this type.")
+}
+

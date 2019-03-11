@@ -64,19 +64,22 @@ append_facile_table <- function(dat, x, table_name) {
 #' @export
 assay_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x$con, 'assay_info') %>% set_fds(x)
+  out <- tbl(x$con, 'assay_info')
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' @export
 assay_feature_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x$con, 'assay_feature_info') %>% set_fds(x)
+  out <- tbl(x$con, 'assay_feature_info')
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' @export
 assay_sample_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x$con, 'assay_sample_info') %>% set_fds(x)
+  out <- tbl(x$con, 'assay_sample_info')
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' @export
@@ -95,7 +98,7 @@ feature_info_tbl <- function(x, assay_name=NULL) {
       filter(assay == assay_name)
     out <- semi_join(out, afi, by=c('feature_type', 'feature_id'))
   }
-  out %>% set_fds(x)
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' Mimics the old `gene_info` table.
@@ -115,7 +118,7 @@ gene_info_tbl <- function(x) {
     select(feature_id, feature_type, symbol=name, n_exons=-1,
            length=effective_length, source) %>%
     inner_join(hdf5.info, by='feature_id') %>%
-    set_fds(x)
+    as_facile_frame(x, .valid_sample_check = FALSE)
 }
 
 #' Mimics old sample_stats table
@@ -126,20 +129,24 @@ gene_info_tbl <- function(x) {
 sample_stats_tbl <- function(x) {
   assay_sample_info_tbl(x) %>%
     select(dataset, sample_id, libsize, normfactor) %>%
-    set_fds(x)
+    as_facile_frame(x, .valid_sample_check = FALSE)
 }
 
 #' @export
 sample_covariate_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x$con, 'sample_covariate') %>% set_fds(x)
+  out <- tbl(x$con, 'sample_covariate')
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' @export
 sample_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x$con, 'sample_info') %>% set_fds(x)
+  out <- tbl(x$con, 'sample_info')
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
+
+# fds() getters/setters ========================================================
 
 #' Get/set db
 #'

@@ -8,8 +8,8 @@ genes <- local({
   out <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
   feature_info_tbl(FDS) %>%
     filter(feature_id %in% out) %>%
-    collect %$%
-    feature_id
+    collect() %>%
+    pull(feature_id)
 })
 
 test_that("fetch_assay_data results converted to DGEList", {
@@ -37,7 +37,7 @@ test_that("fetch_assay_data results converted to DGEList", {
   expect_equal(m[rownames(y), colnames(y)], y$counts)
 })
 
-test_that("as.DGEList appends custom covaraite table correctly", {
+test_that("as.DGEList appends custom covariate table correctly", {
   custom.covs <- c("sex", "subtype_molecular")
   with.covs <- with_sample_covariates(samples, custom.covs)
 

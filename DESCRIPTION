@@ -24,6 +24,7 @@ Imports:
   methods,
   dplyr,
   dtplyr,
+  edgeR,
   magrittr,
   yaml,
   checkmate (>= 1.8.5),
@@ -45,14 +46,15 @@ Imports:
   glue,
   utils
 Suggests:
-  testthat (>= 1.0.2),
+  AnnotationDbi,
+  Biobase,
   knitr,
-  roxygen2 (>= 6.1.0),
   org.Hs.eg.db,
   org.Mm.eg.db,
+  roxygen2 (>= 6.1.0),
   stringr,
-  AnnotationDbi,
   SummarizedExperiment,
+  testthat (>= 1.0.2),
 Remotes:
   lianos/multiGSEA@develop
 RoxygenNote: 6.1.1

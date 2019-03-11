@@ -2,9 +2,9 @@
 % Please edit documentation in R/as.BiocAssayContainers.R
 \name{as.DGEList}
 \alias{as.DGEList}
-\alias{as.DGEList.matrix}
 \alias{as.DGEList.data.frame}
-\alias{as.DGEList.tbl_sql}
+\alias{as.DGEList.tbl}
+\alias{as.DGEList.facile_frame}
 \alias{as.DGEList.FacileDataSet}
 \alias{as.ExpressionSet}
 \alias{as.ExpressionSet.data.frame}
@@ -16,20 +16,20 @@
 \usage{
 as.DGEList(x, ...)
 
-\method{as.DGEList}{matrix}(x, covariates = TRUE, feature_ids = NULL,
-  assay_name = default_assay(.fds), .fds = fds(x),
+\method{as.DGEList}{data.frame}(x, covariates = TRUE,
+  feature_ids = NULL, assay_name = NULL, .fds = NULL,
   custom_key = Sys.getenv("USER"), ...)
 
-\method{as.DGEList}{data.frame}(x, covariates = TRUE,
-  feature_ids = NULL, assay_name = default_assay(.fds),
-  .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
+\method{as.DGEList}{tbl}(x, covariates = TRUE, feature_ids = NULL,
+  assay_name = NULL, .fds = NULL, custom_key = Sys.getenv("USER"),
+  ...)
 
-\method{as.DGEList}{tbl_sql}(x, covariates = TRUE, feature_ids = NULL,
-  assay_name = default_assay(.fds), .fds = fds(x),
+\method{as.DGEList}{facile_frame}(x, covariates = TRUE,
+  feature_ids = NULL, assay_name = NULL,
   custom_key = Sys.getenv("USER"), ...)
 
 \method{as.DGEList}{FacileDataSet}(x, covariates = TRUE,
-  feature_ids = NULL, assay_name = default_assay(x),
+  feature_ids = NULL, assay_name = NULL,
   custom_key = Sys.getenv("USER"), ...)
 
 as.ExpressionSet(x, ...)
