@@ -65,7 +65,7 @@ which minimally includes the following items:
     - `default_assay`: the name of the assay to use by default if none is
       specified in calls to [fetch_assay_data()], [with_assay_data()], etc.
       (kind of like how `"exprs"` is the default assay used when working with
-      a [Biobase::ExpressionSet])
+      a `Biobase::ExpressionSet`)
     - `datasets`: a section tha enumerates the datases included internally.
       The datasets are further enumerated.
     - `sample_covariates`: a section that enumerates the covariatets that

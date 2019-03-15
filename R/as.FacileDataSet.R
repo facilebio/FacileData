@@ -17,8 +17,8 @@
 #' @details
 #'
 #' A `FacileDataSet` can be created from a number of different Bioconductor
-#' containers, such as a [Biobase::ExpressionSet],
-#' [SummarizedExperiment::SummarizedExperiment], or an [edgeR::DGEList]. To
+#' containers, such as a `Biobase::ExpressionSet`,
+#' `SummarizedExperiment::SummarizedExperiment`, or an `edgeR::DGEList`. To
 #' create a `FacileDataSet` that spans multiple Bioc containters, i.e. you may
 #' have one ExpressionSet per indication in the TCGA. You can make
 #' `FacileDataSet` to encompass the data from *all* of these indications by
@@ -234,16 +234,10 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
 
   meta_yaml <- paste0(tempfile(), ".yaml")
   yaml::write_yaml(meta, meta_yaml)
-  fds <- initializeFacileDataSet(path, meta_yaml)
+  path <- initializeFacileDataSet(path, meta_yaml)
 
-  ## Register sample covariate info into Facile SQLite
-  # known_types <- c("general", "tumor_classification", "data_batch", "IC", "TC",
-  #                 "conmeds", "safety", "user_annotation", "active_brush", "mutation")
-  # sample.covs <- pdat_eav %>%
-  #     mutate(
-  #         type = ifelse(type %in% known_types, type, "general"),
-  #         date_entered = as.integer(Sys.time())
-  #     ) %>% append_facile_table(fds, 'sample_covariate')
+  assert_directory_exists(path, access = "w")
+  fds <- FacileDataSet(path)
 
   # add sample covariates to table
   sample.covs <- eav %>%
@@ -326,13 +320,17 @@ fdata <- function(x, validate = FALSE, ...) {
   UseMethod("fdata")
 }
 fdata.SummarizedExperiment <- function(x, validate = FALSE, ...) {
-  stopifnot(requireNamespace("SummarizedExperiment", quietly = TRUE))
-  out <- as.data.frame(SummarizedExperiment::mcols(x))
+  ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
+  if (is.null(ns)) stop("SummarizedExperiment required")
+
+  out <- ns$as.data.frame(ns$mcols(x))
   if (validate) validate.fdata(out, ...) else out
 }
 fdata.ExpressionSet <- function(x, validate = FALSE, ...) {
-  stopifnot(requireNamespace("Biobase", quietly = TRUE))
-  out <- Biobase::fData(x)
+  ns <- tryCatch(loadNamespace("Biobase"), error = function(e) NULL)
+  if (is.null(ns)) stop("Biobase required")
+
+  out <- ns$fData(x)
   if (validate) validate.fdata(out, ...) else out
 }
 fdata.DGEList <- function(x, validate = FALSE, ...) {
@@ -375,14 +373,16 @@ pdata <- function(x, covariate_metadata = NULL, ...) {
   UseMethod("pdata")
 }
 pdata.SummarizedExperiment <- function(x, covariate_metadata = NULL,  ...) {
-    stopifnot(requireNamespace("SummarizedExperiment", quietly = TRUE))
-    df = SummarizedExperiment::colData(x)
-    ds = as.data.frame(df)
+  ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
+  if (is.null(ns)) stop("SummarizedExperiment required")
+  df = ns$colData(x)
+    ds = ns$as.data.frame(df)
     validate.pdata(ds, ...)
 }
 pdata.ExpressionSet <- function(x, covariate_metadata = NULL,  ...) {
-  stopifnot(requireNamespace("Biobase", quietly = TRUE))
-  validate.pdata(Biobase::pData(x), ...)
+  ns <- tryCatch(loadNamespace("Biobase"), error = function(e) NULL)
+  if (is.null(ns)) stop("Biobase required")
+  validate.pdata(ns$pData(x), ...)
 }
 pdata.DGEList <- function(x, covariate_metadata = NULL,  ...) {
   # stopifnot(requireNamespace("edgeR", quietly = TRUE))
@@ -410,10 +410,11 @@ pdata_metadata <- function(x, ...) {
 #' SummarizedExperiment method
 #' @export
 pdata_metadata.SummarizedExperiment <- function(x, ...) {
-    stopifnot(requireNamespace("SummarizedExperiment", quietly = TRUE))
-    sinfo = SummarizedExperiment::colData(x)
-    defs = S4Vectors::metadata(sinfo)
-    defs
+  ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
+  if (is.null(ns)) stop("SummarizedExperiment required")
+  sinfo <- ns$colData(x)
+  defs <- S4Vectors::metadata(sinfo)
+  defs
 }
 
 #' ExpressionSet method
@@ -429,11 +430,11 @@ pdata_metadata.ExpressionSet <- function(x, ...) {
 #' DGEList method
 #' @export
 pdata_metadata.DGEList <- function(x, ...) {
-    sinfo = x$samples
-    defs = sapply(colnames(sinfo), function(el) {
-        list(description = el, label = el, type = "general")
-    }, simplify = FALSE)
-    defs
+  sinfo <- x$samples
+  defs <- sapply(colnames(sinfo), function(el) {
+    list(description = el, label = el, type = "general")
+  }, simplify = FALSE)
+  defs
 }
 
 #' Bioc-container specific assay data extraction functions

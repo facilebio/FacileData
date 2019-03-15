@@ -56,37 +56,37 @@ test_that("pData -> meta.yaml covariate encoding works (simple & compound)", {
   for (varname in names(lol)) {
     validate_eav_recode(relol[[varname]], elol[[varname]], varname)
   }
+})
 
+test_that("Successful EAV creation of data.frame with a Surv object column", {
   # pData with Surv
-  df = data.frame(
+  df <- data.frame(
     dataset = "foo",
     sample_id = letters[1:3],
-    x = Surv(1:3, c(0,1,0)),
+    x = survival::Surv(1:3, c(0,1,0)),
     y = 4:6,
-    stringsAsFactors = FALSE
-  )
-  long = as.EAVtable(df)
-  long2 = data.frame(
-    dataset = "foo",
-    sample_id = c("a","b","c","a","b","c"),
-    variable = c("x","x","x","y","y","y"),
-    value = c("1+","2","3+","4","5","6"),
-    class = c("cSurv","cSurv","cSurv","real","real","real"),
-    type = rep("general", 6),
-    stringsAsFactors = FALSE
-  )
-  expect_identical(long,long2)
+    stringsAsFactors = FALSE)
 
+  expected <- df %>%
+    mutate(x = as.character(x)) %>%
+    tidyr::gather("variable", "value", -dataset, -sample_id) %>%
+    mutate(class = ifelse(variable == "x", "cSurv", "real"),
+           type = "general") %>%
+    as.tbl()
+
+  long <- as.EAVtable(df)
+  expect_equal(long, expected)
 })
 
 test_that("basic encoding and decoding of EAV columns works", {
   # survival::Surv
-  foo = Surv(1:3, c(0,1,0))
-  x = as(foo, "cSurv")
-  y = eav_encode_cSurv(x)
-  y1 = c("1+","2","3+")
-  attr(y1, "eavclass") = "cSurv"
+  foo <- Surv(1:3, c(0,1,0))
+  x <- as(foo, "cSurv")
+  y <- eav_encode_cSurv(x)
+  y1 <- c("1+","2","3+")
+  attr(y1, "eavclass") <- "cSurv"
   expect_identical(y, y1)
-  z = eav_decode_cSurv(y)
-  expect_identical(x,z)
+
+  z <- eav_decode_cSurv(y)
+  expect_identical(x, z)
 })

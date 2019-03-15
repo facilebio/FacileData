@@ -51,9 +51,9 @@ assert_columns(x, req.cols)
 
 has_columns(x, req.cols, warn = TRUE)
 
-assert_covariate_definitions(x, required = "class")
+assert_covariate_definitions(x, required = NULL)
 
-is_covariate_definitions(x, required = "class")
+is_covariate_definitions(x, required = NULL)
 }
 \description{
 Samples have compound keys: dataset,sample_id. If we want to index into

@@ -23,3 +23,9 @@ be generated from `eav_metadata_create(pData(eSet), covariate_def = NULL)`,
 and pulls out the sister custom-definitions from the `covariate_def`
 attribute definition list.
 }
+\details{
+If the `covariate_def` list-of-lists has information for variables not
+found in `default_def`, ie. the definitions returned from
+`setdiff(names(covariate_def), names(default_def))` will be added to
+the object returned from this funciton.
+}

@@ -1,7 +1,7 @@
 #' Query a table to identify its primary key(s)
 #'
 #' @export
-#'
+#' @importFrom DBI dbGetQuery
 #' @param x a \code{FacileDataSet} or \code{SQLiteConnection}
 #' @param table_name the name of the table to query
 #' @return a character vector of primary keys
@@ -28,12 +28,12 @@ primary_key <- function(x, table_name) {
 #' @param table_name the name of the table in \code{x} to add the rows of
 #'   \code{dat} to.
 #' @return invisibly returns the conformed version of \code{dat}.
-append_facile_table <- function(dat, x, table_name) {
+append_facile_table <- function(dat, x, table_name, warn_existing = FALSE) {
   stopifnot(is.FacileDataSet(x))
   target <- try(tbl(x$con, table_name), silent=TRUE)
   if (is(target, 'try-error')) stop("Unknown table to append to: ", table_name)
   dat <- conform_data_frame(dat, target)
-    # strip facile_frame class if it's there.
+  # strip facile_frame class if it's there.
   dat <- as.data.frame(dat, stringsAsFactors = FALSE)
 
   # Ensure that we don't try to add existing rows into the database
@@ -43,7 +43,7 @@ append_facile_table <- function(dat, x, table_name) {
       semi_join(dat, by=pk, copy=TRUE, auto_index=TRUE) %>%
       collect(n=Inf) %>%
       mutate(added=FALSE)
-    if (nrow(skip)) {
+    if (nrow(skip) && warn_existing) {
       warning(nrow(skip), "/", nrow(dat), " features already in database",
               immediate.=TRUE)
     }

@@ -39,9 +39,9 @@
 #' @param .fds The `FacileDataSet` that `x` was retrieved from
 #' @param custom_key the custom key to use to fetch custom annotations from
 #'   `.fds`
-#' @return the appropriate bioconductor assay container, ie. a [edgeR::DGEList]
-#'   for `as.DGEList`, an [Biobase::ExpressionSet] for `as.ExpressionSet`, or
-#'   a [SummarizedExperiment::SummarizedExperiment] for
+#' @return the appropriate bioconductor assay container, ie. an `edgeR::DGEList`
+#'   for `as.DGEList`, a `Biobase::ExpressionSet` for `as.ExpressionSet`, or
+#'   a `SummarizedExperiment::SummarizedExperiment` for
 #'   `as.SummarizedExperiment`.
 #'
 #' @examples
@@ -301,14 +301,15 @@ as.ExpressionSet.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
   assert_sample_subset(x)
-  if (!requireNamespace("Biobase", quietly = TRUE)) {
-    stop("Biobase required")
-  }
+
+  ns <- tryCatch(loadNamespace("Biobase"), error = function(e) NULL)
+  if (is.null(ns)) stop("Biobase required for `as.ExpressionSet`")
+
   y <- as.DGEList(x, covariates, feature_ids, assay_name, .fds=.fds,
                   custom_key=custom_key, ...)
-  es <- Biobase::ExpressionSet(y$counts)
-  es <- Biobase::`pData<-`(es, y$samples)
-  es <- Biobase::`fData<-`(es, y$genes)
+  es <- ns$ExpressionSet(y$counts)
+  es <- ns$`pData<-`(es, y$samples)
+  es <- ns$`fData<-`(es, y$genes)
   set_fds(es, .fds)
 }
 
@@ -345,14 +346,15 @@ as.SummarizedExperiment.data.frame <- function(x, covariates=TRUE, feature_ids=N
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
   assert_sample_subset(x)
-  if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
-    stop("SummarizedExperiment package required")
-  }
+
+  ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
+  if (is.null(ns)) stop("SummarizedExperiment required for")
+
   y <- as.DGEList(x, covariates, feature_ids, assay_name, .fds=.fds,
                   custom_key=custom_key, ...)
   ## TODO: Check y$genes to see if we should make a rowRanges out of the
   ## rowData or just keep it as a DataFrame
-  out <- SummarizedExperiment::SummarizedExperiment(
+  out <- ns$SummarizedExperiment(
     y$counts, colData=y$samples, rowData=y$genes, ...)
   set_fds(out, .fds)
 }

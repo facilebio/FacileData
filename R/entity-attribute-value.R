@@ -440,7 +440,7 @@ eav_metadata_create <- function(x, ignore = c("dataset", "sample_id"),
 
   cnames <- setdiff(colnames(x), ignore)
 
-  # generate generic covariate definitions for all columns
+  # generate generic covariate definitions for all columns in x
   gcd <- sapply(cnames, function(name) {
     eavdef_for_column(x[[name]], name)
   }, simplify = FALSE)
@@ -480,6 +480,26 @@ eav_metadata_merge <- function(default_def, covariate_def = list()) {
   for (cname in names(covariate_def)) {
     def <- c(covariate_def[[cname]], default_def[[cname]])
     default_def[[cname]] <- def[!duplicated(names(def))]
+  }
+
+  # Run through the custom covariate_def list to identify if any covariates
+  # are multi-column compounded elements (like survival). If so, then those
+  # top-level covariate definitions are removed from the outgoing definitions.
+  multi.cols <- lapply(default_def, function(def) {
+    args <- def[["arguments"]]
+    if (length(args) > 1) args else NULL
+  })
+  multi.cols <- unlist(multi.cols, use.names = FALSE)
+  if (length(multi.cols)) {
+    multi.dup <- multi.cols[duplicated(multi.cols)]
+    if (length(multi.dup)) {
+      stop("There are single columns that are used in > 1 multi-column ",
+           "covariate definintions: ",
+           paste(multi.dup, collapse = ","))
+    }
+  }
+  for (mres in multi.cols) {
+    if (!is.null(mres)) default_def[mres] <- NULL
   }
 
   default_def

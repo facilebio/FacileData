@@ -10,15 +10,15 @@ as.FacileDataSet(x, path, assay_name, assay_type, source_assay,
   dataset_name = "DEFAULT_NAME", organism = c("unspecified",
   "Homo sapiens", "Mus musculus"), page_size = 2^12,
   cache_size = 2e+05, chunk_rows = 5000, chunk_cols = "ncol",
-  chunk_compression = 5, ...)
+  chunk_compression = 5, covariate_def = NULL, ...)
 
 \method{as.FacileDataSet}{list}(x, path, assay_name, assay_type,
   source_assay, assay_description = paste("Description for ",
   assay_name), dataset_name = "DEFAULT_NAME",
   organism = c("unspecified", "Homo sapiens", "Mus musculus"),
   page_size = 2^12, cache_size = 2e+05, chunk_rows = 5000,
-  chunk_cols = "ncol", chunk_compression = 5,
-  covariate_metadata = NULL, ...)
+  chunk_cols = "ncol", chunk_compression = 5, covariate_def = NULL,
+  ...)
 }
 \arguments{
 \item{x}{The bioconductor assay container to extract data from}
@@ -74,8 +74,8 @@ you will be creating.
 }
 \details{
 A \code{FacileDataSet} can be created from a number of different Bioconductor
-containers, such as a \link[Biobase:ExpressionSet]{Biobase::ExpressionSet},
-\link[SummarizedExperiment:SummarizedExperiment]{SummarizedExperiment::SummarizedExperiment}, or an \link[edgeR:DGEList]{edgeR::DGEList}. To
+containers, such as a \code{Biobase::ExpressionSet},
+\code{SummarizedExperiment::SummarizedExperiment}, or an \code{edgeR::DGEList}. To
 create a \code{FacileDataSet} that spans multiple Bioc containters, i.e. you may
 have one ExpressionSet per indication in the TCGA. You can make
 \code{FacileDataSet} to encompass the data from \emph{all} of these indications by

@@ -3,13 +3,13 @@ Type: Package
 Title: A fluent API for accessing multi-assay high-throughput genomics data
 Version: 2.0.0
 Authors@R: c(
-  person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre")),
+  person("Steve", "Lianoglou", , "lianoglou@dnli.com", c("aut", "cre")),
   person("Vincent", "Rouilly", , "rouilly.vincent@gene.com", role = "aut"),
   person("Peter", "Haverty", , "haverty.peter@gene.com", role = "aut"),
-  person("Genentech", role = c("cph", "fnd")),
-  person("Denali Therapeutics", role = c("fnd")))
-Author: Steve Lianoglou <slianoglou@gmail.com>
-Maintainer: Steve Lianoglou <slianoglou@gmail.com>
+  person("Denali Therapeutics", role = c("cph", "fnd"),
+         comment = "Coypright holder from 2019 onward"),
+  person("Genentech", role = c("cph", "fnd"),
+         comment = "Coypright holder for work pre 2019"))
 Description: Defines the "FacileData" API over multi-assay, high-throughput
   genomics data. The FacileData API is a fluent grammar that facilitates
   exploratory data analysis. This package also defines a "FacileDataSet" class,
@@ -21,31 +21,27 @@ Depends:
   R (>= 3.4.3),
 Imports:
   broom,
-  methods,
-  dplyr,
-  dtplyr,
-  DBI,
-  edgeR,
-  magrittr,
-  yaml,
   checkmate (>= 1.8.5),
-  RSQLite,
-  reshape2,
-  tidyr,
-  rhdf5,
+  DBI,
   data.table,
-  jsonlite,
-  multiGSEA (>= 0.10.4),
-  edgeR,
-  lazyeval,
-  survival,
-  Biobase,
-  S4Vectors,
-  SummarizedExperiment,
   desc,
   devtools,
+  dplyr,
+  dtplyr,
   glue,
-  utils
+  edgeR,
+  jsonlite,
+  lazyeval,
+  magrittr,
+  multiGSEA (>= 0.10.4),
+  reshape2,
+  rhdf5,
+  RSQLite,
+  S4Vectors,
+  survival,
+  tidyr,
+  utils,
+  yaml
 Suggests:
   AnnotationDbi,
   Biobase,

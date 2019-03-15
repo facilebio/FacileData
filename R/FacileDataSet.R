@@ -29,7 +29,7 @@
 #'     - `default_assay`: the name of the assay to use by default if none is
 #'       specified in calls to [fetch_assay_data()], [with_assay_data()], etc.
 #'       (kind of like how `"exprs"` is the default assay used when working with
-#'       a [Biobase::ExpressionSet])
+#'       a `Biobase::ExpressionSet`)
 #'     - `datasets`: a section tha enumerates the datases included internally.
 #'       The datasets are further enumerated.
 #'     - `sample_covariates`: a section that enumerates the covariatets that
@@ -45,7 +45,8 @@
 #'    elsewhere.
 #'
 #' @export
-#' @importFrom RSQLite dbConnect SQLite dbExecute
+#' @importFrom RSQLite SQLite sqliteCopyDatabase
+#' @importFrom DBI dbConnect dbDisconnect dbExecute
 #' @family FacileDataSet
 #'
 #' @param path The path to the FacileData repository
@@ -93,7 +94,7 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   if (db.loc == 'memory') {
     mcon <- dbConnect(RSQLite::SQLite(), ":memory:")
     RSQLite::sqliteCopyDatabase(con, mcon)
-    RSQLite::dbDisconnect(con)
+    dbDisconnect(con)
     con <- mcon
   }
 
@@ -316,11 +317,12 @@ facet_frame.FacileDataSet <- function(x, name = "default", ...) {
 #' @noRd
 #'
 #' @export
+#' @importFrom DBI dbGetQuery
 #' @param x FacileDataSet
 #' @param ... additional args (ignored)
 print.FacileDataSet <- function(x, ...) {
-  ns <- RSQLite::dbGetQuery(x$con, "SELECT COUNT(*) FROM sample_info;")
-  nds <- RSQLite::dbGetQuery(x$con, "SELECT COUNT (DISTINCT dataset) FROM sample_info;")
+  ns <- dbGetQuery(x$con, "SELECT COUNT(*) FROM sample_info;")
+  nds <- dbGetQuery(x$con, "SELECT COUNT (DISTINCT dataset) FROM sample_info;")
   out <- paste0(
     "FacileDataSet",
     if (class(x)[1] != "FacileDataSet") sprintf(" (%s)\n", class(x)[1L]) else "\n",

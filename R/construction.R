@@ -2,15 +2,19 @@
 
 #' Create an empty FacileDataSet
 #'
-#' @importFrom rhdf5 h5createFile h5createGroup H5close
 #' @export
+#'
+#' @importFrom rhdf5 h5createFile h5createGroup H5close
+#' @importFrom DBI dbConnect dbDisconnect dbGetQuery
+#' @importFrom RSQLite SQLite
+#'
 #'
 #' @param path the directory to create which will house the
 #'   \code{FacileDataSet}
 #' @param covariate_definition the path to the covariate definition file
 #' @param page_size,cache_size \code{pragma} values to setup the backend SQLite
 #'   database
-#' @return inivisibly returns the \code{FaclieDataSet} you just made
+#' @return inivisibly returns the path to the successfully created datastore
 initializeFacileDataSet <- function(path, meta_file,
                                     page_size=2**12, cache_size=2e5) {
   assert_valid_meta_file(meta_file)
@@ -31,20 +35,19 @@ initializeFacileDataSet <- function(path, meta_file,
   db.fn <- file.path(path, 'data.sqlite')
   con <- dbConnect(SQLite(), db.fn)
   on.exit(dbDisconnect(con))
-  dbGetQuery(con, 'pragma temp_store=MEMORY;')
-  dbGetQuery(con, sprintf('pragma page_size=%d', page_size))
-  dbGetQuery(con, sprintf('pragma cache_size=%d;', cache_size))
+  dbExecute(con, 'pragma temp_store=MEMORY;')
+  dbExecute(con, sprintf('pragma page_size=%d', page_size))
+  dbExecute(con, sprintf('pragma cache_size=%d;', cache_size))
   sql.fn <- system.file('extdata', 'init', 'faciledataset.sql',
                         package='FacileData')
   db.sql <- sqlFromFile(sql.fn)
-  dbGetQueries(con, db.sql)
+  executeSQL(con, db.sql)
 
   ## Create empty HDF5 file
   hd5.fn <- file.path(path, 'data.h5')
   h5createFile(hd5.fn)
   h5createGroup(hd5.fn, 'assay')
-  # H5close()
-  invisible(FacileDataSet(path))
+  invisible(path)
 }
 
 #' @export
@@ -210,7 +213,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
                               storage_mode=.storage.modes,
                               chunk_rows=5000, chunk_cols='ncol',
                               chunk_compression=4,
-                              assay_name=NULL) {
+                              assay_name=NULL, warn_existing = FALSE) {
   ## Parameter Checking --------------------------------------------------------
   stopifnot(is.FacileDataSet(x))
   assert_string(facile_assay_name)
@@ -245,12 +248,14 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
                description=facile_assay_description,
                nfeatures=nrow(datasets[[1]]),
                storage_mode=storage_mode) %>%
-    append_facile_table(x, 'assay_info')
+    append_facile_table(x, "assay_info", warn_existing = warn_existing)
 
   ## Insert Feature Information into FacileDataSet -----------------------------
   ## Insert new features into global feature_info table
-  features <- append_facile_feature_info(x, facile_feature_info,
-                                         type=facile_feature_type) %>%
+  features <- x %>%
+    append_facile_feature_info(facile_feature_info,
+                               type = facile_feature_type,
+                               warn_existing = warn_existing) %>%
     select(feature_type, feature_id, added)
 
   ## Create entries in `assay_feature_info` table to track hdf5 indices for
@@ -262,7 +267,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
     collect(n=Inf) %>%
     transmute(., assay=facile_assay_name, feature_id,
               hdf5_index=seq(nrow(.))) %>%
-    append_facile_table(x, 'assay_feature_info') %>%
+    append_facile_table(x, "assay_feature_info", warn_existing) %>%
     arrange(hdf5_index)
   stopifnot(nf == nrow(afi), all(afi$hdf5_index == seq(nf)))
 
@@ -307,7 +312,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
     }) %>% bind_rows
   }
 
-  asi <- append_facile_table(asi, x, 'assay_sample_info')
+  asi <- append_facile_table(asi, x, 'assay_sample_info', warn_existing)
 
   # "numeric" R storage mode is "double" storage mode in hdf5
   if (storage_mode == 'numeric') {
@@ -346,7 +351,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   ## add samples to sample_info table if they're not there.
   samples <- asi %>%
     mutate(parent_id=NA_character_) %>%
-    append_facile_table(x, 'sample_info')
+    append_facile_table(x, 'sample_info', warn_existing)
   invisible(list(samples=samples, assay_sample_info=asi))
 }
 
@@ -366,7 +371,8 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
 #'   features that were new (and added) to the repository or \code{FALSE} to
 #'   indicate that they were already in the database.
 append_facile_feature_info <- function(x, feature_info,
-                                       type=feature_info$feature_type) {
+                                       type=feature_info$feature_type,
+                                       warn_existing = FALSE) {
   ## Argument Checking
   stopifnot(is.FacileDataSet(x))
   stopifnot(is.data.frame(feature_info))
@@ -382,6 +388,6 @@ append_facile_feature_info <- function(x, feature_info,
   stopifnot(all(ftypes %in% .feature.types))
   added <- feature_info %>%
     distinct(feature_type, feature_id, .keep_all=TRUE) %>%
-    append_facile_table(x, 'feature_info')
+    append_facile_table(x, 'feature_info', warn_existing = warn_existing)
   invisible(added)
 }

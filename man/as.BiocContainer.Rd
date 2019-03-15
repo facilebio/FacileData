@@ -81,9 +81,9 @@ The default value is the entry provided by [default_assay()]}
 `.fds`}
 }
 \value{
-the appropriate bioconductor assay container, ie. a [edgeR::DGEList]
-  for `as.DGEList`, an [Biobase::ExpressionSet] for `as.ExpressionSet`, or
-  a [SummarizedExperiment::SummarizedExperiment] for
+the appropriate bioconductor assay container, ie. an `edgeR::DGEList`
+  for `as.DGEList`, a `Biobase::ExpressionSet` for `as.ExpressionSet`, or
+  a `SummarizedExperiment::SummarizedExperiment` for
   `as.SummarizedExperiment`.
 
 a \code{\link[Biobase]{ExpressionSet}}

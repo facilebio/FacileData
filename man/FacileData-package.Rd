@@ -15,7 +15,7 @@ Defines the "FacileData" API over multi-assay, high-throughput
   into memory.
 }
 \author{
-\strong{Maintainer}: Steve Lianoglou \email{slianoglou@gmail.com}
+\strong{Maintainer}: Steve Lianoglou \email{lianoglou@dnli.com}
 
 Authors:
 \itemize{
@@ -25,8 +25,8 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item Genentech [copyright holder, funder]
-  \item Denali Therapeutics [funder]
+  \item Denali Therapeutics (Coypright holder from 2019 onward) [copyright holder, funder]
+  \item Genentech (Coypright holder for work pre 2019) [copyright holder, funder]
 }
 
 }

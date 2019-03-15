@@ -3,17 +3,21 @@
 #' @export
 #' @importFrom rhdf5 h5read
 #' @importFrom multiGSEA eigenWeightedMean
-#' @inheritParams assay_feature_info
 #' @rdname fetch_assay_data
-#' @param x A \code{FacileDataSet} object.
+#'
+#' @md
+#'
+#' @param x A `FacileDataSrote` object.
 #' @param features a feature descriptor (data.frame with assay and feature_id
 #'   columms)
 #' @param samples a sample descriptor to specify which samples to return data
 #'   from.
+#' @param assay_name the name of the assay to fetch data from. Defaults to the
+#'   value of [default_assay()] for `x`. Must be a subset of `assay_names(x)`.
 #' @param normalized return normalize or raw data values, defaults to
 #'   \code{raw}
 #' @param as.matrix by default, the data is returned in a long-form tbl-like
-#'   result. If set to \code{TRUE}, the data is returned as a matrix.
+#'   result. If set to `TRUE`, the data is returned as a matrix.
 #' @param ... parameters to pass to normalization methods
 #' @param subset.threshold sometimes fetching all the genes is faster than
 #'   trying to subset. We have to figure out why that is, but I've previously
@@ -21,9 +25,7 @@
 #'   the elbow.
 #' @param aggregate.by do you want individual level results or geneset
 #'   scores? Use 'ewm' for eigenWeightedMean, and that's all.
-#' @return A lazy \code{\link[dplyr]{tbl}} object with the expression
-#'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
-#'   otherwise a \code{tbl_df} of the results.
+#' @return A `tibble` (lazy or not) with assay data.
 #' @family API
 fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
                                            assay_name = default_assay(x),

@@ -34,14 +34,20 @@ test_that("fetch_sample_covariates::samples arg limits samples correctly", {
 
 test_that("cast_covariate converts simple variables to correct type", {
   ## Simple covariates are converted to an atomic vector type
-  simple.vars <- c('sex'='factor', 'stage'='character', 'sample_type'='factor')
+  simple.vars <- c(
+    sex = "factor",
+    stage ="factor", sample_type = "factor",
+    subtype_tcga = "character",
+    OS = "data.frame")
+
   for (name in names(simple.vars)) {
     eclass <- simple.vars[[name]]
     info <- sprintf('%s (%s)', name, eclass)
     vals <- fetch_sample_covariates(FDS, samples, name) %>% collect(n=Inf)
-    casted <- cast_covariate(name, vals$value, .fds=FDS)
-    expect_true(length(casted) == nrow(vals), info=info)
-    expect_equal(class(casted)[1L], eclass, info=info)
+    casted <- cast_covariate(name, vals$value, .fds = FDS)
+    len <- if (eclass == "data.frame") nrow(casted) else length(casted)
+    expect_true(len == nrow(vals), info = info)
+    expect_is(casted, eclass, info = info)
   }
 })
 
@@ -62,7 +68,11 @@ test_that("cast_covariate converts right_censored data correctly", {
 
 
 test_that("spread_covariates casts simple covariates to correct class", {
-  vars <- c('sex'='factor', 'stage'='character', 'sample_type'='factor')
+  vars <- c(
+    sex = "factor",
+    stage ="factor", sample_type = "factor",
+    subtype_tcga = "character")
+
   wide <- FDS %>%
     fetch_sample_covariates(samples, names(vars)) %>%
     spread_covariates

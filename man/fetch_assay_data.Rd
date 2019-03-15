@@ -16,13 +16,16 @@
   aggregate.by = NULL, verbose = FALSE)
 }
 \arguments{
-\item{x}{A \code{FacileDataSet} object.}
+\item{x}{A \code{FacileDataSrote} object.}
 
 \item{features}{a feature descriptor (data.frame with assay and feature_id
 columms)}
 
 \item{samples}{a sample descriptor to specify which samples to return data
 from.}
+
+\item{assay_name}{the name of the assay to fetch data from. Defaults to the
+value of \code{\link[=default_assay]{default_assay()}} for \code{x}. Must be a subset of \code{assay_names(x)}.}
 
 \item{normalized}{return normalize or raw data values, defaults to
 \code{raw}}
@@ -41,9 +44,7 @@ the elbow.}
 scores? Use 'ewm' for eigenWeightedMean, and that's all.}
 }
 \value{
-A lazy \code{\link[dplyr]{tbl}} object with the expression
-  data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
-  otherwise a \code{tbl_df} of the results.
+A \code{tibble} (lazy or not) with assay data.
 }
 \description{
 Fetch data from single assay of choice
