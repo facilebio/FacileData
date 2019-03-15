@@ -246,21 +246,26 @@ has_columns <- function(x, req.cols, warn = TRUE) {
 
 #' @export
 #' @rdname assertions
-assert_covariate_definitions <- function(x) {
-  stopifnot(is_covariate_definitions(x))
+assert_covariate_definitions <- function(x, required = NULL) {
+  stopifnot(is_covariate_definitions(x, required))
   invisible(x)
 }
 
 #' @export
 #' @rdname assertions
-is_covariate_definitions <- function(x) {
+is_covariate_definitions <- function(x, required = NULL) {
   if (!is.list(x)) return(FALSE)
   if (!is.character(names(x))) return(FALSE)
-  ## all variables have type, class, description, and label fields
-  req.fields <- c('type', 'class', 'description', 'label')
-  kosher <- sapply(x, function(y) {
-    sapply(req.fields, function(z) is.character(y[[z]]))
-  }) %>% t
-  all(kosher)
+  if (!all(sapply(x, is.list))) return(FALSE)
+
+  if (length(required)) {
+    # required <- c('type', 'class', 'description', 'label')
+    kosher <- sapply(x, function(y) {
+      sapply(required, function(z) is.character(y[[z]]))
+    }) %>% t
+    if (!all(kosher)) return(FALSE)
+  }
+
+  TRUE
 }
 

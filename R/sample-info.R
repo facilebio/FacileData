@@ -15,7 +15,8 @@
 #' @family API
 fetch_sample_statistics.FacileDataSet <- function(x, samples = NULL,
                                                   semi = TRUE,
-                                                  assay_name = "rnaseq") {
+                                                  assay_name = default_assay(x),
+                                                  ...) {
   assert_string(assay_name)
   stopifnot(assay_name %in% assay_names(x))
 

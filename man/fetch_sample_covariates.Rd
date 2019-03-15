@@ -2,9 +2,14 @@
 % Please edit documentation in R/sample-covariates.R
 \name{fetch_sample_covariates.FacileDataSet}
 \alias{fetch_sample_covariates.FacileDataSet}
+\alias{fetch_sample_covariates.facile_frame}
 \title{Fetch rows from sample_covariate table for specified samples and covariates}
 \usage{
 \method{fetch_sample_covariates}{FacileDataSet}(x, samples = NULL,
+  covariates = NULL, custom_key = Sys.getenv("USER"),
+  with_source = FALSE, ...)
+
+\method{fetch_sample_covariates}{facile_frame}(x, samples = NULL,
   covariates = NULL, custom_key = Sys.getenv("USER"),
   with_source = FALSE, ...)
 }

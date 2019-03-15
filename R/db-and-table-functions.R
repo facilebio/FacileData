@@ -20,7 +20,7 @@ primary_key <- function(x, table_name) {
 #' checking the primary key) are not added.
 #'
 #' @export
-#'
+#' @importFrom DBI dbWriteTable
 #' @param dat the \code{data.frame} of rows to add to the table, which must
 #'   have a superset of columns present in the \code{table_name} that is being
 #'   appended to
@@ -33,8 +33,10 @@ append_facile_table <- function(dat, x, table_name) {
   target <- try(tbl(x$con, table_name), silent=TRUE)
   if (is(target, 'try-error')) stop("Unknown table to append to: ", table_name)
   dat <- conform_data_frame(dat, target)
+    # strip facile_frame class if it's there.
+  dat <- as.data.frame(dat, stringsAsFactors = FALSE)
 
-  ## Ensure that we don't try to add existing rows into the database
+  # Ensure that we don't try to add existing rows into the database
   pk <- primary_key(x, table_name)
   if (length(pk)) {
     skip <- target %>%
@@ -51,7 +53,7 @@ append_facile_table <- function(dat, x, table_name) {
       add.me$added <- TRUE
     }
     dat <- bind_rows(add.me, skip)
-  } else{
+  } else {
     dat$added <- TRUE
     dbWriteTable(x$con, table_name, dat, append=TRUE)
   }
@@ -111,7 +113,7 @@ gene_info_tbl <- function(x) {
   ## Columns:
   ## feature_id|feature_type|symbol|n_exons|length|source|hdf5_index
   hdf5.info <- assay_feature_info_tbl(x) %>%
-    filter(assay == 'rnaseq')
+    filter(assay == default_assay(x))
 
   gi <- feature_info_tbl(x) %>%
     filter(feature_type == 'entrez') %>%

@@ -24,6 +24,7 @@ Imports:
   methods,
   dplyr,
   dtplyr,
+  DBI,
   edgeR,
   magrittr,
   yaml,

@@ -106,12 +106,14 @@ fetch_samples.default <- function(x, samples = NULL, assay = "rnaseq", ...) {
 
 #' @family FacileInterface
 #' @export
-fetch_sample_statistics <- function(x, samples=NULL, semi=TRUE, assay_name='rnaseq') {
+fetch_sample_statistics <- function(x, samples = NULL, semi = TRUE,
+                                    assay_name = NULL, ...) {
   UseMethod("fetch_sample_statistics")
 }
 
 #' @export
-fetch_sample_statistics.default <- function(x, samples=NULL, semi=TRUE, assay_name='rnaseq') {
+fetch_sample_statistics.default <- function(x, samples = NULL, semi = TRUE,
+                                            assay_name = NULL) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
 

@@ -2,10 +2,16 @@
 % Please edit documentation in R/assay-data.R
 \name{fetch_assay_data.FacileDataSet}
 \alias{fetch_assay_data.FacileDataSet}
+\alias{fetch_assay_data.facile_frame}
 \title{Fetch data from single assay of choice}
 \usage{
 \method{fetch_assay_data}{FacileDataSet}(x, features, samples = NULL,
   assay_name = default_assay(x), normalized = FALSE,
+  as.matrix = FALSE, ..., subset.threshold = 700,
+  aggregate.by = NULL, verbose = FALSE)
+
+\method{fetch_assay_data}{facile_frame}(x, features, samples = NULL,
+  assay_name = default_assay(fds(x)), normalized = FALSE,
   as.matrix = FALSE, ..., subset.threshold = 700,
   aggregate.by = NULL, verbose = FALSE)
 }

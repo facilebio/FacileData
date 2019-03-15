@@ -43,6 +43,7 @@ sample_covariates:
   stage:
     type: clinical
     class: categorical
+    levels: ["I", "II", "III", "IV"]
     description: Cancer staging classification (I-IV)
     label: Cancer stage
   subtype_molecular:

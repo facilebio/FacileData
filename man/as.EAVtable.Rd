@@ -4,7 +4,8 @@
 \alias{as.EAVtable}
 \title{Convert a \code{pData} data.frame to a melted EAV table}
 \usage{
-as.EAVtable(x, eav_metadata = NULL, covariate_def = list())
+as.EAVtable(x, eav_metadata = NULL, covariate_def = list(),
+  na.rm = TRUE)
 }
 \arguments{
 \item{x}{a wide \code{pData} data.frame}

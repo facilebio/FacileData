@@ -5,7 +5,7 @@
 \title{Fetch the sample statistics for sets of samples in the warehouse}
 \usage{
 \method{fetch_sample_statistics}{FacileDataSet}(x, samples = NULL,
-  semi = TRUE, assay_name = "rnaseq")
+  semi = TRUE, assay_name = default_assay(x), ...)
 }
 \arguments{
 \item{x}{A \code{FacileDataSet} object}

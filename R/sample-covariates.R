@@ -84,6 +84,7 @@ sample_covariates.facile_frame <- function(x, ...){
 #' @param covariates character vector of covariate names
 #' @param custom_key The key to use to fetch more custom annotations over
 #'   the given samples
+#' @rdname fetch_sample_covariates
 #' @return rows from the \code{sample_covariate} table
 #' @family API
 fetch_sample_covariates.FacileDataSet <- function(
@@ -125,6 +126,20 @@ fetch_sample_covariates.FacileDataSet <- function(
   as_facile_frame(out, x, "eav_covariates", .valid_sample_check = FALSE)
 }
 
+#' @export
+#' @rdname fetch_sample_covariates
+fetch_sample_covariates.facile_frame <- function(
+    x, samples = NULL, covariates = NULL,
+    custom_key = Sys.getenv("USER"), with_source = FALSE, ...) {
+  if (is.null(samples)) {
+    samples <- assert_sample_subset(x)
+    samples <- distinct(samples, dataset, sample_id)
+  }
+  fetch_sample_covariates(fds(x), samples = samples, covariates = covariates,
+                          custom_key = custom_key, with_source = with_source,
+                          ...)
+}
+
 #' Fetches custom (user) annotations for a given user prefix
 #'
 #' @export
@@ -134,11 +149,9 @@ fetch_sample_covariates.FacileDataSet <- function(
 #' @param custom_key The key to use for the custom annotation
 #' @return covariate tbl
 #' @family API
-fetch_custom_sample_covariates.FacileDataSet <- function(x, samples = NULL,
-                                                         covariates = NULL,
-                                                         custom_key = Sys.getenv("USER"),
-                                                         with_source = FALSE,
-                                                         file.prefix = "facile") {
+fetch_custom_sample_covariates.FacileDataSet <- function(
+    x, samples = NULL, covariates = NULL, custom_key = Sys.getenv("USER"),
+    with_source = FALSE, file.prefix = "facile", ...) {
   if (is.null(samples)) {
     samples <- samples(x)
   } else {

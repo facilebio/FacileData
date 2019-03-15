@@ -65,8 +65,10 @@ as.DGEList <- function(x, ...) {
 #' @rdname as.BiocContainer
 #' @importFrom edgeR DGEList
 as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
-                              .fds = NULL, custom_key = Sys.getenv("USER"), ...) {
+                              assay_name = NULL, .fds = NULL,
+                              custom_key = Sys.getenv("USER"), ...) {
   .fds <- assert_facile_data_store(.fds)
+  assert_choice(assay_name, assay_names(.fds))
 
   ## Construct sample table from colnames of the matrix, and make sure this is
   ## legit
@@ -101,10 +103,17 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
                                    sep="__")
   }
 
+  # Construct $genes meta information
+  ainfo <- assay_info(.fds, assay_name = assay_name)
+  ftype <- ainfo[["feature_type"]]
   fids <- rownames(x)
-  genes <- gene_info_tbl(.fds) %>%
-    collect(n=Inf) %>% ## #dboptimize# remove this if you want to exercise db
+
+  gene_info <- feature_info_tbl(.fds) %>%
+    filter(feature_type == !!ftype) %>%
+    collect(n = Inf)
+  genes <- gene_info %>%
     semi_join(tibble(feature_id=fids), by='feature_id') %>%
+    rename(symbol = "name") %>%
     as.data.frame %>%
     set_rownames(., .$feature_id)
 
@@ -123,7 +132,8 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
 
   ## Doing the internal filtering seems to be too slow
   ## sample.stats <- fetch_sample_statistics(db, x) %>%
-  sample.stats <- fetch_sample_statistics(.fds, samples) %>%
+  sample.stats <- .fds %>%
+    fetch_sample_statistics(samples, assay_name = assay_name) %>%
     collect(n=Inf) %>%
     mutate(samid=paste(dataset, sample_id, sep='__')) %>%
     rename(lib.size=libsize, norm.factors=normfactor) %>%
@@ -202,7 +212,8 @@ as.DGEList.data.frame <- function(x, covariates = TRUE, feature_ids = NULL,
   }
 
   as.DGEList.matrix(counts, covariates = covariates, feature_ids = feature_ids,
-                    .fds = .fds, custom_key = custom_key, ...)
+                    assay_name = assay_name, .fds = .fds,
+                    custom_key = custom_key, ...)
 }
 
 #' @method as.DGEList tbl

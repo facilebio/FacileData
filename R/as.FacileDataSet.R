@@ -1,9 +1,4 @@
-# User-friendly functions used in the creation of a FacileDataSet
-#
-# The easiest way to create a FacileDataSet is to start from a well manicured
-# SummarizeExperiment (or list of them).
-
-#' Converts bioconductor assay containers into a FacileDataSet.
+#' Converts a (list of) bioconductor assay containers into a FacileDataSet.
 #'
 #' @description
 #' This function assumes you are only extracting one assay from the assay
@@ -64,12 +59,13 @@
 #' `data.frame` from **the first** given bioc-container in the list.
 #' This `data.frame` must define the following columns:
 #'
-#' * "feature_type": `character` (c('entrez', 'ensgid', 'enstid', 'genomic', 'custom'))
-#' * "feature_id": `character`
-#' * "name": `character`
-#' * "meta": `character`
-#' * "effective_length": `numeric`
-#' * "source": `character`
+#' * "feature_type": `string`, one of: `"entrez"`, `"ensgid"`, `"enstid"`,
+#'     `"genomic"`, `"custom"`.
+#' * "feature_id": `string`
+#' * "name": `string`
+#' * "meta": `string`
+#' * "effective_length": `integer`
+#' * "source": `string`
 #'
 #' @md
 #' @rdname as.FacileDataSet
@@ -99,12 +95,12 @@
 #' @return a [FacileDataSet()]
 #' @importFrom yaml write_yaml
 as.FacileDataSet <- function(x, path, assay_name, assay_type, source_assay,
+                             assay_description = paste("Description for ", assay_name),
                              dataset_name = "DEFAULT_NAME",
                              organism = c("unspecified", "Homo sapiens", "Mus musculus"),
                              page_size=2**12, cache_size=2e5,
                              chunk_rows=5000, chunk_cols="ncol",
-                             chunk_compression=5,
-                             ...) {
+                             chunk_compression=5, covariate_def = NULL,...) {
   organism = match.arg(organism)
   UseMethod("as.FacileDataSet")
 }
@@ -124,7 +120,7 @@ as.FacileDataSet.default <- function(x, ...) {
     if (! xclass %in% legit.as.classes) {
         stop("as.FacileDataSet not defined for object of class: ", xclass)
     }
-    as.FacileDataSet(list(x))
+    as.FacileDataSet(list(x), ...)
 }
 
 #' @method as.FacileDataSet list
@@ -132,12 +128,13 @@ as.FacileDataSet.default <- function(x, ...) {
 #' @rdname as.FacileDataSet
 as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
                                   source_assay,
-                                  dataset_name,
+                                  assay_description = paste("Description for ", assay_name),
+                                  dataset_name = "DEFAULT_NAME",
                                   organism = c("unspecified", "Homo sapiens", "Mus musculus"),
                                   page_size=2**12, cache_size=2e5,
                                   chunk_rows=5000, chunk_cols="ncol",
                                   chunk_compression=5,
-                                  covariate_metadata = NULL, ...) {
+                                  covariate_def = NULL, ...) {
   stopifnot(is.list(x))
   stopifnot(length(x) >= 1L)
   if (file.exists(path)) {
@@ -183,37 +180,44 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   finfo <- fdata(first, validate = TRUE)
 
   pdats <- lapply(names(x), function(dname) {
-      obj <- x[[dname]]
-      out <- pdata(obj)
-      out$dataset <- dname
-      out$sample_id <- colnames(obj)
-      out[] = lapply(out,
-                     function(el) {
-                         if (is(el, "Surv")) {
-                             as_cSurv(el)
-                         } else {
-                             el
-                         }
-                     })
-      dplyr::select(out, dataset, sample_id, everything())
+    obj <- x[[dname]]
+    pdat <- pdata(obj)
+    for (cname in colnames(pdat)) {
+      vals <- pdat[[cname]]
+      if (is(vals, "Surv")) pdat[[cname]] <- as_cSurv(vals)
+    }
+    pdat %>%
+      mutate(dataset = dname, sample_id = colnames(obj)) %>%
+      select(dataset, sample_id, everything())
   })
 
   pdat <- bind_rows(pdats)
-  pdat$sample_id = gsub("__", "",  pdat$sample_id) # __ has as special meaning for Facile
+  # __ has as special meaning for Facile
+  pdat$sample_id = gsub("__", "",  pdat$sample_id)
 
-  col_descs_list = lapply(x, pdata_metadata, covariate_metadata)
-  col_descs = unlist(col_descs_list, FALSE, FALSE)
-  names(col_descs) = unlist(sapply(col_descs_list, names, simplify = FALSE), FALSE, FALSE)
-  col_descs = col_descs[!duplicated(names(col_descs))]
+  # col_descs_list = lapply(x, pdata_metadata, covariate_metadata)
+  # col_descs = unlist(col_descs_list, FALSE, FALSE)
+  # names(col_descs) = unlist(sapply(col_descs_list, names, simplify = FALSE),
+  #                           recursive = FALSE, use.names = FALSE)
+  # col_descs = col_descs[!duplicated(names(col_descs))]
+  #
+  # eav.meta <- eav_metadata_merge(pdat, col_descs)
 
-  eav.meta <- eav_metadata_merge(pdat, col_descs)
+  eav = as.EAVtable(pdat, covariate_def = covariate_def)
+  eav_meta <- attr(eav, "covariate_def")
 
-  adat <- sapply(names(x),
-                 function(dname) {
-                     ds = adata(x[[dname]], assay = source_assay)
-                     colnames(ds) = gsub("__", "", colnames(ds)) # __ has as special meaning for Facile
-                     ds
-                 }, simplify = FALSE)
+  # Check for duplicates entries in the eav table here, otherwise injecting it
+  # into the database will raise an error
+  stopifnot(
+    nrow(distinct(eav, dataset, sample_id, variable)) == nrow(eav))
+
+  # list of assay matricess
+  adat <- sapply(names(x), function(dname) {
+    ds = adata(x[[dname]], assay = source_assay)
+    # __ has as special meaning for Facile
+    colnames(ds) = gsub("__", "", colnames(ds))
+    ds
+  }, simplify = FALSE)
 
 
   ## Make YAML and Initialize FDS
@@ -226,35 +230,33 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     organism = organism,
     default_assay = assay_name,
     datasets = ds_list,
-    sample_covariates = col_descs
-   )
+    sample_covariates = eav_meta)
 
-  meta_yaml = paste0(tempfile(), ".yaml")
-  write_yaml(meta, meta_yaml)
+  meta_yaml <- paste0(tempfile(), ".yaml")
+  yaml::write_yaml(meta, meta_yaml)
   fds <- initializeFacileDataSet(path, meta_yaml)
 
-  ## FIXME: make pdat_eav
-  pdat_eav = as.EAVtable(pdat, eav.meta)
-
-  ## Check for duplicates as SQLite will raise exception
-  stopifnot(nrow(duplicated(pdat_eav %>% select(dataset, sample_id, variable))) == 0)
-
   ## Register sample covariate info into Facile SQLite
-  known_types <- c("general", "tumor_classification", "data_batch", "IC", "TC",
-                  "conmeds", "safety", "user_annotation", "active_brush", "mutation")
-  sample.covs <- pdat_eav %>%
-      mutate(
-          type = ifelse(type %in% known_types, type, "general"),
-          date_entered = as.integer(Sys.time())
-      ) %>% append_facile_table(fds, 'sample_covariate')
+  # known_types <- c("general", "tumor_classification", "data_batch", "IC", "TC",
+  #                 "conmeds", "safety", "user_annotation", "active_brush", "mutation")
+  # sample.covs <- pdat_eav %>%
+  #     mutate(
+  #         type = ifelse(type %in% known_types, type, "general"),
+  #         date_entered = as.integer(Sys.time())
+  #     ) %>% append_facile_table(fds, 'sample_covariate')
 
-  ## Register sample info into Facile SQLite
-  sample.info <- pdat_eav %>%
+  # add sample covariates to table
+  sample.covs <- eav %>%
+    mutate(date_entered = as.integer(Sys.time())) %>%
+    append_facile_table(fds, "sample_covariate")
+
+  # Add samples to sample_info table
+  sample.info <- eav %>%
     distinct(dataset, sample_id) %>%
-    mutate(parent_id =  "") %>%
-    append_facile_table(fds, 'sample_info')
+    mutate(parent_id = "") %>%
+    append_facile_table(fds, "sample_info")
 
-  ## insert the first assay
+  # insert the first assay
   if (is.integer(adat[[1]])) {
     storage_mode = "integer"
   } else {
@@ -266,10 +268,10 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     fds,
     adat,
     facile_assay_name=meta$default_assay,
-    facile_assay_type='rnaseq',
+    facile_assay_type=assay_type,
     facile_feature_type=finfo$feature_type[1],
     facile_feature_info=finfo,
-    facile_assay_description=meta$name,
+    facile_assay_description=assay_description,
     storage_mode=storage_mode,
     chunk_rows=chunk_rows,
     chunk_cols=chunk_cols,
@@ -384,7 +386,9 @@ pdata.ExpressionSet <- function(x, covariate_metadata = NULL,  ...) {
 }
 pdata.DGEList <- function(x, covariate_metadata = NULL,  ...) {
   # stopifnot(requireNamespace("edgeR", quietly = TRUE))
-  validate.pdata(x$samples, ...)
+  ignore.cols <- c("lib.size", "norm.factors")
+  if (all(x$samples$group == 1)) ignore.cols <- c(ignore.cols, "group")
+  validate.pdata(x$samples[, !colnames(x$samples) %in% ignore.cols], ...)
 }
 
 validate.pdata <- function(x, ...) {
@@ -395,7 +399,7 @@ validate.pdata <- function(x, ...) {
 #'
 #' Get metadata on columns of sample info data.frame (label, etc.) for
 #' inclusion in metadata YAML.
-#' not for export
+#'
 #' @param x SummarizedExperiment, ExpressionSet or DGEList
 #' @param ... additional args, ignored for now
 #' @export

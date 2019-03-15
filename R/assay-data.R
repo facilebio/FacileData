@@ -4,6 +4,7 @@
 #' @importFrom rhdf5 h5read
 #' @importFrom multiGSEA eigenWeightedMean
 #' @inheritParams assay_feature_info
+#' @rdname fetch_assay_data
 #' @param x A \code{FacileDataSet} object.
 #' @param features a feature descriptor (data.frame with assay and feature_id
 #'   columms)
@@ -50,7 +51,8 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     }
     stopifnot(is(features, 'tbl') || is(features, 'data.frame'))
     if (!'assay' %in% colnames(features) || !is.character(features$assay)) {
-      features$assay <- assay_name
+      features <- collect(features, n = Inf)
+      features[["assay"]] <- assay_name
     }
     assert_assay_feature_descriptor(features)
   }
@@ -100,6 +102,29 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
   }
 
   out
+}
+
+#' @export
+#' @rdname fetch_assay_data
+fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
+                                          assay_name = default_assay(fds(x)),
+                                          normalized = FALSE,
+                                          as.matrix = FALSE,
+                                          ...,
+                                          subset.threshold = 700,
+                                          aggregate.by = NULL,
+                                          verbose = FALSE) {
+  force(assay_name)
+  if (is.null(samples)) {
+    samples <- assert_sample_subset(x)
+    samples <- distinct(samples, dataset, sample_id)
+  }
+  fetch_assay_data(fds(x), features = features, samples = samples,
+                   assay_name = assay_name, normalized = normalized,
+                   as.matrix = as.matrix, ...,
+                   subset.threshold = subset.threshold,
+                   aggregate.by = aggregate.by,
+                   verbose = verbose)
 }
 
 .fetch_assay_data <- function(x, assay_name, feature_ids, samples,
