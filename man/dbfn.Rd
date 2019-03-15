@@ -9,11 +9,18 @@ dbfn(x, mustWork = TRUE)
 \arguments{
 \item{x}{FacileDataSet}
 
-\item{mustWork}{single logical}
+\item{mustWork}{boolean, if `TRUE` (default), throws an error if the sqlite
+file does not exist. When `FALSE`, this returns the "expected" path to the
+sqlite file for `x`}
 }
 \value{
-single character, path to database
+the filepath to the sqlite database
 }
 \description{
 Get location of the FacileDataSet database
 }
+\seealso{
+Other FacileDataSet: \code{\link{FacileDataSet}},
+  \code{\link{hdf5fn}}, \code{\link{meta_file}}
+}
+\concept{FacileDataSet}

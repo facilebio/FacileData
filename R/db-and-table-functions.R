@@ -1,7 +1,7 @@
 #' Query a table to identify its primary key(s)
 #'
 #' @export
-#'
+#' @importFrom DBI dbGetQuery
 #' @param x a \code{FacileDataSet} or \code{SQLiteConnection}
 #' @param table_name the name of the table to query
 #' @return a character vector of primary keys
@@ -20,7 +20,7 @@ primary_key <- function(x, table_name) {
 #' checking the primary key) are not added.
 #'
 #' @export
-#'
+#' @importFrom DBI dbWriteTable
 #' @param dat the \code{data.frame} of rows to add to the table, which must
 #'   have a superset of columns present in the \code{table_name} that is being
 #'   appended to
@@ -28,20 +28,22 @@ primary_key <- function(x, table_name) {
 #' @param table_name the name of the table in \code{x} to add the rows of
 #'   \code{dat} to.
 #' @return invisibly returns the conformed version of \code{dat}.
-append_facile_table <- function(dat, x, table_name) {
+append_facile_table <- function(dat, x, table_name, warn_existing = FALSE) {
   stopifnot(is.FacileDataSet(x))
   target <- try(tbl(x$con, table_name), silent=TRUE)
   if (is(target, 'try-error')) stop("Unknown table to append to: ", table_name)
   dat <- conform_data_frame(dat, target)
+  # strip facile_frame class if it's there.
+  dat <- as.data.frame(dat, stringsAsFactors = FALSE)
 
-  ## Ensure that we don't try to add existing rows into the database
+  # Ensure that we don't try to add existing rows into the database
   pk <- primary_key(x, table_name)
   if (length(pk)) {
     skip <- target %>%
       semi_join(dat, by=pk, copy=TRUE, auto_index=TRUE) %>%
       collect(n=Inf) %>%
       mutate(added=FALSE)
-    if (nrow(skip)) {
+    if (nrow(skip) && warn_existing) {
       warning(nrow(skip), "/", nrow(dat), " features already in database",
               immediate.=TRUE)
     }
@@ -51,7 +53,7 @@ append_facile_table <- function(dat, x, table_name) {
       add.me$added <- TRUE
     }
     dat <- bind_rows(add.me, skip)
-  } else{
+  } else {
     dat$added <- TRUE
     dbWriteTable(x$con, table_name, dat, append=TRUE)
   }
@@ -64,19 +66,22 @@ append_facile_table <- function(dat, x, table_name) {
 #' @export
 assay_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x$con, 'assay_info') %>% set_fds(x)
+  out <- tbl(x$con, 'assay_info')
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' @export
 assay_feature_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x$con, 'assay_feature_info') %>% set_fds(x)
+  out <- tbl(x$con, 'assay_feature_info')
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' @export
 assay_sample_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x$con, 'assay_sample_info') %>% set_fds(x)
+  out <- tbl(x$con, 'assay_sample_info')
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' @export
@@ -95,7 +100,7 @@ feature_info_tbl <- function(x, assay_name=NULL) {
       filter(assay == assay_name)
     out <- semi_join(out, afi, by=c('feature_type', 'feature_id'))
   }
-  out %>% set_fds(x)
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' Mimics the old `gene_info` table.
@@ -108,14 +113,14 @@ gene_info_tbl <- function(x) {
   ## Columns:
   ## feature_id|feature_type|symbol|n_exons|length|source|hdf5_index
   hdf5.info <- assay_feature_info_tbl(x) %>%
-    filter(assay == 'rnaseq')
+    filter(assay == default_assay(x))
 
   gi <- feature_info_tbl(x) %>%
     filter(feature_type == 'entrez') %>%
     select(feature_id, feature_type, symbol=name, n_exons=-1,
            length=effective_length, source) %>%
     inner_join(hdf5.info, by='feature_id') %>%
-    set_fds(x)
+    as_facile_frame(x, .valid_sample_check = FALSE)
 }
 
 #' Mimics old sample_stats table
@@ -126,20 +131,24 @@ gene_info_tbl <- function(x) {
 sample_stats_tbl <- function(x) {
   assay_sample_info_tbl(x) %>%
     select(dataset, sample_id, libsize, normfactor) %>%
-    set_fds(x)
+    as_facile_frame(x, .valid_sample_check = FALSE)
 }
 
 #' @export
 sample_covariate_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x$con, 'sample_covariate') %>% set_fds(x)
+  out <- tbl(x$con, 'sample_covariate')
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' @export
 sample_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
-  tbl(x$con, 'sample_info') %>% set_fds(x)
+  out <- tbl(x$con, 'sample_info')
+  as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
+
+# fds() getters/setters ========================================================
 
 #' Get/set db
 #'
@@ -147,11 +156,24 @@ sample_info_tbl <- function(x) {
 #' @export
 #' @param x the object
 #' @param db The \code{FacileDb} object
-fds <- function(x) {
-  if (is.FacileDataSet(x)) return(x)
+fds <- function(x, ...) {
+  UseMethod("fds", x)
+}
+
+#' @export
+#' @rdname getsetdb
+fds.FacileDataStore <- function(x) {
+  return(x)
+}
+
+
+#' @export
+#' @rdname getsetdb
+fds.default <- function(x, ...) {
   out <- attr(x, 'fds')
   if (is.null(out)) {
-    warning("No FacileDataSet found in x (", class(x)[1L], ")", immediate.=TRUE)
+    warning("No FacileDataStore found in x (", class(x)[1L], ")",
+            immediate.=TRUE)
   }
   out
 }
@@ -190,8 +212,10 @@ set_fds <- function(x, value) {
 
 ## Unexported utility functions ================================================
 
+#' Validates the bits required in a legit FacileDataSet directory.
+#' @noRd
 validate.facile.dirs <- function(path, data.fn, sqlite.fn, hdf5.fn, meta.fn,
-                                 anno.dir, db.type=c('sqlite', 'monetdblite')) {
+                                 anno.dir) {
   if (!dir.exists(path)) {
     stop("Top level FacileData directory does not exist: ", path)
   }
@@ -230,7 +254,6 @@ validate.facile.dirs <- function(path, data.fn, sqlite.fn, hdf5.fn, meta.fn,
               immediate.=TRUE)
     }
   }
-  db.type <- match.arg(db.type)
 
   list(path=path, data.fn=data.fn, sqlite.fn=sqlite.fn, hdf5.fn=hdf5.fn,
        meta.fn=meta.fn, anno.dir=anno.dir)

@@ -14,5 +14,4 @@ pdata_metadata(x, ...)
 \description{
 Get metadata on columns of sample info data.frame (label, etc.) for
 inclusion in metadata YAML.
-not for export
 }

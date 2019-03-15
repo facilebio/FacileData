@@ -4,12 +4,12 @@
 \alias{eav_encode_covariate}
 \title{Encodes column(s) from \code{pData} into character values}
 \usage{
-eav_encode_covariate(pdata, covariate_def, aname = "variable")
+eav_encode_covariate(dat, covariate_def, aname = "variable")
 }
 \arguments{
-\item{pdata}{the \code{pData} \code{data.frame}}
-
 \item{covariate_def}{the single-list-definition of this covariate}
+
+\item{pdata}{the \code{pData} \code{data.frame}}
 
 \item{vname}{the name of the attribute column in the eav table}
 }

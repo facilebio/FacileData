@@ -5,6 +5,10 @@ samples <- sample_covariate_tbl(FDS) %>%
   filter(variable == 'stage' & value == 'III') %>%
   select(dataset, sample_id)
 
+samples <- FDS %>%
+  filter_samples(stage == "III") %>%
+  select(dataset, sample_id)
+
 genes <- c(
   PRF1='5551',
   GZMA='3001',
@@ -34,7 +38,7 @@ test_that("spreading data works with_assay_data", {
     select(dataset, sample_id, feature_name, value) %>%
     tidyr::spread(feature_name, value)
   result <- samples %>%
-    with_assay_data(genes, normalized=TRUE) %>%
+    with_assay_data(genes, normalized = TRUE, .fds = FDS) %>%
     collect
 
   expect_equal(result, expected)

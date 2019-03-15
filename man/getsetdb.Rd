@@ -2,13 +2,19 @@
 % Please edit documentation in R/db-and-table-functions.R
 \name{fds}
 \alias{fds}
+\alias{fds.FacileDataStore}
+\alias{fds.default}
 \alias{fds<-}
 \alias{fds<-.tbl}
 \alias{fds<-.data.frame}
 \alias{set_fds}
 \title{Get/set db}
 \usage{
-fds(x)
+fds(x, ...)
+
+\method{fds}{FacileDataStore}(x)
+
+\method{fds}{default}(x, ...)
 
 fds(x) <- value
 

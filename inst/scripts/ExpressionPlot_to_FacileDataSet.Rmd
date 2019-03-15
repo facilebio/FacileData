@@ -1,0 +1,228 @@
+---
+title: "Creating a FacileDataSet from ExpressionPlot"
+author: "Jonathan Carroll, Vincent Rouilly, Peter Haverty, and the FacileExplorer Working Group"
+date: "Last Updated: `r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document: 
+    code_folding: show
+    keep_md: true
+    toc: yes
+    toc_depth: 4
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+
+required_packages <- c("desc", "devtools", "glue")
+for (pkg in required_packages) {
+  stopifnot(requireNamespace(pkg, quietly = TRUE))
+}
+```
+
+
+# Overview
+
+The current workflow for ingesting data into `FacileExplorer` is to create a `Facile___DataSet` R package. This allows both the data and some complementary R scripts to be contained together. For now we will focus on just the data.
+
+The path for now is to go via a `list` of harmonized and annotated `ExpressionSet` or `SummarizedExperiment` objects. We have broken the steps down into documented chunks here.
+
+This conversion is based on a WIP script found here: https://stash.intranet.roche.com/stash/projects/FACILEDATA/repos/faciledataset/browse/inst/scripts/gcell_rnaseq_as.FacileDataSet.R?at=refs%2Fheads%2Ffeature%2Fas.FacileDataSet
+
+The result of this workflow should be a Facile___DataSet R package. Let's start by filling in that gap
+
+# Define the Facile___DataSet
+
+The Facile___DataSet needs a name (in the ___ component -- this structure is mandatory) and a version
+
+```{r define}
+dataset_name <- "GCell"
+FDS_name <- glue::glue("Facile{dataset_name}DataSet")
+FDS_version <- "0.1.2"
+```
+
+This will therefore produce a `r FDS_name` package.
+
+# Install the `FacileData` R Package
+
+available from ssh://git@stash.intranet.roche.com:7999/faciledata/faciledataset.git
+
+```{r}
+library(FacileData)
+```
+
+## Notes
+
+- This script requires the Genentech bundled R 3.4.3 distribution. The R 3.5.0 distribution is not able to detect the `ExpressionPlot` projects used and complains about `S4Vectors`.
+- PRJ0013166 (NGS114) has been superseded but we will still use it and skip the warning.
+- PRJ0013155 (NGS171) has been superseded but we will still use it and skip the warning.
+- `ExpressionPlot` R package requires that the calls be made on rescomp, since it uses an internal perl script.
+- If building `FacileData` from source, make sure to document the functions (e.g. `devtools::document` or via Build Tools) as this is not always complete in the repo, and functionality will not be exported otherwise.
+
+# Load data from `ExpressionPlot`
+
+Load two datasets directly from `ExpressionPlot`. These have been superseded, so we will skip the warnings.
+
+```{r load ep data}
+library(ExpressionPlot)
+
+ngs114 <- ep.project.from.id("PRJ0013166", standard.checks = FALSE)
+ngs171 <- ep.project.from.id("PRJ0013155", standard.checks = FALSE)
+
+ds <- list(
+  NGS114 = ep.SummarizedExperiment(ngs114, attach.annot = TRUE),
+  NGS171 = ep.SummarizedExperiment(ngs171, attach.annot = TRUE)
+)
+```
+
+# Subset and rename
+
+The feature space and phenoData spaces need to be harmonized between all datasets within a `Facile___DataSet`. The following chunk:
+
+- prefixes the GeneIDs
+- subsets the phenoData to a limited set of columns, and renames them
+- populates the metadata with definitions of the phenoData columns
+
+For now, categorical covariates are the more common variables as there are few tools available yet to deal with continuous covariates.
+
+```{r subset phenotypes}
+## examples of type: data_batch, clinical, tumor_classification, response, IHC, mutation, safety, conmeds
+## examples of class: numerical, categorical, right_censored
+## (**can't create new type or class**)
+ds <- lapply(ds,
+             function(x) {
+               rownames(x) = paste0("GeneID:",rownames(x))
+               f = colnames(mcols(x)) = c("aliases", "effective_length", "feature_type", "name", "meta")
+               mcols(x)$source = "IGIS"
+               mcols(x)$feature_type = "entrez"
+               mcols(x)$feature_id = rownames(x)
+               colData(x) = colData(x)[,c("PRIMARY_TISSUE", "GENDER", "TISSUE_DIAGNOSIS", "ETHNICITY", "TISSUE_METACLASS_ONCOLOGY")]
+               colnames(colData(x)) = c("primary_tissue", "gender", "diagnosis", "ethnicity", "tissue")
+               metadata(colData(x)) = list(
+                 primary_tissue = list(label = "Primary Tissue",
+                                       description = "Primary tissue source",
+                                       type = "tumor_classification",
+                                       class = "categorical"
+                 ),
+                 gender = list(label = "Gender/Sex",
+                               description = "In the 'ratio between chrX:chrY' sense.",
+                               type = "clinical",
+                               class = "categorical"
+                 ),
+                 diagnosis = list(label = "Tissue Diagnosis",
+                                  description = "Tissue metaclass oncology",
+                                  type = "tumor_classification",
+                                  class = "categorical"
+                 ),
+                 ethnicity = list(label = "Ethnicity",
+                                  description = "Patient ethnicity",
+                                  type = "clinical",
+                                  class = "categorical"
+                 ),
+                 tissue = list(label = "Tissue Group",
+                               description = "Rollup of tissue type to defined vocab",
+                               type = "tumor_classification",
+                               class = "categorical"
+                 )
+               )
+               x
+             })
+```
+
+The overall metadata for the studies can also be populated
+
+```{r metadata}
+metadata(ds[[1]]) <- list(url = "http://gene.com", description = "This is NGS114")
+metadata(ds[[2]]) <- list(url = "http://gene.com", description = "This is NGS171")
+```
+
+# Convert to `FacileDataSet`
+
+The `Facile___DataSet` will be stored in a directory (specified, should not exist yet). The contents of this new directory need to be copied into a new package directory, which we will also create.
+
+```{r create FDS}
+DIR <- file.path("../../FacileVerse", FDS_name)
+unlink(DIR, recursive = TRUE, force = TRUE)
+devtools::create(DIR) ## create a package
+## start an installation directory
+## the parent directory of the 
+## FacileDataSet must already exist.
+dir.create(file.path(DIR, "inst", "extdata"), recursive = TRUE) 
+
+gcell_fds <- as.FacileDataSet(ds,
+                              path = file.path(DIR, "inst", "extdata", FDS_name),
+                              assay_name = "rnaseq",
+                              assay_type = "rnaseq",
+                              source_assay = "counts",
+                              dataset_name = "gCell",
+                              organism = "Homo sapiens"
+)
+```
+
+# Try it out
+
+Before we package the dataset entirely, we can reassure ourselves that it works as expected using the `FacileDataSet` API
+
+```{r testing}
+library(dplyr)
+library(reshape2)
+
+samples <- sample_info_tbl(gcell_fds) %>% collect
+samples <- fetch_sample_covariates(gcell_fds, samples, "tissue") %>%
+  filter(variable == "tissue" & value == "Breast") %>%
+  collect
+genes <- c(ERBB2 = 'GeneID:2064', GRB7 = 'GeneID:2886')
+exprs <- gcell_fds %>% fetch_assay_data(genes, samples, 'rnaseq', normalized = TRUE)
+ew <- exprs %>% dcast(dataset + sample_id ~ feature_name, value.var = 'value')
+cor(ew[,"ERBB2"], ew[,"GRB7"]) # ~ 0.76
+
+library(ggplot2)
+theme_set(theme_bw())
+ggplot(ew, aes(ERBB2, GRB7)) +
+  geom_point()
+```
+
+# Create the accessor function
+
+`FacileExplorer` requires that the Facile___DataSet be accessible via a named function, so we create it in the R/ directory
+
+```{r accessor}
+writeLines(
+  glue::glue("##' A connection to the {FDS_name}",
+             "#'",
+             "#' @export",
+             "#' @return A \\code{{FDS_name}} object",
+             "{FDS_name} <- function(path, cache_size=80000,",
+             "                               db.loc = c('reference', 'temporary', 'memory')) {{",
+             "  if (missing(path) || is.null(path)) {{",
+             "    path <- system.file('extdata', '{FDS_name}', package='{FDS_name}')",
+             "  }}",
+             "  db.loc <- match.arg(db.loc)",
+             "  FacileDataSet(path, cache_size = cache_size, db.loc = db.loc)",
+             "}}", .sep = "\n"),
+  file.path(DIR, "R", glue::glue("{FDS_name}.R"))
+)
+```
+
+# Build the Facile___DataSet package
+
+Building the package loads it into your environment. We will also save a version for export.
+
+```{r build}
+## custom-annotation directory would be removed if empty
+writeLines("", file.path(DIR, "inst", "extdata", FDS_name, "custom-annotation", "README.md"))
+## update package version
+desc::desc_set_version(FDS_version, file = file.path(DIR, "DESCRIPTION"))
+## document, install, and build source tar.gz
+devtools::document(DIR)
+devtools::install(DIR)
+devtools::build(pkg = DIR, path = "../../FacileVerse/")
+```

@@ -32,6 +32,7 @@ has_feature_type <- function(x, feature_type) {
 #' @return a tibble with \code{feature_id, name, type} columns, where type
 #'   is "primary" or "alias"
 feature_name_map <- function(x, feature_type) {
+  requireNamespace("AnnotationDbi") || stop("Failed to require AnnotationDbi.")
   stopifnot(has_feature_type(x, feature_type))
   ## http://jira.gene.com/jira/browse/FACILEDATA-64 will put this in database
   ## but for now we have flat files.
@@ -42,7 +43,7 @@ feature_name_map <- function(x, feature_type) {
     mutate(type='primary')
   if (organism(x) == 'Homo sapiens') {
     if (FALSE) {
-      library(org.Hs.eg.db)
+      requireNamespace("org.Hs.eg.db") || stop("Failed to require org.Hs.eg.db")
       alias <- org.Hs.eg.db %>%
         AnnotationDbi::select(finfo$feature_id, c('ENTREZID', 'ALIAS')) %>%
         transmute(feature_id=ENTREZID, name=ALIAS, type='alias') %>%
@@ -52,8 +53,8 @@ feature_name_map <- function(x, feature_type) {
     alias <- system.file('extdata', 'feature-alias-map.human.csv', package='FacileData')
     alias <- read.csv(alias, colClasses='character')
   } else if (organism(x) == 'Mus musculus') {
-    if (FALSE) {
-      library(org.Mm.eg.db)
+      if (FALSE) {
+          requireNamespace("org.Mm.eg.db") || stop("Failed to require org.Mm.eg.db")
       alias <- org.Mm.eg.db %>%
         AnnotationDbi::select(finfo$feature_id, c('ENTREZID', 'ALIAS')) %>%
         transmute(feature_id=ENTREZID, name=ALIAS, type='alias') %>%

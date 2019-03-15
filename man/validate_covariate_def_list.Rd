@@ -2,7 +2,7 @@
 % Please edit documentation in R/entity-attribute-value.R
 \name{validate_covariate_def_list}
 \alias{validate_covariate_def_list}
-\title{Validates that a covariate defintion list reasonably describes a data.frame}
+\title{Validates that a covariate defintion list reasonably describes a data.frame.}
 \usage{
 validate_covariate_def_list(x, pdata)
 }
@@ -12,5 +12,11 @@ validate_covariate_def_list(x, pdata)
 \item{pdata}{a `data.frame`}
 }
 \description{
-Validates that a covariate defintion list reasonably describes a data.frame
+The covariates defined in `x` must be a subset of the columns in `pdata`.
+This method will throw an error if there is a covariate in `x` that does
+not have a matching column in `pdata`.
+}
+\details{
+This function does not check if all columns in `pdata` have definitions in
+`x`.
 }

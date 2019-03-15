@@ -1,24 +1,16 @@
-#' Creates a FacileDb connection to a test database
+#' Retrieves an example FacileDataSet
+#'
+#' A subset of the TCGA data from the BLCA and COAD indications is provided
+#' as a FacileDataSet.
 #'
 #' @export
-#' @param db.fn The path on the filesystem to the facile database
-#' @param covdef The path on the filesystem to the yaml file that provides
-#'   the covariate definitions
-exampleFacileDataSet <- function(db.type=c('sqlite', 'monetdblite')) {
+exampleFacileDataSet <- function() {
   fn <- system.file('extdata', 'exampleFacileDataSet', package='FacileData')
   FacileDataSet(fn)
 }
 
-## This uses GenomicsTools to create a test database
-createExampleFacileDataSet <- function(out.fn) {
-  ## I am farming this out to the FacileTCGADataSet package and creating a smaller
-  ## version of the TCGA -- this is circular, I know.
-  ##
-  ## See FacileTCGA/inst/build-test-db
-  stop("This is created in FacileTCGA/inst/build-test-db")
-}
-
-#' Fetches exemplar pData
+#' Fetches exemplar data for unit testing
+#'
 #' @export
 #' @rdname test-helpers
 example_sample_covariates <- function() {
@@ -27,7 +19,6 @@ example_sample_covariates <- function() {
   readRDS(pdat)
 }
 
-#' Fetches the meta file for the example FacileDataSet
 #' @export
 #' @rdname test-helpers
 #' @param file.path If `TRUE`, returns the path to the yaml file, otherwise
@@ -43,8 +34,6 @@ example_meta <- function(file.path=FALSE) {
   out
 }
 
-#' Fetches the EAV definitions for the sample covariates
-#'
 #' @export
 #' @importFrom yaml read_yaml
 #' @rdname test-helpers

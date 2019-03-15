@@ -1,18 +1,103 @@
+#' Provides a summary table of sample covariates.
+#'
+#' Sumamrizes a set of sample covariates (returned from
+#' [fetch_sample_covariates()] at different granulaities.
+#'
+#' @md
+#' @export
+#'
+#' @param x A sample covariate table, the likes returned from
+#'   [fetch_sample_covariates()].
+#' @param expanded includes details (rows) for each covariate per level
+#'   (or quantile), depending on the covariates `"class"` attribute.
+#' @return a tibble of summary sample covariate information with the following
+#'   columns:
+#'   * `variable`: name of the variable
+#'   * `class`: class of variable (real, categorical)
+#'   * `nsamples`: the number of samples that have this variable defined
+#'   * `level`: the level (or quantile) of the covariate
+#'     (included only when `expanded == TRUE`)
+#'   * `ninlevel`: the number of samples with this covariate value
+#'     (included only when `expanded == TRUE`)
+#' @examples
+#' fds <- exampleFacileDataSet()
+#' covs <- fetch_sample_covariates(fds)
+#' smry <- summary(covs)
+#' details <- summary(covs, expanded = TRUE)
+#' catdeetz <- covs %>%
+#'   filter(class == "categorical") %>%
+#'   summary(expanded = TRUE)
+summary.eav_covariates <- function(x, expanded = FALSE, ...) {
+  x <- assert_sample_covariates(x)
+  .fds <- assert_facile_data_store(fds(x))
+  with.source <- is.character(x[["source"]])
+
+  dat <- collect(x, n = Inf)
+  if (!with.source) dat <- mutate(dat, source = NA)
+
+  if (expanded) {
+    covdef <- covariate_definitions(.fds)
+    res <- dat %>%
+      group_by(variable, class) %>%
+      do({
+        value <- cast_covariate(.$variable[1L], .$value, covdef, .fds)
+        clz <- .$class[1L]
+
+        if (clz == "categorical" && is.atomic(value)) {
+          levels <- table(value)
+        } else if (clz == "real" && is.atomic(value)) {
+          qtl <- quantile(value)
+          bins <- cut(value, qtl)
+          levels <- table(bins)
+        } else {
+          levels <- c(all = length(value))
+        }
+        tibble(nsamples = length(value),
+               source = .$source[1L],
+               level = names(levels),
+               ninlevel = as.integer(levels))
+      })
+  } else {
+    res <- dat %>%
+      group_by(variable, class) %>%
+      summarize(nsamples = n(), source = source[1L])
+  }
+
+  res <- ungroup(res)
+  if (!with.source) {
+    res <- mutate(res, source = NULL)
+  }
+
+  as_facile_frame(res, .fds, .valid_sample_check = FALSE)
+}
+
+sample_covariates.facile_frame <- function(x, ...){
+  .fds <- fds(x)
+  sample_covariates(.fds, x)
+}
+
 #' Fetch rows from sample_covariate table for specified samples and covariates
 #'
 #' @export
-#' @param db a \code{FacileDataSet} connection
+#' @param x a \code{FacileDataSet} connection
 #' @param samples a samples descriptor \code{tbl_*}
 #' @param covariates character vector of covariate names
 #' @param custom_key The key to use to fetch more custom annotations over
 #'   the given samples
+#' @rdname fetch_sample_covariates
 #' @return rows from the \code{sample_covariate} table
 #' @family API
-fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
-                                    custom_key=Sys.getenv("USER")) {
-  stopifnot(is.FacileDataSet(x))
-  ## db temp table thing shouldn't be an issue here
-  # dat <- sample_covariate_tbl(x) %>% collect(n=Inf) ## #dboptimize# remove to exercise db harder
+fetch_sample_covariates.FacileDataSet <- function(
+    x, samples = NULL, covariates = NULL,
+    custom_key = Sys.getenv("USER"), with_source = FALSE, ...) {
+  if (is.null(samples)) {
+    samples <- samples(x)
+  } else {
+    assert_sample_subset(samples, x)
+    samples <- distinct(samples, dataset, sample_id)
+  }
+  samples <- collect(samples, n = Inf)
+
   dat <- sample_covariate_tbl(x)
   if (is.character(covariates)) {
     if (length(covariates) == 1L) {
@@ -24,26 +109,35 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
   dat <- collect(dat, n=Inf)
   dat <- set_fds(dat, x) ## explicitly added here to do `collect` above
 
-  ## If the samples descriptor is defined over the sample_covariate table,
-  ## this thing explodes (inner joining within itself, I guess). We defensively
-  ## copy the sample descriptor, but in future maybe better to test if the
-  ## dat and samples sqlite tables are pointing to the same thing
-  if (!is.null(samples)) {
-    samples <- assert_sample_subset(samples) %>%
-      distinct(dataset, sample_id) %>%
-      collect(n=Inf)
-  }
-  # out <- filter_samples(dat, samples)
   out <- join_samples(dat, samples, semi=TRUE)
+  out <- collect(out, n = Inf)
+  if (with_source) {
+    out <- mutate(out, source = "datastore")
+  }
 
   if (!is.null(custom_key)) {
     custom <- fetch_custom_sample_covariates(x, samples,
-                                             covariates=covariates,
-                                             custom_key)
+                                             covariates = covariates,
+                                             custom_key,
+                                             with_source = with_source)
     out <- bind_rows(collect(out, n=Inf), custom)
   }
 
-  set_fds(out, x)
+  as_facile_frame(out, x, "eav_covariates", .valid_sample_check = FALSE)
+}
+
+#' @export
+#' @rdname fetch_sample_covariates
+fetch_sample_covariates.facile_frame <- function(
+    x, samples = NULL, covariates = NULL,
+    custom_key = Sys.getenv("USER"), with_source = FALSE, ...) {
+  if (is.null(samples)) {
+    samples <- assert_sample_subset(x)
+    samples <- distinct(samples, dataset, sample_id)
+  }
+  fetch_sample_covariates(fds(x), samples = samples, covariates = covariates,
+                          custom_key = custom_key, with_source = with_source,
+                          ...)
 }
 
 #' Fetches custom (user) annotations for a given user prefix
@@ -55,12 +149,18 @@ fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
 #' @param custom_key The key to use for the custom annotation
 #' @return covariate tbl
 #' @family API
-fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
-                                           custom_key=Sys.getenv("USER"),
-                                           file.prefix="facile") {
-  stopifnot(is.FacileDataSet(x))
-  out.cols <- colnames(sample_covariate_tbl(x))
+fetch_custom_sample_covariates.FacileDataSet <- function(
+    x, samples = NULL, covariates = NULL, custom_key = Sys.getenv("USER"),
+    with_source = FALSE, file.prefix = "facile", ...) {
+  if (is.null(samples)) {
+    samples <- samples(x)
+  } else {
+    assert_sample_subset(samples, x)
+    samples <- distinct(samples, dataset, sample_id)
+  }
+  samples <- collect(samples, n = Inf)
 
+  out.cols <- colnames(sample_covariate_tbl(x))
   fpat <- paste0('^', file.prefix, '_', custom_key, "_.*json")
   annot.files <- list.files(path=x$anno.dir, pattern=fpat, full.names=TRUE)
 
@@ -69,7 +169,6 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
     out <- bind_rows(annos) %>%
       select_(.dots=out.cols) %>%
       set_fds(x) %>%
-      # filter_samples(samples)
       join_samples(samples, semi=TRUE)
     ## We weren't saving the type == 'categorical' column earlier. So if this
     ## column is.na, then we force it to 'categorical', because that's all it
@@ -88,7 +187,11 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
     out <- filter(out, variable %in% covariates)
   }
 
-  out %>% set_fds(x)
+  if (with_source) {
+    out <- mutate(out, source = "userstore")
+  }
+
+  as_facile_frame(out, x, "eav_covariates", .valid_sample_check = FALSE)
 }
 
 #' Saves custom sample covariates to a FacileDataSet
@@ -97,7 +200,7 @@ fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
 #' @importFrom jsonlite stream_out
 #'
 #' @param x the \code{FacileDataSet}
-#' @param annotation the annotation table of covariate vaues to a
+#' @param annotation the annotation table of covariate values to a
 #'   sample-descriptor-like table
 #' @param name the variable name of the covariate
 #' @param custom_key the custom key (likely userid) for the annotation
@@ -133,26 +236,36 @@ save_custom_sample_covariates <- function(x, annotation, name=NULL,
   invisible(set_fds(annotation, x))
 }
 
-#' Appends covariate columns to a query result
-#'
-#' Note that this function will force the collection of \code{x}
-#'
 #' @export
-#' @importFrom stats complete.cases
-#' @param x a facile sample descriptor
-#' @param covariates character vector of covariate names. If \code{NULL}
-#'   (default), returns all covariates, if is character and length() == 0, then
-#'   this is a no-op (x is returned)
-#' @param na.rm if \code{TRUE}, filters outgoing result such that only rows
-#'   with nonNA values for the \code{covariates} specified here will be
-#'   returned. Default: \code{FALSE}. Note that this will not check columns
-#'   not specified in \code{covariates} for NA-ness.
-#' @param custom_key The key to use to fetch more custom annotations over
-#'   the given samples
-#' @param .fds A \code{FacileDataSet} object
-#' @return The facile \code{x} object, annotated with the specified covariates.
-with_sample_covariates <- function(x, covariates=NULL, na.rm=FALSE,
-                                   custom_key=Sys.getenv("USER"), .fds=fds(x)) {
+#' @noRd
+with_sample_covariates.facile_frame <- function(x, covariates = NULL,
+                                                na.rm = FALSE,
+                                                custom_key = Sys.getenv("USER"),
+                                                .fds = fds(x), ...) {
+  x <- collect(x, n = Inf)
+  .fds <- assert_facile_data_store(.fds)
+  NextMethod(x, .fds = .fds)
+}
+
+#' @export
+#' @noRd
+with_sample_covariates.tbl <- function(x, covariates = NULL,
+                                       na.rm = FALSE,
+                                       custom_key = Sys.getenv("USER"),
+                                       .fds = NULL, ...) {
+  with_sample_covariates.data.frame(collect(x, n = Inf),
+                                    covariates = covariates,
+                                    na.rm = na.rm, custom_key = custom_key,
+                                    .fds = .fds, ...)
+}
+
+#' @export
+#' @noRd
+#' @method with_sample_covariates data.frame
+with_sample_covariates.data.frame <- function(x, covariates = NULL,
+                                              na.rm = FALSE,
+                                              custom_key = Sys.getenv("USER"),
+                                              .fds = NULL, ...) {
   stopifnot(is.FacileDataSet(.fds))
   x <- assert_sample_subset(x) %>% collect(n=Inf)
   stopifnot(is.character(covariates) || is.null(covariates))
@@ -175,7 +288,7 @@ with_sample_covariates <- function(x, covariates=NULL, na.rm=FALSE,
     out <- out[keep,,drop=FALSE]
   }
 
-  set_fds(out, .fds)
+  as_facile_frame(out, .fds, "wide_covariates", .valid_sample_check = FALSE)
 }
 
 #' Spreads the covariates returned from database into wide data.frame
@@ -228,5 +341,5 @@ spread_covariates <- function(x, .fds=fds(x)) {
     }
   }
 
-  set_fds(out, .fds)
+  as_facile_frame(out, .fds, "wide_covariates", .valid_sample_check = FALSE)
 }

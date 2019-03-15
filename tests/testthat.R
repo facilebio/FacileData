@@ -1,8 +1,8 @@
 library("testthat")
+library("FacileData")
 library("magrittr")
 library("reshape2")
 library("tidyr")
-library("FacileData")
-library("survival")
-library("Biobase")
+library("dplyr")
+
 test_check("FacileData")

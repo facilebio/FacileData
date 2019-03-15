@@ -1,3 +1,101 @@
+# checkmate compliant validations functions ------------------------------------
+
+#' Check to see if a vector is categorical (character or string)
+#'
+#' @export
+#' @param x a vector of things
+#' @param ... dots
+check_categorical <- function(x, ...) {
+  e <- character()
+  if (!is.character(x) && !is.factor(x)) {
+    e <- c(e, "e is not a character or factor vector")
+  }
+  if (length(e)) e else TRUE
+}
+
+#' @rdname check_categorical
+#' @export
+assert_categorical <- function(x, ..., .var.name = vname(x), add = NULL) {
+  res <- check_categorical(x, ...)
+  makeAssertion(x, res, .var.name, add)
+}
+
+#' @rdname check_categorical
+#' @export
+test_categorical <- function(x, ...) {
+  identical(check_categorical(x, ...), TRUE)
+}
+
+
+#' Check if argument is a FacileDataStore
+#'
+#' @export
+#'
+#' @param x The object to check.
+#' @param ... to be determined later
+check_facile_data_store <- function(x, ...) {
+  e <- character()
+  if (!is(x, "FacileDataStore")) {
+    e <- paste0("Must be of type 'FacileDataStore', not '", class(x)[1L], "'")
+  }
+
+  if (length(e)) e else TRUE
+}
+
+#' @export
+#' @rdname check_facile_data_store
+#' @param .var.name Name of the checked object to print in assertions. Defaults
+#'   to the heuristic implemented in [checkmate::vname()].
+#' @param add An [checkmate::AssertCollection()] object. Default is `NULL`.
+assert_facile_data_store <- function(x, ..., .var.name = vname(x), add = NULL) {
+  res <- check_facile_data_store(x, ...)
+  makeAssertion(x, res, .var.name, add)
+}
+
+#' @export
+#' @rdname check_facile_data_store
+test_facile_data_store <- function(x, ...) {
+  identical(check_facile_data_store(x, ...), TRUE)
+}
+
+#' Check if argument is a FacileDataSet
+#'
+#' @export
+#' @inheritParams check_facile_data_store
+check_facile_data_set <- function(x, ...) {
+  e <- character()
+  if (!is(x, "FacileDataSet")) {
+    e <- paste0("Must be of type 'FacileDataSet', not '", class(x)[1L], "'")
+  }
+  if (!("con" %in% names(x) && is(x[["con"]], "DBIObject"))) {
+    e <- c(e, "x$con is not a DBIObject")
+  }
+  if (!("anno.dir" %in% names(x) &&
+        check_directory_exists(x[["anno.dir"]], "w"))) {
+    e <- c(e, "x$anno.dir is not a valid annotation directory")
+  }
+  if (!("hdf5.fn" %in% names(x) &&
+        check_file_exists(x[["hdf5.fn"]], "r"))) {
+    e <- c(e, "x$anno.dir is not a valid HDF5 file")
+  }
+  if (length(e)) e else TRUE
+}
+
+#' @export
+#' @rdname check_facile_data_set
+assert_facile_data_set <- function(x, ..., .var.name = vname(x), add = NULL) {
+  res <- check_facile_data_set(x, ..., )
+  makeAssertion(x, res, .var.name, add)
+}
+
+#' @export
+#' @rdname check_facile_data_set
+test_facile_data_set <- function(x, ...) {
+  identical(check_facile_data_set(x, ...), TRUE)
+}
+
+# checkmate-like validation functios -------------------------------------------
+
 #' Check to see that samples are referenced correctly
 #'
 #' Samples have compound keys: dataset,sample_id. If we want to index into
@@ -8,17 +106,40 @@
 #'      has your filters of interest set
 #' @export
 #' @rdname assertions
-assert_sample_subset <- function(x) {
-  stopifnot(is_sample_subset(x))
-  invisible(x)
+assert_sample_subset <- function(x, fds = NULL, ..., .var.name = vname(x),
+                                 add = NULL) {
+  res <- check_sample_subset(x, fds, ...)
+  makeAssertion(x, res, .var.name, add)
 }
 
 #' @export
 #' @rdname assertions
-is_sample_subset <- function(x) {
-  if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
-  if (!has_columns(x, c('dataset', 'sample_id'))) return(FALSE)
-  TRUE
+check_sample_subset <- function(x, fds = NULL, ...) {
+  e <- character()
+  if (!(is(x, 'tbl') || is(x, 'data.frame'))) {
+    e <- "Sample descriptor is not data.frame/tbl-like"
+  }
+  if (!has_columns(x, c('dataset', 'sample_id'), warn = FALSE)) {
+    e <- c(e, "'dataset' and 'sample_id' columns required in sample descriptor")
+  }
+  if (length(e) == 0L && !is.null(fds)) {
+    .samples <- samples(fds, .valid_sample_check = FALSE)
+    bad.samples <- anti_join(x, .samples, by = c("dataset", "sample_id"),
+                             copy = !same_src(.samples, x))
+    bad.samples <- collect(bad.samples, n = Inf)
+    nbad <- nrow(bad.samples)
+    if (nbad > 0L) {
+      e <- c(e, paste(nbad, "samples not found in FacileDataStore"))
+    }
+  }
+
+  if (length(e)) e else TRUE
+}
+
+#' @export
+#' @rdname assertions
+test_sample_subset <- function(x, fds = NULL, ...) {
+  identical(check_sample_subset(x, fds, ...), TRUE)
 }
 
 #' @export
@@ -114,32 +235,37 @@ assert_columns <- function(x, req.cols) {
 
 #' @export
 #' @rdname assertions
-has_columns <- function(x, req.cols) {
+has_columns <- function(x, req.cols, warn = TRUE) {
   missed <- setdiff(req.cols, colnames(x))
-  if (length(missed)) {
+  any.missing <- length(missed) > 0L
+  if (any.missing && warn) {
     warning("missing columns: ", paste(missed, collpase=', '), immediate.=TRUE)
-    FALSE
-  } else {
-    TRUE
   }
+  !any.missing
 }
 
 #' @export
 #' @rdname assertions
-assert_covariate_definitions <- function(x) {
-  stopifnot(is_covariate_definitions(x))
+assert_covariate_definitions <- function(x, required = NULL) {
+  stopifnot(is_covariate_definitions(x, required))
   invisible(x)
 }
 
 #' @export
 #' @rdname assertions
-is_covariate_definitions <- function(x) {
+is_covariate_definitions <- function(x, required = NULL) {
   if (!is.list(x)) return(FALSE)
   if (!is.character(names(x))) return(FALSE)
-  ## all variables have type, class, description, and label fields
-  req.fields <- c('type', 'class', 'description', 'label')
-  kosher <- sapply(x, function(y) {
-    sapply(req.fields, function(z) is.character(y[[z]]))
-  }) %>% t
-  all(kosher)
+  if (!all(sapply(x, is.list))) return(FALSE)
+
+  if (length(required)) {
+    # required <- c('type', 'class', 'description', 'label')
+    kosher <- sapply(x, function(y) {
+      sapply(required, function(z) is.character(y[[z]]))
+    }) %>% t
+    if (!all(kosher)) return(FALSE)
+  }
+
+  TRUE
 }
+

@@ -2,12 +2,19 @@
 #'
 #' This allows the user to query the `FacileDataSet` as if it were a wide
 #' `pData` `data.frame` of all its covariates.
-#' @md
+#'
+#' This feature is only really meant to be
+#' used interactively, and with extreme caution ... programatically specifying
+#' the covariates, for instance, does not work right now.
+#'
+#' TODO: Implement using `tidyeval`
+#'
 #' @export
 #' @importFrom lazyeval lazy_dots auto_name
+#' @family API
 #'
-#' @param x A \code{FacileDataSet}
-#' @param ... NSE claused to use in \code{\link[dplyr]{filter}} expressions
+#' @param x A `FacileDataSet`
+#' @param ... NSE claused to use in [dplyr::filter()] expressions
 #' @return a sample-descriptor `data.frame` that includes the dataset,sample_id
 #'   pairs that match the virtual `filter(covaries, ...)` clause executed here.
 #'
@@ -21,21 +28,14 @@
 #'   filter(variable == "subtype_crc_cms", value %in% c("CMS3", "CMS4")) %>%
 #'   collect
 #' setequal(crc.34$sample_id, eav.query$sample_id)
-#' @family API
-filter_samples <- function(x, ..., with_covariates=FALSE) {
-    ## TODO: You will minimally want to use `tidyeval`
-    #' This feature is implemented so poorly. It's only really meant to be used
-    #' interactively, and with extreme caution ... programatically specifying
-    #' the covariates, for instance, does not work right now.
-
-  stopifnot(is.FacileDataSet(x))
+filter_samples.FacileDataSet <- function(x, ..., with_covariates=FALSE) {
   dots <- lazy_dots(...)
   cov.table <- .create_wide_covariate_table(x, dots)
   out <- dplyr::filter_(cov.table, .dots=dots)
   if (!with_covariates) {
     out <- select(out, dataset, sample_id)
   }
-  set_fds(out, x)
+  as_facile_frame(out, x)
 }
 
 .create_wide_covariate_table <- function(x, dots) {

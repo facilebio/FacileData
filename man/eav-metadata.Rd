@@ -4,10 +4,15 @@
 \alias{eav_metadata_create}
 \title{Create a facile covariate definition file from a sample \code{pData} data.frame}
 \usage{
-eav_metadata_create(x, covariate_def = list())
+eav_metadata_create(x, ignore = c("dataset", "sample_id"),
+  covariate_def = list())
 }
 \arguments{
 \item{x}{a \code{pData} \code{data.frame}}
+
+\item{ignore}{the columns in \code{x} to not create covariate definitions for.
+This defaults to \code{c("dataset", "sample_id")} since we are in the
+facileverse.}
 
 \item{covariate_def}{a named list of covariate definitions. The names of
 this list are the names the covariates will be called in the target
@@ -32,7 +37,16 @@ the FacileExplorer.
 }
 \value{
 a list-of-lists that encodes the \code{sample_covariate} section of the
-\code{meta.yaml} file for a \code{FacileDataSet}.
+\code{meta.yaml} file for a \code{FacileDataSet}. Each list element will have the
+following elements:
+\enumerate{
+\item arguments: the name(s) of the columns from \code{x} used in this covariate
+description.
+\item class: \code{"real"}, \code{"categorical"}, (survival needs a bity of work)
+\item description: a string with minimal description
+\item type: this isn't really used in the dataset, but another application
+might want to group covariates by type.
+}
 }
 \description{
 Sample covariates (aka \code{pData}) are encoded in an

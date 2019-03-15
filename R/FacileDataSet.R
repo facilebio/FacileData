@@ -15,11 +15,10 @@
 #'    are generated from the assays performed on the samples in the
 #'    `FacileDataSet`.
 #' 3. A `meta.yaml` file tha contains informaiton about the `FacileDataSet`.
-#'    To better understasnd the structure and contents of this file, you can
+#'    To better understand the structure and contents of this file, you can
 #'    refer to the following:
-#'     a. The included `testdata/expected-meta.yaml` file for, which is an
-#'        exemplar file for the `testdata/TestFacileTcgaDataSet`, which consists
-#'        of data extracted from two datasets (BLCA and BRCA) from the TCGA.
+#'     a. The included `testdata/expected-meta.yaml` file, which is an
+#'        exemplar file for [exampleFacileDataSet()].
 #'     b. The help file provided by the [eav_metadata_create()] function, which
 #'        describes in greater detail how we track a dataset's sample-level
 #'        covariates (aka, "pData" in the bioconductor world).
@@ -30,7 +29,7 @@
 #'     - `default_assay`: the name of the assay to use by default if none is
 #'       specified in calls to [fetch_assay_data()], [with_assay_data()], etc.
 #'       (kind of like how `"exprs"` is the default assay used when working with
-#'       a [Biobase::ExpressionSet])
+#'       a `Biobase::ExpressionSet`)
 #'     - `datasets`: a section tha enumerates the datases included internally.
 #'       The datasets are further enumerated.
 #'     - `sample_covariates`: a section that enumerates the covariatets that
@@ -45,9 +44,10 @@
 #'    a custom `anno.dir` parameter so that custom annotations are stored
 #'    elsewhere.
 #'
-#' @md
 #' @export
-#' @importFrom RSQLite dbConnect SQLite dbExecute
+#' @importFrom RSQLite SQLite sqliteCopyDatabase
+#' @importFrom DBI dbConnect dbDisconnect dbExecute
+#' @family FacileDataSet
 #'
 #' @param path The path to the FacileData repository
 #' @param data.fn A custom path to the database (probably don't mess with this)
@@ -60,6 +60,9 @@
 #' @param ... other args to pass down, not used at the moment
 #' @param covdef.fn A custom path to the yaml file that has covariate mapping info
 #' @return a `FacileDataSet` object
+#' @examples
+#' fn <- system.file("extdata", "exampleFacileDataSet", package = "FacileData")
+#' fds <- FacileDataSet(fn)
 FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
                           sqlite.fn=file.path(path, 'data.sqlite'),
                           hdf5.fn=file.path(path, 'data.h5'),
@@ -91,12 +94,18 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   if (db.loc == 'memory') {
     mcon <- dbConnect(RSQLite::SQLite(), ":memory:")
     RSQLite::sqliteCopyDatabase(con, mcon)
-    RSQLite::dbDisconnect(con)
+    dbDisconnect(con)
     con <- mcon
   }
 
   dbExecute(con, 'pragma temp_store=MEMORY;')
   dbExecute(con, sprintf('pragma cache_size=%d;', cache_size))
+
+  if (!dir.exists(anno.dir)) {
+    if (!dir.create(anno.dir, recursive =  TRUE))
+      stop(sprintf("%s: failed to create annotation directory: ", FDS.name),
+           anno.dir)
+  }
 
   out <- list(con=con)
   out['parent.dir'] <- paths$path
@@ -105,7 +114,7 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   out['hdf5.fn'] <- paths$hdf5.fn
   out['anno.dir'] <- paths$anno.dir
   out['db.loc'] <- db.loc
-  out[['cache']] <- list()
+  out[['cache']] <- new.env()
 
   ## meta information
   class(out) <- c("FacileDataSet", "FacileDataStore")
@@ -122,27 +131,33 @@ FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
   out
 }
 
+#' Class and validity checker for FacileDataSet
+#'
 #' @export
-#' @param x object to test for Facile-ness
+#'
+#' @param x object to test
+#' @return `TRUE`/`FALSE` indicating that `x` nominally "looks like" a
+#'   `FacileDataSet`
 is.FacileDataSet <- function(x) {
-  ## `is` and `validate` functionality conflated here
-  is(x, 'FacileDataSet') &&
-    'con' %in% names(x) && is(x$con, 'DBIObject') &&
-    'anno.dir' %in% names(x) && dir.exists(x$anno.dir) &&
-    'hdf5.fn' %in% names(x) && file.exists(x$hdf5.fn)
+  test_facile_data_set(x)
 }
 
-##' Get location of the FacileDataSet database
-##' @param x FacileDataSet
-##' @param mustWork single logical
-##' @return single character, path to database
-##' @export
+#' Get location of the FacileDataSet database
+#'
+#' @export
+#' @family FacileDataSet
+#'
+#' @param x FacileDataSet
+#' @param mustWork boolean, if `TRUE` (default), throws an error if the sqlite
+#'   file does not exist. When `FALSE`, this returns the "expected" path to the
+#'   sqlite file for `x`
+#' @return the filepath to the sqlite database
 dbfn <- function(x, mustWork=TRUE) {
   base.fn <- 'data.sqlite'
   if (is.FacileDataSet(x)) {
     x <- x$parent.dir
   }
-  stopifnot(is.character(x), length(x) == 1L)
+  assert_string(x)
   out <- file.path(x, base.fn)
   if (mustWork && !file.exists(out)) {
     stop("data.sqlite file not found: ", out)
@@ -150,11 +165,14 @@ dbfn <- function(x, mustWork=TRUE) {
   out
 }
 
-##' Get location of the FacileDataSet HDF5 file
-##' @param x FacileDataSet
-##' @param mustWork single logical
-##' @return single character, path to HDF5 file
-##' @export
+#' Get location of the FacileDataSet HDF5 file
+#'
+#' @export
+#' @family FacileDataSet
+#'
+#' @param x FacileDataSet
+#' @param mustWork single logical
+#' @return path to HDF5 file
 hdf5fn <- function(x, mustWork=TRUE) {
   base.fn <- 'data.h5'
   if (is.FacileDataSet(x)) {
@@ -170,42 +188,47 @@ hdf5fn <- function(x, mustWork=TRUE) {
 
 #' Path to the meta information YAML file
 #'
-#' @rdname meta-info
 #' @export
-#' @param x \code{FacileDataSet}
+#' @rdname meta-info
+#' @family FacileDataSet
+#'
+#' @param x A `FacileDataSet`
 meta_file <- function(x) {
-  stopifnot(is.FacileDataSet(x))
+  assert_facile_data_set(x)
   fn <- assert_file(file.path(x$parent.dir, 'meta.yaml'), 'r')
   fn
 }
 
-#' Get meta information for dataset
+#' Retrieves the meta information for a FacileDataSet
 #'
-#' @md
-#' @rdname meta-info
+#' Lots of useful information is stored in a `FacileDataSet`'s `meta.yaml` file.
+#' This function returns all of that in a list-of-lists
+#'
 #' @export
-#'
-#' @param x `FacileDataSet`
+#' @rdname meta-info
 #' @param fn The path to the `meta.yaml` file.
 #' @return The `meta.yaml` file parsed into a list-of-lists representation
 meta_info <- function(x, fn = meta_file(x)) {
+  assert_facile_data_set(x)
   out <- assert_valid_meta_file(fn, as.list = TRUE)
   out
 }
 
-#' @rdname meta-info
+#' Retrieves the organism the data is defined over
+#'
+#' A FacileDataStore is only expected to hold data for one organism.
+#'
 #' @export
-#' @param x \code{FacileDataSet}
-organism <- function(x) {
-  stopifnot(is.FacileDataSet(x))
+#' @family API
+#' @return `"Homo sapiens`", `"Mus musculus"`, etc.
+organism.FacileDataSet <- function(x) {
+  assert_facile_data_set(x)
   x$organism
 }
 
-#' @rdname meta-info
 #' @export
-#' @param x \code{FacileDataSet}
-default_assay <- function(x) {
-  stopifnot(is.FacileDataSet(x))
+#' @rdname meta-info
+default_assay.FacileDataSet <- function(x) {
   if (is.null(x$default_assay)) {
     out <- assay_names(x, default_first=FALSE)[1L]
     if (is.na(out)) out <- NULL
@@ -215,27 +238,40 @@ default_assay <- function(x) {
   out
 }
 
-#' Get URL and description of datasets in a FacileDataSet
+#' Retrieves URL and description of datasets in a FacileDataSet
+#'
+#' A `FacileDataSet` can contain assay data from different "datasets" (such
+#' as different cancer indications from the TCGA). This functions returns
+#' description and URL information that describes these datasets in more detail,
+#' which is specified in the FacileDataSets `meta.yaml` file.
+#'
 #' @rdname meta-info
 #' @export
-#' @param x \code{FacileDataSet}
-#' @param as.list single logical if FALSE, condense to a tibble
+#' @param as.list boolean, if `FALSE` (default) returns a list, otherwise
+#'   summarizes results into a tibble.
+#' @return meta information about the datasets in `x` as a `list` or `tibble`
 dataset_definitions <- function(x, as.list=TRUE) {
   defs <- meta_info(x)$datasets
   if (!as.list) {
     defs <- lapply(names(defs), function(ds) {
       i <- defs[[ds]]
       tibble(dataset=ds, url=i$url, description=i$description)
-    }) %>% bind_rows
+    })
+    defs <- bind_rows(defs)
   }
   defs
 }
 
 #' Get description of sample metadata columns
+#'
+#' Descriptions of the sample covariates can be specified in a FacileDataSet's
+#' `meta.yaml` file. This function returns those.
+#'
 #' @export
 #' @importFrom yaml yaml.load_file
 #' @param x FacileDataSet
 #' @param as.list single logical, return tibble or list
+#' @return meta information about the sample covariates in `x`
 covariate_definitions <- function(x, as.list=TRUE) {
   out <- meta_info(x)$sample_covariates
   if (!as.list) {
@@ -246,46 +282,47 @@ covariate_definitions <- function(x, as.list=TRUE) {
       lbl <- if (is.null(i$label)) name else i$label
       tibble(variable=name, type=i$type, class=i$class, label=i$label,
              is_factor=is.factor, levels=list(lvls), description=i$description)
-    }) %>% bind_rows
+    })
+    out <- bind_rows(out)
   }
   class(out) <- c('CovariateDefinitions', class(out))
-  out %>% set_fds(x)
+  set_fds(out, x)
 }
 
-##' Get tibble of sample information
-##'
-##' Get tibble of sample information
-##' @param x FacileDataSet
-##' @return tibble of sample attributes
-##' @export
-samples <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  sample_info_tbl(x) %>%
-    select(dataset, sample_id) %>%
-    set_fds(x)
-}
-
-#' A dataset-specific method to overridden that returns default sample grouping
+#' Retrieves the sample identifiers for all samples in a FacileDataSet.
+#'
+#' Sample identifiers are provided as `dataset,sample_id tuples`.
 #'
 #' @export
-#' @rdname facet_frame
-facet_frame <- function(x, ...) {
-  UseMethod("facet_frame")
+#' @family API
+#'
+#' @param x a `FacileDataSet`
+#' @return tibble of sample attributes
+samples.FacileDataSet <- function(x, ...) {
+  assert_facile_data_set(x)
+  sample_info_tbl(x) %>%
+    select(dataset, sample_id) %>%
+    as_facile_frame(x, ...)
 }
 
 #' @export
 #' @rdname facet_frame
-facet_frame.default <- function(x, ...) {
-  tibble(facet=character(), dataset=facet, sample_id=facet)
+facet_frame.FacileDataSet <- function(x, name = "default", ...) {
+  samples(x) %>%
+    mutate(facet = dataset) %>%
+    select(facet, dataset, sample_id) %>%
+    as_facile_frame(x)
 }
 
-#' Print a FacileDataSet
+#' @noRd
+#'
 #' @export
+#' @importFrom DBI dbGetQuery
 #' @param x FacileDataSet
 #' @param ... additional args (ignored)
 print.FacileDataSet <- function(x, ...) {
-  ns <- RSQLite::dbGetQuery(x$con, "SELECT COUNT(*) FROM sample_info;")
-  nds <- RSQLite::dbGetQuery(x$con, "SELECT COUNT (DISTINCT dataset) FROM sample_info;")
+  ns <- dbGetQuery(x$con, "SELECT COUNT(*) FROM sample_info;")
+  nds <- dbGetQuery(x$con, "SELECT COUNT (DISTINCT dataset) FROM sample_info;")
   out <- paste0(
     "FacileDataSet",
     if (class(x)[1] != "FacileDataSet") sprintf(" (%s)\n", class(x)[1L]) else "\n",

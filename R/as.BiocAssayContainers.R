@@ -1,10 +1,18 @@
-#' Converts a facile result into a traditional Bioconductor assay container
+#' Converts a "facile object" to a traditional Bioconductor assay container
 #'
-#' Even though the faciledata API provides functionality to access your data
-#' in useful ways, it is still conceivable that you *might* prefer to work
-#' with these data using a more traditional bioconductor container like a
-#' `SummarizedExperiment`, `DGEList`, `ExpressionSet`, etc.
-#' @md
+#' An entire `FacileDataSet` or a subset of it can be converted into
+#' bioconductor-standard assay containers, like a `SummarizedExperiment`,
+#' `DGEList`, or `ExpressionSet` "at any time" using various `as.XXX` functions,
+#' like `as.DGEList(...)`.
+#'
+#' We use the term "facile object" to refer to either the entirety of a
+#' `FacileDataStore` or any sample-descriptor that specifies subsets of the
+#' data, eg. where `fds(x)` returns a `FacileDataStore`. See examples for
+#' specifics.
+#'
+#' Note that the order that the samples and features are materialized into the
+#' expression container are not guaranteed.
+#'
 #' @rdname as.BiocContainer
 #'
 #' @export
@@ -16,36 +24,51 @@
 #'   - `TRUE`: All covariates are retrieved from the `FacileDataSet`
 #'   - `FALSE`: TODO: Better handle FALSE
 #'   - `character`: A vector of covariate names to fetch from the
-#'     `FacileDataSet`
-#'   - `data.frame`: A table that looks like a subset of the
-#'     `sample_covariate`, which will be transformed into the `pData`
+#'     `FacileDataSet`. Must be elements of `names(sample_definitions(x))`
+#'   - `data.frame`: A wide covariate table (dataset, sample_id, covariates ...)
+#'     This may be external covariates for samples not available within
+#'     `x` (yet), ie. a table of covariates provided by a third party.
 #'   - `NULL`: do not decorate with *any* covariates.
 #' @param feature_ids the features to get expression for (if not specified
-#'   in `x` descriptor)
-#' @param assay the assay matrix to use when populating the default assay
-#'   matrix of the bioconductor container, i.e. the `$counts` matrix of a
-#'   `DGEList`, the `exprs()` of an `ExpressionSet`, etc.
+#'   in `x` descriptor). These correspond to the elements found in the
+#'   `feature_info_tbl(x)$feature_id` column.
+#' @param assay_name the name of the assay matrix to use when populating the
+#'   default assay matrix of the bioconductor container (the `$counts`
+#'   matrix of a `DGEList`, the `exprs()` of an `ExpressionSet`, etc.).
+#'   The default value is the entry provided by [default_assay()]
 #' @param .fds The `FacileDataSet` that `x` was retrieved from
 #' @param custom_key the custom key to use to fetch custom annotations from
 #'   `.fds`
-#' @return the appropriate bioconductor assay container, ie. a [edgeR::DGEList]
-#'   for `as.DGEList`, an [Biobase::ExpressionSet] for `as.ExpressionSet`, or
-#'   a [SummarizedExperiment::SummarizedExperiment] for
+#' @return the appropriate bioconductor assay container, ie. an `edgeR::DGEList`
+#'   for `as.DGEList`, a `Biobase::ExpressionSet` for `as.ExpressionSet`, or
+#'   a `SummarizedExperiment::SummarizedExperiment` for
 #'   `as.SummarizedExperiment`.
+#'
+#' @examples
+#' fds <- exampleFacileDataSet()
+#'
+#' # Retrieve DGEList of gene expression for all samples
+#' y.all <- as.DGEList(fds) # gene expression of all samples
+#'
+#' # Retrieve data for only 3 genes
+#' # Suppose we only wanted female samples in our DGEList
+#' y.fem <- fds %>%
+#'   filter_samples(sex == "f") %>%
+#'   as.DGEList() # or `as.ExpressionSet()`
+#' @export
 as.DGEList <- function(x, ...) {
-  UseMethod('as.DGEList')
+  UseMethod("as.DGEList", x)
 }
 
+#' @noRd
 #' @method as.DGEList matrix
 #' @rdname as.BiocContainer
-as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
-                              assay_name=default_assay(.fds), .fds=fds(x),
-                              custom_key=Sys.getenv("USER"), ...) {
-  ## NOTE: by now assay_name is ignored
-  stopifnot(is(x, 'FacileExpression'))
-  requireNamespace("edgeR")
-  .fds <- force(.fds)
-  stopifnot(is.FacileDataSet(.fds))
+#' @importFrom edgeR DGEList
+as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
+                              assay_name = NULL, .fds = NULL,
+                              custom_key = Sys.getenv("USER"), ...) {
+  .fds <- assert_facile_data_store(.fds)
+  assert_choice(assay_name, assay_names(.fds))
 
   ## Construct sample table from colnames of the matrix, and make sure this is
   ## legit
@@ -67,16 +90,30 @@ as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
   if (!is.null(covariates)) {
     if (isTRUE(covariates)) {
       covariates <- fetch_sample_covariates(.fds, samples)
+      covariates <- spread_covariates(covariates)
     } else if (is.character(covariates)) {
       covariates <- fetch_sample_covariates(.fds, samples, covariates)
+      covariates <- spread_covariates(covariates)
     }
-    assert_sample_covariates(covariates)
+    assert_subset(c("dataset", "sample_id"), colnames(covariates))
+    assert_true(nrow(covariates) == nrow(distinct(covariates)))
+    covariates <- as.data.frame(covariates, stringsAsFactors = FALSE)
+    rownames(covariates) <-  paste(covariates$dataset,
+                                   covariates$sample_id,
+                                   sep="__")
   }
 
+  # Construct $genes meta information
+  ainfo <- assay_info(.fds, assay_name = assay_name)
+  ftype <- ainfo[["feature_type"]]
   fids <- rownames(x)
-  genes <- gene_info_tbl(.fds) %>%
-    collect(n=Inf) %>% ## #dboptimize# remove this if you want to exercise db
+
+  gene_info <- feature_info_tbl(.fds) %>%
+    filter(feature_type == !!ftype) %>%
+    collect(n = Inf)
+  genes <- gene_info %>%
     semi_join(tibble(feature_id=fids), by='feature_id') %>%
+    rename(symbol = "name") %>%
     as.data.frame %>%
     set_rownames(., .$feature_id)
 
@@ -95,7 +132,8 @@ as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
 
   ## Doing the internal filtering seems to be too slow
   ## sample.stats <- fetch_sample_statistics(db, x) %>%
-  sample.stats <- fetch_sample_statistics(.fds, samples) %>%
+  sample.stats <- .fds %>%
+    fetch_sample_statistics(samples, assay_name = assay_name) %>%
     collect(n=Inf) %>%
     mutate(samid=paste(dataset, sample_id, sep='__')) %>%
     rename(lib.size=libsize, norm.factors=normfactor) %>%
@@ -111,10 +149,7 @@ as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
     sample.stats[colnames(y), c('dataset', 'sample_id', 'samid'), drop=FALSE])
 
   if (!is.null(covariates)) {
-    covs <- spread_covariates(covariates, .fds) %>%
-      as.data.frame %>%
-      set_rownames(., paste(.$dataset, .$sample_id, sep='__')) %>%
-      select(-dataset, -sample_id)
+    covs <- select(covariates, -dataset, -sample_id)
     y$samples <- cbind(y$samples, covs[colnames(y),,drop=FALSE])
   }
 
@@ -124,12 +159,15 @@ as.DGEList.matrix <- function(x, covariates=TRUE, feature_ids=NULL,
 #' @export
 #' @method as.DGEList data.frame
 #' @rdname as.BiocContainer
-as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
-                                  assay_name=default_assay(.fds), .fds=fds(x),
-                                  custom_key=Sys.getenv("USER"),
+as.DGEList.data.frame <- function(x, covariates = TRUE, feature_ids = NULL,
+                                  assay_name = NULL, .fds = NULL,
+                                  custom_key = Sys.getenv("USER"),
                                   ...) {
-  .fds <- force(.fds)
-  stopifnot(is.FacileDataSet(.fds))
+  .fds <- assert_facile_data_store(.fds)
+  if (is.null(assay_name)) {
+    assay_name <- default_assay(.fds)
+  }
+  assert_choice(assay_name, assay_names(.fds))
   x <- assert_sample_subset(x)
 
   has.count <- 'value' %in% colnames(x) && is.integer(x[['value']])
@@ -137,7 +175,7 @@ as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
 
   ## Do we want to fetch counts from the FacileDataSet?
   if (has.count) {
-    if (is.character(feature_ids) && all(feature_ids %in% x[['feature_id']])) {
+    if (is.character(feature_ids) && !all(feature_ids %in% x[['feature_id']])) {
       fetch.counts <- TRUE
     }
     if (!missing(feature_ids) && is.null(feature_ids)) {
@@ -156,8 +194,8 @@ as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
     if (ainfo$assay_type != 'rnaseq') {
       warning("Creating DGEList for something other than rnaseq type assay")
     }
-    counts <- fetch_assay_data(.fds, feature_ids, x, assay_name=assay_name,
-                               normalized=FALSE, as.matrix=TRUE)
+    counts <- fetch_assay_data(.fds, feature_ids, x, assay_name = assay_name,
+                               normalized = FALSE, as.matrix = TRUE)
   } else {
     counts.dt <- assert_expression_result(x) %>%
       collect(n=Inf) %>%
@@ -173,28 +211,77 @@ as.DGEList.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
     })
   }
 
-  as.DGEList(counts, covariates=covariates, feature_ids=feature_ids,
-             .fds=.fds, custom_key=custom_key, ...)
+  as.DGEList.matrix(counts, covariates = covariates, feature_ids = feature_ids,
+                    assay_name = assay_name, .fds = .fds,
+                    custom_key = custom_key, ...)
+}
+
+#' @method as.DGEList tbl
+#' @export
+#' @rdname as.BiocContainer
+as.DGEList.tbl <- function(x, covariates = TRUE, feature_ids = NULL,
+                           assay_name = NULL, .fds = NULL,
+                           custom_key = Sys.getenv("USER"),
+                           ...) {
+  .fds <- assert_facile_data_store(.fds)
+  if (is.null(assay_name)) {
+    assay_name <- default_assay(.fds)
+  }
+  assert_choice(assay_name, assay_names(.fds))
+  x <- collect(x, n = Inf)
+  # NextMethod()
+  as.DGEList.data.frame(x, covariates, feature_ids, assay_name, .fds = .fds,
+                        custom_key = custom_key, ...)
 }
 
 #' @export
-#' @method as.DGEList tbl_sql
 #' @rdname as.BiocContainer
-as.DGEList.tbl_sql <- function(x, covariates=TRUE, feature_ids=NULL,
-                               assay_name=default_assay(.fds), .fds=fds(x),
-                               custom_key=Sys.getenv("USER"),
-                               ...) {
-  x <- collect(x, n=Inf) %>% set_fds(.fds)
-  as.DGEList(x, covariates, feature_ids, assay_name, .fds=.fds,
-             custom_key=custom_key, ...)
+as.DGEList.facile_frame <- function(x, covariates = TRUE, feature_ids = NULL,
+                                    assay_name = NULL,
+                                    custom_key = Sys.getenv("USER"),
+                                    ...) {
+  x <- collect(x, n = Inf)
+  .fds <- assert_facile_data_store(fds(x))
+  if (is.null(assay_name)) {
+    assay_name <- default_assay(.fds)
+  }
+  assert_choice(assay_name, assay_names(.fds))
+
+  # force(.fds)
+  # force(assay_name)
+  # .fds <- assert_facile_data_store(.fds)
+  # browser()
+  # NextMethod(.fds = .fds)
+  # NextMethod(.fds = .fds)
+  # NextMethod()
+  # browser()
+
+  has.count <- "value" %in% colnames(x) &&
+    is.integer(x[["value"]]) &&
+    is.character("feature_id")
+
+  if (has.count && is.null(feature_ids)) {
+    feature_ids <- unique(x[["feature_id"]])
+  }
+
+  as.DGEList.tbl(x, covariates, feature_ids, assay_name, .fds = .fds,
+                 custom_key = custom_key, ...)
 }
 
-as.DGEList.FacileDataSet <- function(x, covariates=TRUE, feature_ids=NULL,
-                                     assay_name=default_assay(x),
-                                     custom_key=Sys.getenv("USER"),
+
+#' @export
+#' @rdname as.BiocContainer
+as.DGEList.FacileDataSet <- function(x, covariates = TRUE, feature_ids = NULL,
+                                     assay_name = NULL,
+                                     custom_key = Sys.getenv("USER"),
                                      ...) {
-  as.DGEList(samples(x), covariates, feature_ids, assay_name, x, custom_key,
-             ...)
+  xs <- samples(x)
+  if (is.null(assay_name)) {
+    assay_name <- default_assay(x)
+  }
+  assert_choice(assay_name, assay_names(x))
+  as.DGEList(xs, covariates = covariates, feature_ids = feature_ids,
+             assay_name = assay_name, custom_key = custom_key, ...)
 }
 
 #' @rdname as.BiocContainer
@@ -214,14 +301,15 @@ as.ExpressionSet.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
   assert_sample_subset(x)
-  if (!requireNamespace("Biobase", quietly = TRUE)) {
-    stop("Biobase required")
-  }
+
+  ns <- tryCatch(loadNamespace("Biobase"), error = function(e) NULL)
+  if (is.null(ns)) stop("Biobase required for `as.ExpressionSet`")
+
   y <- as.DGEList(x, covariates, feature_ids, assay_name, .fds=.fds,
                   custom_key=custom_key, ...)
-  es <- Biobase::ExpressionSet(y$counts)
-  es <- Biobase::`pData<-`(es, y$samples)
-  es <- Biobase::`fData<-`(es, y$genes)
+  es <- ns$ExpressionSet(y$counts)
+  es <- ns$`pData<-`(es, y$samples)
+  es <- ns$`fData<-`(es, y$genes)
   set_fds(es, .fds)
 }
 
@@ -258,14 +346,15 @@ as.SummarizedExperiment.data.frame <- function(x, covariates=TRUE, feature_ids=N
   .fds <- force(.fds)
   stopifnot(is.FacileDataSet(.fds))
   assert_sample_subset(x)
-  if (!requireNamespace("SummarizedExperiment", quietly = TRUE)) {
-    stop("SummarizedExperiment package required")
-  }
+
+  ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
+  if (is.null(ns)) stop("SummarizedExperiment required for")
+
   y <- as.DGEList(x, covariates, feature_ids, assay_name, .fds=.fds,
                   custom_key=custom_key, ...)
   ## TODO: Check y$genes to see if we should make a rowRanges out of the
   ## rowData or just keep it as a DataFrame
-  out <- SummarizedExperiment::SummarizedExperiment(
+  out <- ns$SummarizedExperiment(
     y$counts, colData=y$samples, rowData=y$genes, ...)
   set_fds(out, .fds)
 }

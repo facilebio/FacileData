@@ -2,91 +2,118 @@
 % Please edit documentation in R/as.BiocAssayContainers.R
 \name{as.DGEList}
 \alias{as.DGEList}
-\alias{as.DGEList.matrix}
 \alias{as.DGEList.data.frame}
-\alias{as.DGEList.tbl_sql}
+\alias{as.DGEList.tbl}
+\alias{as.DGEList.facile_frame}
+\alias{as.DGEList.FacileDataSet}
 \alias{as.ExpressionSet}
 \alias{as.ExpressionSet.data.frame}
 \alias{as.ExpressionSet.FacileDataSet}
 \alias{as.SummarizedExperiment}
 \alias{as.SummarizedExperiment.data.frame}
 \alias{as.SummarizedExperiment.FacileDataSet}
-\title{Converts a facile result into a traditional Bioconductor assay container}
+\title{Converts a "facile object" to a traditional Bioconductor assay container}
 \usage{
 as.DGEList(x, ...)
 
-\method{as.DGEList}{matrix}(x, covariates = TRUE, feature_ids = NULL,
-  assay_name = default_assay(.fds), .fds = fds(x),
+\method{as.DGEList}{data.frame}(x, covariates = TRUE,
+  feature_ids = NULL, assay_name = NULL, .fds = NULL,
   custom_key = Sys.getenv("USER"), ...)
 
-\method{as.DGEList}{data.frame}(x, covariates = TRUE, feature_ids = NULL,
-  assay_name = default_assay(.fds), .fds = fds(x),
+\method{as.DGEList}{tbl}(x, covariates = TRUE, feature_ids = NULL,
+  assay_name = NULL, .fds = NULL, custom_key = Sys.getenv("USER"),
+  ...)
+
+\method{as.DGEList}{facile_frame}(x, covariates = TRUE,
+  feature_ids = NULL, assay_name = NULL,
   custom_key = Sys.getenv("USER"), ...)
 
-\method{as.DGEList}{tbl_sql}(x, covariates = TRUE, feature_ids = NULL,
-  assay_name = default_assay(.fds), .fds = fds(x),
+\method{as.DGEList}{FacileDataSet}(x, covariates = TRUE,
+  feature_ids = NULL, assay_name = NULL,
   custom_key = Sys.getenv("USER"), ...)
 
 as.ExpressionSet(x, ...)
 
 \method{as.ExpressionSet}{data.frame}(x, covariates = TRUE,
-  feature_ids = NULL, assay_name = default_assay(.fds), .fds = fds(x),
-  custom_key = Sys.getenv("USER"), ...)
+  feature_ids = NULL, assay_name = default_assay(.fds),
+  .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
 
 \method{as.ExpressionSet}{FacileDataSet}(x, covariates = TRUE,
-  feature_ids = NULL, assay_name = default_assay(.fds), .fds = fds(x),
-  custom_key = Sys.getenv("USER"), ...)
+  feature_ids = NULL, assay_name = default_assay(.fds),
+  .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
 
 as.SummarizedExperiment(x, ...)
 
 \method{as.SummarizedExperiment}{data.frame}(x, covariates = TRUE,
-  feature_ids = NULL, assay_name = default_assay(.fds), .fds = fds(x),
-  custom_key = Sys.getenv("USER"), ...)
+  feature_ids = NULL, assay_name = default_assay(.fds),
+  .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
 
 \method{as.SummarizedExperiment}{FacileDataSet}(x, covariates = TRUE,
-  feature_ids = NULL, assay_name = default_assay(.fds), .fds = fds(x),
-  custom_key = Sys.getenv("USER"), ...)
+  feature_ids = NULL, assay_name = default_assay(.fds),
+  .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
 }
 \arguments{
 \item{x}{a facile expression-like result}
 
 \item{covariates}{The covariates the user wants to add to the $samples of
 the DGEList. This can take the following forms:
-\itemize{
-\item \code{TRUE}: All covariates are retrieved from the \code{FacileDataSet}
-\item \code{FALSE}: TODO: Better handle FALSE
-\item \code{character}: A vector of covariate names to fetch from the
-\code{FacileDataSet}
-\item \code{data.frame}: A table that looks like a subset of the
-\code{sample_covariate}, which will be transformed into the \code{pData}
-\item \code{NULL}: do not decorate with \emph{any} covariates.
-}}
+- `TRUE`: All covariates are retrieved from the `FacileDataSet`
+- `FALSE`: TODO: Better handle FALSE
+- `character`: A vector of covariate names to fetch from the
+  `FacileDataSet`. Must be elements of `names(sample_definitions(x))`
+- `data.frame`: A wide covariate table (dataset, sample_id, covariates ...)
+  This may be external covariates for samples not available within
+  `x` (yet), ie. a table of covariates provided by a third party.
+- `NULL`: do not decorate with *any* covariates.}
 
 \item{feature_ids}{the features to get expression for (if not specified
-in \code{x} descriptor)}
+in `x` descriptor). These correspond to the elements found in the
+`feature_info_tbl(x)$feature_id` column.}
 
-\item{.fds}{The \code{FacileDataSet} that \code{x} was retrieved from}
+\item{assay_name}{the name of the assay matrix to use when populating the
+default assay matrix of the bioconductor container (the `$counts`
+matrix of a `DGEList`, the `exprs()` of an `ExpressionSet`, etc.).
+The default value is the entry provided by [default_assay()]}
+
+\item{.fds}{The `FacileDataSet` that `x` was retrieved from}
 
 \item{custom_key}{the custom key to use to fetch custom annotations from
-\code{.fds}}
-
-\item{assay}{the assay matrix to use when populating the default assay
-matrix of the bioconductor container, i.e. the \code{$counts} matrix of a
-\code{DGEList}, the \code{exprs()} of an \code{ExpressionSet}, etc.}
+`.fds`}
 }
 \value{
-the appropriate bioconductor assay container, ie. a \link[edgeR:DGEList]{edgeR::DGEList}
-for \code{as.DGEList}, an \link[Biobase:ExpressionSet]{Biobase::ExpressionSet} for \code{as.ExpressionSet}, or
-a \link[SummarizedExperiment:SummarizedExperiment]{SummarizedExperiment::SummarizedExperiment} for
-\code{as.SummarizedExperiment}.
+the appropriate bioconductor assay container, ie. an `edgeR::DGEList`
+  for `as.DGEList`, a `Biobase::ExpressionSet` for `as.ExpressionSet`, or
+  a `SummarizedExperiment::SummarizedExperiment` for
+  `as.SummarizedExperiment`.
 
 a \code{\link[Biobase]{ExpressionSet}}
 
 a \code{\link[SummarizedExperiment]{SummarizedExperiment}}
 }
 \description{
-Even though the faciledata API provides functionality to access your data
-in useful ways, it is still conceivable that you \emph{might} prefer to work
-with these data using a more traditional bioconductor container like a
-\code{SummarizedExperiment}, \code{DGEList}, \code{ExpressionSet}, etc.
+An entire `FacileDataSet` or a subset of it can be converted into
+bioconductor-standard assay containers, like a `SummarizedExperiment`,
+`DGEList`, or `ExpressionSet` "at any time" using various `as.XXX` functions,
+like `as.DGEList(...)`.
+}
+\details{
+We use the term "facile object" to refer to either the entirety of a
+`FacileDataStore` or any sample-descriptor that specifies subsets of the
+data, eg. where `fds(x)` returns a `FacileDataStore`. See examples for
+specifics.
+
+Note that the order that the samples and features are materialized into the
+expression container are not guaranteed.
+}
+\examples{
+fds <- exampleFacileDataSet()
+
+# Retrieve DGEList of gene expression for all samples
+y.all <- as.DGEList(fds) # gene expression of all samples
+
+# Retrieve data for only 3 genes
+# Suppose we only wanted female samples in our DGEList
+y.fem <- fds \%>\%
+  filter_samples(sex == "f") \%>\%
+  as.DGEList() # or `as.ExpressionSet()`
 }

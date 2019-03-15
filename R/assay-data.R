@@ -3,16 +3,21 @@
 #' @export
 #' @importFrom rhdf5 h5read
 #' @importFrom multiGSEA eigenWeightedMean
-#' @inheritParams assay_feature_info
-#' @param x A \code{FacileDataSet} object.
+#' @rdname fetch_assay_data
+#'
+#' @md
+#'
+#' @param x A `FacileDataSrote` object.
 #' @param features a feature descriptor (data.frame with assay and feature_id
 #'   columms)
 #' @param samples a sample descriptor to specify which samples to return data
 #'   from.
+#' @param assay_name the name of the assay to fetch data from. Defaults to the
+#'   value of [default_assay()] for `x`. Must be a subset of `assay_names(x)`.
 #' @param normalized return normalize or raw data values, defaults to
 #'   \code{raw}
 #' @param as.matrix by default, the data is returned in a long-form tbl-like
-#'   result. If set to \code{TRUE}, the data is returned as a matrix.
+#'   result. If set to `TRUE`, the data is returned as a matrix.
 #' @param ... parameters to pass to normalization methods
 #' @param subset.threshold sometimes fetching all the genes is faster than
 #'   trying to subset. We have to figure out why that is, but I've previously
@@ -20,16 +25,16 @@
 #'   the elbow.
 #' @param aggregate.by do you want individual level results or geneset
 #'   scores? Use 'ewm' for eigenWeightedMean, and that's all.
-#' @return A lazy \code{\link[dplyr]{tbl}} object with the expression
-#'   data to be \code{\link[dplyr]{collect}}ed when \code{db} is provided,
-#'   otherwise a \code{tbl_df} of the results.
+#' @return A `tibble` (lazy or not) with assay data.
 #' @family API
-fetch_assay_data <- function(x, features, samples=NULL,
-                             assay_name=default_assay(x),
-                             normalized=FALSE, as.matrix=FALSE, ...,
-                             subset.threshold=700, aggregate.by=NULL,
-                             verbose=FALSE) {
-  stopifnot(is.FacileDataSet(x))
+fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
+                                           assay_name = default_assay(x),
+                                           normalized = FALSE,
+                                           as.matrix = FALSE,
+                                           ...,
+                                           subset.threshold = 700,
+                                           aggregate.by = NULL,
+                                           verbose = FALSE) {
   assert_flag(as.matrix)
   assert_flag(normalized)
   assert_number(subset.threshold)
@@ -48,7 +53,8 @@ fetch_assay_data <- function(x, features, samples=NULL,
     }
     stopifnot(is(features, 'tbl') || is(features, 'data.frame'))
     if (!'assay' %in% colnames(features) || !is.character(features$assay)) {
-      features$assay <- assay_name
+      features <- collect(features, n = Inf)
+      features[["assay"]] <- assay_name
     }
     assert_assay_feature_descriptor(features)
   }
@@ -87,13 +93,40 @@ fetch_assay_data <- function(x, features, samples=NULL,
 
   if (length(out) == 1L) {
     out <- out[[1L]]
-  } else if (!as.matrix) {
+  } else {
     ## We stop if we are asking for a matrix across multiple assays, but maybe
     ## we don't have to ... (in the future, I mean)
     out <- bind_rows(out)
   }
 
+  if (!as.matrix) {
+    out <- as_facile_frame(out, x)
+  }
+
   out
+}
+
+#' @export
+#' @rdname fetch_assay_data
+fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
+                                          assay_name = default_assay(fds(x)),
+                                          normalized = FALSE,
+                                          as.matrix = FALSE,
+                                          ...,
+                                          subset.threshold = 700,
+                                          aggregate.by = NULL,
+                                          verbose = FALSE) {
+  force(assay_name)
+  if (is.null(samples)) {
+    samples <- assert_sample_subset(x)
+    samples <- distinct(samples, dataset, sample_id)
+  }
+  fetch_assay_data(fds(x), features = features, samples = samples,
+                   assay_name = assay_name, normalized = normalized,
+                   as.matrix = as.matrix, ...,
+                   subset.threshold = subset.threshold,
+                   aggregate.by = aggregate.by,
+                   verbose = verbose)
 }
 
 .fetch_assay_data <- function(x, assay_name, feature_ids, samples,
@@ -200,7 +233,7 @@ fetch_assay_data <- function(x, features, samples=NULL,
     vals <- as.tbl(setDF(vals))
   }
 
-  class(vals) <- c('FacileExpression', class(vals))
+  # class(vals) <- c('FacileExpression', class(vals))
   set_fds(vals, x)
 }
 
@@ -226,29 +259,26 @@ fetch_assay_data <- function(x, features, samples=NULL,
 #' Helper function to get sample assay data from single or aggregate features
 #' @export
 #' @family API
-fetch_assay_score <- function(x, features, samples=NULL, assay_name=NULL,
-                              as.matrix=FALSE, ..., subset.threshold=700) {
+fetch_assay_score.FacileDataSet <- function(x, features, samples = NULL,
+                                            assay_name = NULL,
+                                            as.matrix = FALSE, ...,
+                                            subset.threshold = 700) {
   if (is.null(assay_name)) {
     assay_name <- features$assay
   }
   stopifnot(is.character(assay_name), length(unique(asssay_name)) == 1L)
-  dat <- fetch_assay_data(x, features, samples=samples, assay_name=NULL,
-                          as.matrix=TRUE, normalized=TRUE,
-                          subset.threshold=subset.threshold)
+  dat <- fetch_assay_data(x, features, samples = samples, assay_name = NULL,
+                          as.matrix = TRUE, normalized = TRUE,
+                          subset.threshold = subset.threshold)
   if (nrow(dat) > 1) {
-    dat <- matrix(eigenWeightedMean(dat)$score, nrow=1)
+    dat <- matrix(eigenWeightedMean(dat)$score, nrow = 1)
   }
 
 }
-#' @export
-assay_types <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  assay_info_tbl(x) %>% collect(n=Inf) %$% assay_type
-}
 
+#' @noRd
 #' @export
-assay_names <- function(x, default_first=TRUE) {
-  stopifnot(is.FacileDataSet(x))
+assay_names.FacileDataSet <- function(x, default_first=TRUE) {
   anames <- assay_info_tbl(x) %>% collect %$% assay
   if (default_first && length(anames) > 1L) {
     dassay <- default_assay(x)
@@ -257,16 +287,21 @@ assay_names <- function(x, default_first=TRUE) {
   anames
 }
 
+#' Fetches assay meta information for the assays stored in a FacileDataStore
+#'
 #' @export
-assay_info <- function(x, assay_name=NULL) {
+#' @param x A `FacileDataStore`
+#' @param assay_name optional name of the assay to get information for
+#' @return a tibble of meta information for the assays stored in `x`
+assay_info <- function(x, assay_name = NULL) {
   stopifnot(is.FacileDataSet(x))
-  ainfo <- assay_info_tbl(x) %>% collect(n=Inf)
+  ainfo <- assay_info_tbl(x) %>% collect(n = Inf)
   if (!is.null(assay_name)) {
     assert_string(assay_name)
     assert_choice(assay_name, ainfo$assay)
     ainfo <- filter(ainfo, assay == assay_name)
   }
-  ainfo
+  as_facile_frame(ainfo, x)
 }
 
 #' @export
@@ -289,14 +324,18 @@ has_assay <- function(x, assay_name) {
 #'   scaling factors, etc. Note that rows in \code{samples} that do not appear
 #'   in \code{assay_name} will be returnd here with NA values for hd5_index and
 #'   such.
-assay_sample_info <- function(x, assay_name, samples=NULL) {
-  stopifnot(is.FacileDataSet(x))
-  if (!is.null(samples)) {
-    samples <- assert_sample_subset(samples) %>%
-      distinct(dataset, sample_id) %>%
-      collect(n=Inf)
+assay_sample_info <- function(x, assay_name, samples = NULL) {
+  assert_facile_data_store(x)
+
+  if (is.null(samples)) {
+    samples <- samples(x)
+  } else {
+    assert_sample_subset(samples, x)
+    samples <- distinct(samples, dataset, sample_id)
   }
-  feature.type <- assay_feature_type(x, assay_name) ## validate assay_name
+  samples <- collect(samples, n = Inf)
+
+  feature.type <- assay_feature_type(x, assay_name)
 
   asi <- assay_sample_info_tbl(x) %>%
     filter(assay == assay_name) %>%
@@ -339,49 +378,46 @@ assay_feature_type <- function(x, assay_name) {
 #'     Warning: Error in : Table pkdtpohpsu already exists.
 #'
 #' This fetches the hdf5_index for the assays as well
+#'
 #' @export
 #' @inheritParams assay_feature_type
 #' @param feature_ids a character vector of feature_ids
 #' @return a \code{tbl_sqlite} result with the feature information for the
-#'   features in a specified assay. This
-assay_feature_info <- function(x, assay_name, feature_ids=NULL) {
+#'   features in a specified assay
+assay_feature_info.FacileDataSet <- function(x, assay_name, feature_ids = NULL,
+                                             ...) {
   ## NOTE: This is currently limited to a single assay
   ftype <- assay_feature_type(x, assay_name)
   if (!is.null(feature_ids)) {
     assert_character(feature_ids)
-    if (length(feature_ids) == 0) {
-      feature_ids <- NULL
-    } else {
-      feature_ids <- tibble(feature_id=feature_ids)
-    }
   }
 
   afinfo <- assay_feature_info_tbl(x) %>%
-    filter(assay == assay_name) %>%
-    collect(n=Inf)
+    filter(assay == assay_name)
 
-  if (!is.null(feature_ids)) {
-    afinfo <- inner_join(afinfo, feature_ids, by=c('feature_id'))
+  if (!is.null(feature_ids) && length(feature_ids) > 0) {
+    afinfo <- filter(afinfo, feature_id %in% feature_ids)
   }
+  afinfo <- collect(afinfo, n=Inf)
 
   assay.info <- assay_info_tbl(x) %>%
     select(assay, assay_type, feature_type) %>%
     filter(assay == assay_name) %>%
-    collect(n=Inf)
+    collect(n = Inf)
 
-  out <- afinfo %>% inner_join(assay.info, by='assay')
+  ## FIXME: consider materialized view for this
+  out <- inner_join(afinfo, assay.info, by = "assay")
+
   ftype <- out$feature_type[1L]
   finfo <- feature_info_tbl(x)
-  if (length(ftype == 1L)) {
-    finfo <- filter(finfo, feature_type == ftype)
-  } else {
-    finfo <- filter(finfo, feature_type %in% ftype)
-  }
-  finfo <- collect(finfo, n=Inf)
+  finfo <- filter(finfo, feature_type %in% ftype)
+  finfo <- collect(finfo, n = Inf)
 
-  out %>%
-    inner_join(finfo, by=c('feature_type', 'feature_id')) %>%
-    set_fds(x)
+  ## FIXME: feature_id should be made unique to feature_type to simplify
+  ## e.g add GeneID: prefix for entrez
+  ## But, still we know out and finfo each only have one feature type now
+  out <- inner_join(out, finfo, by=c('feature_type', 'feature_id'))
+  as_facile_frame(out, x)
 }
 
 #' @rdname feature_name_map
@@ -404,31 +440,35 @@ assay_feature_name_map <- function(x, assay_name) {
 #' @return rows from assay_info_tbl that correspond to the assays defined
 #'   over the given samples. If no assays are defined over these samples,
 #'   you're going to get an empty tibble.
-assay_info_over_samples <- function(x, samples) {
-  stopifnot(is.FacileDataSet(x))
-  assert_sample_subset(samples)
-
-  asi <- assay_sample_info_tbl(x)
-  if (!same_src(asi, samples)) {
-    asi <- collect(asi, n=Inf)
-    samples <- collect(samples, n=Inf)
+assay_info_over_samples <- function(x, samples = NULL) {
+  assert_facile_data_store(x)
+  if (is.null(samples)) {
+    samples <- samples(x)
+  } else {
+    assert_sample_subset(samples, x)
+    samples <- distinct(samples, dataset, sample_id)
   }
-  assays <- inner_join(asi, samples, by=c('dataset', 'sample_id'))
 
-  ## Count number of samples across dataset count for each assay type
+  asi <- select(assay_sample_info_tbl(x), dataset, assay, sample_id)
+  if (!same_src(asi, samples)) {
+      asi <- collect(asi, n = Inf)
+      samples <- collect(samples, n = Inf)
+  }
+  assays <- inner_join(asi, samples, by = c("dataset","sample_id"))
+
+  # Count number of samples across dataset count for each assay type
   out <- assays %>%
-    group_by(assay, dataset) %>%
-    summarize(nsamples=n()) %>%
-    collect(n=Inf) %>%
     group_by(assay) %>%
-    summarize(ndatasets=length(unique(dataset)), nsamples=sum(nsamples)) %>%
-    ungroup
-  out
+    summarize(ndatasets = n_distinct(dataset), nsamples = n()) %>%
+    ungroup()
+
+  as_facile_frame(out, x)
 }
 
-
-
-## helper function to fetch_assay_data
+#' Helper function to fetch_assay_data
+#'
+#' @noRd
+#' @importFrom edgeR cpm
 normalize.assay.matrix <- function(vals, feature.info, sample.info,
                                    log=TRUE, prior.count=5, ...,
                                    verbose=FALSE) {
@@ -500,21 +540,40 @@ create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
 #' \code{normalize} defaults to \code{TRUE}
 #'
 #' @export
-#' @param x a samples descriptor
+#' @param samples a samples descriptor
 #' @param feature_ids character vector of feature_ids
 #' @param with_symbols Do you want gene symbols returned, too?
 #' @param .fds A \code{FacileDataSet} object
 #' @return a tbl-like result
-with_assay_data <- function(samples, features, assay_name=NULL,
-                            normalized=TRUE, aggregate.by=NULL,
-                            spread=TRUE, with_assay_name=FALSE, ...,
-                            verbose=FALSE, .fds=fds(samples)) {
-  if (is.FacileDataSet(samples)) {
-    .fds <- samples(samples)
-    samples(samples(.fds))
-  }
-  stopifnot(is.FacileDataSet(.fds))
-  assert_sample_subset(samples)
+with_assay_data.facile_frame <- function(x, features, assay_name = NULL,
+                                         normalized = TRUE, aggregate.by = NULL,
+                                         spread = TRUE, with_assay_name = FALSE,
+                                         ..., verbose = FALSE, .fds = fds(x)) {
+  x <- collect(x, n = Inf)
+  .fds <- assert_facile_data_store(.fds)
+  NextMethod(x, .fds = .fds)
+}
+
+with_assay_data.tbl <- function(x, features, assay_name = NULL,
+                                normalized = TRUE, aggregate.by = NULL,
+                                spread = TRUE, with_assay_name = FALSE,
+                                ..., verbose = FALSE, .fds = NULL) {
+  with_assay_data.data.frame(collect(x, n = Inf), features = features,
+                             assay_name = assay_name, normalized = normalized,
+                             aggregate.by = aggregate.by, spread = spread,
+                             with_assay_name = with_assay_name, ...,
+                             verbose = verbose, .fds = .fds)
+}
+
+#' @export
+#' @method with_assay_data data.frame
+#' @noRd
+with_assay_data.data.frame <- function(x, features, assay_name=NULL,
+                                       normalized = TRUE, aggregate.by = NULL,
+                                       spread = TRUE, with_assay_name=FALSE,
+                                       ..., verbose = FALSE, .fds = NULL) {
+  .fds <- assert_facile_data_store(.fds)
+  assert_sample_subset(x)
   assert_flag(normalized)
 
   ## Check that parameters are kosher before fetching data
@@ -534,12 +593,12 @@ with_assay_data <- function(samples, features, assay_name=NULL,
   }
 
   ## Hit the datastore
-  adata <- fetch_assay_data(.fds, features, samples, normalized=normalized,
+  adata <- fetch_assay_data(.fds, features, x, normalized=normalized,
                             aggregate.by=aggregate.by, verbose=verbose)
 
   if (is.character(spread)) {
     spread.vals <- unique(adata[[spread]])
-    if (any(spread.vals %in% colnames(samples))) {
+    if (any(spread.vals %in% colnames(x))) {
       if (!with_assay_name && verbose) {
         warning("appending assay_name to spread columns to avoid collision")
       }
@@ -555,8 +614,8 @@ with_assay_data <- function(samples, features, assay_name=NULL,
     adata <- set_fds(adata, .fds)
   }
 
-  # join_samples(adata, samples)
-  join_samples(samples, adata)
+  out <- join_samples(x, adata)
+  as_facile_frame(out, .fds)
 }
 
 can.spread.assay.by.name <- function(x, assay_name) {

@@ -3,17 +3,22 @@
 \name{as.FacileDataSet}
 \alias{as.FacileDataSet}
 \alias{as.FacileDataSet.list}
-\title{Converts bioconductor assay containers into a FacileDataSet.}
+\title{Converts a (list of) bioconductor assay containers into a FacileDataSet.}
 \usage{
 as.FacileDataSet(x, path, assay_name, assay_type, source_assay,
-  dataset_name = "DEFAULT_NAME", organism = c("unspecified", "Homo sapiens",
-  "Mus musculus"), page_size = 2^12, cache_size = 2e+05,
-  chunk_rows = 5000, chunk_cols = "ncol", chunk_compression = 5, ...)
+  assay_description = paste("Description for ", assay_name),
+  dataset_name = "DEFAULT_NAME", organism = c("unspecified",
+  "Homo sapiens", "Mus musculus"), page_size = 2^12,
+  cache_size = 2e+05, chunk_rows = 5000, chunk_cols = "ncol",
+  chunk_compression = 5, covariate_def = NULL, ...)
 
-\method{as.FacileDataSet}{list}(x, path, assay_name, assay_type, source_assay,
-  dataset_name, organism = c("unspecified", "Homo sapiens", "Mus musculus"),
+\method{as.FacileDataSet}{list}(x, path, assay_name, assay_type,
+  source_assay, assay_description = paste("Description for ",
+  assay_name), dataset_name = "DEFAULT_NAME",
+  organism = c("unspecified", "Homo sapiens", "Mus musculus"),
   page_size = 2^12, cache_size = 2e+05, chunk_rows = 5000,
-  chunk_cols = "ncol", chunk_compression = 5, ...)
+  chunk_cols = "ncol", chunk_compression = 5, covariate_def = NULL,
+  ...)
 }
 \arguments{
 \item{x}{The bioconductor assay container to extract data from}
@@ -69,8 +74,8 @@ you will be creating.
 }
 \details{
 A \code{FacileDataSet} can be created from a number of different Bioconductor
-containers, such as a \link[Biobase:ExpressionSet]{Biobase::ExpressionSet},
-\link[SummarizedExperiment:SummarizedExperiment]{SummarizedExperiment::SummarizedExperiment}, or an \link[edgeR:DGEList]{edgeR::DGEList}. To
+containers, such as a \code{Biobase::ExpressionSet},
+\code{SummarizedExperiment::SummarizedExperiment}, or an \code{edgeR::DGEList}. To
 create a \code{FacileDataSet} that spans multiple Bioc containters, i.e. you may
 have one ExpressionSet per indication in the TCGA. You can make
 \code{FacileDataSet} to encompass the data from \emph{all} of these indications by
@@ -114,12 +119,13 @@ populate this table will be retrieved from the corresponding \code{fData}-like
 \code{data.frame} from \strong{the first} given bioc-container in the list.
 This \code{data.frame} must define the following columns:
 \itemize{
-\item "feature_type": \code{character} (c('entrez', 'ensgid', 'enstid', 'genomic', 'custom'))
-\item "feature_id": \code{character}
-\item "name": \code{character}
-\item "meta": \code{character}
-\item "effective_length": \code{numeric}
-\item "source": \code{character}
+\item "feature_type": \code{string}, one of: \code{"entrez"}, \code{"ensgid"}, \code{"enstid"},
+\code{"genomic"}, \code{"custom"}.
+\item "feature_id": \code{string}
+\item "name": \code{string}
+\item "meta": \code{string}
+\item "effective_length": \code{integer}
+\item "source": \code{string}
 }
 }
 

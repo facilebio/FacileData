@@ -2,25 +2,25 @@
 #'
 #' Copied from http://stackoverflow.com/questions/18914283
 #'
-#' @export
 #' @param file single character, name of file with SQL statements
 sqlFromFile <- function(file){
   requireNamespace("stringr") || stop("Failed to require stringr")
   sql <- readLines(file)
-  sql <- gsub("--.*$", '', sql) ## remove comments
-  sql <- unlist(str_split(paste(sql,collapse=" "),";"))
+  sql <- gsub("--.*$", "", sql) ## remove comments
+  sql <- unlist(strsplit(paste(sql,collapse=" "),";"))
   sql <- sql[grep("^ *$", sql, invert=TRUE)]
   sql
 }
 
 #' Execute multiple queries against a database
-#' @export
+#'
+#' @importFrom DBI dbExecute
 #' @param con database handle
 #' @param sql list of charvecs (SQL statements)
-dbGetQueries <- function(con, sql){
+executeSQL <- function(con, sql){
   execsql <- function(sql, con) {
-    # message(sql)
-    dbGetQuery(con,sql)
+    # dbGetQuery(con,sql)
+    dbExecute(con, sql)
   }
   invisible(lapply(sql, execsql, con))
 }

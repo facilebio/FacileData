@@ -1,32 +1,3 @@
-#' Creates tbl that associates a sample with all of its indication/subtypes
-#'
-#' @export
-#' @param x a \code{FacileDataSet} object
-#' @return a \code{tbl} with indication and subtype information for all samples
-#'   in the database
-subtype_map <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  sample.map <- sample_covariate_tbl(x) %>%
-    filter(type == 'tumor_classification') %>%
-    with_sample_covariates('sample_type', .fds=x)
-
-  main <- sample.map %>%
-    filter(variable == 'indication') %>%
-    transmute(indication=value, subtype='all', dataset=dataset,
-              sample_id=sample_id, sample_type=sample_type)
-
-  subs <- sample.map %>%
-    filter(variable != 'indication') %>%
-    transmute(subtype=value, dataset=dataset, sample_id=sample_id,
-              sample_type=sample_type) %>% ## add indication
-    left_join(select(main, dataset, sample_id, indication),
-              by=c('dataset', 'sample_id'))
-
-  bind_rows(main, subs) %>%
-    arrange(indication, subtype, dataset) %>%
-    set_fds(x)
-}
-
 #' Fetches a sample descriptor that matches the filter criterion
 #'
 #' Use \code{...} as if this is a dplyr::filter call, and our
@@ -42,14 +13,24 @@ subtype_map <- function(x) {
 #' @param ... the NSE boolean filter criteria
 #' @return a facile sample descriptor
 #' @family API
-fetch_samples <- function(x, samples=NULL, assay="rnaseq", ...) {
-  stopifnot(is.FacileDataSet(x))
+fetch_samples.FacileDataSet <- function(x, samples = NULL,
+                                        assay = "rnaseq", ...) {
+  stop("This shouldn't be used")
+
+  if (is.null(samples)) {
+    samples <- samples(x)
+  } else {
+    assert_sample_subset(samples, x)
+    samples <- distinct(samples, dataset, sample_id)
+  }
+  samples <- collect(samples, n = Inf)
+
   dots <- lazy_dots(...)
   if (length(dots)) {
     stop("Currently rethinking how to make fetching samples intuitive, ie. ",
          "see fetch_samples.old")
   }
-  if (is.null(samples)) samples <- sample_info_tbl(x)
+  # if (is.null(samples)) samples <- sample_info_tbl(x)
   samples <- assert_sample_subset(samples) %>% collect(n=Inf)
 
   if (!missing(assay)) {
@@ -70,7 +51,7 @@ fetch_samples <- function(x, samples=NULL, assay="rnaseq", ...) {
 
   tbl(x$con, fds.tbl) %>%
     semi_join(samples, by=pk, copy=copy, auto_index=copy) %>%
-    set_fds(x)
+    as_facile_frame(x)
 }
 
 
@@ -109,8 +90,7 @@ join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
   }
 
   inner_join(x, samples, by=c('dataset', 'sample_id'),
-             copy=internalize, auto_index=internalize) %>%
-    set_fds(fds(x))
+             copy=internalize, auto_index=internalize)
 }
 
 ## Filter x down to specific samples
