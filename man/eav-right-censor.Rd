@@ -23,7 +23,7 @@ right censored.}
 
 \item{def}{the covariate definition for this variable}
 
-\item{suffix}{adds \code{_&lt;suffix&gt;} to the \code{tte} and \code{event} columns of the
+\item{suffix}{adds \code{_<suffix>} to the \code{tte} and \code{event} columns of the
 outgoing \code{data.frame}}
 }
 \value{

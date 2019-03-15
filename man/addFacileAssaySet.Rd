@@ -9,7 +9,8 @@ addFacileAssaySet(x, datasets, facile_assay_name,
   facile_feature_type = .feature.types,
   facile_assay_description = NULL, facile_feature_info,
   storage_mode = .storage.modes, chunk_rows = 5000,
-  chunk_cols = "ncol", chunk_compression = 4, assay_name = NULL)
+  chunk_cols = "ncol", chunk_compression = 4, assay_name = NULL,
+  warn_existing = FALSE)
 }
 \arguments{
 \item{x}{The \code{FacileDataSet}}

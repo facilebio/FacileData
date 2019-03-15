@@ -4,7 +4,7 @@
 \alias{append_facile_table}
 \title{Adds rows to a table in a FacileDataSet}
 \usage{
-append_facile_table(dat, x, table_name)
+append_facile_table(dat, x, table_name, warn_existing = FALSE)
 }
 \arguments{
 \item{dat}{the \code{data.frame} of rows to add to the table, which must

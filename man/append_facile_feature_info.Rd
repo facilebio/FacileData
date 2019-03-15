@@ -5,7 +5,7 @@
 \title{Appends new features to \code{feature_info} table}
 \usage{
 append_facile_feature_info(x, feature_info,
-  type = feature_info$feature_type)
+  type = feature_info$feature_type, warn_existing = FALSE)
 }
 \arguments{
 \item{x}{The \code{FacileDataSet}}

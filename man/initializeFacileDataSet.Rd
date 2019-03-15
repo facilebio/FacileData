@@ -17,7 +17,7 @@ database}
 \item{covariate_definition}{the path to the covariate definition file}
 }
 \value{
-inivisibly returns the \code{FaclieDataSet} you just made
+inivisibly returns the path to the successfully created datastore
 }
 \description{
 Create an empty FacileDataSet
