@@ -9,3 +9,6 @@
 #' @import survival
 #' @importFrom utils read.csv
 "_PACKAGE"
+
+#' @export
+broom::tidy

@@ -86,6 +86,9 @@
 #'   `c("Homo sapiens", "Mus musculus", "unspecified")`.
 #' @param dataset_name the `name` attribute of the FacileDataSet `meta.yaml`
 #'   file.
+#' @param dataset_meta a named (by names(x)) with meta data about the datasets
+#'   that appear in the list of datasets `x`. List elements per dataset should
+#'   minimally include a `description` and `url` string.
 #' @param page_size parameter to tweak SQLite
 #' @param cache_size parameter to tweak SQLite
 #' @param chunk_rows parameter to tweak HDF5
@@ -97,6 +100,7 @@
 as.FacileDataSet <- function(x, path, assay_name, assay_type, source_assay,
                              assay_description = paste("Description for ", assay_name),
                              dataset_name = "DEFAULT_NAME",
+                             dataset_meta = NULL,
                              organism = c("unspecified", "Homo sapiens", "Mus musculus"),
                              page_size=2**12, cache_size=2e5,
                              chunk_rows=5000, chunk_cols="ncol",
@@ -130,6 +134,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
                                   source_assay,
                                   assay_description = paste("Description for ", assay_name),
                                   dataset_name = "DEFAULT_NAME",
+                                  dataset_meta = list(),
                                   organism = c("unspecified", "Homo sapiens", "Mus musculus"),
                                   page_size=2**12, cache_size=2e5,
                                   chunk_rows=5000, chunk_cols="ncol",
@@ -152,6 +157,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     # default dataset name if the list is unnamed
     names(x) <- tolower(fclass)
   }
+
 
   # All elements in list must be the same class, and a legit class at that!
   first <- x[[1L]]
@@ -220,9 +226,9 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   }, simplify = FALSE)
 
 
-  ## Make YAML and Initialize FDS
-  ds_list = sapply(names(x), function(dname) {
-      ds_annot(x[[dname]])
+  # Make YAML and Initialize FDS
+  ds_list <- sapply(names(x), function(dname) {
+    ds_annot(x[[dname]], dataset_meta[[dname]])
   }, simplify = FALSE)
 
   meta <- list(
@@ -285,29 +291,54 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
 #' a character annotation and can provide a description.
 #' @param x SummarizedExperiment, ExpressionSet or DGEList
 #' @param validate single logical, check results
+#' @param meta a list of description stuff for the dataset, this can act to
+#'   override what's there, already
 #' @param ... additional args (ignored for now)
-ds_annot <- function(x, validate = FALSE, ...) {
+ds_annot <- function(x, meta = NULL, validate = FALSE, ...) {
   UseMethod("ds_annot")
 }
 
-ds_annot.SummarizedExperiment <- function(x, validate = FALSE) {
-    out = metadata(x)
-    if (validate && !(is.list(x) && setequal(names(x), c("url", "description")))) {
-        stop("SummarizedExperiment data set level annotation was not a list with 'url' and 'description'.")
-    }
-    out
+ds_annot.SummarizedExperiment <- function(x, meta = NULL, validate = FALSE,
+                                          ...) {
+  out <- .merge_ds_annot(metadata(x), meta)
+  if (validate) .ds_annot_validate(out)
+  out
 }
 
-ds_annot.ExpressionSet <- function(x, validate = FALSE) {
-    out = list(
-        url = "http://www.google.com",
-        description = annotation(x)
-        )
-    out
+ds_annot.ExpressionSet <- function(x, meta = NULL, validate = FALSE, ...) {
+  out <- .merge_ds_annot(NULL, meta)
+  if (validate) .ds_annot_validate(out)
+  out
 }
 
-ds_annot.default <- function(x, validate = FALSE) {
-    list(url = "http://google.com", description = "NoDescription")
+ds_annot.default <- function(x, meta = NULL, validate = FALSE, ...) {
+  out <- .merge_ds_annot(NULL, meta)
+  if (validate) .ds_annot_validate(out)
+  out
+}
+
+.merge_ds_annot <- function(x, y) {
+  if (is.null(x)) x <- list()
+  if (is.null(y)) y <- list()
+  elems <- union(names(x), names(y))
+  out <- sapply(elems, function(name) {
+    c(x[[name]], y[[name]])[1L]
+  }, simplify = FALSE)
+  if (is.null(out[["description"]])) {
+    out[["description"]] <- "No Description Provided"
+  }
+  if (is.null(out[["url"]])) {
+    out[["url"]] <- "http://example.com"
+  }
+  out
+}
+
+.ds_annot_validate <- function(x) {
+  if (!is.list(x) && test_subset(c("url", "description"), names(x))) {
+    stop("Dataset metadata needs to be a list, minimally with 'url' and ",
+         "'description' components")
+  }
+  invisible(x)
 }
 
 #' BioC-container specific fData extraction functions

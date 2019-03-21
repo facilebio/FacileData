@@ -116,7 +116,8 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
   if (is.null(dnames) ||
       all(dnames != make.names(dnames)) ||
       length(unique(dnames)) != length(dnames)) {
-    stop("names(datasets) must be valid varnames and all unique")
+    # stop("names(datasets) must be valid varnames and all unique")
+    warning("names(datasets) are not valid R variable names", immediate. = TRUE)
   }
 
   smodes <- sapply(datasets, function(d) {
