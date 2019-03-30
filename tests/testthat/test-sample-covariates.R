@@ -112,8 +112,8 @@ test_that("spread_covariates works with both simple and complex types", {
   ## check values in same (named) columns are the same
   cols <- intersect(names(mixed), names(cc))
 
-  mcheck %<>% arrange(dataset, sample_id)
-  cc %<>% arrange(dataset, sample_id)
+  mcheck <- arrange(mcheck, dataset, sample_id)
+  cc <- arrange(cc, dataset, sample_id)
   expect_equal(mcheck[, cols], cc[, cols], check.attributes=FALSE)
 })
 

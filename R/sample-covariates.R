@@ -79,14 +79,15 @@ sample_covariates.facile_frame <- function(x, ...){
 #' Fetch rows from sample_covariate table for specified samples and covariates
 #'
 #' @export
+#' @rdname sample-covariates
+#' @family API
+#'
 #' @param x a \code{FacileDataSet} connection
 #' @param samples a samples descriptor \code{tbl_*}
 #' @param covariates character vector of covariate names
 #' @param custom_key The key to use to fetch more custom annotations over
 #'   the given samples
-#' @rdname fetch_sample_covariates
 #' @return rows from the \code{sample_covariate} table
-#' @family API
 fetch_sample_covariates.FacileDataSet <- function(
     x, samples = NULL, covariates = NULL,
     custom_key = Sys.getenv("USER"), with_source = FALSE, ...) {
@@ -127,7 +128,8 @@ fetch_sample_covariates.FacileDataSet <- function(
 }
 
 #' @export
-#' @rdname fetch_sample_covariates
+#' @rdname sample-covariates
+#' @family API
 fetch_sample_covariates.facile_frame <- function(
     x, samples = NULL, covariates = NULL,
     custom_key = Sys.getenv("USER"), with_source = FALSE, ...) {
@@ -297,6 +299,7 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
 #' have NA.
 #'
 #' @export
+#' @importFrom data.table dcast setDT setDF
 #' @param x output from \code{fetch_sample_covariates}
 #' @param .fds A \code{FacileDataSet} object
 #' @return a wide \code{tbl_df}-like object
@@ -313,11 +316,13 @@ spread_covariates <- function(x, .fds=fds(x)) {
     mutate(variable='.dummy.', value=NA)
 
   out <- bind_rows(x, dummy) %>%
-    dcast(dataset + sample_id ~ variable, value.var='value') %>%
-    mutate(.dummy.=NULL) %>%
-    ## I don't think we should set rownames here. Delete next command and test
-    # set_rownames(., paste(.$dataset, .$sample_id, sep='__'))
-    as.tbl
+    setDT() %>%
+    dcast(dataset + sample_id ~ variable, value.var = "value") %>%
+    setDF() %>%
+    mutate(.dummy. = NULL) %>%
+    as.tbl()
+
+  # sample-covariates -------------------------------------------------------
 
   cov.def <- covariate_definitions(.fds)
   if (!is.null(cov.def)) {

@@ -7,9 +7,9 @@ Authors@R: c(
   person("Vincent", "Rouilly", , "rouilly.vincent@gene.com", role = "aut"),
   person("Peter", "Haverty", , "haverty.peter@gene.com", role = "aut"),
   person("Denali Therapeutics", role = c("cph", "fnd"),
-         comment = "Coypright holder from 2019 onward"),
+         comment = "Coypright 2019"),
   person("Genentech", role = c("cph", "fnd"),
-         comment = "Coypright holder for work pre 2019"))
+         comment = "Coypright 2015 - 2018"))
 Description: Defines the "FacileData" API over multi-assay, high-throughput
   genomics data. The FacileData API is a fluent grammar that facilitates
   exploratory data analysis. This package also defines a "FacileDataSet" class,
@@ -24,22 +24,14 @@ Imports:
   checkmate (>= 1.8.5),
   DBI,
   data.table,
-  desc,
-  devtools,
   dplyr,
-  dtplyr,
   glue,
   edgeR,
   jsonlite,
-  lazyeval,
-  magrittr,
   multiGSEA (>= 0.10.4),
   reshape2,
   rhdf5,
   RSQLite,
-  S4Vectors,
-  survival,
-  tidyr,
   utils,
   yaml
 Suggests:
@@ -50,8 +42,11 @@ Suggests:
   org.Mm.eg.db,
   roxygen2 (>= 6.1.0),
   stringr,
+  S4Vectors,
   SummarizedExperiment,
+  survival,
   testthat (>= 1.0.2),
+  tidyr
 Remotes:
   lianos/multiGSEA@develop
 RoxygenNote: 6.1.1

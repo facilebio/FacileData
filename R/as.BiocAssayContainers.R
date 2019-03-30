@@ -63,10 +63,12 @@ as.DGEList <- function(x, ...) {
 #' @noRd
 #' @method as.DGEList matrix
 #' @rdname as.BiocContainer
-#' @importFrom edgeR DGEList
+#' @importFrom edgeR DGEList calcNormFactors
 as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
                               assay_name = NULL, .fds = NULL,
-                              custom_key = Sys.getenv("USER"), ...) {
+                              custom_key = Sys.getenv("USER"),
+                              update_libsizes = !is.null(feature_ids),
+                              update_normfactors = update_libsizes, ...) {
   .fds <- assert_facile_data_store(.fds)
   assert_choice(assay_name, assay_names(.fds))
 
@@ -114,8 +116,8 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
   genes <- gene_info %>%
     semi_join(tibble(feature_id=fids), by='feature_id') %>%
     rename(symbol = "name") %>%
-    as.data.frame %>%
-    set_rownames(., .$feature_id)
+    as.data.frame
+  rownames(genes) <- genes[["feature_id"]]
 
   class(x) <- 'matrix'
 
@@ -137,8 +139,8 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
     collect(n=Inf) %>%
     mutate(samid=paste(dataset, sample_id, sep='__')) %>%
     rename(lib.size=libsize, norm.factors=normfactor) %>%
-    as.data.frame %>%
-    set_rownames(., .$samid)
+    as.data.frame()
+  rownames(sample.stats) <- sample.stats[["samid"]]
   sample.stats <- sample.stats[colnames(x),,drop=FALSE]
 
   y <- DGEList(x, genes=genes, lib.size=sample.stats$lib.size,
@@ -148,9 +150,21 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
     y$samples,
     sample.stats[colnames(y), c('dataset', 'sample_id', 'samid'), drop=FALSE])
 
+  if (update_libsizes) {
+    y[["samples"]][["lib.size"]] <- colSums(y[["counts"]])
+  }
+  if (update_normfactors) {
+    y <- edgeR::calcNormFactors(y)
+  }
+
   if (!is.null(covariates)) {
     covs <- select(covariates, -dataset, -sample_id)
-    y$samples <- cbind(y$samples, covs[colnames(y),,drop=FALSE])
+    covs <- covs[colnames(y),,drop=FALSE]
+    if ("group" %in% colnames(covs)) {
+      y[["samples"]][["group"]] <- covs[["group"]]
+      covs[["group"]] <- NULL
+    }
+    y$samples <- cbind(y$samples, covs)
   }
 
   set_fds(y, .fds)
@@ -159,6 +173,7 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
 #' @export
 #' @method as.DGEList data.frame
 #' @rdname as.BiocContainer
+#' @importFrom data.table dcast set setDT
 as.DGEList.data.frame <- function(x, covariates = TRUE, feature_ids = NULL,
                                   assay_name = NULL, .fds = NULL,
                                   custom_key = Sys.getenv("USER"),
@@ -198,12 +213,14 @@ as.DGEList.data.frame <- function(x, covariates = TRUE, feature_ids = NULL,
                                normalized = FALSE, as.matrix = TRUE)
   } else {
     counts.dt <- assert_expression_result(x) %>%
-      collect(n=Inf) %>%
+      collect(n = Inf) %>%
       setDT %>%
-      unique(by=c('dataset', 'sample_id', 'feature_id'))
-    counts.dt[, samid := paste(dataset, sample_id, sep='__')]
+      unique(by = c('dataset', 'sample_id', 'feature_id'))
+    # counts.dt[, samid := paste(dataset, sample_id, sep='__')]
+    set(counts.dt, i = NULL, j = "samid",
+        paste(counts.dt[["dataset"]], counts.dt[["sample_id"]], sep = "__"))
     counts <- local({
-      wide <- dcast.data.table(counts.dt, feature_id ~ samid, value.var='value')
+      wide <- dcast(counts.dt, feature_id ~ samid, value.var = "value")
       out <- as.matrix(wide[, -1L, with=FALSE])
       rownames(out) <- wide[[1L]]
       class(out) <- c('FacileExpression', class(out))

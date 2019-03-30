@@ -4,10 +4,13 @@
 \alias{ds_annot}
 \title{Bioc-container specific data set annotation extraction functions}
 \usage{
-ds_annot(x, validate = FALSE, ...)
+ds_annot(x, meta = NULL, validate = FALSE, ...)
 }
 \arguments{
 \item{x}{SummarizedExperiment, ExpressionSet or DGEList}
+
+\item{meta}{a list of description stuff for the dataset, this can act to
+override what's there, already}
 
 \item{validate}{single logical, check results}
 

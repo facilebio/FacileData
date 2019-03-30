@@ -71,6 +71,8 @@ tidy.EList <- function(x, ...)  {
   .tidy.core(mats, genes = x$genes, samples = x$targets)
 }
 
+#' @noRd
+#' @importFrom reshape2 melt
 .tidy.core <- function(mats, genes, samples, genes_columns = NULL,
                        samples_columns = NULL, ...) {
   if (is.matrix(mats)) mats <- list(value = mats)
@@ -107,7 +109,7 @@ tidy.EList <- function(x, ...)  {
   adat.all <- lapply(names(mats), function(mname) {
     m <- mats[[mname]]
     stopifnot(all.equal(rownames(m), rnames))
-    m <- melt(m)
+    m <- reshape2::melt(m)
     m <- transform(m, Var1 = as.character(Var1), Var2 = as.character(Var2))
     colnames(m) <- c(gid.col, sid.col, mname)
     m

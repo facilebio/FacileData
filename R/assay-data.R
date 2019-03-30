@@ -108,6 +108,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
 
 #' @export
 #' @rdname fetch_assay_data
+#' @importFrom data.table setDF
 fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
                                           assay_name = default_assay(fds(x)),
                                           normalized = FALSE,
@@ -237,21 +238,32 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
   set_fds(vals, x)
 }
 
+#' @noRd
+#' @importFrom data.table as.data.table melt.data.table set setcolorder setnames
 .melt.assay.matrix <- function(vals, assay_name, atype, ftype, finfo) {
   vals <- as.data.table(vals, keep.rownames=TRUE)
   vals <- melt.data.table(vals, id.vars='rn', variable.factor=FALSE,
                           variable.name='sample_id')
   setnames(vals, 1L, 'feature_id')
 
-  vals[, dataset := sub('__.*$', '', sample_id)]
-  vals[, sample_id := sub('^.*__', '', sample_id)]
-  vals[, assay := assay_name]
-  vals[, assay_type := atype]
-  vals[, feature_type := ftype]
-  xref <- match(vals$feature_id, finfo$feature_id)
-  vals[, feature_name := finfo$name[xref]]
-  corder <- c('dataset', 'sample_id', 'assay', 'assay_type',
-              'feature_type', 'feature_id', 'feature_name', 'value')
+  # vals[, dataset := sub('__.*$', '', sample_id)]
+  # vals[, sample_id := sub('^.*__', '', sample_id)]
+  # vals[, assay := assay_name]
+  # vals[, assay_type := atype]
+  # vals[, feature_type := ftype]
+  # xref <- match(vals$feature_id, finfo$feature_id)
+  # vals[, feature_name := finfo$name[xref]]
+
+  set(vals, NULL, "dataset", sub("__.*$", "", vals[["sample_id"]]))
+  set(vals, NULL, "sample_id", sub("^.*__", "", vals[["sample_id"]]))
+  set(vals, NULL, "assay", assay_name)
+  set(vals, NULL, "assay_type", atype)
+  set(vals, NULL, "feature_type", ftype)
+  xref <- match(vals[["feature_id"]], finfo[["feature_id"]])
+  set(vals, NULL, "feature_name", finfo[["name"]][xref])
+
+  corder <- c("dataset", "sample_id", "assay", "assay_type",
+              "feature_type", "feature_id", "feature_name", "value")
   setcolorder(vals, corder)
   vals
 }
@@ -279,7 +291,7 @@ fetch_assay_score.FacileDataSet <- function(x, features, samples = NULL,
 #' @noRd
 #' @export
 assay_names.FacileDataSet <- function(x, default_first=TRUE) {
-  anames <- assay_info_tbl(x) %>% collect %$% assay
+  anames <- assay_info_tbl(x) %>% collect(n = Inf) %>% pull(assay)
   if (default_first && length(anames) > 1L) {
     dassay <- default_assay(x)
     anames <- intersect(c(dassay, setdiff(anames, dassay)), anames)
@@ -365,8 +377,8 @@ assay_feature_type <- function(x, assay_name) {
   assert_choice(assay_name, assay_names(x))
   assay_info_tbl(x) %>%
     filter(assay == assay_name) %>%
-    collect %$%
-    feature_type
+    collect(n = Inf) %>%
+    pull(feature_type)
 }
 
 #' Materializes a table with all feature information for a given assay.

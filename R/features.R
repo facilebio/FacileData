@@ -7,8 +7,8 @@ feature_types <- function(x) {
   ## Damn, can't do distinct on sqlite
   feature_info_tbl(x) %>%
     distinct(feature_type) %>%
-    collect(n=Inf) %$%
-    feature_type
+    collect(n=Inf) %>%
+    pull(feature_type)
 }
 
 #' Test if a given feature type is stored in a FacileDataSet

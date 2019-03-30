@@ -7,14 +7,15 @@
 \usage{
 as.FacileDataSet(x, path, assay_name, assay_type, source_assay,
   assay_description = paste("Description for ", assay_name),
-  dataset_name = "DEFAULT_NAME", organism = c("unspecified",
-  "Homo sapiens", "Mus musculus"), page_size = 2^12,
-  cache_size = 2e+05, chunk_rows = 5000, chunk_cols = "ncol",
-  chunk_compression = 5, covariate_def = NULL, ...)
+  dataset_name = "DEFAULT_NAME", dataset_meta = NULL,
+  organism = c("unspecified", "Homo sapiens", "Mus musculus"),
+  page_size = 2^12, cache_size = 2e+05, chunk_rows = 5000,
+  chunk_cols = "ncol", chunk_compression = 5, covariate_def = NULL,
+  ...)
 
 \method{as.FacileDataSet}{list}(x, path, assay_name, assay_type,
   source_assay, assay_description = paste("Description for ",
-  assay_name), dataset_name = "DEFAULT_NAME",
+  assay_name), dataset_name = "DEFAULT_NAME", dataset_meta = list(),
   organism = c("unspecified", "Homo sapiens", "Mus musculus"),
   page_size = 2^12, cache_size = 2e+05, chunk_rows = 5000,
   chunk_cols = "ncol", chunk_compression = 5, covariate_def = NULL,
@@ -38,6 +39,10 @@ for use.}
 
 \item{dataset_name}{the \code{name} attribute of the FacileDataSet \code{meta.yaml}
 file.}
+
+\item{dataset_meta}{a named (by names(x)) with meta data about the datasets
+that appear in the list of datasets \code{x}. List elements per dataset should
+minimally include a \code{description} and \code{url} string.}
 
 \item{organism}{This is used to fetch the appropriate genesets when this
 dataset is used with the facileexplorer. Currently supported values are:

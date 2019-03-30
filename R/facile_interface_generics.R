@@ -170,6 +170,7 @@ fetch_assay_score.default <- function(x, features, samples=NULL, assay_name=NULL
 #' @family FacileInterface
 #' @export
 #' @rdname sample-covariates
+#' @family API
 fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
                                     custom_key=Sys.getenv("USER"),
                                     with_source = FALSE, ...) {

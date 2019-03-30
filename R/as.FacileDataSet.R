@@ -443,19 +443,21 @@ pdata_metadata <- function(x, ...) {
 pdata_metadata.SummarizedExperiment <- function(x, ...) {
   ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
   if (is.null(ns)) stop("SummarizedExperiment required")
+  ns4 <- tryCatch(loadNamespace("S4Vectors"), error = function(e) NULL)
+  if (is.null(ns4)) stop("S4Vectors required")
+
   sinfo <- ns$colData(x)
-  defs <- S4Vectors::metadata(sinfo)
-  defs
+  ns4$metadata(sinfo)
 }
 
 #' ExpressionSet method
 #' @export
 pdata_metadata.ExpressionSet <- function(x, ...) {
-    sinfo = pdata(x)
-    defs = attributes(sinfo)$label
-    names(defs) = colnames(sinfo)
-    defs = lapply(defs, function(el) { list(description = el) })
-    defs
+  sinfo <- pdata(x)
+  defs <- attributes(sinfo)$label
+  names(defs) <- colnames(sinfo)
+  defs <- lapply(defs, function(el) { list(description = el) })
+  defs
 }
 
 #' DGEList method
@@ -477,24 +479,24 @@ adata <- function(x, assay = NULL, ...) {
   UseMethod("adata")
 }
 adata.SummarizedExperiment <- function(x, assay = NULL, ...) {
-  stopifnot(requireNamespace("SummarizedExperiment", quietly = TRUE))
-  if (is.null(assay)) {
-    assay <- SummarizedExperiment::assayNames(x)[1L]
-  }
-  if (!assay %in% SummarizedExperiment::assayNames(x)) {
+  ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
+  if (is.null(ns)) stop("SummarizedExperiment required")
+  anames <- ns$assayNames(x)
+  if (is.null(assay)) assay <- anames[1L]
+  if (!assay %in% anames) {
     stop("Unknown assay in SummarizedExperiment: ", assay)
   }
-  SummarizedExperiment::assay(x, assay)
+  ns$assay(x, assay)
 }
 adata.ExpressionSet <- function(x, assay = NULL, ...) {
-  stopifnot(requireNamespace("Biobase", quietly = TRUE))
-  if (is.null(assay)) {
-    assay <- Biobase::assayDataElementNames(x)[1L]
-  }
-  if (!assay %in% Biobase::assayDataElementNames(x)) {
+  ns <- tryCatch(loadNamespace("Biobase"), error = function(e) NULL)
+  if (is.null(ns)) stop("Biobase required")
+  anames <- ns$assayDataElementNames(x)
+  if (is.null(assay)) assay <- anames[1L]
+  if (!assay %in% anames) {
     stop("Unknown assay in ExpressoinSet: ", assay)
   }
-  Biobase::assayDataElement(x, assay)
+  ns$assayDataElement(x, assay)
 }
 adata.DGEList <- function(x, assay = NULL, ...) {
   # stopifnot(requireNamespace("edgeR", quietly = TRUE))

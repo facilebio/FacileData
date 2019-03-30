@@ -1,6 +1,6 @@
-#####################################################################################
-### Make a type called cSurv that is a character representation of survival::surv ###
-#####################################################################################
+################################################################################
+# Make a type called cSurv that is a character representation of survival::surv
+################################################################################
 
 #' @name cSurv
 #' @title cSurv is a character representation of survival::surv ###
@@ -41,10 +41,13 @@ as_cSurv <- function(from) {
 #' @family cSurv
 #' @export
 as_Surv <- function(from) {
+  ns <- tryCatch(loadNamespace("survival"), error = function(e) NULL)
+  if (is.null(ns)) stop("survival package required")
+
   from <- as.character(from) # Both check type and drop attributes
   stopifnot(all(is.na(from) | grepl("\\d[\\+ ]*$", from)))
   status <- ifelse(endsWith(from, "+"), 0, 1)
-  Surv(as.numeric(gsub("[\\+ ]*$", "", from)), status)
+  ns$Surv(as.numeric(gsub("[\\+ ]*$", "", from)), status)
 }
 
 #' @family cSurv
