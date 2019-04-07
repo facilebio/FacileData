@@ -115,30 +115,40 @@ ungroup.facile_frame <- function(x, ...) {
 
 # Joins ========================================================================
 
+#' @export
+#' @noRd
 inner_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
                                     suffix = c(".x", ".y"), ...) {
   res <- NextMethod()
   as_facile_frame(res, fds(x), .extra_classes(x), .valid_sample_check = FALSE)
 }
 
+#' @export
+#' @noRd
 left_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
                                    suffix = c(".x", ".y"), ...) {
   res <- NextMethod()
   as_facile_frame(res, fds(x), .extra_classes(x), .valid_sample_check = FALSE)
 }
 
+#' @export
+#' @noRd
 right_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
                                     suffix = c(".x", ".y"), ...) {
   res <- NextMethod()
   as_facile_frame(res, fds(x), .extra_classes(x), .valid_sample_check = FALSE)
 }
 
+#' @export
+#' @noRd
 full_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
                                    suffix = c(".x", ".y"), ...) {
   res <- NextMethod()
   as_facile_frame(res, fds(x), .extra_classes(x), .valid_sample_check = FALSE)
 }
 
+#' @export
+#' @noRd
 anti_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, ...) {
   res <- NextMethod()
   as_facile_frame(res, fds(x), .extra_classes(x), .valid_sample_check = FALSE)
