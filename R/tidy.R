@@ -71,6 +71,34 @@ tidy.EList <- function(x, ...)  {
   .tidy.core(mats, genes = x$genes, samples = x$targets)
 }
 
+#' This is a convenience function for users to whip together a data.frame of
+#' assay data annotated with row and column annotations.
+#' @noRd
+#' @export
+tidy.matrix <- function(x, row_covariates, col_covariates, ...) {
+  assert_matrix(x, row.names = "unique", col.names = "unique")
+  assert_multi_class(row_covariates, c("data.frame", "tbl"))
+  assert_multi_class(col_covariates, c("data.frame", "tbl"))
+  row_covariates <- as.data.frame(collect(row_covariates, n = Inf))
+  col_covariates <- as.data.frame(collect(col_covariates, n = Inf))
+
+  stopifnot(
+    nrow(row_covariates) == nrow(x),
+    nrow(col_covariates) == ncol(x))
+
+  if (!setequal(rownames(x), rownames(row_covariates))) {
+    stop("rownames(x) does not match rownames(row_covariates)")
+  }
+  row_covariates <- row_covariates[rownames(x),,drop=FALSE]
+
+  if (!setequal(colnames(x), rownames(col_covariates))) {
+    stop("colnames(x) does not match rownames(col_covariates)")
+  }
+  col_covariates <- col_covariates[colnames(x),,drop=FALSE]
+
+  .tidy.core(x, row_covariates, col_covariates)
+}
+
 #' @noRd
 #' @importFrom reshape2 melt
 .tidy.core <- function(mats, genes, samples, genes_columns = NULL,
@@ -123,5 +151,5 @@ tidy.EList <- function(x, ...)  {
   adat <- adat[, !duplicated(colnames(adat))]
   out <- inner_join(adat, select(genes, !!gcols), by = gid.col)
   out <- inner_join(out, select(samples, !!scols), by = sid.col)
-  out
+  as.tbl(out)
 }
