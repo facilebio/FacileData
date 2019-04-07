@@ -264,15 +264,6 @@ as.DGEList.facile_frame <- function(x, covariates = TRUE, feature_ids = NULL,
   }
   assert_choice(assay_name, assay_names(.fds))
 
-  # force(.fds)
-  # force(assay_name)
-  # .fds <- assert_facile_data_store(.fds)
-  # browser()
-  # NextMethod(.fds = .fds)
-  # NextMethod(.fds = .fds)
-  # NextMethod()
-  # browser()
-
   has.count <- "value" %in% colnames(x) &&
     is.integer(x[["value"]]) &&
     is.character("feature_id")
