@@ -283,7 +283,8 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
                                   custom_key=custom_key)
   covs <- spread_covariates(covs, .fds)
 
-  out <- left_join(x, covs, by=c("dataset", "sample_id"), suffix = c("", ".x"))
+  out <- left_join(x, covs, by=c("dataset", "sample_id"),
+                   suffix = c("", ".infds"))
 
   if (na.rm && length(covariates)) {
     keep <- complete.cases(select_(out, .dots=covariates))
