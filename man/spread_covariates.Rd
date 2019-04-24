@@ -4,7 +4,7 @@
 \alias{spread_covariates}
 \title{Spreads the covariates returned from database into wide data.frame}
 \usage{
-spread_covariates(x, .fds = fds(x))
+spread_covariates(x, .fds = fds(x), cov.def = NULL, ...)
 }
 \arguments{
 \item{x}{output from \code{fetch_sample_covariates}}

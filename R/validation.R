@@ -222,7 +222,7 @@ assert_sample_covariates <- function(x) {
 #' @rdname assertions
 is_sample_covariates <- function(x) {
   if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
-  req.cols <- c('dataset', 'sample_id', 'variable', 'value', 'class', 'type')
+  req.cols <- c('dataset', 'sample_id', 'variable', 'value', 'class') #, 'type')
   has_columns(x, req.cols)
 }
 

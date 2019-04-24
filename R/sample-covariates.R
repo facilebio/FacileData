@@ -60,7 +60,19 @@ summary.eav_covariates <- function(x, expanded = FALSE, ...) {
   } else {
     res <- dat %>%
       group_by(variable, class) %>%
-      summarize(nsamples = n(), source = source[1L])
+      summarize(nsamples = n(),
+                nlevels = {
+                  if (class[1L] == "categorical")
+                    length(unique(value))
+                  else
+                    NA_integer_
+                },
+                IQR = {
+                  if (class[1L] == "real")
+                    IQR(as.numeric(value))
+                  else
+                    NA_real_
+                  })
   }
 
   res <- ungroup(res)
@@ -280,8 +292,8 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
     distinct(.keep_all=TRUE)
 
   covs <- fetch_sample_covariates(.fds, samples, covariates,
-                                  custom_key=custom_key)
-  covs <- spread_covariates(covs, .fds)
+                                  custom_key=custom_key, ...)
+  covs <- spread_covariates(covs, .fds, ...)
 
   out <- left_join(x, covs, by=c("dataset", "sample_id"),
                    suffix = c("", ".infds"))
@@ -304,7 +316,7 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
 #' @param x output from \code{fetch_sample_covariates}
 #' @param .fds A \code{FacileDataSet} object
 #' @return a wide \code{tbl_df}-like object
-spread_covariates <- function(x, .fds=fds(x)) {
+spread_covariates <- function(x, .fds = fds(x), cov.def = NULL, ...) {
   stopifnot(is.FacileDataSet(.fds))
   x <- assert_sample_covariates(x) %>%
     collect(n=Inf)
@@ -324,8 +336,10 @@ spread_covariates <- function(x, .fds=fds(x)) {
     as.tbl()
 
   # sample-covariates -------------------------------------------------------
+  if (is.null(cov.def)) {
+    cov.def <- covariate_definitions(.fds)
+  }
 
-  cov.def <- covariate_definitions(.fds)
   if (!is.null(cov.def)) {
     do.cast <- setdiff(colnames(out), c('dataset', 'sample_id'))
     ## Don't decode categorical variables of type 'user_annotation'

@@ -262,17 +262,10 @@ dataset_definitions <- function(x, as.list=TRUE) {
   defs
 }
 
-#' Get description of sample metadata columns
-#'
-#' Descriptions of the sample covariates can be specified in a FacileDataSet's
-#' `meta.yaml` file. This function returns those.
-#'
+#' @noRd
 #' @export
 #' @importFrom yaml yaml.load_file
-#' @param x FacileDataSet
-#' @param as.list single logical, return tibble or list
-#' @return meta information about the sample covariates in `x`
-covariate_definitions <- function(x, as.list=TRUE) {
+covariate_definitions.FacileDataSet <- function(x, as.list = TRUE, ...) {
   out <- meta_info(x)$sample_covariates
   if (!as.list) {
     out <- lapply(names(out), function(name) {
@@ -287,6 +280,13 @@ covariate_definitions <- function(x, as.list=TRUE) {
   }
   class(out) <- c('CovariateDefinitions', class(out))
   set_fds(out, x)
+}
+
+#' @noRd
+#' @export
+name.FacileDataSet <- function(x, ...) {
+  name. <- assert_string(meta_info(x)[["name"]])
+  name.
 }
 
 #' Retrieves the sample identifiers for all samples in a FacileDataSet.

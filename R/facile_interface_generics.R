@@ -30,6 +30,19 @@ samples.default <- function(x, ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
 
+#' Get description of sample metadata columns
+#'
+#' Descriptions of the sample covariates can be specified in a FacileDataSet's
+#' `meta.yaml` file. This function returns those.
+#'
+#' @export
+#' @param x FacileDataTore
+#' @param as.list single logical, return tibble or list
+#' @return meta information about the sample covariates in `x`
+covariate_definitions <- function(x, as.list = TRUE, ...) {
+  UseMethod("covariate_definitions", x)
+}
+
 #' @family FacileInterface
 #' @export
 default_assay <- function(x, ...) {
@@ -256,4 +269,42 @@ with_sample_covariates.default <- function(x, covariates = NULL, na.rm = FALSE,
                                            .fds = NULL, ...) {
   stop("The FacileAPI requires a specific method be written for this type.")
 }
+
+# Labeled ======================================================================
+
+# Covaraites (and similar things) have can have both "labels" and "names". The
+# "name" is the R-frienly name of the object/variable/etc. and the "label" is
+# a human-readable version of the same, ie. "PFS" might be a name, and
+# "Progression Free Survival" might be the label
+
+#' Labeled acts like interface to reactive modules.
+#'
+#' Modules that implement this interface must return `label` and `name` reactive
+#' elements within them.
+#'
+#' We use these when something (like a `assayFeatureSelect`) needs
+#' a "computer friendly" name for itself (`name()`), or a more human readable
+#' name (`label()`)
+#'
+#' @export
+#' @rdname labeled
+name <- function(x, ...) {
+  UseMethod("name", x)
+}
+
+#' @noRd
+#' @export
+name.NULL <- function(x, ...) NULL
+
+#' @noRd
+#' @export
+#' @rdname labeled
+label <- function(x, ...) {
+  UseMethod("label")
+}
+
+#' @noRd
+#' @export
+#' @rdname labeled
+label.NULL <- function(x, ...) NULL
 

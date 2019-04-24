@@ -37,6 +37,9 @@ as different cancer indications from the TCGA). This functions returns
 description and URL information that describes these datasets in more detail,
 which is specified in the FacileDataSets `meta.yaml` file.
 }
+\details{
+TODO: Implement meta_info as s3 generic and make one for ReactiveFacileDataStore
+}
 \seealso{
 Other FacileDataSet: \code{\link{FacileDataSet}},
   \code{\link{dbfn}}, \code{\link{hdf5fn}}

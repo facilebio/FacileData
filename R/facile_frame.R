@@ -18,6 +18,7 @@ as_facile_frame <- function(x, datastore = fds(x), classes = NULL, ...,
     has_columns(x, c("dataset", "sample_id"), warn = FALSE)
   if (.valid_sample_check) assert_sample_subset(x, datastore)
 
+  # if (!is(datastore, "FacileDataStore")) browser()
   assert_class(datastore, "FacileDataStore")
   if (!is.null(classes)) assert_character(classes)
   class(x) <- unique(c(classes, "facile_frame", class(x)))
@@ -154,3 +155,5 @@ anti_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, ...) {
   as_facile_frame(res, fds(x), .extra_classes(x), .valid_sample_check = FALSE)
 }
 
+# bind =========================================================================
+# No can do, the first param in these methods is `...`, which you can S3ize
