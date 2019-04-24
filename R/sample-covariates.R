@@ -174,14 +174,16 @@ fetch_custom_sample_covariates.FacileDataSet <- function(
   }
   samples <- collect(samples, n = Inf)
 
-  out.cols <- colnames(sample_covariate_tbl(x))
+  out.cols <- c("dataset", "sample_id", "variable", "value", "class", "type",
+                "date_entered")
   fpat <- paste0('^', file.prefix, '_', custom_key, "_.*json")
   annot.files <- list.files(path=x$anno.dir, pattern=fpat, full.names=TRUE)
 
   if (length(annot.files)) {
     annos <- lapply(annot.files, function(fn) stream_in(file(fn), verbose=FALSE))
     out <- bind_rows(annos) %>%
-      select_(.dots=out.cols) %>%
+      # select_(.dots=out.cols) %>%
+      select(!!out.cols) %>%
       set_fds(x) %>%
       join_samples(samples, semi=TRUE)
     ## We weren't saving the type == 'categorical' column earlier. So if this
@@ -280,7 +282,7 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
                                               na.rm = FALSE,
                                               custom_key = Sys.getenv("USER"),
                                               .fds = NULL, ...) {
-  stopifnot(is.FacileDataSet(.fds))
+  assert_facile_data_store(.fds)
   x <- assert_sample_subset(x) %>% collect(n=Inf)
   stopifnot(is.character(covariates) || is.null(covariates))
   if (is.character(covariates) && length(covariates) == 0L) {
@@ -317,7 +319,7 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
 #' @param .fds A \code{FacileDataSet} object
 #' @return a wide \code{tbl_df}-like object
 spread_covariates <- function(x, .fds = fds(x), cov.def = NULL, ...) {
-  stopifnot(is.FacileDataSet(.fds))
+  assert_facile_data_store(.fds)
   x <- assert_sample_covariates(x) %>%
     collect(n=Inf)
 

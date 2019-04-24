@@ -290,7 +290,7 @@ fetch_assay_score.FacileDataSet <- function(x, features, samples = NULL,
 
 #' @noRd
 #' @export
-assay_names.FacileDataSet <- function(x, default_first=TRUE) {
+assay_names.FacileDataSet <- function(x, default_first = TRUE, ...) {
   anames <- assay_info_tbl(x) %>% collect(n = Inf) %>% pull(assay)
   if (default_first && length(anames) > 1L) {
     dassay <- default_assay(x)
@@ -299,13 +299,9 @@ assay_names.FacileDataSet <- function(x, default_first=TRUE) {
   anames
 }
 
-#' Fetches assay meta information for the assays stored in a FacileDataStore
-#'
 #' @export
-#' @param x A `FacileDataStore`
-#' @param assay_name optional name of the assay to get information for
-#' @return a tibble of meta information for the assays stored in `x`
-assay_info <- function(x, assay_name = NULL) {
+#' @noRd
+assay_info.FacileDataSet <- function(x, assay_name = NULL, ...) {
   stopifnot(is.FacileDataSet(x))
   ainfo <- assay_info_tbl(x) %>% collect(n = Inf)
   if (!is.null(assay_name)) {
@@ -318,7 +314,7 @@ assay_info <- function(x, assay_name = NULL) {
 
 #' @export
 has_assay <- function(x, assay_name) {
-  stopifnot(is.FacileDataSet(x))
+  assert_facile_data_store(x)
   assert_character(assay_name)
   assay_name %in% assay_names(x)
 }
@@ -386,7 +382,7 @@ assay_feature_type <- function(x, assay_name) {
 #' DEBUG: This logic is unnecessarily complex because I make sure to collect
 #' all tables from the database as opposed to copying external tables in and
 #' doing an inner_join in the database. I'm doing this becuase we are getting
-#' name collections on some of the temporary tables. We get errors like:
+#' name collisions on some of the temporary tables. We get errors like:
 #'     Warning: Error in : Table pkdtpohpsu already exists.
 #'
 #' This fetches the hdf5_index for the assays as well
@@ -580,7 +576,7 @@ with_assay_data.tbl <- function(x, features, assay_name = NULL,
 #' @export
 #' @method with_assay_data data.frame
 #' @noRd
-with_assay_data.data.frame <- function(x, features, assay_name=NULL,
+with_assay_data.data.frame <- function(x, features, assay_name = NULL,
                                        normalized = TRUE, aggregate.by = NULL,
                                        spread = TRUE, with_assay_name=FALSE,
                                        ..., verbose = FALSE, .fds = NULL) {
@@ -590,7 +586,7 @@ with_assay_data.data.frame <- function(x, features, assay_name=NULL,
 
   ## Check that parameters are kosher before fetching data
   features <- create_assay_feature_descriptor(.fds, features,
-                                              assay_name=assay_name)
+                                              assay_name = assay_name)
   assay_name <- unique(features$assay)
   if (test_flag(spread) && spread) {
     ## infer column based on assay type (rnaseq for now)
@@ -616,7 +612,8 @@ with_assay_data.data.frame <- function(x, features, assay_name=NULL,
       }
       with_assay_name <- TRUE
     }
-    adata <- select_(adata, .dots=c('dataset', 'sample_id', spread, 'value'))
+    # adata <- select_(adata, .dots=c('dataset', 'sample_id', spread, 'value'))
+    adata <- select(adata, dataset, sample_id, !!spread, value)
     adata <- tidyr::spread_(adata, spread, 'value')
     spread.idx <- which(colnames(adata) %in% spread.vals)
     if (with_assay_name || spread == 'id') {
@@ -707,4 +704,53 @@ spread_assay_data <- function(x, assay_name, key=c('name', 'feature_id'),
          "You need to debug this")
   }
   out
+}
+
+#' @noRd
+#' @export
+with_assay_covariates.facile_frame <- function(x, covariates = NULL,
+                                               assay_name = default_assay(x),
+                                               ..., .fds = fds(x)) {
+  x <- collect(x, n = Inf)
+  .fds <- assert_facile_data_store(.fds)
+
+  NextMethod(x, .fds = .fds)
+  # NextMethod(x = x, .fds = .fds)
+}
+
+#' @noRd
+#' @export
+#' @method with_assay_covariates data.frame
+with_assay_covariates.data.frame <- function(x, covariates = NULL,
+                                             assay_name = NULL, ...,
+                                             .fds = NULL) {
+  # doing fds(.fds) here because of the collision between
+  # FacileShine::ReactiveFacileDataSet (boxd) objects and Issue #2
+  # Currently we are accessing directly the assay_sample_info tbl to get
+  # assay_sample covariates, which needs to change.
+  #
+  # https://github.com/denalitherapeutics/FacileData/issues/2
+  ofds <- .fds
+  .fds <- assert_facile_data_store(fds(.fds))
+
+  # Until Issue #2 is complete, we can only fetch "libsize" and "normfactor"
+  choices <- c("libsize", "normfactor")
+  if (is.null(covariates)) covariates <- choices
+  assert_character(covariates, null.ok = TRUE)
+  assert_subset(covariates, choices, empty.ok = TRUE)
+
+  if (is.null(assay_name)) assay_name <- default_assay(.fds)
+  assert_choice(assay_name, assay_names(.fds))
+
+
+  x <- collect(x, n = Inf)
+  assert_sample_subset(x, .fds)
+
+  ss <- assay_sample_info_tbl(.fds) %>%
+    filter(assay == assay_name) %>%
+    select(dataset, sample_id, !!covariates) %>%
+    collect(n = Inf)
+
+  out <- left_join(x, ss, by = c("dataset", "sample_id"))
+  as_facile_frame(out, ofds)
 }

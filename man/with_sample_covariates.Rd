@@ -32,7 +32,8 @@ Note that this function will force the collection of \code{x}
 }
 \seealso{
 Other FacileInterface: \code{\link{facet_frame.FacileDataSet}},
+  \code{\link{fetch_assay_score}},
   \code{\link{fetch_sample_covariates}},
-  \code{\link{organism}}
+  \code{\link{fetch_sample_statistics}}
 }
 \concept{FacileInterface}

@@ -10,7 +10,6 @@
 #' TODO: Implement using `tidyeval`
 #'
 #' @export
-#' @importFrom lazyeval lazy_dots auto_name
 #' @family API
 #'
 #' @param x A `FacileDataSet`
@@ -24,29 +23,39 @@
 #' # To identify all samples that are of "CMS3" or "CMS4" subtype(
 #' # stored in the "subtype_crc_cms" covariate:
 #' crc.34 <- filter_samples(fds, subtype_crc_cms %in% c("CMS3", "CMS4"))
-#' eav.query <- sample_covariate_tbl(fds) %>%
-#'   filter(variable == "subtype_crc_cms", value %in% c("CMS3", "CMS4")) %>%
-#'   collect
+#' eav.query <- fds %>%
+#'   fetch_sample_covariates(covariates = "subtype_crc_cms") %>%
+#'   filter(value %in% c("CMS3", "CMS4")) %>%
+#'   collect()
 #' setequal(crc.34$sample_id, eav.query$sample_id)
-filter_samples.FacileDataSet <- function(x, ..., with_covariates=FALSE) {
-  dots <- lazy_dots(...)
-  cov.table <- .create_wide_covariate_table(x, dots)
-  out <- dplyr::filter_(cov.table, .dots=dots)
+filter_samples.FacileDataSet <- function(x, ...,
+                                         custom_key = Sys.getenv("USER"),
+                                         with_covariates = FALSE) {
+  # cov.table <- .create_wide_covariate_table(x, dots)
+  # out <- dplyr::filter_(cov.table, .dots=dots)
+  cov.table <- .create_wide_covariate_table(x, ..., custom_key = custom_key)
+  out <- filter(cov.table, ...)
   if (!with_covariates) {
     out <- select(out, dataset, sample_id)
   }
   as_facile_frame(out, x)
 }
 
-.create_wide_covariate_table <- function(x, dots) {
-  stopifnot(is.FacileDataSet(x))
-  sc <- sample_covariate_tbl(x)
+#' @noRd
+#' @importFrom lazyeval lazy_dots
+.create_wide_covariate_table <- function(x, ...,
+                                         custom_key = Sys.getenv("USER")) {
+  assert_facile_data_store(x)
+  sc <- fetch_sample_covariates(x, custom_key = custom_key)
+  dots <- lazy_dots(...)
   qvars <- .parse_filter_vars(x, dots)
-  fetch_sample_covariates(x, covariates=qvars) %>% spread_covariates
+  filter(sc, variable %in% !!qvars) %>% spread_covariates()
 }
 
+#' @noRd
+#' @importFrom lazyeval auto_name
 .parse_filter_vars <- function(x, dots) {
-  stopifnot(is.FacileDataSet(x))
+  assert_facile_data_store(x)
   stopifnot(is(dots, 'lazy_dots'))
 
   all.vars <- sample_covariate_tbl(x) %>%

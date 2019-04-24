@@ -3,6 +3,7 @@
 #' NOTE: this function needs the axe. It has been changed to use the
 #' assay_sample_info_table, but the way we handle this with the new unhinged
 #' assay needs to change.
+#'
 #' @export
 #' @param x A \code{FacileDataSet} object
 #' @param samples a data.frame or tbl_sqlite that has dataset and sample_id
@@ -17,6 +18,11 @@ fetch_sample_statistics.FacileDataSet <- function(x, samples = NULL,
                                                   semi = TRUE,
                                                   assay_name = default_assay(x),
                                                   ...) {
+  warning("`fetch_sample_statistics` will be removed from FacileData API\n,",
+          "See Issue #2\n",
+          "https://github.com/denalitherapeutics/FacileData/issues/2",
+          immediate. = TRUE)
+
   assert_string(assay_name)
   stopifnot(assay_name %in% assay_names(x))
 

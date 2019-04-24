@@ -36,7 +36,8 @@ Fetch rows from sample_covariate table for specified samples and covariates
 }
 \seealso{
 Other FacileInterface: \code{\link{facet_frame.FacileDataSet}},
-  \code{\link{organism}},
+  \code{\link{fetch_assay_score}},
+  \code{\link{fetch_sample_statistics}},
   \code{\link{with_sample_covariates}}
 
 Other API: \code{\link{fetch_assay_data.FacileDataSet}},

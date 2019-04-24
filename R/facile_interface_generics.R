@@ -6,12 +6,22 @@
 #'
 #' This is a stub for a manpage all about the FacileAPI
 
+#' Fetches assay meta information for the assays stored in a FacileDataStore
+#'
+#' @export
+#' @param x A `FacileDataStore`
+#' @param assay_name optional name of the assay to get information for
+#' @return a tibble of meta information for the assays stored in `x`
+assay_info <- function(x, assay_name = NULL, ...) {
+  UseMethod("assay_info", x)
+}
+
 ## General getters
 
 #' @family FacileInterface
 #' @export
 organism <- function(x, ...) {
-  UseMethod("organism")
+  UseMethod("organism", x)
 }
 
 #' @export
@@ -22,7 +32,7 @@ organism.default <- function(x, ...) {
 #' @family FacileInterface
 #' @export
 samples <- function(x, ...) {
-  UseMethod("samples")
+  UseMethod("samples", x)
 }
 
 #' @export
@@ -117,6 +127,8 @@ fetch_samples.default <- function(x, samples = NULL, assay = "rnaseq", ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
 
+#' NOTE: fetch_sample_statistics -> `fetch_assay_covariates`
+#' Issue #2
 #' @family FacileInterface
 #' @export
 fetch_sample_statistics <- function(x, samples = NULL, semi = TRUE,
@@ -124,6 +136,7 @@ fetch_sample_statistics <- function(x, samples = NULL, semi = TRUE,
   UseMethod("fetch_sample_statistics")
 }
 
+#' Issue #2
 #' @export
 fetch_sample_statistics.default <- function(x, samples = NULL, semi = TRUE,
                                             assay_name = NULL) {
@@ -132,7 +145,7 @@ fetch_sample_statistics.default <- function(x, samples = NULL, semi = TRUE,
 
 #' @family FacileInterface
 #' @export
-assay_names <- function(x, default_first=TRUE) {
+assay_names <- function(x, default_first = TRUE, ...) {
   UseMethod("assay_names")
 }
 
@@ -146,6 +159,29 @@ assay_names.default <- function(x, default_first = TRUE) {
 assay_feature_info <- function(x, assay_name, feature_ids = NULL, ...) {
   UseMethod("assay_feature_info", x)
 }
+
+#' Retrieve assay-specific information, this is where things like libsize and
+#' normfactors are stored for RNA-seq data, maybe RIN score and other such
+#' things?
+#'
+#' TODO: Need an assay_sample_info EAV table in FacileDataSet
+#' @noRd
+#' @family FacileInterface
+#' @export
+fetch_assay_covariates <- function(x, covariates = NULL,
+                                   assay_name = default_assay(x), ...) {
+  UseMethod("fetch_assay_covariates", x)
+}
+
+#' TODO: Need an assay_sample_info EAV table in FacileDataSet
+#' @noRd
+#' @family FacileInterface
+#' @export
+with_assay_covariates <- function(x, covariates = NULL,
+                                   assay_name = default_assay(x), ...) {
+  UseMethod("with_assay_covariates", x)
+}
+
 
 #' @family FacileInterface
 #' @export
@@ -166,6 +202,7 @@ fetch_assay_data.default <- function(x, features, samples=NULL,
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
 
+#' NOTE: is fetch_assay_score really necessary?
 #' @family FacileInterface
 #' @export
 fetch_assay_score <- function(x, features, samples=NULL, assay_name=NULL,

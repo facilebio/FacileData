@@ -77,13 +77,22 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
   samples <- tibble(
     dataset=sub('__.*$', '', colnames(x)),
     sample_id=sub('^.*?__', '', colnames(x)))
-  ## if you don't want to `collect` first, you could send `samples` in as
-  ## second argument and then copy that into the db.
-  ## #dboptimize
+
+  # if you don't want to `collect` first, you could send `samples` in as
+  # second argument and then copy that into the db.
+  # #dboptimize
+
+  # TODO: Start fixing here. This msethod assumes direct access to the db of
+  # the .fds, which breaks the abstractions. Fix use of these methods:
+  #   * feature_info_tbl()
+  #   * fetch_sample_statistics() should be fetch_assay_covariates? or
+  #     with_assay_covariates, because we get a wide table, maybe adding
+  #     the libsize and normfactors would look like:
+  #     assay_info <- with_assay_covariates(samples, assay_name)
   bad.samples <- samples %>%
-    anti_join(collect(sample_stats_tbl(.fds), n=Inf),
-              by=c('dataset', 'sample_id')) %>%
-    collect(n=Inf)
+    anti_join(collect(samples(.fds), n = Inf),
+              by=c("dataset", "sample_id")) %>%
+    collect(n = Inf)
   if (nrow(bad.samples)) {
     stop("Bad sample columns specified in the count matrix")
   }
@@ -106,49 +115,59 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
   }
 
   # Construct $genes meta information
-  ainfo <- assay_info(.fds, assay_name = assay_name)
-  ftype <- ainfo[["feature_type"]]
-  fids <- rownames(x)
+  # ainfo <- assay_info(.fds, assay_name = assay_name)
+  # ftype <- ainfo[["feature_type"]]
+  # fids <- rownames(x)
+  #
+  # gene_info <- feature_info_tbl(.fds) %>%
+  #   filter(feature_type == !!ftype) %>%
+  #   collect(n = Inf)
+  # genes <- gene_info %>%
+  #   semi_join(tibble(feature_id=fids), by='feature_id') %>%
+  #   rename(symbol = "name") %>%
+  #   as.data.frame
+  # rownames(genes) <- genes[["feature_id"]]
 
-  gene_info <- feature_info_tbl(.fds) %>%
-    filter(feature_type == !!ftype) %>%
-    collect(n = Inf)
-  genes <- gene_info %>%
-    semi_join(tibble(feature_id=fids), by='feature_id') %>%
-    rename(symbol = "name") %>%
-    as.data.frame
-  rownames(genes) <- genes[["feature_id"]]
-
-  class(x) <- 'matrix'
-
-  ## now subset down to only features asked for
   if (!is.null(feature_ids) && is.character(feature_ids)) {
     keep <- feature_ids %in% rownames(x)
     if (mean(keep) != 1) {
-      warning(sprintf("Only %d / %d feature_ids requested are in dataset",
+      warning(sprintf("Only %d / %d feature_ids requested are in data matrix",
                       sum(keep), length(keep)))
     }
-    x <- x[feature_ids[keep],,drop=FALSE]
-    genes <- genes[feature_ids[keep],,drop=FALSE]
+    feature_ids <- feature_ids[keep]
+  } else {
+    feature_ids <- rownames(x)
   }
 
-  ## Doing the internal filtering seems to be too slow
-  ## sample.stats <- fetch_sample_statistics(db, x) %>%
-  sample.stats <- .fds %>%
-    fetch_sample_statistics(samples, assay_name = assay_name) %>%
-    collect(n=Inf) %>%
+  genes <- .fds %>%
+    assay_feature_info(assay_name, feature_ids = feature_ids) %>%
+    as.data.frame()
+  rownames(genes) <- genes[["feature_id"]]
+  if (genes[["feature_type"]][1L] %in% c("entrez", "ensgid")) {
+    genes <- rename(genes, symbol = "name")
+  }
+
+  class(x) <- 'matrix'
+  x <- x[feature_ids,,drop = FALSE]
+  genes <- genes[feature_ids,,drop = FALSE]
+
+  # Issue #2
+  # https://github.com/denalitherapeutics/FacileData/issues/2
+  sample.stats <- samples %>%
+    with_assay_covariates(c("libsize", "normfactor"), assay_name,
+                          .fds = .fds) %>%
+    collect(n = Inf) %>%
     mutate(samid=paste(dataset, sample_id, sep='__')) %>%
-    rename(lib.size=libsize, norm.factors=normfactor) %>%
     as.data.frame()
   rownames(sample.stats) <- sample.stats[["samid"]]
   sample.stats <- sample.stats[colnames(x),,drop=FALSE]
 
-  y <- DGEList(x, genes=genes, lib.size=sample.stats$lib.size,
-               norm.factors=sample.stats$norm.factors)
+  y <- DGEList(x, genes = genes, lib.size = sample.stats[["libsize"]],
+               norm.factors = sample.stats[["normfactor"]])
 
   y$samples <- cbind(
     y$samples,
-    sample.stats[colnames(y), c('dataset', 'sample_id', 'samid'), drop=FALSE])
+    sample.stats[, c("dataset", "sample_id", "samid"), drop = FALSE])
 
   if (update_libsizes) {
     y[["samples"]][["lib.size"]] <- colSums(y[["counts"]])

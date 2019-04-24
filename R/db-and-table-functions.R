@@ -79,7 +79,11 @@ assay_feature_info_tbl <- function(x) {
 
 #' @export
 assay_sample_info_tbl <- function(x) {
-  stopifnot(is.FacileDataSet(x))
+  # multi_class because of the collision between
+  # FacileShine::ReactiveFacileDataSet (boxd) objects and Issue #2
+  # Currently we are accessing directly the assay_sample_info tbl to get
+  # assay_sample covariates, which needs to change.
+  assert_multi_class(x, c("FacileDataSet", "BoxedFacileDataStore"))
   out <- tbl(x$con, 'assay_sample_info')
   as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
