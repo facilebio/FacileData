@@ -9,7 +9,7 @@ Authors@R: c(
   person("Denali Therapeutics", role = c("cph", "fnd"),
          comment = "Coypright 2019"),
   person("Genentech", role = c("cph", "fnd"),
-         comment = "Coypright 2015 - 2018"))
+         comment = "Coypright 2016 - 2018"))
 Description: Defines the "FacileData" API over multi-assay, high-throughput
   genomics data. The FacileData API is a fluent grammar that facilitates
   exploratory data analysis. This package also defines a "FacileDataSet" class,
