@@ -1,3 +1,63 @@
+#' @export
+#' @noRd
+fetch_feature_info.FacileDataSet <- function(x, feature_type,
+                                             feature_ids = NULL, ...) {
+  ftype <- assert_choice(feature_type, feature_types(x))
+  out <- filter(feature_info_tbl(x), feature_type == ftype)
+  if (!is.null(feature_ids)) {
+    assert_character(feature_ids, min.len = 1)
+    if (length(feature_ids) == 1L) {
+      out <- filter(out, feature_id == feature_ids)
+    } else {
+      out <- filter(out, feature_id %in% feature_ids)
+    }
+  }
+  out
+}
+
+#' @noRd
+#' @export
+with_feature_info.facile_frame <- function(x, covariates = NULL, ...,
+                                           .fds = fds(x)) {
+  x <- collect(x, n = Inf)
+  .fds <- assert_facile_data_store(.fds)
+  NextMethod(x, .fds = .fds)
+}
+
+#' @noRd
+#' @export
+with_feature_info.tbl <- function(x, covariates = NULL, ..., .fds = NULL) {
+  with_feature_info.data.frame(collect(x, n = Inf), covariates = covariates,
+                               ..., .fds = .fds)
+}
+
+#' @noRd
+#' @export
+#' @method with_feature_info data.frame
+with_feature_info.data.frame <- function(x, covariates = NULL, ...,
+                                         .fds = NULL) {
+  .fds <- assert_facile_data_store(.fds)
+  assert_subset(c("feature_id", "feature_type"), colnames(x))
+
+  # Possible things to ask for
+  fattribs <- colnames(fetch_feature_info(.fds, feature_types(.fds)[1L]))
+  fattribs <- setdiff(fattribs, c("feature_id", "feature_type"))
+
+  if (is.null(covariates)) covariates <- fattribs
+  assert_subset(covariates, fattribs)
+
+  new_info <- lapply(unique(x[["feature_type"]]), function(ftype) {
+    # I can do this lazily, but ...
+    fi <- fetch_feature_info(.fds, ftype)
+    fi <- select(fi, feature_id, feature_type, !!covariates)
+    collect(fi, n = Inf)
+  })
+  new_info <- bind_rows(new_info)
+
+  out <- left_join(x, new_info, by = c("feature_id", "feature_type"))
+  as_facile_frame(out, .fds)
+}
+
 #' Enumerate the types of feature stored in a FacileDataSet
 #'
 #' @export

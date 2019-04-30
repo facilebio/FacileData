@@ -160,6 +160,30 @@ assay_feature_info <- function(x, assay_name, feature_ids = NULL, ...) {
   UseMethod("assay_feature_info", x)
 }
 
+#' @family FacileInterface
+#' @export
+fetch_feature_info <- function(x, feature_type, feature_ids = NULL, ...) {
+  UseMethod("fetch_feature_info", x)
+}
+
+fetch_feature_info.default <- function(x, feature_type, feature_ids = NULL, ...) {
+  stop("Implement fetch_feature_info for class: ", class(x)[1L])
+}
+
+#' Append feature information columns to (feature-rows)
+#'
+#' @param x a data.frame feature descriptor columns (feature_id, feature_type)
+#' @return `x` fattened with the columns asked for
+with_feature_info <- function(x, covariates = NULL, ...) {
+  UseMethod("with_feature_info", x)
+}
+
+#' @noRd
+#' @export
+with_feature_info.default <- function(x, covariates = NULL, ...) {
+  stop("Implement 'with_feature_info for: ", class(x)[1L])
+}
+
 #' Retrieve assay-specific information, this is where things like libsize and
 #' normfactors are stored for RNA-seq data, maybe RIN score and other such
 #' things?

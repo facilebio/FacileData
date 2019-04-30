@@ -4,7 +4,8 @@
 \alias{filter_samples.FacileDataSet}
 \title{Filter against the sample_covariate_tbl EAV table as if it were wide.}
 \usage{
-\method{filter_samples}{FacileDataSet}(x, ..., with_covariates = FALSE)
+\method{filter_samples}{FacileDataSet}(x, ...,
+  custom_key = Sys.getenv("USER"), with_covariates = FALSE)
 }
 \arguments{
 \item{x}{A `FacileDataSet`}
@@ -32,9 +33,10 @@ fds <- exampleFacileDataSet()
 # To identify all samples that are of "CMS3" or "CMS4" subtype(
 # stored in the "subtype_crc_cms" covariate:
 crc.34 <- filter_samples(fds, subtype_crc_cms \%in\% c("CMS3", "CMS4"))
-eav.query <- sample_covariate_tbl(fds) \%>\%
-  filter(variable == "subtype_crc_cms", value \%in\% c("CMS3", "CMS4")) \%>\%
-  collect
+eav.query <- fds \%>\%
+  fetch_sample_covariates(covariates = "subtype_crc_cms") \%>\%
+  filter(value \%in\% c("CMS3", "CMS4")) \%>\%
+  collect()
 setequal(crc.34$sample_id, eav.query$sample_id)
 }
 \seealso{
