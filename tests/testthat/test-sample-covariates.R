@@ -151,3 +151,15 @@ test_that("successive with_sample_covariate calls build correct frame", {
     arrange(dataset, sample_id)
   expect_equal(res, expected)
 })
+
+test_that("with_sample_covariates can support renaming covariates", {
+  expected <- FDS %>%
+    fetch_sample_covariates(samples, c('sample_type', 'stage')) %>%
+    spread_covariates %>%
+    arrange(dataset, sample_id) %>%
+    rename(tumor_stage = "stage")
+  res <- samples %>%
+    with_sample_covariates(c("sample_type", tumor_stage = "stage")) %>%
+    arrange(dataset, sample_id)
+  expect_equal(res, expected)
+})

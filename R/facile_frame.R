@@ -14,9 +14,12 @@
 as_facile_frame <- function(x, datastore = fds(x), classes = NULL, ...,
                             .valid_sample_check = TRUE) {
   stopifnot(is.tbl(x) || is.data.frame(x))
+
   .valid_sample_check <- .valid_sample_check &&
     has_columns(x, c("dataset", "sample_id"), warn = FALSE)
-  if (.valid_sample_check) assert_sample_subset(x, datastore)
+  if (.valid_sample_check) {
+    assert_sample_subset(x, datastore)
+  }
 
   # if (!is(datastore, "FacileDataStore")) browser()
   assert_class(datastore, "FacileDataStore")

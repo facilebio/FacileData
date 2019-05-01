@@ -15,3 +15,14 @@ test_that("with_feature_info grabs the right goods", {
   f2 <- with_feature_info(genes, c("name", "meta"), .fds = FDS)
   expect_equal(f2, select(expected, !!colnames(f2)))
 })
+
+test_that("with_feature_info can rename feature covariates", {
+  expected <- genes %>%
+    with_feature_info(c("name", "meta"), .fds = FDS) %>%
+    rename(symbol = "name")
+
+  res <- genes %>%
+    with_feature_info(c(symbol = "name", "meta"), .fds = FDS)
+
+  expect_equal(res, expected)
+})

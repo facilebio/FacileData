@@ -31,30 +31,42 @@ with_feature_info.tbl <- function(x, covariates = NULL, ..., .fds = NULL) {
                                ..., .fds = .fds)
 }
 
+#' NOTE: Would be nice to do with_feature_info(x, symbol = name)
+#'
 #' @noRd
 #' @export
 #' @method with_feature_info data.frame
+#' @examples
+#' efds <- exampleFacileDataSet()
+#' some <- fetch_feature_info(efds, "entrez") %>%
+#'   select(feature_id, feature_type) %>%
+#'   collect(n = 5)
+#' with_feature_info(some, c("name", "meta"))
+#' with_feature_info(some, c(symbol = "name", biotype = "meta"))
 with_feature_info.data.frame <- function(x, covariates = NULL, ...,
                                          .fds = NULL) {
+  fkey <- c("feature_id", "feature_type")
   .fds <- assert_facile_data_store(.fds)
-  assert_subset(c("feature_id", "feature_type"), colnames(x))
+  assert_true(has_columns(x, fkey))
 
   # Possible things to ask for
   fattribs <- colnames(fetch_feature_info(.fds, feature_types(.fds)[1L]))
-  fattribs <- setdiff(fattribs, c("feature_id", "feature_type"))
+  fattribs <- setdiff(fattribs, fkey)
 
   if (is.null(covariates)) covariates <- fattribs
-  assert_subset(covariates, fattribs)
+  # unique removes
+  covariates <- assert_subset(covariates[!duplicated(covariates)], fattribs)
+  covariates <- nameit(covariates)
 
   new_info <- lapply(unique(x[["feature_type"]]), function(ftype) {
     # I can do this lazily, but ...
     fi <- fetch_feature_info(.fds, ftype)
-    fi <- select(fi, feature_id, feature_type, !!covariates)
+    fi <- select(fi, !!fkey, !!covariates)
     collect(fi, n = Inf)
   })
   new_info <- bind_rows(new_info)
 
-  out <- left_join(x, new_info, by = c("feature_id", "feature_type"))
+  out <- left_join(x, new_info, by = fkey, suffix = c("", ".infds"))
   as_facile_frame(out, .fds)
 }
 

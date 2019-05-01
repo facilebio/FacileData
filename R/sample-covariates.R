@@ -278,6 +278,11 @@ with_sample_covariates.tbl <- function(x, covariates = NULL,
 #' @export
 #' @noRd
 #' @method with_sample_covariates data.frame
+#' @examples
+#' efds <- exampleFacileDataSet()
+#' s <- filter_samples(efds, indication == "CRC")
+#' with_sample_covariates(s, c("sample_type", "stage"))
+#' with_sample_covariates(s, c("sample_type", tumor_stage = "stage"))
 with_sample_covariates.data.frame <- function(x, covariates = NULL,
                                               na.rm = FALSE,
                                               custom_key = Sys.getenv("USER"),
@@ -285,8 +290,10 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
   assert_facile_data_store(.fds)
   x <- assert_sample_subset(x) %>% collect(n=Inf)
   stopifnot(is.character(covariates) || is.null(covariates))
-  if (is.character(covariates) && length(covariates) == 0L) {
-    return(x)
+  if (is.character(covariates)) {
+    if (length(covariates) == 0L) return(x)
+    covariates <- covariates[!duplicated(covariates)]
+    covariates <- nameit(covariates)
   }
 
   samples <- x %>%
@@ -296,6 +303,9 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
   covs <- fetch_sample_covariates(.fds, samples, covariates,
                                   custom_key=custom_key, ...)
   covs <- spread_covariates(covs, .fds, ...)
+  if (!is.null(covariates) && !is.null(names(covariates))) {
+    covs <- rename(covs, !!covariates)
+  }
 
   out <- left_join(x, covs, by=c("dataset", "sample_id"),
                    suffix = c("", ".infds"))

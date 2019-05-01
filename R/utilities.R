@@ -40,3 +40,17 @@ set_class <- function(x, .class, ...) {
   class(x) <- unique(c(.class, class(x)))
   x
 }
+
+#' Ensures that a vector has names for all elements if it has names for any
+#'
+#' If the vector is not named, it remains that way
+#' @export
+#' @param x an object with names
+#' @return `x` with all elements either being uniquely named, or NULL
+nameit <- function(x, ...) {
+  if (is.null(names(x))) return(x)
+  noname <- nchar(names(x)) == 0L
+  names(x)[noname] <- x[noname]
+  names(x) <- make.names(names(x), unique = TRUE)
+  x
+}

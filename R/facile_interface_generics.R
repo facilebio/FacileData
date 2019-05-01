@@ -172,6 +172,7 @@ fetch_feature_info.default <- function(x, feature_type, feature_ids = NULL, ...)
 
 #' Append feature information columns to (feature-rows)
 #'
+#' @export
 #' @param x a data.frame feature descriptor columns (feature_id, feature_type)
 #' @return `x` fattened with the columns asked for
 with_feature_info <- function(x, covariates = NULL, ...) {

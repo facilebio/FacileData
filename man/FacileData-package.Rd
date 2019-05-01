@@ -26,7 +26,7 @@ Authors:
 Other contributors:
 \itemize{
   \item Denali Therapeutics (Coypright 2019) [copyright holder, funder]
-  \item Genentech (Coypright 2015 - 2018) [copyright holder, funder]
+  \item Genentech (Coypright 2016 - 2018) [copyright holder, funder]
 }
 
 }
