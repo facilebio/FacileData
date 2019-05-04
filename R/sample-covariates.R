@@ -6,7 +6,7 @@
 #' @md
 #' @export
 #'
-#' @param x A sample covariate table, the likes returned from
+#' @param object A sample covariate table, the likes returned from
 #'   [fetch_sample_covariates()].
 #' @param expanded includes details (rows) for each covariate per level
 #'   (or quantile), depending on the covariates `"class"` attribute.
@@ -27,12 +27,12 @@
 #' catdeetz <- covs %>%
 #'   filter(class == "categorical") %>%
 #'   summary(expanded = TRUE)
-summary.eav_covariates <- function(x, expanded = FALSE, ...) {
-  x <- assert_sample_covariates(x)
-  .fds <- assert_facile_data_store(fds(x))
-  with.source <- is.character(x[["source"]])
+summary.eav_covariates <- function(object, expanded = FALSE, ...) {
+  object <- assert_sample_covariates(object)
+  .fds <- assert_facile_data_store(fds(object))
+  with.source <- is.character(object[["source"]])
 
-  dat <- collect(x, n = Inf)
+  dat <- collect(object, n = Inf)
   if (!with.source) dat <- mutate(dat, source = NA)
 
   if (expanded) {

@@ -520,7 +520,8 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info,
 #'   used to absolutely find features
 create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
   ## TODO: Refactor the code inside `fetch_assay_data` to use this.
-  stopifnot(is.FacileDataSet(x))
+  # stopifnot(is.FacileDataSet(x))
+  assert_facile_data_store(x)
 
   if (is.character(features) || is.null(features) || is(features, 'tbl_sql')) {
     if (is.null(assay_name)) assay_name <- default_assay(x)
@@ -531,11 +532,11 @@ create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
   if (is.null(features)) {
     features <- assay_feature_info(x, assay_name) %>% collect(n=Inf)
   } else if (is.character(features)) {
-    features <- tibble(feature_id=features, assay=assay_name)
+    features <- tibble(feature_id = features, assay = assay_name)
   } else if (is(features, 'tbl_sql')) {
-    features <- collect(features, n=Inf) %>% mutate(assay=assay_name)
-  } else if (is.data.frame(features) && is.null(features[['assay']])) {
-    features[['assay']] <- assay_name
+    features <- collect(features, n = Inf) %>% mutate(assay = assay_name)
+  } else if (is.data.frame(features) && is.null(features[["assay"]])) {
+    features[["assay"]] <- assay_name
   }
 
   assert_assay_feature_descriptor(features, x)

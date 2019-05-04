@@ -4,10 +4,10 @@
 \alias{summary.eav_covariates}
 \title{Provides a summary table of sample covariates.}
 \usage{
-\method{summary}{eav_covariates}(x, expanded = FALSE, ...)
+\method{summary}{eav_covariates}(object, expanded = FALSE, ...)
 }
 \arguments{
-\item{x}{A sample covariate table, the likes returned from
+\item{object}{A sample covariate table, the likes returned from
 \code{\link[=fetch_sample_covariates]{fetch_sample_covariates()}}.}
 
 \item{expanded}{includes details (rows) for each covariate per level

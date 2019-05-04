@@ -24,7 +24,11 @@ as_facile_frame <- function(x, datastore = fds(x), classes = NULL, ...,
   # if (!is(datastore, "FacileDataStore")) browser()
   assert_class(datastore, "FacileDataStore")
   if (!is.null(classes)) assert_character(classes)
-  class(x) <- unique(c(classes, "facile_frame", class(x)))
+  if (!is(x, "facile_frame")) {
+    classes <- c(classes, "facile_frame")
+  }
+  classes <- setdiff(classes, class(x))
+  class(x) <- unique(c(classes, class(x)))
   set_fds(x, datastore)
 }
 
