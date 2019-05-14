@@ -57,49 +57,51 @@ as.SummarizedExperiment(x, ...)
 
 \item{covariates}{The covariates the user wants to add to the $samples of
 the DGEList. This can take the following forms:
-- `TRUE`: All covariates are retrieved from the `FacileDataSet`
-- `FALSE`: TODO: Better handle FALSE
-- `character`: A vector of covariate names to fetch from the
-  `FacileDataSet`. Must be elements of `names(sample_definitions(x))`
-- `data.frame`: A wide covariate table (dataset, sample_id, covariates ...)
-  This may be external covariates for samples not available within
-  `x` (yet), ie. a table of covariates provided by a third party.
-- `NULL`: do not decorate with *any* covariates.}
+\itemize{
+\item \code{TRUE}: All covariates are retrieved from the \code{FacileDataSet}
+\item \code{FALSE}: TODO: Better handle FALSE
+\item \code{character}: A vector of covariate names to fetch from the
+\code{FacileDataSet}. Must be elements of \code{names(sample_definitions(x))}
+\item \code{data.frame}: A wide covariate table (dataset, sample_id, covariates ...)
+This may be external covariates for samples not available within
+\code{x} (yet), ie. a table of covariates provided by a third party.
+\item \code{NULL}: do not decorate with \emph{any} covariates.
+}}
 
 \item{feature_ids}{the features to get expression for (if not specified
-in `x` descriptor). These correspond to the elements found in the
-`feature_info_tbl(x)$feature_id` column.}
+in \code{x} descriptor). These correspond to the elements found in the
+\code{feature_info_tbl(x)$feature_id} column.}
 
 \item{assay_name}{the name of the assay matrix to use when populating the
-default assay matrix of the bioconductor container (the `$counts`
-matrix of a `DGEList`, the `exprs()` of an `ExpressionSet`, etc.).
-The default value is the entry provided by [default_assay()]}
+default assay matrix of the bioconductor container (the \code{$counts}
+matrix of a \code{DGEList}, the \code{exprs()} of an \code{ExpressionSet}, etc.).
+The default value is the entry provided by \code{\link[=default_assay]{default_assay()}}}
 
-\item{.fds}{The `FacileDataSet` that `x` was retrieved from}
+\item{.fds}{The \code{FacileDataSet} that \code{x} was retrieved from}
 
 \item{custom_key}{the custom key to use to fetch custom annotations from
-`.fds`}
+\code{.fds}}
 }
 \value{
-the appropriate bioconductor assay container, ie. an `edgeR::DGEList`
-  for `as.DGEList`, a `Biobase::ExpressionSet` for `as.ExpressionSet`, or
-  a `SummarizedExperiment::SummarizedExperiment` for
-  `as.SummarizedExperiment`.
+the appropriate bioconductor assay container, ie. an \code{edgeR::DGEList}
+for \code{as.DGEList}, a \code{Biobase::ExpressionSet} for \code{as.ExpressionSet}, or
+a \code{SummarizedExperiment::SummarizedExperiment} for
+\code{as.SummarizedExperiment}.
 
 a \code{\link[Biobase]{ExpressionSet}}
 
 a \code{\link[SummarizedExperiment]{SummarizedExperiment}}
 }
 \description{
-An entire `FacileDataSet` or a subset of it can be converted into
-bioconductor-standard assay containers, like a `SummarizedExperiment`,
-`DGEList`, or `ExpressionSet` "at any time" using various `as.XXX` functions,
-like `as.DGEList(...)`.
+An entire \code{FacileDataSet} or a subset of it can be converted into
+bioconductor-standard assay containers, like a \code{SummarizedExperiment},
+\code{DGEList}, or \code{ExpressionSet} "at any time" using various \code{as.XXX} functions,
+like \code{as.DGEList(...)}.
 }
 \details{
 We use the term "facile object" to refer to either the entirety of a
-`FacileDataStore` or any sample-descriptor that specifies subsets of the
-data, eg. where `fds(x)` returns a `FacileDataStore`. See examples for
+\code{FacileDataStore} or any sample-descriptor that specifies subsets of the
+data, eg. where \code{fds(x)} returns a \code{FacileDataStore}. See examples for
 specifics.
 
 Note that the order that the samples and features are materialized into the

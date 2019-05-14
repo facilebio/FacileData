@@ -59,13 +59,19 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     assert_assay_feature_descriptor(features)
   }
 
-  ## Adding check for a 0 row data.frame, because there is some chain of
-  ## reactivity that fires in FacileExplorer upon FDS switching that triggers
-  ## this when the previous dataset has sample filters entered. This acts
-  ## as a defense to that, and also works to handle this strange case from the
-  ## backend side, too -- perhaps a user will stumble on this in their analyses?
+  # Adding check for a 0 row data.frame, because there is some chain of
+  # reactivity that fires in FacileExplorer upon FDS switching that triggers
+  # this when the previous dataset has sample filters entered. This acts
+  # as a defense to that, and also works to handle this strange case from the
+  # backend side, too -- perhaps a user will stumble on this in their analyses?
   if (is.null(samples) || (is.data.frame(samples) && nrow(samples) == 0L)) {
     samples <- samples(x)
+    extra_classes <- NULL
+  } else {
+    ignore.tbl <- class(samples)
+    ignore.tbl <- ignore.tbl[grepl("^tbl", ignore.tbl)]
+    ignore <- c("data.frame", ignore.tbl)
+    extra_classes <- setdiff(class(samples), ignore)
   }
   assert_sample_subset(samples)
 
@@ -94,13 +100,14 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
   if (length(out) == 1L) {
     out <- out[[1L]]
   } else {
-    ## We stop if we are asking for a matrix across multiple assays, but maybe
-    ## we don't have to ... (in the future, I mean)
+    # We stop if we are asking for a matrix across multiple assays, but maybe
+    # we don't have to ... (in the future, I mean)
     out <- bind_rows(out)
   }
 
   if (!as.matrix) {
-    out <- as_facile_frame(out, x)
+    out <- as_facile_frame(out, x, classes = extra_classes,
+                           .valid_sample_check = FALSE)
   }
 
   out
@@ -110,25 +117,30 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
 #' @rdname fetch_assay_data
 #' @importFrom data.table setDF
 fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
-                                          assay_name = default_assay(fds(x)),
+                                          assay_name = NULL,
                                           normalized = FALSE,
                                           as.matrix = FALSE,
                                           ...,
                                           subset.threshold = 700,
                                           aggregate.by = NULL,
                                           verbose = FALSE) {
-  force(assay_name)
-  if (is.null(samples)) {
-    samples <- assert_sample_subset(x)
-    samples <- distinct(samples, dataset, sample_id)
+  fds. <- assert_facile_data_store(fds(x))
+  if (!is.null(samples)) {
+    warning("`samples` ignored when fetching covariates from a facile_frame",
+            immediate. = TRUE)
   }
-  fetch_assay_data(fds(x), features = features, samples = samples,
+  samples. <- assert_sample_subset(x)
+  samples. <- distinct(samples., dataset, sample_id)
+  if (is.null(assay_name)) assay_name <- default_assay(fds.)
+
+  fetch_assay_data(fds., features = features, samples = samples.,
                    assay_name = assay_name, normalized = normalized,
                    as.matrix = as.matrix, ...,
                    subset.threshold = subset.threshold,
                    aggregate.by = aggregate.by,
                    verbose = verbose)
 }
+
 
 .fetch_assay_data <- function(x, assay_name, feature_ids, samples,
                               normalized=FALSE, as.matrix=FALSE,
@@ -146,13 +158,13 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
     aggregate.by <- assert_choice(tolower(aggregate.by), c('ewm', 'zscore'))
   }
 
-  finfo <- assay_feature_info(x, assay_name, feature_ids=feature_ids) %>%
-    collect(n=Inf) %>%
+  finfo <- assay_feature_info(x, assay_name, feature_ids = feature_ids) %>%
+    collect(n = Inf) %>%
     arrange(hdf5_index)
   atype <- finfo$assay_type[1L]
   ftype <- finfo$feature_type[1L]
   sinfo <- assay_sample_info(x, assay_name, samples) %>%
-    mutate(samid=paste(dataset, sample_id, sep="__"))
+    mutate(samid = paste(dataset, sample_id, sep = "__"))
   bad.samples <- is.na(sinfo$hdf5_index)
   if (any(bad.samples)) {
     if (verbose) {
@@ -162,33 +174,33 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
     sinfo <- sinfo[!bad.samples,,drop=FALSE]
   }
 
-  ## DEBUG: Tune chunk size?
-  ## As the number of genes you are fetching increases, only subsetting
-  ## out a few of them intead of first loading the whole matrix gives you little
-  ## value, for instance, over all BRCA tumors (994) these are some timings for
-  ## different numbers of genes:
-  ##
-  ##     Ngenes                   Time (seconds)
-  ##     10                       0.5s
-  ##     100                      0.8s
-  ##     250                      1.2s
-  ##     500                      2.6s
-  ##     750                      6s seconds
-  ##     3000                     112 seconds!
-  ##     unpspecified (all 26.5k) 7 seconds!
-  ##
-  ## I'm using `ridx` as a hack downstream to run around the issue of slowing
-  ## down the data by trying to subset many rows via hdf5 instead of loading
-  ## then subsetting after (this is so weird)
-  ##
-  ## TODO: setup unit tests to ensure that ridx subsetting and remapping back
-  ## to original genes works
+  # DEBUG: Tune chunk size?
+  # As the number of genes you are fetching increases, only subsetting
+  # out a few of them intead of first loading the whole matrix gives you little
+  # value, for instance, over all BRCA tumors (994) these are some timings for
+  # different numbers of genes:
+  #
+  #     Ngenes                   Time (seconds)
+  #     10                       0.5s
+  #     100                      0.8s
+  #     250                      1.2s
+  #     500                      2.6s
+  #     750                      6s seconds
+  #     3000                     112 seconds!
+  #     unpspecified (all 26.5k) 7 seconds!
+  #
+  # I'm using `ridx` as a hack downstream to run around the issue of slowing
+  # down the data by trying to subset many rows via hdf5 instead of loading
+  # then subsetting after (this is so weird)
+  #
+  # TODO: setup unit tests to ensure that ridx subsetting and remapping back
+  # to original genes works
   fetch.some <- nrow(finfo) < subset.threshold
   ridx <- if (fetch.some) finfo$hdf5_index else NULL
 
   dat <- sinfo %>%
     group_by(dataset) %>%
-    do(res={
+    do(res = {
       ds <- .$dataset[1L]
       hd5.name <- paste('assay', assay_name, ds, sep='/')
       vals <- h5read(hdf5fn(x), hd5.name, list(ridx, .$hdf5_index))
@@ -203,10 +215,10 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
     }) %>%
     ungroup
 
-  ## NOTE: We can avoid the monster matrix creation if we only want !as.matrix
-  ## returns, but this makes the code easier to reason. We can come back to this
-  ## to optimize for speed later. The problem is introduced when the
-  ## aggregate.by parameter was introduced
+  # NOTE: We can avoid the monster matrix creation if we only want !as.matrix
+  # returns, but this makes the code easier to reason about.
+  # We can come back to this to optimize for speed later. The problem is
+  # introduced when the aggregate.by parameter was introduced
   vals <- do.call(cbind, dat$res)
 
   if (nrow(vals) == 1L) {
@@ -219,8 +231,8 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
 
   if (is.character(aggregate.by)) {
     scores <- switch(aggregate.by,
-                     ewm=eigenWeightedMean(vals, ...)$score,
-                     zscore=zScore(vals, ...)$score)
+                     ewm = eigenWeightedMean(vals, ...)$score,
+                     zscore = zScore(vals, ...)$score)
     vals <- matrix(scores, nrow=1, dimnames=list('score', names(scores)))
   }
 
@@ -234,7 +246,6 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
     vals <- as.tbl(setDF(vals))
   }
 
-  # class(vals) <- c('FacileExpression', class(vals))
   set_fds(vals, x)
 }
 

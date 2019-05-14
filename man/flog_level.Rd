@@ -8,11 +8,11 @@ flog_level(namespace = NULL)
 }
 \arguments{
 \item{namespace}{Package (or whoever) can provide a value here to set the
-level they want to listen to. If this is `NULL` (default), the top level
-`facile.log.level` value will be used.}
+level they want to listen to. If this is \code{NULL} (default), the top level
+\code{facile.log.level} value will be used.}
 }
 \value{
-the logging level, as an integer (from `FacileData:::.flog_levels`)
+the logging level, as an integer (from \code{FacileData:::.flog_levels})
 }
 \description{
 Retrieves the currently set logging level

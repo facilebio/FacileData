@@ -7,12 +7,12 @@
 assay_info(x, assay_name = NULL, ...)
 }
 \arguments{
-\item{x}{A `FacileDataStore`}
+\item{x}{A \code{FacileDataStore}}
 
 \item{assay_name}{optional name of the assay to get information for}
 }
 \value{
-a tibble of meta information for the assays stored in `x`
+a tibble of meta information for the assays stored in \code{x}
 }
 \description{
 This is a stub for a manpage all about the FacileAPI

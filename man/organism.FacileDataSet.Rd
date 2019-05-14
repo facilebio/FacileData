@@ -7,7 +7,7 @@
 \method{organism}{FacileDataSet}(x)
 }
 \value{
-`"Homo sapiens`", `"Mus musculus"`, etc.
+\code{"Homo sapiens"}, \code{"Mus musculus"}, etc.
 }
 \description{
 A FacileDataStore is only expected to hold data for one organism.

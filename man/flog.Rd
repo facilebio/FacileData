@@ -9,67 +9,70 @@ flog(..., level = "info", ns = NULL, session = NULL,
   append = FALSE, newline = !is.null(file))
 }
 \arguments{
-\item{...}{the string elements to pass into `glue::glue()`}
+\item{...}{the string elements to pass into \code{\link[glue:glue]{glue::glue()}}}
 
 \item{level}{the "firing level" of this message. Defaults to "info"}
 
 \item{ns}{(namespace) if included, then the message checks the
 namespace-specific logging priority}
 
-\item{session, file, sep, fill, labels, append}{sent to [base::cat()]}
+\item{session, file, sep, fill, labels, append}{sent to \code{\link[base:cat]{base::cat()}}}
 
-\item{newline}{If `TRUE`, appends a `\n` to the message. By default, this
-is `TRUE` when `file` is not `NULL`.}
+\item{newline}{If \code{TRUE}, appends a \code{\\n} to the message. By default, this
+is \code{TRUE} when \code{file} is not \code{NULL}.}
 }
 \value{
 invisibly returns the text generated in the logging message.
 }
 \description{
 Like other logging approaches, each message created with this function is
-assigned a `level` (priority). If the current logging level, which is
-returned from a call to `flog_level` (ostensibly determenied by the value
-of the `"facile.log.level(.*?)"` option) is less than or equal to level of
-this message, then the message will be generated and sent to `file`.
-You can include a `namespace` for the message to provide a namespace-specific
+assigned a \code{level} (priority). If the current logging level, which is
+returned from a call to \code{flog_level} (ostensibly determenied by the value
+of the \code{"facile.log.level(.*?)"} option) is less than or equal to level of
+this message, then the message will be generated and sent to \code{file}.
+You can include a \code{namespace} for the message to provide a namespace-specific
 level/priority hierarchy.
 }
 \details{
 Conveninece wrapper functions are provided for each logging level, ie.
-call `fwarn("message")` instead of flog("message", level = "warn")`. Also,
-each facile* package provides its own `flog()` function which sets the
-namespace `ns` parameter to default to a package-specific namespace so you
+call \code{fwarn("message")} instead of flog("message", level = "warn")\code{. Also, each facile* package provides its own }flog()\code{function which sets the namespace}ns` parameter to default to a package-specific namespace so you
 can control logging at the different package level.
 }
+\section{Logging Levels}{
+
+
+Logging levels are\preformatted{.flog_levels <- c("all"  = 0, "trace" = 1, "debug" = 2, "info" = 3,
+                  "warn" = 4, "error" = 5, "fatal" = 6)
+}
+}
+
 \section{crayon}{
 
-Glue lets you put cayon functions in `{}` to stylize output. For instance,
-you can make "bold and red" the color red and also bold, like so:
+Glue lets you put cayon functions in \code{{}} to stylize output. For instance,
+you can make "bold and red" the color red and also bold, like so:\preformatted{flog("This is {red}{bold}bold and red{reset}, right?")
+}
 
-```r
-flog("This is {red}{bold}bold and red{reset}, right?")
-```
-
-Nice! It would be *cooler* if we could make it a bit more terse, like so:
-
-```r
-flog("This is rb`bold and red`, right?")
-```
+Nice! It might be more convenient if we could make it a bit more terse,
+as shown below, but that might happen at another time.\preformatted{flog("This is rb`bold and red`, right?")
+}
 
 Colors:
-
-* b: blue
-* c: cyan
-* g: green
-* k: black
-* m: magenta
-* r: red
-* y: yellow
+\itemize{
+\item b: blue
+\item c: cyan
+\item g: green
+\item k: black
+\item m: magenta
+\item r: red
+\item y: yellow
+}
 
 Styles:
-
-* i: italic
-* s: strong (bold)
-* S: striketthrough
-* u: underline
+\itemize{
+\item i: italic
+\item s: strong (bold)
+\item S: striketthrough
+\item u: underline
+}
 }
 

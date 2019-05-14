@@ -14,8 +14,9 @@
 #' namespace `ns` parameter to default to a package-specific namespace so you
 #' can control logging at the different package level.
 #'
-#' @sectio Logging Levels:
-#' Logging levels are:
+#' @section Logging Levels:
+#'
+#' Logging levels are
 #'
 #' ```
 #' .flog_levels <- c("all"  = 0, "trace" = 1, "debug" = 2, "info" = 3,
@@ -26,13 +27,14 @@
 #' Glue lets you put cayon functions in `{}` to stylize output. For instance,
 #' you can make "bold and red" the color red and also bold, like so:
 #'
-#' ```r
+#' ```
 #' flog("This is {red}{bold}bold and red{reset}, right?")
 #' ```
 #'
-#' Nice! It would be *cooler* if we could make it a bit more terse, like so:
+#' Nice! It might be more convenient if we could make it a bit more terse,
+#' as shown below, but that might happen at another time.
 #'
-#' ```r
+#' ```
 #' flog("This is rb`bold and red`, right?")
 #' ```
 #'
@@ -58,12 +60,12 @@
 #' @importFrom crayon blue cyan green black magenta red yellow
 #' @importFrom crayon bold italic strikethrough underline
 #'
-#' @param ... the string elements to pass into `glue::glue()`
+#' @param ... the string elements to pass into [glue::glue()]
 #' @param level the "firing level" of this message. Defaults to "info"
 #' @param ns (namespace) if included, then the message checks the
 #'   namespace-specific logging priority
 #' @param session,file,sep,fill,labels,append sent to [base::cat()]
-#' @param newline If `TRUE`, appends a `\n` to the message. By default, this
+#' @param newline If `TRUE`, appends a `\\n` to the message. By default, this
 #'   is `TRUE` when `file` is not `NULL`.
 #' @return invisibly returns the text generated in the logging message.
 flog <- function(..., level = "info", ns = NULL, session = NULL,

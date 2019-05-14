@@ -18,6 +18,7 @@ assay_info <- function(x, assay_name = NULL, ...) {
 
 ## General getters
 
+#' @noRd
 #' @family FacileInterface
 #' @export
 organism <- function(x, ...) {

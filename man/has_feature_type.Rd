@@ -13,7 +13,7 @@ has_feature_type(x, feature_type)
 }
 \value{
 logical vector indicating whether or not a given \code{feature_type}
-  is stored in \code{x}
+is stored in \code{x}
 }
 \description{
 Test if a given feature type is stored in a FacileDataSet

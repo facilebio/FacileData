@@ -2,14 +2,14 @@
 % Please edit documentation in R/facile_interface_generics.R
 \name{fetch_sample_statistics}
 \alias{fetch_sample_statistics}
-\title{NOTE: fetch_sample_statistics -> `fetch_assay_covariates`
+\title{NOTE: fetch_sample_statistics -> \code{fetch_assay_covariates}
 Issue #2}
 \usage{
 fetch_sample_statistics(x, samples = NULL, semi = TRUE,
   assay_name = NULL, ...)
 }
 \description{
-NOTE: fetch_sample_statistics -> `fetch_assay_covariates`
+NOTE: fetch_sample_statistics -> \code{fetch_assay_covariates}
 Issue #2
 }
 \seealso{

@@ -210,7 +210,7 @@ fds.default <- function(x, ...) {
 #' @rdname getsetdb
 #' @export
 set_fds <- function(x, value) {
-  attr(x, 'fds') <- value
+  attr(x, "fds") <- value
   x
 }
 

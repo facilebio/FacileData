@@ -10,7 +10,7 @@ nameit(x, ...)
 \item{x}{an object with names}
 }
 \value{
-`x` with all elements either being uniquely named, or NULL
+\code{x} with all elements either being uniquely named, or NULL
 }
 \description{
 If the vector is not named, it remains that way

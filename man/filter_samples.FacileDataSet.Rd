@@ -8,24 +8,24 @@
   custom_key = Sys.getenv("USER"), with_covariates = FALSE)
 }
 \arguments{
-\item{x}{A `FacileDataSet`}
+\item{x}{A \code{FacileDataSet}}
 
-\item{...}{NSE claused to use in [dplyr::filter()] expressions}
+\item{...}{NSE claused to use in \code{\link[dplyr:filter]{dplyr::filter()}} expressions}
 }
 \value{
-a sample-descriptor `data.frame` that includes the dataset,sample_id
-  pairs that match the virtual `filter(covaries, ...)` clause executed here.
+a sample-descriptor \code{data.frame} that includes the dataset,sample_id
+pairs that match the virtual \code{filter(covaries, ...)} clause executed here.
 }
 \description{
-This allows the user to query the `FacileDataSet` as if it were a wide
-`pData` `data.frame` of all its covariates.
+This allows the user to query the \code{FacileDataSet} as if it were a wide
+\code{pData} \code{data.frame} of all its covariates.
 }
 \details{
 This feature is only really meant to be
 used interactively, and with extreme caution ... programatically specifying
 the covariates, for instance, does not work right now.
 
-TODO: Implement using `tidyeval`
+TODO: Implement using \code{tidyeval}
 }
 \examples{
 fds <- exampleFacileDataSet()

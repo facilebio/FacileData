@@ -7,13 +7,13 @@
 \method{samples}{FacileDataSet}(x, ...)
 }
 \arguments{
-\item{x}{a `FacileDataSet`}
+\item{x}{a \code{FacileDataSet}}
 }
 \value{
 tibble of sample attributes
 }
 \description{
-Sample identifiers are provided as `dataset,sample_id tuples`.
+Sample identifiers are provided as \code{dataset,sample_id tuples}.
 }
 \seealso{
 Other API: \code{\link{fetch_assay_data.FacileDataSet}},

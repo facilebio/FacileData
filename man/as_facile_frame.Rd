@@ -13,14 +13,14 @@ as_facile_frame(x, datastore = fds(x), classes = NULL, ...,
 \item{datastore}{the FacileDataStore tied to x}
 
 \item{classes}{more classes to append to the outgoing object. The
-`"facile_frame"` class entry is always the last one of the bunch.}
+\code{"facile_frame"} class entry is always the last one of the bunch.}
 
 \item{...}{dots}
 
-\item{.valid_sample_check}{If `TRUE` (default), will check if `x` is a valid
-subset of the FacileDataStore `.fds`. Internal functions may set this to
-`TRUE` to avoid the check to (1) save time; and (2) save infinite
-recursion in the call to `assert_sample_subset`.}
+\item{.valid_sample_check}{If \code{TRUE} (default), will check if \code{x} is a valid
+subset of the FacileDataStore \code{.fds}. Internal functions may set this to
+\code{TRUE} to avoid the check to (1) save time; and (2) save infinite
+recursion in the call to \code{assert_sample_subset}.}
 }
 \description{
 Converts a normal tibble/data.frame to a facile_frame

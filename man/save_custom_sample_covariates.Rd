@@ -21,8 +21,8 @@ sample-descriptor-like table}
 \item{file.prefix}{Vincent uses this}
 
 \item{sample_filter_criteria}{optional list of filtering criteria that were
-  used to drill down into the samples we have the \code{annotatino}
-  data.frame for
+used to drill down into the samples we have the \code{annotatino}
+data.frame for
 TODO: Figure out how to encode sample_filter_criteria into serialized
 (JSON) annotation file}
 }

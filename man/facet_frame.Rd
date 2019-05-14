@@ -18,13 +18,13 @@ defined for each FacileDataSet, but we want to enable different facet
 definitions to be used in the future.}
 }
 \value{
-A `tibble` that defines the `dataset,sample_id` tuples that belong
-  to each "facet" (group).
+A \code{tibble} that defines the \code{dataset,sample_id} tuples that belong
+to each "facet" (group).
 }
 \description{
 It is natural to define subgroups of samples within larger datasets.
 This function returns grouping definitions (which we call "facets") for
-a `FacileDataStore`.
+a \code{FacileDataStore}.
 }
 \seealso{
 Other FacileInterface: \code{\link{fetch_assay_score}},

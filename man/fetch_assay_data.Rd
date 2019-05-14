@@ -11,9 +11,8 @@
   aggregate.by = NULL, verbose = FALSE)
 
 \method{fetch_assay_data}{facile_frame}(x, features, samples = NULL,
-  assay_name = default_assay(fds(x)), normalized = FALSE,
-  as.matrix = FALSE, ..., subset.threshold = 700,
-  aggregate.by = NULL, verbose = FALSE)
+  assay_name = NULL, normalized = FALSE, as.matrix = FALSE, ...,
+  subset.threshold = 700, aggregate.by = NULL, verbose = FALSE)
 }
 \arguments{
 \item{x}{A \code{FacileDataSrote} object.}

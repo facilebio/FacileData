@@ -51,5 +51,6 @@ Suggests:
 Remotes:
   lianos/multiGSEA@develop
 RoxygenNote: 6.1.1
+Roxygen: list(markdown = TRUE)
 License: MIT + file LICENSE
 Encoding: UTF-8

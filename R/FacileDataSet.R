@@ -220,7 +220,7 @@ meta_info <- function(x, fn = meta_file(x)) {
 #'
 #' @export
 #' @family API
-#' @return `"Homo sapiens`", `"Mus musculus"`, etc.
+#' @return `"Homo sapiens"`, `"Mus musculus"`, etc.
 organism.FacileDataSet <- function(x) {
   assert_facile_data_set(x)
   x$organism

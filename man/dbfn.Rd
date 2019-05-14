@@ -9,9 +9,9 @@ dbfn(x, mustWork = TRUE)
 \arguments{
 \item{x}{FacileDataSet}
 
-\item{mustWork}{boolean, if `TRUE` (default), throws an error if the sqlite
-file does not exist. When `FALSE`, this returns the "expected" path to the
-sqlite file for `x`}
+\item{mustWork}{boolean, if \code{TRUE} (default), throws an error if the sqlite
+file does not exist. When \code{FALSE}, this returns the "expected" path to the
+sqlite file for \code{x}}
 }
 \value{
 the filepath to the sqlite database

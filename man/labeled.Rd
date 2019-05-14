@@ -7,11 +7,11 @@
 name(x, ...)
 }
 \description{
-Modules that implement this interface must return `label` and `name` reactive
+Modules that implement this interface must return \code{label} and \code{name} reactive
 elements within them.
 }
 \details{
-We use these when something (like a `assayFeatureSelect`) needs
-a "computer friendly" name for itself (`name()`), or a more human readable
-name (`label()`)
+We use these when something (like a \code{assayFeatureSelect}) needs
+a "computer friendly" name for itself (\code{name()}), or a more human readable
+name (\code{label()})
 }

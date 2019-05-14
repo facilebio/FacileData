@@ -8,24 +8,24 @@ eav_metadata_merge(default_def, covariate_def = list())
 }
 \arguments{
 \item{default_def}{A list of covariate-definition-lists, as would be returned
-from [eav_metadata_create()]}
+from \code{\link[=eav_metadata_create]{eav_metadata_create()}}}
 
 \item{covariate_def}{list of additional covariate info, such as 'label'. The
-variables defined here (defined by `names(covarate_def)`) need not be
-identical to `names(defeault_def)`.}
+variables defined here (defined by \code{names(covarate_def)}) need not be
+identical to \code{names(defeault_def)}.}
 }
 \value{
 list of column metadata lists
 }
 \description{
 Takes a list of (perhaps) default sets of entity-attribute metadata, as would
-be generated from `eav_metadata_create(pData(eSet), covariate_def = NULL)`,
-and pulls out the sister custom-definitions from the `covariate_def`
+be generated from \code{eav_metadata_create(pData(eSet), covariate_def = NULL)},
+and pulls out the sister custom-definitions from the \code{covariate_def}
 attribute definition list.
 }
 \details{
-If the `covariate_def` list-of-lists has information for variables not
-found in `default_def`, ie. the definitions returned from
-`setdiff(names(covariate_def), names(default_def))` will be added to
+If the \code{covariate_def} list-of-lists has information for variables not
+found in \code{default_def}, ie. the definitions returned from
+\code{setdiff(names(covariate_def), names(default_def))} will be added to
 the object returned from this funciton.
 }

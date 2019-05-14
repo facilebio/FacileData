@@ -10,7 +10,7 @@ with_feature_info(x, covariates = NULL, ...)
 \item{x}{a data.frame feature descriptor columns (feature_id, feature_type)}
 }
 \value{
-`x` fattened with the columns asked for
+\code{x} fattened with the columns asked for
 }
 \description{
 Append feature information columns to (feature-rows)

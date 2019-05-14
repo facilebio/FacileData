@@ -7,10 +7,11 @@
 #' The following code will include a `"corrected"` column in the tidied output,
 #' in addition to the standard `"cpm"` and `"count"` columns.
 #'
-#' ```r
+#' ```
 #' y$corrected <- removeBatchEffect(cpm(y), ...)
 #' tidy(y, assay_name = "corrected")
 #' ```
+#'
 #' @noRd
 #' @export
 #' @importFrom edgeR cpm

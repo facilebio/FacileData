@@ -12,9 +12,9 @@ covariate_definitions(x, as.list = TRUE, ...)
 \item{as.list}{single logical, return tibble or list}
 }
 \value{
-meta information about the sample covariates in `x`
+meta information about the sample covariates in \code{x}
 }
 \description{
 Descriptions of the sample covariates can be specified in a FacileDataSet's
-`meta.yaml` file. This function returns those.
+\code{meta.yaml} file. This function returns those.
 }

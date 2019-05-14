@@ -28,7 +28,9 @@ as_facile_frame <- function(x, datastore = fds(x), classes = NULL, ...,
     classes <- c(classes, "facile_frame")
   }
   classes <- setdiff(classes, class(x))
-  class(x) <- unique(c(classes, class(x)))
+  if (length(classes)) {
+    class(x) <- unique(c(classes, class(x)))
+  }
   set_fds(x, datastore)
 }
 

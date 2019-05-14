@@ -145,11 +145,15 @@ fetch_sample_covariates.FacileDataSet <- function(
 fetch_sample_covariates.facile_frame <- function(
     x, samples = NULL, covariates = NULL,
     custom_key = Sys.getenv("USER"), with_source = FALSE, ...) {
-  if (is.null(samples)) {
-    samples <- assert_sample_subset(x)
-    samples <- distinct(samples, dataset, sample_id)
+  if (!is.null(samples)) {
+    warning("`samples` ignored when fetching covariates from a facile_frame",
+            immediate. = TRUE)
   }
-  fetch_sample_covariates(fds(x), samples = samples, covariates = covariates,
+
+  samples. <- assert_sample_subset(x)
+  samples. <- distinct(samples., dataset, sample_id)
+
+  fetch_sample_covariates(fds(x), samples = samples., covariates = covariates,
                           custom_key = custom_key, with_source = with_source,
                           ...)
 }

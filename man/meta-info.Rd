@@ -16,26 +16,26 @@ meta_info(x, fn = meta_file(x))
 dataset_definitions(x, as.list = TRUE)
 }
 \arguments{
-\item{x}{A `FacileDataSet`}
+\item{x}{A \code{FacileDataSet}}
 
-\item{fn}{The path to the `meta.yaml` file.}
+\item{fn}{The path to the \code{meta.yaml} file.}
 
-\item{as.list}{boolean, if `FALSE` (default) returns a list, otherwise
+\item{as.list}{boolean, if \code{FALSE} (default) returns a list, otherwise
 summarizes results into a tibble.}
 }
 \value{
-The `meta.yaml` file parsed into a list-of-lists representation
+The \code{meta.yaml} file parsed into a list-of-lists representation
 
-meta information about the datasets in `x` as a `list` or `tibble`
+meta information about the datasets in \code{x} as a \code{list} or \code{tibble}
 }
 \description{
-Lots of useful information is stored in a `FacileDataSet`'s `meta.yaml` file.
+Lots of useful information is stored in a \code{FacileDataSet}'s \code{meta.yaml} file.
 This function returns all of that in a list-of-lists
 
-A `FacileDataSet` can contain assay data from different "datasets" (such
+A \code{FacileDataSet} can contain assay data from different "datasets" (such
 as different cancer indications from the TCGA). This functions returns
 description and URL information that describes these datasets in more detail,
-which is specified in the FacileDataSets `meta.yaml` file.
+which is specified in the FacileDataSets \code{meta.yaml} file.
 }
 \seealso{
 Other FacileDataSet: \code{\link{FacileDataSet}},

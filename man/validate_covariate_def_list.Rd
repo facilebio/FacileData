@@ -9,14 +9,14 @@ validate_covariate_def_list(x, pdata)
 \arguments{
 \item{x}{a covariate definition list-of-lists}
 
-\item{pdata}{a `data.frame`}
+\item{pdata}{a \code{data.frame}}
 }
 \description{
-The covariates defined in `x` must be a subset of the columns in `pdata`.
-This method will throw an error if there is a covariate in `x` that does
-not have a matching column in `pdata`.
+The covariates defined in \code{x} must be a subset of the columns in \code{pdata}.
+This method will throw an error if there is a covariate in \code{x} that does
+not have a matching column in \code{pdata}.
 }
 \details{
-This function does not check if all columns in `pdata` have definitions in
-`x`.
+This function does not check if all columns in \code{pdata} have definitions in
+\code{x}.
 }
