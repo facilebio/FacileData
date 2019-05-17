@@ -84,7 +84,15 @@ flog <- function(..., level = "info", ns = NULL, session = NULL,
   } else {
     txt <- ""
   }
-  txt <- glue(txt, do.call(glue, list(...)))
+  # Calls to glue(...) can only accept arguments that are length-1
+  # charcter vectors. If we find something that doens't fit that
+  # in `...` we try to coerce to length-1 character, or dump it.
+  dot.text <- lapply(list(...), function(.txt) {
+    if (!is.character(.txt)) return(NULL)
+    paste(.txt, collapse = ",")
+  })
+  txt <- glue(txt, do.call(glue, dot.text))
+
   if (newline) txt <- paste0(txt, "\n")
   if (!is.null(file)) {
     cat(txt, file = file, sep = sep, fill = fill, labels = labels,
