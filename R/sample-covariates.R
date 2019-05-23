@@ -27,7 +27,8 @@
 #' catdeetz <- covs %>%
 #'   filter(class == "categorical") %>%
 #'   summary(expanded = TRUE)
-summary.eav_covariates <- function(object, expanded = FALSE, ...) {
+summary.eav_covariates <- function(object, expanded = FALSE,
+                                   droplevels = TRUE, ...) {
   object <- assert_sample_covariates(object)
   .fds <- assert_facile_data_store(fds(object))
   with.source <- is.character(object[["source"]])
@@ -52,10 +53,13 @@ summary.eav_covariates <- function(object, expanded = FALSE, ...) {
         } else {
           levels <- c(all = length(value))
         }
-        tibble(nsamples = length(value),
-               source = .$source[1L],
-               level = names(levels),
-               ninlevel = as.integer(levels))
+        out <- tibble(nsamples = length(value),
+                      source = .$source[1L],
+                      level = names(levels),
+                      ninlevel = as.integer(levels))
+        if (droplevels) {
+          out <- filter(out, ninlevel > 0L)
+        }
       })
   } else {
     res <- dat %>%
