@@ -64,7 +64,8 @@ summary.eav_covariates <- function(object, expanded = FALSE,
   } else {
     res <- dat %>%
       group_by(variable, class) %>%
-      summarize(nsamples = n(),
+      summarize(ndatasets = length(unique(dataset)),
+                nsamples = n(),
                 nlevels = {
                   if (class[1L] == "categorical")
                     length(unique(value))
