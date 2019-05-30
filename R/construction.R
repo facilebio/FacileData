@@ -28,6 +28,10 @@ initializeFacileDataSet <- function(path, meta_file,
 
   dir.create(path)
   dir.create(file.path(path, 'custom-annotation'))
+  # create dummy file in custom-annotation directory for source control and
+  # s3 synching of empty directories
+  writeLines("Empty placeholder for synching empty directories",
+             file.path(path, 'custom-annotation', 'README.txt'))
   ## file.copy(covariate_definition, file.path(path, 'sample-covariate-info.yaml'))
   file.copy(meta_file, file.path(path, 'meta.yaml'))
 
@@ -289,7 +293,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   })
 
   ## If rnaseq, do calcnormfactors
-  if (facile_assay_type == 'rnaseq') {
+  if (facile_assay_type %in% c('rnaseq', 'isoseq')) {
     ## Can create assay_sample_info_table
     cnts <- do.call(cbind, dats)
     normfactors <- calcNormFactors(cnts)

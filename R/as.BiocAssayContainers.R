@@ -225,7 +225,7 @@ as.DGEList.data.frame <- function(x, covariates = TRUE, feature_ids = NULL,
     }
     ## Check that we are getting the right type of assay for this
     ainfo <- assay_info(.fds, assay_name)
-    if (ainfo$assay_type != 'rnaseq') {
+    if (ainfo$assay_type %in% c("rnaseq", "isoseq")) {
       warning("Creating DGEList for something other than rnaseq type assay")
     }
     counts <- fetch_assay_data(.fds, feature_ids, x, assay_name = assay_name,

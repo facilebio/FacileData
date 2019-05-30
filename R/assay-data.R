@@ -449,7 +449,9 @@ assay_feature_name_map <- function(x, assay_name) {
   feature_name_map(x, ftype)
 }
 
-#' Identify the number of each assay run across specific samples
+#' Identify the number of each assay run across specific samples.
+#'
+#' The default assay is listed first, the rest of the order is undetermined.
 #'
 #' @export
 #' @param x FacileDataSet
@@ -479,7 +481,14 @@ assay_info_over_samples <- function(x, samples = NULL) {
   out <- assays %>%
     group_by(assay) %>%
     summarize(ndatasets = n_distinct(dataset), nsamples = n()) %>%
-    ungroup()
+    ungroup() %>%
+    collect(n = Inf)
+
+  # default assay first
+  def.idx <- which(out[["assay"]] == default_assay(x))
+  if (length(def.idx)) {
+    out <- bind_rows(out[def.idx,,drop = FALSE], out[-def.idx,,drop = FALSE])
+  }
 
   as_facile_frame(out, x)
 }
@@ -489,7 +498,7 @@ assay_info_over_samples <- function(x, samples = NULL) {
 #' @noRd
 #' @importFrom edgeR cpm
 normalize.assay.matrix <- function(vals, feature.info, sample.info,
-                                   log=TRUE, prior.count=5, ...,
+                                   log = TRUE, prior.count = 5, ...,
                                    verbose=FALSE) {
   stopifnot(
     nrow(vals) == nrow(feature.info),
@@ -501,7 +510,7 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info,
     is.numeric(sample.info$libsize), is.numeric(sample.info$normfactor))
   atype <- feature.info$assay_type[1L]
   libsize <- sample.info$libsize * sample.info$normfactor
-  if (atype == 'rnaseq') {
+  if (atype %in% c("rnaseq", "isoseq")) {
     # we assume these are units that are at the count level
     out <- edgeR::cpm(vals, libsize, log=log, prior.count=prior.count)
   } else if (atype == "tpm") {
