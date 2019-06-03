@@ -4,7 +4,7 @@
 \alias{filter_samples.FacileDataSet}
 \title{Filter against the sample_covariate_tbl EAV table as if it were wide.}
 \usage{
-\method{filter_samples}{FacileDataSet}(x, ...,
+\method{filter_samples}{FacileDataSet}(x, ..., samples. = samples(x),
   custom_key = Sys.getenv("USER"), with_covariates = FALSE)
 }
 \arguments{
@@ -38,6 +38,9 @@ eav.query <- fds \%>\%
   filter(value \%in\% c("CMS3", "CMS4")) \%>\%
   collect()
 setequal(crc.34$sample_id, eav.query$sample_id)
+
+# You can keep filtering a filtered dataset
+crc.34.male <- filter_sample(crc.34, sex == "m")
 }
 \seealso{
 Other API: \code{\link{fetch_assay_data.FacileDataSet}},

@@ -12,7 +12,7 @@
 \alias{as.SummarizedExperiment}
 \alias{as.SummarizedExperiment.data.frame}
 \alias{as.SummarizedExperiment.FacileDataSet}
-\title{Converts a "facile object" to a traditional Bioconductor assay container}
+\title{Converts a "facile result" to a traditional Bioconductor assay container.}
 \usage{
 as.DGEList(x, ...)
 

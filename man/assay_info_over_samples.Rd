@@ -2,7 +2,7 @@
 % Please edit documentation in R/assay-data.R
 \name{assay_info_over_samples}
 \alias{assay_info_over_samples}
-\title{Identify the number of each assay run across specific samples}
+\title{Identify the number of each assay run across specific samples.}
 \usage{
 assay_info_over_samples(x, samples = NULL)
 }
@@ -20,5 +20,5 @@ over the given samples. If no assays are defined over these samples,
 you're going to get an empty tibble.
 }
 \description{
-Identify the number of each assay run across specific samples
+The default assay is listed first, the rest of the order is undetermined.
 }

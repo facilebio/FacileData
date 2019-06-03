@@ -28,12 +28,20 @@
 #'   filter(value %in% c("CMS3", "CMS4")) %>%
 #'   collect()
 #' setequal(crc.34$sample_id, eav.query$sample_id)
-filter_samples.FacileDataSet <- function(x, ...,
+#'
+#' # You can keep filtering a filtered dataset
+#' crc.34.male <- filter_sample(crc.34, sex == "m")
+filter_samples.FacileDataSet <- function(x, ..., samples. = samples(x),
                                          custom_key = Sys.getenv("USER"),
                                          with_covariates = FALSE) {
   # cov.table <- .create_wide_covariate_table(x, dots)
   # out <- dplyr::filter_(cov.table, .dots=dots)
-  cov.table <- .create_wide_covariate_table(x, ..., custom_key = custom_key)
+
+  force(samples.)
+  assert_sample_subset(samples.)
+
+  cov.table <- .create_wide_covariate_table(x, samples., ...,
+                                            custom_key = custom_key)
   out <- filter(cov.table, ...)
   if (!with_covariates) {
     out <- select(out, dataset, sample_id)
@@ -42,11 +50,24 @@ filter_samples.FacileDataSet <- function(x, ...,
 }
 
 #' @noRd
+#' @export
+filter_samples.facile_frame <- function(x, ...,
+                                        custom_key = Sys.getenv("USER"),
+                                        with_covariates = FALSE) {
+  .fds <- assert_facile_data_store(fds(x))
+  assert_sample_subset(x)
+  filter_samples(.fds, ..., samples. = x, custom_key = custom_key,
+                 with_covariates = with_covariates)
+}
+
+#' @noRd
 #' @importFrom lazyeval lazy_dots
-.create_wide_covariate_table <- function(x, ...,
+.create_wide_covariate_table <- function(x, samples, ...,
                                          custom_key = Sys.getenv("USER")) {
   assert_facile_data_store(x)
-  sc <- fetch_sample_covariates(x, custom_key = custom_key)
+  assert_sample_subset(samples)
+
+  sc <- fetch_sample_covariates(x, samples = samples, custom_key = custom_key)
   dots <- lazy_dots(...)
   qvars <- .parse_filter_vars(x, dots)
   filter(sc, variable %in% !!qvars) %>% spread_covariates()
