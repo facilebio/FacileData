@@ -44,7 +44,7 @@ summary.eav_covariates <- function(object, expanded = FALSE,
         value <- cast_covariate(.$variable[1L], .$value, covdef, .fds)
         clz <- .$class[1L]
 
-        if (clz == "categorical" && is.atomic(value)) {
+        if (clz %in% c("categorical", "logical") && is.atomic(value)) {
           levels <- table(value)
         } else if (clz == "real" && is.atomic(value)) {
           qtl <- quantile(value)
@@ -67,7 +67,7 @@ summary.eav_covariates <- function(object, expanded = FALSE,
       summarize(ndatasets = length(unique(dataset)),
                 nsamples = n(),
                 nlevels = {
-                  if (class[1L] == "categorical")
+                  if (class[1L] %in% c("categorical", "logical"))
                     length(unique(value))
                   else
                     NA_integer_

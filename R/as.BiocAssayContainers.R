@@ -1,4 +1,4 @@
-#' Converts a "facile object" to a traditional Bioconductor assay container
+#' Converts a "facile result" to a traditional Bioconductor assay container.
 #'
 #' An entire `FacileDataSet` or a subset of it can be converted into
 #' bioconductor-standard assay containers, like a `SummarizedExperiment`,
