@@ -82,8 +82,9 @@
 #' @param source_assay the name of the assay element in `x` to extract
 #'   for use.
 #' @param organism This is used to fetch the appropriate genesets when this
-#'   dataset is used with the facileexplorer. Currently supported values are:
-#'   `c("Homo sapiens", "Mus musculus", "unspecified")`.
+#'   dataset is used with the facileexplorer. Put species name here, ie.
+#'   `"Homo sapiens"`, `"Mus musculus"`, etc. Default is `"unspecified"`,
+#'   which isn't really helpful.
 #' @param dataset_name the `name` attribute of the FacileDataSet `meta.yaml`
 #'   file.
 #' @param dataset_meta a named (by names(x)) with meta data about the datasets
@@ -101,11 +102,10 @@ as.FacileDataSet <- function(x, path, assay_name, assay_type, source_assay,
                              assay_description = paste("Description for ", assay_name),
                              dataset_name = "DEFAULT_NAME",
                              dataset_meta = NULL,
-                             organism = c("unspecified", "Homo sapiens", "Mus musculus"),
+                             organism = "unspecified",
                              page_size=2**12, cache_size=2e5,
                              chunk_rows=5000, chunk_cols="ncol",
                              chunk_compression=5, covariate_def = NULL,...) {
-  organism = match.arg(organism)
   UseMethod("as.FacileDataSet")
 }
 
@@ -135,7 +135,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
                                   assay_description = paste("Description for ", assay_name),
                                   dataset_name = "DEFAULT_NAME",
                                   dataset_meta = list(),
-                                  organism = c("unspecified", "Homo sapiens", "Mus musculus"),
+                                  organism = "unspecified",
                                   page_size=2**12, cache_size=2e5,
                                   chunk_rows=5000, chunk_cols="ncol",
                                   chunk_compression=5,
