@@ -1,7 +1,7 @@
 Package: FacileData
 Type: Package
 Title: A fluent API for accessing multi-assay high-throughput genomics data
-Version: 0.9.4
+Version: 0.9.5
 Authors@R: c(
   person("Steve", "Lianoglou", , "lianoglou@dnli.com", c("aut", "cre")),
   person("Vincent", "Rouilly", , "rouilly.vincent@gene.com", role = "aut"),
@@ -50,6 +50,7 @@ Suggests:
   tidyr
 Remotes:
   lianos/multiGSEA@develop
+biocViews: Infrastructure, DataRepresentation
 RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)
 License: MIT + file LICENSE

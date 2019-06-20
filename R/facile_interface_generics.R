@@ -336,7 +336,7 @@ with_sample_covariates.default <- function(x, covariates = NULL, na.rm = FALSE,
 # Labeled ======================================================================
 
 # Covaraites (and similar things) have can have both "labels" and "names". The
-# "name" is the R-frienly name of the object/variable/etc. and the "label" is
+# "name" is the R-friendly name of the object/variable/etc. and the "label" is
 # a human-readable version of the same, ie. "PFS" might be a name, and
 # "Progression Free Survival" might be the label
 

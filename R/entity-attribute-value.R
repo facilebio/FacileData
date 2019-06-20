@@ -182,18 +182,23 @@ eav_decode_cSurv <- function(x, attrname = character(), def = list(), ...) {
 #' the returned value is converted to a factor, with the levels in the order
 #' as defined in `def$levels`. If more levels appear in `x` than exist in
 #' `def$levels` they are appended to the end of the factor levels in
-#' alphabetical order.
+#' alphabetical order. If more levels are defined in `def$levels` than appear
+#' in `x`, they are by default dropped, set `droplevels = FALSE` to keep them.
 #'
 #' @inheritParams eav_decode_real
 #' @rdname simple-eav-decode-functions
 #' @export
-eav_decode_categorical <- function(x, attrname=character(), def=list(), ...) {
+eav_decode_categorical <- function(x, attrname = character(), def = list(),
+                                   droplevels = TRUE, ...) {
   out <- as.character(x)
-  if (is.character(def$levels)) {
-    ## protect against NAing a long list of values in the event that the
-    ## levels provided in the meta.yaml file don't include all levels observed
-    ## here
-    lvls <- unique(c(def$levels, setdiff(out, def$levels)))
+  if (is.character(def[["levels"]])) {
+    # protect against NAing a long list of values in the event that the
+    # levels provided in the meta.yaml file don't include all levels observed
+    # here
+    lvls <- unique(c(def[["levels"]], setdiff(out, def[["levels"]])))
+    if (droplevels) {
+      lvls <- intersect(lvls, out)
+    }
     out <- factor(out, lvls)
   }
   out
