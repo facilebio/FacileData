@@ -94,7 +94,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
   out <- lapply(assays, function(a) {
     f <- filter(features, assay == a)
     .fetch_assay_data(x, a, f$feature_id, samples, normalized, as.matrix,
-                      subset.threshold, aggregate.by, verbose=verbose)
+                      subset.threshold, aggregate.by, ..., verbose=verbose)
   })
 
   if (length(out) == 1L) {
