@@ -23,7 +23,8 @@ eav_encode_cSurv(x, ...)
 
 eav_decode_cSurv(x, attrname = character(), def = list(), ...)
 
-eav_decode_categorical(x, attrname = character(), def = list(), ...)
+eav_decode_categorical(x, attrname = character(), def = list(),
+  droplevels = TRUE, ...)
 
 eav_encode_categorical(x, ...)
 }
@@ -46,5 +47,6 @@ values in the EAV table. If the \code{def} list contains a \code{levels} entry, 
 the returned value is converted to a factor, with the levels in the order
 as defined in \code{def$levels}. If more levels appear in \code{x} than exist in
 \code{def$levels} they are appended to the end of the factor levels in
-alphabetical order.
+alphabetical order. If more levels are defined in \code{def$levels} than appear
+in \code{x}, they are by default dropped, set \code{droplevels = FALSE} to keep them.
 }

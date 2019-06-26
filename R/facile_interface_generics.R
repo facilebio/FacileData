@@ -6,6 +6,42 @@
 #'
 #' This is a stub for a manpage all about the FacileAPI
 
+#' Units of measure in an assay
+#'
+#' @export
+#' @return string
+assay_units <- function(x, assay_name, normalized = FALSE, abbreviate = FALSE,
+                        ...) {
+  UseMethod("assay_units", x)
+}
+
+#' @noRd
+#' @export
+assay_units.FacileDataStore <- function(x, assay_name = default_assay(x),
+                                        normalized = FALSE, abbreviate = FALSE,
+                                        ...) {
+  ainfo <- assay_info(x, assay_name = assay_name)
+
+  if (normalized) {
+    out <- switch(ainfo$assay_type,
+                  rnaseq = "log2(counts per million)",
+                  isoseq = "log2(counts per million)",
+                  normcounts = "log2(normalized counts)",
+                  "values")
+    if (abbreviate) {
+      out <- sub("counts per million", "CPM", out)
+    }
+  } else {
+    out <- switch(ainfo$assay_type,
+                  rnaseq = "counts",
+                  isoseq = "counts",
+                  normcounts = "normalized counts",
+                  "values")
+  }
+
+  out
+}
+
 #' Fetches assay meta information for the assays stored in a FacileDataStore
 #'
 #' @export

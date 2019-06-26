@@ -2,7 +2,7 @@
 % Please edit documentation in R/facile_interface_generics.R
 \name{assay_info}
 \alias{assay_info}
-\title{The Facile API}
+\title{Fetches assay meta information for the assays stored in a FacileDataStore}
 \usage{
 assay_info(x, assay_name = NULL, ...)
 }
@@ -15,6 +15,5 @@ assay_info(x, assay_name = NULL, ...)
 a tibble of meta information for the assays stored in \code{x}
 }
 \description{
-This is a stub for a manpage all about the FacileAPI
 Fetches assay meta information for the assays stored in a FacileDataStore
 }
