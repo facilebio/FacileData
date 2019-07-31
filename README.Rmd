@@ -17,8 +17,7 @@ checkout https://lazappi.github.io/clustree/ package for some badge-inspiration
 -->
 
 [![Project Status](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
-[![Lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-
+[![Lifecycle: Experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 
 # Overview
 
@@ -49,7 +48,7 @@ will want to install three `FacileData*` packages to appreciate the its utility:
 
 ```{r gh-installation, eval = FALSE}
 # install.packages("devtools")
-devtools::install_github("Genentech/FacileData")
+devtools::install_github("facileverse/FacileData")
 ```
 
 # Example Usage
@@ -82,7 +81,7 @@ Let's compare how you might do the same using data stored in a
 `SummarizedExperiment` named `se.tcga` that stores RNA-seq (raw and normalized)
 and copy number data.
 
-```{r example-sumexp}
+```{r example-sumexp, eval = FALSE}
 # load / get `se.all` from somewhere
 fidx <- which(mcols(se.all)$name == "ERBB2")
 se <- se.all[, se.all$indication %in% c("BLCA", "BRCA")]
