@@ -114,20 +114,9 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
                                    sep="__")
   }
 
-  # Construct $genes meta information
-  # ainfo <- assay_info(.fds, assay_name = assay_name)
-  # ftype <- ainfo[["feature_type"]]
-  # fids <- rownames(x)
-  #
-  # gene_info <- feature_info_tbl(.fds) %>%
-  #   filter(feature_type == !!ftype) %>%
-  #   collect(n = Inf)
-  # genes <- gene_info %>%
-  #   semi_join(tibble(feature_id=fids), by='feature_id') %>%
-  #   rename(symbol = "name") %>%
-  #   as.data.frame
-  # rownames(genes) <- genes[["feature_id"]]
-
+  if (is(feature_ids, "data.frame") || is(feature_ids, "tbl")) {
+    feature_ids <- feature_ids[["feature_id"]]
+  }
   if (!is.null(feature_ids) && is.character(feature_ids)) {
     keep <- feature_ids %in% rownames(x)
     if (mean(keep) != 1) {
@@ -247,9 +236,19 @@ as.DGEList.data.frame <- function(x, covariates = TRUE, feature_ids = NULL,
     })
   }
 
-  as.DGEList.matrix(counts, covariates = covariates, feature_ids = feature_ids,
-                    assay_name = assay_name, .fds = .fds,
-                    custom_key = custom_key, ...)
+  out <- as.DGEList.matrix(counts, covariates = covariates,
+                           feature_ids = feature_ids,
+                           assay_name = assay_name, .fds = .fds,
+                           custom_key = custom_key, ...)
+
+  # Add any covariates in x back to out$samples
+  xref <- match(colnames(out), paste(x$dataset, x$sample_id, sep = "__"))
+  cnames <- setdiff(colnames(x),
+                    c("dataset", "sample_id", "lib.size", "norm.factors"))
+  if (length(cnames)) {
+    for (cname in cnames) out$samples[[cname]] <- x[[cname]][xref]
+  }
+  out
 }
 
 #' @method as.DGEList tbl

@@ -70,10 +70,25 @@ filter_samples.facile_frame <- function(x, ...,
   assert_facile_data_store(x)
   assert_sample_subset(samples)
 
-  sc <- fetch_sample_covariates(x, samples = samples, custom_key = custom_key)
+  out <- fetch_sample_covariates(x, samples = samples, custom_key = custom_key)
   dots <- lazy_dots(...)
   qvars <- .parse_filter_vars(x, dots)
-  filter(sc, variable %in% !!qvars) %>% spread_covariates()
+
+  # TODO: check if any of the query variables are dataset or sample_id, then
+  # fiter `out` on the dataset or sample_id columns, THEN play with the
+  # other sample covariates (sc)
+  pk.vars <- intersect(qvars, c("dataset", "sample_id"))
+  # if (length(pk.vars)) {
+  #   out <- filter(out, pk.part.of.query)
+  # }
+
+  sc.vars <- setdiff(qvars, c("dataset", "sample_id"))
+  if (length(sc.vars)) {
+    out <- filter(out, variable %in% !!qvars)
+  }
+  out %>%
+    spread_covariates() %>%
+    distinct(dataset, sample_id, .keep_all = TRUE)
 }
 
 #' @noRd
@@ -85,7 +100,7 @@ filter_samples.facile_frame <- function(x, ...,
   all.vars <- sample_covariate_tbl(x) %>%
     distinct(variable) %>%
     collect(n=Inf)
-  all.vars <- all.vars$variable
+  all.vars <- c(all.vars$variable, "dataset", "sample_id")
 
   dot.exprs <- names(auto_name(dots))
   hits <- sapply(all.vars, function(var) any(grepl(var, dot.exprs)))
