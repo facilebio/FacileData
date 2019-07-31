@@ -23,5 +23,5 @@ a tibble with \code{feature_id, name, type} columns, where type
 is "primary" or "alias"
 }
 \description{
-Returns table of names and aliases for features.
+#dropme
 }

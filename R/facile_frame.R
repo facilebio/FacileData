@@ -34,6 +34,16 @@ as_facile_frame <- function(x, datastore = fds(x), classes = NULL, ...,
   set_fds(x, datastore)
 }
 
+#' @noRd
+#' @export
+samples.facile_frame <- function(x, ...) {
+  reqd <- setdiff(c("dataset", "sample_id"), colnames(x))
+  if (length(reqd)) {
+    stop("Missing required columns: ", paste(reqd, sep = ","))
+  }
+  distinct(x, dataset, sample_id, .keep_all = TRUE)
+}
+
 # dplyr++ manipulation =========================================================
 
 #' Retrieves the extra class information that might be ahead of the root
@@ -47,38 +57,52 @@ as_facile_frame <- function(x, datastore = fds(x), classes = NULL, ...,
 
 #' @export
 #' @noRd
-arrange.facile_frame <- function(.data, ...) {
+arrange.facile_frame <- function(.data, ..., .facilitate = TRUE) {
   res <- NextMethod()
-  as_facile_frame(res, fds(.data), .extra_classes(.data),
-                  .valid_sample_check = FALSE)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
+                           .valid_sample_check = FALSE)
+  }
+  res
 }
 
 #' @export
 #' @noRd
-collect.facile_frame <- function(x, ...) {
+collect.facile_frame <- function(x, ..., .facilitate = TRUE) {
   res <- NextMethod()
-  as_facile_frame(res, fds(x), .extra_classes(x), .valid_sample_check = FALSE)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(x), .extra_classes(x),
+                           .valid_sample_check = FALSE)
+  }
+  res
 }
 
 #' @export
 #' @noRd
-distinct.facile_frame <- function(.data, ..., .keep_all = FALSE) {
+distinct.facile_frame <- function(.data, ..., .keep_all = FALSE,
+                                  .facilitate = TRUE) {
   res <- NextMethod()
-  as_facile_frame(res, fds(.data), .extra_classes(.data),
-                  .valid_sample_check = FALSE)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
+                           .valid_sample_check = FALSE)
+  }
+  res
 }
 
 #' @export
 #' @noRd
-filter.facile_frame <- function(.data, ...) {
+filter.facile_frame <- function(.data, ..., .facilitate = TRUE) {
   res <- NextMethod()
-  as_facile_frame(res, fds(.data), .extra_classes(.data),
-                  .valid_sample_check = FALSE)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
+                           .valid_sample_check = FALSE)
+  }
+  res
 }
 
 #' @export
 #' @noRd
-group_by.facile_frame <- function(.data, ..., add = FALSE) {
+group_by.facile_frame <- function(.data, ..., add = FALSE, .facilitate = TRUE) {
   res <- NextMethod()
   # as_facile_frame(res, fds(.data), .valid_sample_check = FALSE)
   res
@@ -86,38 +110,51 @@ group_by.facile_frame <- function(.data, ..., add = FALSE) {
 
 #' @export
 #' @noRd
-mutate.facile_frame <- function(.data, ...) {
+mutate.facile_frame <- function(.data, ..., .facilitate = TRUE) {
   res <- NextMethod()
-  as_facile_frame(res, fds(.data), .extra_classes(.data),
-                  .valid_sample_check = FALSE)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
+                           .valid_sample_check = FALSE)
+  }
+  res
 }
 
 #' @export
 #' @noRd
-select.facile_frame <- function(.data, ...) {
+select.facile_frame <- function(.data, ..., .facilitate = TRUE) {
   res <- NextMethod()
-  as_facile_frame(res, fds(.data), .extra_classes(.data),
-                  .valid_sample_check = FALSE)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
+                           .valid_sample_check = FALSE)
+  }
+  res
 }
 
 #' @export
 #' @noRd
-subset.facile_frame <- function(x, ...) {
+subset.facile_frame <- function(x, ..., .facilitate = TRUE) {
   res <- NextMethod()
-  as_facile_frame(res, fds(x), .extra_classes(x), .valid_sample_check = FALSE)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(x), .extra_classes(x),
+                           .valid_sample_check = FALSE)
+  }
+  res
 }
 
 #' @export
 #' @noRd
-transmute.facile_frame <- function(.data, ...) {
+transmute.facile_frame <- function(.data, ..., .facilitate = TRUE) {
   res <- NextMethod()
-  as_facile_frame(res, fds(.data), .extra_classes(.data),
-                  .valid_sample_check = FALSE)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
+                           .valid_sample_check = FALSE)
+  }
+  res
 }
 
 #' @export
 #' @noRd
-ungroup.facile_frame <- function(x, ...) {
+ungroup.facile_frame <- function(x, ..., .facilitate = TRUE) {
   res <- NextMethod()
   # as_facile_frame(res, fds(x), .valid_sample_check = FALSE)
   res
@@ -128,40 +165,65 @@ ungroup.facile_frame <- function(x, ...) {
 #' @export
 #' @noRd
 inner_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
-                                    suffix = c(".x", ".y"), ...) {
+                                    suffix = c(".x", ".y"), ...,
+                                    .facilitate = TRUE) {
   res <- NextMethod()
-  as_facile_frame(res, fds(x), .extra_classes(x), .valid_sample_check = FALSE)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(x), .extra_classes(x),
+                           .valid_sample_check = FALSE)
+  }
+  res
 }
 
 #' @export
-#' @noRd
+#'n @noRd
 left_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
-                                   suffix = c(".x", ".y"), ...) {
+                                   suffix = c(".x", ".y"), ...,
+                                   .facilitate = TRUE) {
   res <- NextMethod()
-  as_facile_frame(res, fds(x), .extra_classes(x), .valid_sample_check = FALSE)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(x), .extra_classes(x),
+                           .valid_sample_check = FALSE)
+  }
+  res
 }
 
 #' @export
 #' @noRd
 right_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
-                                    suffix = c(".x", ".y"), ...) {
+                                    suffix = c(".x", ".y"), ...,
+                                    .facilitate = TRUE) {
   res <- NextMethod()
-  as_facile_frame(res, fds(x), .extra_classes(x), .valid_sample_check = FALSE)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(x), .extra_classes(x),
+                           .valid_sample_check = FALSE)
+  }
+  res
 }
 
 #' @export
 #' @noRd
 full_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
-                                   suffix = c(".x", ".y"), ...) {
+                                   suffix = c(".x", ".y"), ...,
+                                   .facilitate = TRUE) {
   res <- NextMethod()
-  as_facile_frame(res, fds(x), .extra_classes(x), .valid_sample_check = FALSE)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(x), .extra_classes(x),
+                           .valid_sample_check = FALSE)
+  }
+  res
 }
 
 #' @export
 #' @noRd
-anti_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, ...) {
+anti_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, ...,
+                                   .facilitate = TRUE) {
   res <- NextMethod()
-  as_facile_frame(res, fds(x), .extra_classes(x), .valid_sample_check = FALSE)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(x), .extra_classes(x),
+                           .valid_sample_check = FALSE)
+  }
+  res
 }
 
 # bind =========================================================================

@@ -46,7 +46,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
 
   if (missing(features) || is.null(features)) {
     assert_string(assay_name)
-    features <- assay_feature_info(x, assay_name) %>% collect(n=Inf)
+    features <- features(x, assay_name) %>% collect(n=Inf)
   } else {
     if (is.character(features)) {
       features <- tibble(feature_id=features, assay=assay_name)
@@ -59,12 +59,13 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     assert_assay_feature_descriptor(features)
   }
 
-  # Adding check for a 0 row data.frame, because there is some chain of
-  # reactivity that fires in FacileExplorer upon FDS switching that triggers
-  # this when the previous dataset has sample filters entered. This acts
-  # as a defense to that, and also works to handle this strange case from the
-  # backend side, too -- perhaps a user will stumble on this in their analyses?
-  if (is.null(samples) || (is.data.frame(samples) && nrow(samples) == 0L)) {
+  # I had originally add tests for 0-row datasets returning data from all
+  # samples (as if it were NULL) but this was throwing me for a loop in analysis
+  # code. If sampels is a 0-row sample-descriptor, the user (like me, ugh) may
+  # have inadvertently filtered away all the samples without realizing and query
+  # for data and not realize you are getting data from samples you weren't
+  # expecting. (what's up with the diary entry?)
+  if (is.null(samples)) {
     samples <- samples(x)
     extra_classes <- NULL
   } else {
@@ -74,6 +75,11 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     extra_classes <- setdiff(class(samples), ignore)
   }
   assert_sample_subset(samples)
+  samples <- collect(samples)
+  if (nrow(samples) == 0) {
+    warning("Emtpy sample descriptor provided", immediate. = TRUE)
+    return(samples)
+  }
 
   assays <- unique(features$assay)
   n.assays <- length(assays)
@@ -158,7 +164,7 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
     aggregate.by <- assert_choice(tolower(aggregate.by), c('ewm', 'zscore'))
   }
 
-  finfo <- assay_feature_info(x, assay_name, feature_ids = feature_ids) %>%
+  finfo <- features(x, assay_name, feature_ids = feature_ids) %>%
     collect(n = Inf) %>%
     arrange(hdf5_index)
   atype <- finfo$assay_type[1L]
@@ -405,37 +411,78 @@ assay_feature_type <- function(x, assay_name) {
 #'   features in a specified assay
 assay_feature_info.FacileDataSet <- function(x, assay_name, feature_ids = NULL,
                                              ...) {
-  ## NOTE: This is currently limited to a single assay
-  ftype <- assay_feature_type(x, assay_name)
+  .Deprecated("features()")
+  features(x, assay_name, feature_ids, ...)
+}
+
+#' Retrieves feature information from the FacileDataStore for *either* a
+#' particular `assay_name` or `feature_type`. By default this method returns
+#' feature information for the features measured on the `default_assay()` of
+#' this FacileDataStore.
+#'
+#' @export
+#' @noRd
+features.FacileDataSet <- function(x, assay_name = NULL, feature_type = NULL,
+                                   feature_ids = NULL, ...) {
+  null.aname <- is.null(assay_name)
+  null.ftype <- is.null(feature_type)
+
+  # Is the user asking for feature information from the features measured on
+  # a given assay, or for all features of a given feature_type.
+  if (null.aname && null.ftype) {
+    assay_name <- default_assay(x)
+    null.aname <- FALSE
+  }
+  if (!xor(null.aname, null.ftype)) {
+    stop("Must specify feature information for EITHER assay_name or ",
+         "feature_type")
+  }
+  if (null.aname) {
+    query_type <- "feature_type"
+    query_value <- assert_choice(feature_type, feature_types(x))
+  } else {
+    query_type <- "assay_name"
+  }
+
   if (!is.null(feature_ids)) {
     assert_character(feature_ids)
   }
 
-  afinfo <- assay_feature_info_tbl(x) %>%
-    filter(assay == assay_name)
+  if (query_type == "feature_type") {
+    out <- filter(feature_info_tbl(x), feature_type == query_value)
+    if (!is.null(feature_ids) && length(feature_ids) > 0) {
+      out <- filter(out, feature_id %in% feautre_ids)
+    }
+    out <- collect(out, n = Inf)
+  } else {
+    ftype <- assay_feature_type(x, assay_name)
 
-  if (!is.null(feature_ids) && length(feature_ids) > 0) {
-    afinfo <- filter(afinfo, feature_id %in% feature_ids)
+    afinfo <- assay_feature_info_tbl(x) %>%
+      filter(assay == assay_name)
+
+    if (!is.null(feature_ids) && length(feature_ids) > 0) {
+      afinfo <- filter(afinfo, feature_id %in% feature_ids)
+    }
+    afinfo <- collect(afinfo, n=Inf)
+
+    assay.info <- assay_info_tbl(x) %>%
+      select(assay, assay_type, feature_type) %>%
+      filter(assay == assay_name) %>%
+      collect(n = Inf)
+
+    ## FIXME: consider materialized view for this
+    out <- inner_join(afinfo, assay.info, by = "assay")
+
+    ftype <- out$feature_type[1L]
+    finfo <- filter(feature_info_tbl(x), feature_type == ftype)
+    finfo <- collect(finfo, n = Inf)
+
+    # FIXME: feature_id should be made unique to feature_type to simplify
+    # e.g add GeneID: prefix for entrez
+    # But, still we know out and finfo each only have one feature type now
+    out <- inner_join(out, finfo, by = c("feature_type", "feature_id"))
   }
-  afinfo <- collect(afinfo, n=Inf)
 
-  assay.info <- assay_info_tbl(x) %>%
-    select(assay, assay_type, feature_type) %>%
-    filter(assay == assay_name) %>%
-    collect(n = Inf)
-
-  ## FIXME: consider materialized view for this
-  out <- inner_join(afinfo, assay.info, by = "assay")
-
-  ftype <- out$feature_type[1L]
-  finfo <- feature_info_tbl(x)
-  finfo <- filter(finfo, feature_type %in% ftype)
-  finfo <- collect(finfo, n = Inf)
-
-  ## FIXME: feature_id should be made unique to feature_type to simplify
-  ## e.g add GeneID: prefix for entrez
-  ## But, still we know out and finfo each only have one feature type now
-  out <- inner_join(out, finfo, by=c('feature_type', 'feature_id'))
   as_facile_frame(out, x)
 }
 
@@ -498,7 +545,7 @@ assay_info_over_samples <- function(x, samples = NULL) {
 #' @noRd
 #' @importFrom edgeR cpm
 normalize.assay.matrix <- function(vals, feature.info, sample.info,
-                                   log = TRUE, prior.count = 5, ...,
+                                   log = TRUE, prior.count = 1, ...,
                                    verbose=FALSE) {
   stopifnot(
     nrow(vals) == nrow(feature.info),
@@ -550,11 +597,11 @@ create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
   }
 
   if (is.null(features)) {
-    features <- assay_feature_info(x, assay_name) %>% collect(n=Inf)
+    features <- features(x, assay_name) %>% collect(n=Inf)
   } else if (is.character(features)) {
     features <- tibble(feature_id = features, assay = assay_name)
   } else if (is(features, 'tbl_sql')) {
-    features <- collect(features, n = Inf) %>% mutate(assay = assay_name)
+    features <- mutate(collect(features, n = Inf), assay = assay_name)
   } else if (is.data.frame(features) && is.null(features[["assay"]])) {
     features[["assay"]] <- assay_name
   }

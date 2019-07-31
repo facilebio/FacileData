@@ -127,6 +127,16 @@ facet_frame.default <- function(x, name = "default", ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
 
+#' Returns a table of information about the features (from an assay, or ...)
+#'
+#' @export
+#' @param x a facile object
+#' @return a tibble with containing feature_id, feature_type, and whatever other
+#'   columns are appropriate given `x`
+features <- function(x, ...) {
+  UseMethod("features", x)
+}
+
 ## Filter
 
 #' @family FacileInterface

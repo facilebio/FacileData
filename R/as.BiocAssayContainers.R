@@ -140,7 +140,7 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
   }
 
   genes <- .fds %>%
-    assay_feature_info(assay_name, feature_ids = feature_ids) %>%
+    features(assay_name, feature_ids = feature_ids) %>%
     as.data.frame()
   rownames(genes) <- genes[["feature_id"]]
   if (genes[["feature_type"]][1L] %in% c("entrez", "ensgid")) {

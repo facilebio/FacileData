@@ -46,6 +46,9 @@ filter_samples.FacileDataSet <- function(x, ..., samples. = samples(x),
   if (!with_covariates) {
     out <- select(out, dataset, sample_id)
   }
+  if (nrow(out) == 0L) {
+    warning("All samples have been filtered out", immediate. = TRUE)
+  }
   as_facile_frame(out, x)
 }
 

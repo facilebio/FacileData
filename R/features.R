@@ -98,6 +98,8 @@ has_feature_type <- function(x, feature_type) {
 
 #' Returns table of names and aliases for features.
 #'
+#' #dropme
+#'
 #' @export
 #' @param x \code{FacileDataSet}
 #' @param feature_type a character vector specifying the feature type
