@@ -21,10 +21,10 @@
 #' @method tidy DGEList
 tidy.DGEList <- function(x, normalized.lib.sizes = TRUE, prior.count = 3,
                          genes_columns = NULL, samples_columns = NULL,
-                         assay_name = NULL, ...) {
+                         assay_name = NULL, cpm.log = TRUE, ...) {
   mats <- list(
     cpm = cpm(x, normalized.lib.sizes = normalized.lib.sizes,
-              log = TRUE, prior.count = prior.count),
+              log = cpm.log, prior.count = prior.count),
     count = x$counts)
 
   if (is.character(assay_name)) {

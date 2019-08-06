@@ -176,7 +176,7 @@ inner_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
 }
 
 #' @export
-#'n @noRd
+#' @noRd
 left_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
                                    suffix = c(".x", ".y"), ...,
                                    .facilitate = TRUE) {

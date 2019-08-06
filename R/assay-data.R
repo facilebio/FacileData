@@ -136,7 +136,7 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
             immediate. = TRUE)
   }
   samples. <- assert_sample_subset(x)
-  samples. <- distinct(samples., dataset, sample_id)
+  samples. <- distinct(samples., dataset, sample_id, .keep_all = TRUE)
   if (is.null(assay_name)) assay_name <- default_assay(fds.)
 
   fetch_assay_data(fds., features = features, samples = samples.,
@@ -556,9 +556,24 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info,
     length(unique(feature.info$assay_type)) == 1L,
     is.numeric(sample.info$libsize), is.numeric(sample.info$normfactor))
   atype <- feature.info$assay_type[1L]
-  libsize <- sample.info$libsize * sample.info$normfactor
   if (atype %in% c("rnaseq", "isoseq")) {
     # we assume these are units that are at the count level
+    # the user may have passes in a samples frame with lib.size and norm.factors
+    # columns already attached, if so let's try using those
+    # libsize <- sample.info$libsize * sample.info$normfactor
+    cnames <- colnames(sample.info)
+    if ("lib.size" %in% cnames && is.numeric(sample.info[["lib.size"]])) {
+      lsize <- sample.info[["lib.size"]]
+    } else  {
+      lsize <- sample.info[["libsize"]]
+    }
+    if ("norm.factors" %in% cnames &&
+        is.numeric(sample.info[["norm.factors"]])) {
+      nf <- sample.info[["norm.factors"]]
+    } else {
+      nf <- sample.info[["normfactor"]]
+    }
+    libsize <- lsize * nf
     out <- edgeR::cpm(vals, libsize, log=log, prior.count=prior.count)
   } else if (atype == "tpm") {
     # someone processed their data with salmon or kallisto and wanted to store
