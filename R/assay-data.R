@@ -73,9 +73,16 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     ignore.tbl <- ignore.tbl[grepl("^tbl", ignore.tbl)]
     ignore <- c("data.frame", ignore.tbl)
     extra_classes <- setdiff(class(samples), ignore)
+
+    assert_sample_subset(samples)
   }
-  assert_sample_subset(samples)
+
   samples <- collect(samples)
+  # you might think that you want to refactor this and put it before the
+  # `collect()` call, but the SQLite back end can't handle
+  # `distinct(..., .keep_all = TRUE)`
+  samples <- distinct(samples, dataset, sample_id, .keep_all = TRUE)
+
   if (nrow(samples) == 0) {
     warning("Emtpy sample descriptor provided", immediate. = TRUE)
     return(samples)
@@ -136,7 +143,6 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
             immediate. = TRUE)
   }
   samples. <- assert_sample_subset(x)
-  samples. <- distinct(samples., dataset, sample_id, .keep_all = TRUE)
   if (is.null(assay_name)) assay_name <- default_assay(fds.)
 
   fetch_assay_data(fds., features = features, samples = samples.,
@@ -171,6 +177,7 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
   ftype <- finfo$feature_type[1L]
   sinfo <- assay_sample_info(x, assay_name, samples) %>%
     mutate(samid = paste(dataset, sample_id, sep = "__"))
+
   bad.samples <- is.na(sinfo$hdf5_index)
   if (any(bad.samples)) {
     if (verbose) {
@@ -215,7 +222,7 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
       }
       dimnames(vals) <- list(finfo$feature_id, .$samid)
       if (normalized) {
-        vals <- normalize.assay.matrix(vals, finfo, ., verbose=verbose, ...)
+        vals <- normalize.assay.matrix(vals, finfo, ., x, verbose=verbose, ...)
       }
       vals
     }) %>%
@@ -297,7 +304,7 @@ fetch_assay_score.FacileDataSet <- function(x, features, samples = NULL,
   }
   stopifnot(is.character(assay_name), length(unique(asssay_name)) == 1L)
   dat <- fetch_assay_data(x, features, samples = samples, assay_name = NULL,
-                          as.matrix = TRUE, normalized = TRUE,
+                          as.matrix = TRUE, normalized = TRUE, ...,
                           subset.threshold = subset.threshold)
   if (nrow(dat) > 1) {
     dat <- matrix(eigenWeightedMean(dat)$score, nrow = 1)
@@ -356,7 +363,7 @@ assay_sample_info <- function(x, assay_name, samples = NULL) {
     samples <- samples(x)
   } else {
     assert_sample_subset(samples, x)
-    samples <- distinct(samples, dataset, sample_id)
+    samples <- distinct(samples, dataset, sample_id, .keep_all = TRUE)
   }
   samples <- collect(samples, n = Inf)
 
@@ -540,13 +547,39 @@ assay_info_over_samples <- function(x, samples = NULL) {
   as_facile_frame(out, x)
 }
 
-#' Helper function to fetch_assay_data
+#' @section Removing Batch Effects:
+#' We leverage limma's `removeBatchEffect` functionality, with a simplified
+#' interface. The `batch` parameter replaces `batch`, `batch2`, and
+#' `covariates`. The `design` parameter is replaced with `main`.
 #'
-#' @noRd
+#' All these parameters must be characters, which reference columns that
+#' have been passed down into the samples frame, or ones that we can pull
+#' out of the facile data store and spank onto the samples frame.
+#'
+#' We'll use these parameters to build a model.matrix with main and batch
+#' effect and follow the use of `removeBatchEffect` as outlined in the post
+#' linked to below to pull the design matrix apart and call the function with
+#' the corresponding `design` and `covariates` parameters:
+#'
+#' https://support.bioconductor.org/p/83286/#83287
+#'
+#' @rdname fetch_assay_data
 #' @importFrom edgeR cpm
-normalize.assay.matrix <- function(vals, feature.info, sample.info,
-                                   log = TRUE, prior.count = 1, ...,
-                                   verbose=FALSE) {
+#' @importFrom limma removeBatchEffect
+#' @importFrom stats contr.sum model.matrix
+#' @examples
+#' samples <- exampleFacileDataSet() %>%
+#'   filter_samples(indication == "BLCA", sample_type == "tumor")
+#' features <- c(PRF1='5551', GZMA='3001', CD274='29126')
+#' dat <- with_assay_data(samples, features, normalized = TRUE, batch = "sex")
+#' dat <- with_assay_data(samples, features, normalized = TRUE,
+#'                        batch = c("sex", "RIN"), normalized = TRUE)
+#' dat <- with_assay_data(samples, features, normalized = TRUE,
+#'                        batch = c("sex", "RIN"), main = "treatment")
+normalize.assay.matrix <- function(vals, feature.info, sample.info, fds,
+                                   log = TRUE, prior.count = 1,
+                                   batch = NULL, main = NULL,
+                                   verbose=FALSE, ...) {
   stopifnot(
     nrow(vals) == nrow(feature.info),
     all(rownames(vals) == feature.info$feature_id),
@@ -586,7 +619,66 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info,
     }
     out <- vals
   }
+
+  # We assume we've got log-transformed data here, and removeBatchEffect
+  # if that was asked for.
+  if (test_character(batch)) {
+    if (is.character(main) && length(main) == 0L) main <- NULL
+    if (!is.null(main)) {
+      assert_string(main)
+    }
+    retrieve.covs <- setdiff(c(batch, main), colnames(sample.info))
+    sample.info <- try({
+      with_sample_covariates(sample.info, retrieve.covs, .fds = fds)
+    }, silent = TRUE)
+    if (is(sample.info, "try-error")) {
+      stop("Covariates for batch correction could not be found: ",
+           paste(retrieve.covs, collapse = ","))
+    }
+
+    # It's possible that the main and batch covariates are all singular,
+    # ie. all factors with the same level, or whatever. Let's protect against
+    # that before we removeBatchEffect
+    batch.df <- sample.info[, c(main, batch), drop = FALSE]
+    is.singular <- sapply(batch.df, function(vals) length(unique(vals)) == 1L)
+
+    if (!is.null(main) && is.singular[main]) main <- NULL
+    batch <- setdiff(batch, names(is.singular)[is.singular])
+    batch.formula <- paste(batch, collapse = " + ")
+    if (length(batch)) {
+      is.num <- sapply(sample.info[, batch, drop = FALSE], is.numeric)
+      if (is.null(main)) {
+        if (any(!is.num)) {
+          cat.mats <- lapply(batch[!is.num], function(bcov) {
+            # in limma we trust
+            batch. <- as.factor(sample.info[[bcov]])
+            contrasts(batch.) <- contr.sum(levels(batch.))
+            model.matrix(~ batch.)[, -1, drop = FALSE]
+          })
+          cat.mats <- do.call(cbind, cat.mats)
+        } else {
+          cat.mats <- matrix(0, nrow = nrow(sample.info), ncol = 0)
+        }
+        num.mats <- sample.info[, batch[is.num], drop = FALSE]
+        batch.design <- cbind(cat.mats, num.mats)
+        treatment.design <- matrix(1, nrow(sample.info), 1)
+      } else {
+        des.formula <- paste("~", main, "+", batch.formula)
+        des.matrix <- model.matrix(formula(des.formula), data = sample.info)
+        main.cols <- c(1, grep(sprintf("^%s", main), colnames(des.matrix)))
+        treatment.design <- des.matrix[, main.cols, drop = FALSE]
+        batch.design <- des.matrix[, -(main.cols), drop = FALSE]
+      }
+      out <- removeBatchEffect(out, design = treatment.design,
+                               covariates = batch.design)
+    }
+  }
   out
+}
+
+.extract_batch_terms <- function(sample.info, batch, batch2, covariates,
+                                 design, batch_columns, ...) {
+  # terms()
 }
 
 #' Creates a feature descriptor for interactive ease
@@ -685,7 +777,7 @@ with_assay_data.data.frame <- function(x, features, assay_name = NULL,
 
   ## Hit the datastore
   adata <- fetch_assay_data(.fds, features, x, normalized=normalized,
-                            aggregate.by=aggregate.by, verbose=verbose)
+                            aggregate.by=aggregate.by, verbose=verbose, ...)
 
   if (is.character(spread)) {
     spread.vals <- unique(adata[[spread]])

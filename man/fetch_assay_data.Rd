@@ -3,6 +3,7 @@
 \name{fetch_assay_data.FacileDataSet}
 \alias{fetch_assay_data.FacileDataSet}
 \alias{fetch_assay_data.facile_frame}
+\alias{normalize.assay.matrix}
 \title{Fetch data from single assay of choice}
 \usage{
 \method{fetch_assay_data}{FacileDataSet}(x, features, samples = NULL,
@@ -13,6 +14,9 @@
 \method{fetch_assay_data}{facile_frame}(x, features, samples = NULL,
   assay_name = NULL, normalized = FALSE, as.matrix = FALSE, ...,
   subset.threshold = 700, aggregate.by = NULL, verbose = FALSE)
+
+normalize.assay.matrix(vals, feature.info, sample.info, fds, log = TRUE,
+  prior.count = 1, batch = NULL, main = NULL, verbose = FALSE, ...)
 }
 \arguments{
 \item{x}{A \code{FacileDataSrote} object.}
@@ -47,6 +51,34 @@ A \code{tibble} (lazy or not) with assay data.
 }
 \description{
 Fetch data from single assay of choice
+}
+\section{Removing Batch Effects}{
+
+We leverage limma's \code{removeBatchEffect} functionality, with a simplified
+interface. The \code{batch} parameter replaces \code{batch}, \code{batch2}, and
+\code{covariates}. The \code{design} parameter is replaced with \code{main}.
+
+All these parameters must be characters, which reference columns that
+have been passed down into the samples frame, or ones that we can pull
+out of the facile data store and spank onto the samples frame.
+
+We'll use these parameters to build a model.matrix with main and batch
+effect and follow the use of \code{removeBatchEffect} as outlined in the post
+linked to below to pull the design matrix apart and call the function with
+the corresponding \code{design} and \code{covariates} parameters:
+
+https://support.bioconductor.org/p/83286/#83287
+}
+
+\examples{
+samples <- exampleFacileDataSet() \%>\%
+  filter_samples(indication == "BLCA", sample_type == "tumor")
+features <- c(PRF1='5551', GZMA='3001', CD274='29126')
+dat <- with_assay_data(samples, features, normalized = TRUE, batch = "sex")
+dat <- with_assay_data(samples, features, normalized = TRUE,
+                       batch = c("sex", "RIN"), normalized = TRUE)
+dat <- with_assay_data(samples, features, normalized = TRUE,
+                       batch = c("sex", "RIN"), main = "treatment")
 }
 \seealso{
 Other API: \code{\link{fetch_assay_score.FacileDataSet}},

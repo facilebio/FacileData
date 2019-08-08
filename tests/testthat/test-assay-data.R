@@ -1,9 +1,6 @@
 context("Fetching assay level data")
 
 FDS <- exampleFacileDataSet()
-samples <- sample_covariate_tbl(FDS) %>%
-  filter(variable == 'stage' & value == 'III') %>%
-  select(dataset, sample_id)
 
 samples <- FDS %>%
   filter_samples(stage == "III") %>%
@@ -55,6 +52,50 @@ test_that("fetch_assay_data(..., aggregate.by='ewm') provides scores", {
     fetch_assay_data(features, samples, normalized=TRUE, as.matrix=TRUE)
   ewm <- multiGSEA::eigenWeightedMean(dat)$score[scores$samid]
   expect_equal(scores$value, unname(ewm))
+})
+
+test_that("batch effect correction mimics limma::removeBatchEffect", {
+  smpls <- FDS %>%
+    filter_samples(indication == "BLCA") %>%
+    with_sample_covariates() %>%
+    mutate(sample_key = paste(dataset, sample_id, sep = "__"))
+
+  dat <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
+                          as.matrix = TRUE)
+  expect_equal(smpls$sample_key, colnames(dat))
+
+  # Normalize by one batch covaraite
+  dat.norm1 <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
+                                  as.matrix = TRUE, batch = "sex")
+  e.norm1 <- limma::removeBatchEffect(dat, batch = smpls$sex)
+  expect_equal(dat.norm1, e.norm1)
+
+  # Normalize by two batch covaraites
+  set.seed(123)
+  smpls$dummy <- sample(c("a", "b"), nrow(smpls), replace = TRUE)
+  dat.norm2 <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
+                                as.matrix = TRUE, batch = c("sex", "dummy"))
+  e.norm2 <- limma::removeBatchEffect(dat, batch = smpls$sex,
+                                      batch2 = smpls$dummy)
+  expect_equal(dat.norm2, e.norm2)
+
+  # Normalize with a real valued covariate
+  smpls$real <- rnorm(nrow(smpls), mean = 0)
+  smpls$real[1:7] <- rnorm(7, mean = 1)
+  dat.normR <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
+                                as.matrix = TRUE, batch = c("real"))
+  e.normR <- limma::removeBatchEffect(dat, covariates = smpls$real)
+  expect_equal(dat.normR, e.normR)
+
+  # full boar
+  dat.norm.uber <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
+                                    as.matrix = TRUE, batch = c("sex", "real"),
+                                    main = "sample_type")
+
+  des <- model.matrix(~ sample_type + sex + real, smpls)
+  e.norm.uber <- limma::removeBatchEffect(dat, design = des[, 1:2],
+                                          covariates = des[, -(1:2)])
+  expect_equal(dat.norm.uber, e.norm.uber)
 })
 
 # test_that("fetch_assay_data handles missing entries for requested samples", {
