@@ -1,6 +1,6 @@
 context("Fetching assay level data")
 
-FDS <- exampleFacileDataSet()
+if (!exists("FDS")) FDS <- exampleFacileDataSet()
 
 samples <- FDS %>%
   filter_samples(stage == "III") %>%
@@ -54,6 +54,8 @@ test_that("fetch_assay_data(..., aggregate.by='ewm') provides scores", {
   expect_equal(scores$value, unname(ewm))
 })
 
+# Batch Effect Correction ======================================================
+
 test_that("batch effect correction mimics limma::removeBatchEffect", {
   smpls <- FDS %>%
     filter_samples(indication == "BLCA") %>%
@@ -64,38 +66,60 @@ test_that("batch effect correction mimics limma::removeBatchEffect", {
                           as.matrix = TRUE)
   expect_equal(smpls$sample_key, colnames(dat))
 
-  # Normalize by one batch covaraite
+  # Normalize by one batch covaraite ...........................................
   dat.norm1 <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
-                                  as.matrix = TRUE, batch = "sex")
+                                as.matrix = TRUE, batch = "sex",
+                                maintain.rowmeans = FALSE)
   e.norm1 <- limma::removeBatchEffect(dat, batch = smpls$sex)
   expect_equal(dat.norm1, e.norm1)
 
-  # Normalize by two batch covaraites
+  # the fixed expression matrix has shifted rowMeans. ..........................
+  expect_true(!isTRUE(all.equal(rowMeans(dat.norm1), rowMeans(dat))))
+
+  # We can maintain the rowmeans by setting saintain.rowmanes = TRUE
+  # which is the default.
+  same.mean <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
+                                as.matrix = TRUE, batch = "sex",
+                                maintain.rowmeans = TRUE)
+  expect_equal(rowMeans(same.mean), rowMeans(dat))
+
+  # Normalize by two batch covaraites ..........................................
   set.seed(123)
   smpls$dummy <- sample(c("a", "b"), nrow(smpls), replace = TRUE)
   dat.norm2 <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
-                                as.matrix = TRUE, batch = c("sex", "dummy"))
+                                as.matrix = TRUE, batch = c("sex", "dummy"),
+                                maintain.rowmeans = FALSE)
   e.norm2 <- limma::removeBatchEffect(dat, batch = smpls$sex,
                                       batch2 = smpls$dummy)
   expect_equal(dat.norm2, e.norm2)
 
-  # Normalize with a real valued covariate
+  # Normalize with a real valued covariate .....................................
   smpls$real <- rnorm(nrow(smpls), mean = 0)
   smpls$real[1:7] <- rnorm(7, mean = 1)
   dat.normR <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
-                                as.matrix = TRUE, batch = c("real"))
+                                as.matrix = TRUE, batch = c("real"),
+                                maintain.rowmeans = FALSE)
   e.normR <- limma::removeBatchEffect(dat, covariates = smpls$real)
   expect_equal(dat.normR, e.normR)
 
-  # full boar
+  # full bore ..................................................................
   dat.norm.uber <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
                                     as.matrix = TRUE, batch = c("sex", "real"),
-                                    main = "sample_type")
+                                    main = "sample_type",
+                                    maintain.rowmeans = FALSE)
 
   des <- model.matrix(~ sample_type + sex + real, smpls)
   e.norm.uber <- limma::removeBatchEffect(dat, design = des[, 1:2],
                                           covariates = des[, -(1:2)])
   expect_equal(dat.norm.uber, e.norm.uber)
+
+  # Final check for equal rowmeans functionality ...............................
+  expect_true(!isTRUE(all.equal(rowMeans(dat.norm.uber), rowMeans(dat))))
+  d2 <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
+                         as.matrix = TRUE, batch = c("sex", "real"),
+                         main = "sample_type",
+                         maintain.rowmeans = TRUE)
+  expect_equal(rowMeans(d2), rowMeans(dat))
 })
 
 # test_that("fetch_assay_data handles missing entries for requested samples", {

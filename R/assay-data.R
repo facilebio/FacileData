@@ -563,6 +563,10 @@ assay_info_over_samples <- function(x, samples = NULL) {
 #'
 #' https://support.bioconductor.org/p/83286/#83287
 #'
+#' Setting the `batch.scale` parameter to `TRUE` (the default), ensures that
+#' the `rowMeans` of the returned data matrix are the same as the original
+#' dataset.
+#'
 #' @rdname fetch_assay_data
 #' @importFrom edgeR cpm
 #' @importFrom limma removeBatchEffect
@@ -579,7 +583,8 @@ assay_info_over_samples <- function(x, samples = NULL) {
 normalize.assay.matrix <- function(vals, feature.info, sample.info, fds,
                                    log = TRUE, prior.count = 1,
                                    batch = NULL, main = NULL,
-                                   verbose=FALSE, ...) {
+                                   maintain.rowmeans = TRUE,
+                                   verbose = FALSE, ...) {
   stopifnot(
     nrow(vals) == nrow(feature.info),
     all(rownames(vals) == feature.info$feature_id),
@@ -644,14 +649,14 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info, fds,
 
     if (!is.null(main) && is.singular[main]) main <- NULL
     batch <- setdiff(batch, names(is.singular)[is.singular])
-    batch.formula <- paste(batch, collapse = " + ")
+
     if (length(batch)) {
       is.num <- sapply(sample.info[, batch, drop = FALSE], is.numeric)
       if (is.null(main)) {
         if (any(!is.num)) {
           cat.mats <- lapply(batch[!is.num], function(bcov) {
-            # in limma we trust
-            batch. <- as.factor(sample.info[[bcov]])
+            # in limma we trust (code taken from limma::removeBatchEffect)
+            batch. <- droplevels(as.factor(sample.info[[bcov]]))
             contrasts(batch.) <- contr.sum(levels(batch.))
             model.matrix(~ batch.)[, -1, drop = FALSE]
           })
@@ -663,11 +668,15 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info, fds,
         batch.design <- cbind(cat.mats, num.mats)
         treatment.design <- matrix(1, nrow(sample.info), 1)
       } else {
+        batch.formula <- paste(batch, collapse = " + ")
         des.formula <- paste("~", main, "+", batch.formula)
         des.matrix <- model.matrix(formula(des.formula), data = sample.info)
         main.cols <- c(1, grep(sprintf("^%s", main), colnames(des.matrix)))
         treatment.design <- des.matrix[, main.cols, drop = FALSE]
         batch.design <- des.matrix[, -(main.cols), drop = FALSE]
+      }
+      if (maintain.rowmeans) {
+        batch.design <- scale(batch.design)
       }
       out <- removeBatchEffect(out, design = treatment.design,
                                covariates = batch.design)
