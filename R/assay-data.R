@@ -46,7 +46,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
 
   if (missing(features) || is.null(features)) {
     assert_string(assay_name)
-    features <- features(x, assay_name) %>% collect(n=Inf)
+    features <- FacileData::features(x, assay_name) %>% collect(n=Inf)
   } else {
     if (is.character(features)) {
       features <- tibble(feature_id=features, assay=assay_name)

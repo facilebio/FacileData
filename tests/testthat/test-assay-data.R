@@ -122,6 +122,26 @@ test_that("batch effect correction mimics limma::removeBatchEffect", {
   expect_equal(rowMeans(d2), rowMeans(dat))
 })
 
+test_that("single-gene batch correction is equivalent to all data correction", {
+  set.seed(0xBEEF)
+  smpls <- filter_samples(FDS, indication == "BLCA") %>%
+    collect() %>%
+    mutate(real.batch = rnorm(nrow(.)))
+
+  bc.all <- fetch_assay_data(smpls, normalized = TRUE, as.matrix = TRUE,
+                             batch = c("sex", "real.batch"))
+  fname <- rownames(bc.all)[3]
+  bc.1 <- fetch_assay_data(smpls, features = fname, normalized = TRUE,
+                           as.matrix = TRUE, batch = c("sex", "real.batch"))
+  expect_equal(bc.1[1,], bc.all[fname,])
+
+  # ensure we were testing a batch corrected thing
+  orig.1 <- fetch_assay_data(smpls, features = fname, normalized = TRUE,
+                             as.matrix = TRUE)
+  expect_equal(colnames(bc.1), colnames(orig.1))
+  expect_true(!isTRUE(all.equal(bc.1[1,], orig.1[1,])))
+})
+
 # test_that("fetch_assay_data handles missing entries for requested samples", {
 #   ## When we have multiple assays for an FDS, we can use a valid sample
 #   ## descriptor to retrieve data, but the requested assay may not have data
