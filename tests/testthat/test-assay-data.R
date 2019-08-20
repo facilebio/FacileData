@@ -55,6 +55,10 @@ test_that("fetch_assay_data(..., aggregate.by='ewm') provides scores", {
     fetch_assay_data(features, samples, normalized=TRUE, as.matrix=TRUE)
   ewm <- multiGSEA::eigenWeightedMean(dat)$score[scores$samid]
   expect_equal(scores$value, unname(ewm))
+
+  xx <- scores %>%
+    distinct(dataset, sample_id) %>%
+    with_assay_data(features, normalized = TRUE, aggregate.by = "ewm")
 })
 
 # test_that("fetch_assay_data handles missing entries for requested samples", {

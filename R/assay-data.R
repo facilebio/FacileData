@@ -686,7 +686,7 @@ with_assay_data.data.frame <- function(x, features, assay_name = NULL,
   ## Hit the datastore
   adata <- fetch_assay_data(.fds, features, x, normalized=normalized,
                             aggregate.by=aggregate.by, verbose=verbose)
-
+browser()
   if (is.character(spread)) {
     spread.vals <- unique(adata[[spread]])
     if (any(spread.vals %in% colnames(x))) {
