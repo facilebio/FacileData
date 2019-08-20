@@ -16,7 +16,8 @@
   subset.threshold = 700, aggregate.by = NULL, verbose = FALSE)
 
 normalize.assay.matrix(vals, feature.info, sample.info, fds, log = TRUE,
-  prior.count = 1, batch = NULL, main = NULL, verbose = FALSE, ...)
+  prior.count = 1, batch = NULL, main = NULL,
+  maintain.rowmeans = TRUE, verbose = FALSE, ...)
 }
 \arguments{
 \item{x}{A \code{FacileDataSrote} object.}
@@ -68,6 +69,10 @@ linked to below to pull the design matrix apart and call the function with
 the corresponding \code{design} and \code{covariates} parameters:
 
 https://support.bioconductor.org/p/83286/#83287
+
+Setting the \code{batch.scale} parameter to \code{TRUE} (the default), ensures that
+the \code{rowMeans} of the returned data matrix are the same as the original
+dataset.
 }
 
 \examples{

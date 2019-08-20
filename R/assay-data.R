@@ -627,7 +627,7 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info, fds,
 
   # We assume we've got log-transformed data here, and removeBatchEffect
   # if that was asked for.
-  if (test_character(batch)) {
+  if (test_character(batch, min.len = 1L)) {
     if (is.character(main) && length(main) == 0L) main <- NULL
     if (!is.null(main)) {
       assert_string(main)

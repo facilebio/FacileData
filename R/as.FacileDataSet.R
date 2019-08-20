@@ -418,7 +418,10 @@ pdata.ExpressionSet <- function(x, covariate_metadata = NULL,  ...) {
 pdata.DGEList <- function(x, covariate_metadata = NULL,  ...) {
   # stopifnot(requireNamespace("edgeR", quietly = TRUE))
   ignore.cols <- c("lib.size", "norm.factors")
-  if (all(x$samples$group == 1)) ignore.cols <- c(ignore.cols, "group")
+  grp <- x$samples$group
+  if (is.null(grp) || any(is.na(grp)) || all(grp == 1)) {
+    ignore.cols <- c(ignore.cols, "group")
+  }
   validate.pdata(x$samples[, !colnames(x$samples) %in% ignore.cols], ...)
 }
 
