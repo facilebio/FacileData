@@ -8,12 +8,13 @@
 \usage{
 \method{fetch_assay_data}{FacileDataSet}(x, features, samples = NULL,
   assay_name = default_assay(x), normalized = FALSE,
-  as.matrix = FALSE, ..., subset.threshold = 700,
-  aggregate.by = NULL, verbose = FALSE)
+  as.matrix = FALSE, ..., subset.threshold = 700, aggregate = FALSE,
+  aggregate.by = "ewm", verbose = FALSE)
 
 \method{fetch_assay_data}{facile_frame}(x, features, samples = NULL,
   assay_name = NULL, normalized = FALSE, as.matrix = FALSE, ...,
-  subset.threshold = 700, aggregate.by = NULL, verbose = FALSE)
+  subset.threshold = 700, aggregate = FALSE, aggregate.by = "ewm",
+  verbose = FALSE)
 
 normalize.assay.matrix(vals, feature.info, sample.info, fds, log = TRUE,
   prior.count = 1, batch = NULL, main = NULL,

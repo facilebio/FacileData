@@ -7,6 +7,7 @@ Authors@R: c(
       comment = c(ORCID = "0000-0002-0924-1754")),
   person("Vincent", "Rouilly", , "rouilly.vincent@gene.com", role = "aut"),
   person("Peter", "Haverty", , "haverty.peter@gene.com", role = "aut"),
+  person("Jonathan", "Carrol", , "jono@jcarroll.com.au", role = "ctb"),
   person("Denali Therapeutics", role = c("cph", "fnd"),
          comment = "Coypright 2019"),
   person("Genentech", role = c("cph", "fnd"),

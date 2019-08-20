@@ -33,7 +33,8 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
                                            as.matrix = FALSE,
                                            ...,
                                            subset.threshold = 700,
-                                           aggregate.by = NULL,
+                                           aggregate = FALSE,
+                                           aggregate.by= "ewm",
                                            verbose = FALSE) {
   assert_flag(as.matrix)
   assert_flag(normalized)
@@ -94,7 +95,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     stop("Fetching from multiple assays requires return in melted form")
   }
 
-  if (!is.null(aggregate.by)) {
+  if (isTRUE(aggregate)) {
     assert_string(aggregate.by)
     aggregate.by <- assert_choice(tolower(aggregate.by), c('ewm', 'zscore'))
     stopifnot(n.assays == 1L)
@@ -107,7 +108,8 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
   out <- lapply(assays, function(a) {
     f <- filter(features, assay == a)
     .fetch_assay_data(x, a, f$feature_id, samples, normalized, as.matrix,
-                      subset.threshold, aggregate.by, ..., verbose=verbose)
+                      subset.threshold, aggregate, aggregate.by, ...,
+                      verbose = verbose)
   })
 
   if (length(out) == 1L) {
@@ -135,7 +137,8 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
                                           as.matrix = FALSE,
                                           ...,
                                           subset.threshold = 700,
-                                          aggregate.by = NULL,
+                                          aggregate = FALSE,
+                                          aggregate.by= "ewm",
                                           verbose = FALSE) {
   fds. <- assert_facile_data_store(fds(x))
   if (!is.null(samples)) {
@@ -149,14 +152,15 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
                    assay_name = assay_name, normalized = normalized,
                    as.matrix = as.matrix, ...,
                    subset.threshold = subset.threshold,
-                   aggregate.by = aggregate.by,
+                   aggregate = aggregate, aggregate.by = aggregate.by,
                    verbose = verbose)
 }
 
 
 .fetch_assay_data <- function(x, assay_name, feature_ids, samples,
-                              normalized=FALSE, as.matrix=FALSE,
-                              subset.threshold=700, aggregate.by=NULL, ...,
+                              normalized = FALSE, as.matrix = FALSE,
+                              subset.threshold = 700, aggregate = FALSE,
+                              aggregate.by = "ewm", ...,
                               verbose=FALSE) {
   stopifnot(is.FacileDataSet(x))
   assert_string(assay_name)
@@ -165,7 +169,7 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
   assert_flag(normalized)
   assert_flag(as.matrix)
   assert_number(subset.threshold)
-  if (!is.null(aggregate.by)) {
+  if (isTRUE(aggregate)) {
     assert_string(aggregate.by)
     aggregate.by <- assert_choice(tolower(aggregate.by), c('ewm', 'zscore'))
   }
@@ -235,14 +239,14 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
   vals <- do.call(cbind, dat$res)
 
   if (nrow(vals) == 1L) {
-    if (!is.null(aggregate.by) && verbose) {
+    if (isTRUE(aggregate) && verbose) {
       warning("No assay feature aggregation performed over single feature",
               immediate.=TRUE)
     }
-    aggregate.by <- NULL
+    aggregate <- FALSE
   }
 
-  if (is.character(aggregate.by)) {
+  if (isTRUE(aggregate)) {
     scores <- switch(aggregate.by,
                      ewm = eigenWeightedMean(vals, ...)$score,
                      zscore = zScore(vals, ...)$score)
@@ -251,7 +255,7 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
 
   if (!as.matrix) {
     vals <- .melt.assay.matrix(vals, assay_name, atype, ftype, finfo)
-    if (!is.null(aggregate.by)) {
+    if (isTRUE(aggregate.by)) {
       vals[, feature_type := 'aggregated']
       vals[, feature_id := 'aggregated']
       vals[, feature_name := 'aggregated']
@@ -299,6 +303,7 @@ fetch_assay_score.FacileDataSet <- function(x, features, samples = NULL,
                                             assay_name = NULL,
                                             as.matrix = FALSE, ...,
                                             subset.threshold = 700) {
+  .Deprecated("fatch_assay_data(..., aggregate = TRUE)")
   if (is.null(assay_name)) {
     assay_name <- features$assay
   }
@@ -738,30 +743,33 @@ create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
 #' @param .fds A \code{FacileDataSet} object
 #' @return a tbl-like result
 with_assay_data.facile_frame <- function(x, features, assay_name = NULL,
-                                         normalized = TRUE, aggregate.by = NULL,
-                                         spread = TRUE, with_assay_name = FALSE,
-                                         ..., verbose = FALSE, .fds = fds(x)) {
+                                         normalized = TRUE, aggregate = FALSE,
+                                         aggregate.by = "ewm", spread = TRUE,
+                                         with_assay_name = FALSE, ...,
+                                         verbose = FALSE, .fds = fds(x)) {
   x <- collect(x, n = Inf)
   .fds <- assert_facile_data_store(.fds)
   NextMethod(x, .fds = .fds)
 }
 
 with_assay_data.tbl <- function(x, features, assay_name = NULL,
-                                normalized = TRUE, aggregate.by = NULL,
-                                spread = TRUE, with_assay_name = FALSE,
-                                ..., verbose = FALSE, .fds = NULL) {
+                                normalized = TRUE, aggregate = FALSE,
+                                aggregate.by = NULL, spread = TRUE,
+                                with_assay_name = FALSE, ..., verbose = FALSE,
+                                .fds = NULL) {
   with_assay_data.data.frame(collect(x, n = Inf), features = features,
                              assay_name = assay_name, normalized = normalized,
-                             aggregate.by = aggregate.by, spread = spread,
-                             with_assay_name = with_assay_name, ...,
-                             verbose = verbose, .fds = .fds)
+                             aggregate = aggregate, aggregate.by = aggregate.by,
+                             spread = spread, with_assay_name = with_assay_name,
+                             ..., verbose = verbose, .fds = .fds)
 }
 
 #' @export
 #' @method with_assay_data data.frame
 #' @noRd
 with_assay_data.data.frame <- function(x, features, assay_name = NULL,
-                                       normalized = TRUE, aggregate.by = NULL,
+                                       normalized = TRUE, aggregate = FALSE,
+                                       aggregate.by = "ewm",
                                        spread = TRUE, with_assay_name=FALSE,
                                        ..., verbose = FALSE, .fds = NULL) {
   .fds <- assert_facile_data_store(.fds)
@@ -785,9 +793,10 @@ with_assay_data.data.frame <- function(x, features, assay_name = NULL,
   }
 
   ## Hit the datastore
-  adata <- fetch_assay_data(.fds, features, x, normalized=normalized,
-                            aggregate.by=aggregate.by, verbose=verbose, ...)
-
+  adata <- fetch_assay_data(.fds, features, x, normalized = normalized,
+                            aggregate = aggregate, aggregate.by = aggregate.by,
+                            verbose = verbose, ...)
+browser()
   if (is.character(spread)) {
     spread.vals <- unique(adata[[spread]])
     if (any(spread.vals %in% colnames(x))) {

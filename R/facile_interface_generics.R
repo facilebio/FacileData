@@ -257,11 +257,11 @@ with_assay_covariates <- function(x, covariates = NULL,
 
 #' @family FacileInterface
 #' @export
-fetch_assay_data <- function(x, features, samples=NULL,
-                             assay_name=default_assay(x),
-                             normalized=FALSE, as.matrix=FALSE, ...,
-                             subset.threshold=700, aggregate.by=NULL,
-                             verbose=FALSE) {
+fetch_assay_data <- function(x, features, samples = NULL,
+                             assay_name = ndefault_assay(x),
+                             normalized = FALSE, as.matrix = nFALSE, ...,
+                             subset.threshold=700, aggregate = FALSE,
+                             aggregate.by = "ewm", verbose=FALSE) {
   UseMethod("fetch_assay_data")
 }
 
@@ -328,14 +328,16 @@ fetch_custom_sample_covariates.default <- function(x, samples=NULL, covariates=N
 #' @export
 #' @family FacileInterface
 with_assay_data <- function(x, features, assay_name = NULL,
-                            normalized = TRUE, aggregate.by = NULL,
-                            spread = TRUE, with_assay_name = FALSE, ...,
-                            verbose = FALSE, .fds = NULL) {
+                            normalized = TRUE, aggregate = FALSE,
+                            aggregate.by = "ewm", spread = TRUE,
+                            with_assay_name = FALSE, ..., verbose = FALSE,
+                            .fds = NULL) {
   UseMethod("with_assay_data", x)
 }
 
 with_assay_data.default <- function(x, features, assay_name = NULL,
-                                    normalized = TRUE, aggregate.by = NULL,
+                                    normalized = TRUE, aggregate = FALSE,
+                                    aggregate.by = "ewm",
                                     spread = TRUE, with_assay_name = FALSE, ...,
                                     verbose = FALSE, .fds = NULL) {
   stop("The FacileAPI requires a specific method be written for this type.")

@@ -25,6 +25,7 @@ Authors:
 
 Other contributors:
 \itemize{
+  \item Jonathan Carrol \email{jono@jcarroll.com.au} [contributor]
   \item Denali Therapeutics (Coypright 2019) [copyright holder, funder]
   \item Genentech (Coypright 2016 - 2018) [copyright holder, funder]
 }

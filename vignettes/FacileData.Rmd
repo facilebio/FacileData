@@ -191,16 +191,18 @@ ggplot(blca.dat, aes(CXCL9, GZMA, color=sex)) +
 ## Function list
 Currently the API consists of:
 
- - filter_features
- - filter_samples
- - fetch_assay_data
- - with_assay_data
- - fetch_assay_score
- - fetch_custom_sample_covariates
- - fetch_sample_covariates
- - with_sample_covariates
- - fetch_sample_statistics
- - fetch_samples
+- filter_features
+- filter_samples
+- fetch_assay_data
+- with_assay_data
+- fetch_assay_score (x): just use `fetch_assay_data(..., aggregate = TRUE)`
+- fetch_custom_sample_covariates (this probably isn't user facing)
+- fetch_sample_covariates
+- with_sample_covariates
+- fetch_sample_statistics (x)
+- fetch_samples (x)
+
+Functions marked with (x) indicate that this function should be on its way out.
 
 Please see the manpages for these functions for more details.
 
@@ -211,3 +213,18 @@ Please see the manpages for these functions for more details.
   implementations for the dplyr and `base::subset` like verbs, as well as
   `[` and `[[` so that we can manipulate this as transparently as possible.
 
+# MultiAssayExperiment API Comparsion
+
+Since MAE's are the closest thing to a datastore that should also easily
+accomodate the FacileData API, we'd like to compare how similar analyses are
+done between the two approaches.
+
+Let's collect MAE use cases in the wild here, and compare ease of data retreival
+and analysis using between the two.
+
+* Mini TCGA analysis with MAE from the 
+  [Management of genome-scale data section][ph525mae] of the PH525x 
+  Biomedical Data Science book by Love et al.
+
+
+[MAEph525]: http://genomicsclass.github.io/book/pages/dataman2017.html#multiomic

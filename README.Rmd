@@ -12,14 +12,18 @@ knitr::opts_chunk$set(
 )
 ```
 
+# FacileData
+
 <!-- 
+badges: start
 checkout https://lazappi.github.io/clustree/ package for some badge-inspiration
 -->
 
 [![Project Status](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
-[![Lifecycle: Experimental](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-
-# Overview
+[![Lifecycle: Experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![Travis build status](https://travis-ci.org/facileverse/FacileData.svg?branch=master)](https://travis-ci.org/facileverse/FacileData)
+[![Codecov test coverage](https://codecov.io/gh/facileverse/FacileData/branch/master/graph/badge.svg)](https://codecov.io/gh/facileverse/FacileData?branch=master)
+<!-- badges: end -->
 
 The `FacileData` package was written to facilitate easier analysis of large,
 multi-assay high-throughput genomics datasets. To this end, the `FacileData`
@@ -42,12 +46,12 @@ package provides two things:
 "experimental" due to its limited use by a broader audience, and not as
 a sign of the commitment to its development or how long it has been in
 (internal) use. As we find the edge cases and pain points in the APIs through
-broader adoption, we expect to soon move to a "stable" [lifecycle][lifecycle].
+broader adoption, we expect to soon move to "maturing" (and eventually "stable")
+[lifecycle][lifecycle].
 
-
+[lifecycle]: https://www.tidyverse.org/lifecycle/
 [tcga]: https://cancergenome.nih.gov/
 [tidyverse]: https://www.tidyverse.org/
-[lifecycle]: https://www.tidyverse.org/lifecycle/
 
 # Installation
 

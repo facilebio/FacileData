@@ -20,5 +20,6 @@ database}
 inivisibly returns the path to the successfully created datastore
 }
 \description{
-Create an empty FacileDataSet
+This is a helper function that is currently only called from
+\code{as.FacileDataSet}
 }

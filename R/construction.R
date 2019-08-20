@@ -2,7 +2,8 @@
 
 #' Create an empty FacileDataSet
 #'
-#' @export
+#' This is a helper function that is currently only called from
+#' `as.FacileDataSet`
 #'
 #' @importFrom rhdf5 h5createFile h5createGroup H5close
 #' @importFrom DBI dbConnect dbDisconnect dbGetQuery

@@ -31,7 +31,7 @@ test_that("fetch_assay_data limits samples correctly", {
 
 test_that("spreading data works with_assay_data", {
   expected <- FDS %>%
-    fetch_assay_data(genes, samples, normalized=TRUE) %>%
+    fetch_assay_data(genes, samples, normalized = TRUE) %>%
     select(dataset, sample_id, feature_name, value) %>%
     tidyr::spread(feature_name, value)
   result <- samples %>%
@@ -41,17 +41,24 @@ test_that("spreading data works with_assay_data", {
   expect_equal(result, expected)
 })
 
-test_that("fetch_assay_data(..., aggregate.by='ewm') provides scores", {
+test_that("fetch_assay_data(..., aggregate = TRUE) provides scores", {
   scores <- FDS %>%
-    fetch_assay_data(features, samples, normalized=TRUE, aggregate.by='ewm') %>%
+    fetch_assay_data(features, samples, normalized = TRUE, aggregate = TRUE) %>%
     arrange(sample_id, feature_name) %>%
     select(dataset, sample_id, feature_id, symbol=feature_name, value) %>%
     mutate(samid=paste(dataset, sample_id, sep="__"))
 
   dat <- FDS %>%
-    fetch_assay_data(features, samples, normalized=TRUE, as.matrix=TRUE)
+    fetch_assay_data(features, samples, normalized = TRUE, as.matrix = TRUE)
   ewm <- multiGSEA::eigenWeightedMean(dat)$score[scores$samid]
   expect_equal(scores$value, unname(ewm))
+
+  # test with_assay_data
+  with.scores <- scores %>%
+    distinct(dataset, sample_id) %>%
+    with_assay_data(features, aggregate.by = "ewm")
+
+  expect_equal(with.scores$score,)
 })
 
 # Batch Effect Correction ======================================================
