@@ -255,7 +255,7 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
 
   if (!as.matrix) {
     vals <- .melt.assay.matrix(vals, assay_name, atype, ftype, finfo)
-    if (isTRUE(aggregate.by)) {
+    if (isTRUE(aggregate)) {
       vals[, feature_type := 'aggregated']
       vals[, feature_id := 'aggregated']
       vals[, feature_name := 'aggregated']
@@ -754,7 +754,7 @@ with_assay_data.facile_frame <- function(x, features, assay_name = NULL,
 
 with_assay_data.tbl <- function(x, features, assay_name = NULL,
                                 normalized = TRUE, aggregate = FALSE,
-                                aggregate.by = NULL, spread = TRUE,
+                                aggregate.by = "ewm", spread = TRUE,
                                 with_assay_name = FALSE, ..., verbose = FALSE,
                                 .fds = NULL) {
   with_assay_data.data.frame(collect(x, n = Inf), features = features,
@@ -792,11 +792,11 @@ with_assay_data.data.frame <- function(x, features, assay_name = NULL,
     stop("Can only spread assay_data if asking for one assay_name")
   }
 
-  ## Hit the datastore
+  # Hit the datastore
   adata <- fetch_assay_data(.fds, features, x, normalized = normalized,
                             aggregate = aggregate, aggregate.by = aggregate.by,
                             verbose = verbose, ...)
-browser()
+
   if (is.character(spread)) {
     spread.vals <- unique(adata[[spread]])
     if (any(spread.vals %in% colnames(x))) {

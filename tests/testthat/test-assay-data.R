@@ -56,9 +56,9 @@ test_that("fetch_assay_data(..., aggregate = TRUE) provides scores", {
   # test with_assay_data
   with.scores <- scores %>%
     distinct(dataset, sample_id) %>%
-    with_assay_data(features, aggregate.by = "ewm")
+    with_assay_data(features, aggregate = TRUE)
 
-  expect_equal(with.scores$score,)
+  expect_equal(with.scores$aggregated, scores$value)
 })
 
 # Batch Effect Correction ======================================================
