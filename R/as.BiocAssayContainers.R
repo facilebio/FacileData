@@ -68,7 +68,10 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
                               assay_name = NULL, .fds = NULL,
                               custom_key = Sys.getenv("USER"),
                               update_libsizes = !is.null(feature_ids),
-                              update_normfactors = update_libsizes, ...) {
+                              update_normfactors = update_libsizes,
+                              custom_libsizes = FALSE,
+                              custom_normfactors = FALSE,
+                              ...) {
   .fds <- assert_facile_data_store(.fds)
   assert_choice(assay_name, assay_names(.fds))
 
@@ -172,6 +175,22 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
       y[["samples"]][["group"]] <- covs[["group"]]
       covs[["group"]] <- NULL
     }
+    # Remove any lib.size or norm.factors that might have come in through
+    # here. Replace the ones loaded in the DGEList if the corresponding
+    # `custom_*` parameter is set to `TRUE`
+    if ("lib.size" %in% colnames(covs)) {
+      if (custom_libsizes && is.numeric(covs[["lib.size"]])) {
+        y$samples[["lib.size"]] <- covs[["lib.size"]]
+      }
+      covs[["lib.size"]] <- NULL
+    }
+    if ("norm.factors" %in% colnames(covs)) {
+      if (custom_normfactors && is.numeric(covs[["norm.factors"]])) {
+        y$samples[["norm.factors"]] <- covs[["norm.factors"]]
+      }
+      covs[["norm.factors"]] <- NULL
+    }
+
     y$samples <- cbind(y$samples, covs)
   }
 

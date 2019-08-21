@@ -58,3 +58,7 @@ test_that("as.DGEList appends custom covariate table correctly", {
                  info = paste("sample <-> custom covariate match:", cov))
   }
 })
+
+test_that("as.DGEList with custom lib.size and norm.factors works", {
+
+})
