@@ -102,11 +102,27 @@ filter.facile_frame <- function(.data, ..., .facilitate = TRUE) {
 
 #' @export
 #' @noRd
-group_by.facile_frame <- function(.data, ..., add = FALSE, .facilitate = TRUE) {
+group_by.facile_frame <- function(.data, ..., add = FALSE,
+                                  # .drop = group_by_drop_default(.data),
+                                  .drop = TRUE,
+                                  .facilitate = TRUE) {
+  # fds. <- fds(.data)
+  # groups <- group_by_prepare(.data, ..., add = add)
+  # groups[["data"]] <- lapply(groups[["data"]], set_fds, fds.)
+  # # set_fds(grouped_df(groups$data, groups$group_names, .drop), fds.)
+  # set_fds(grouped_ff(groups$data, groups$group_names, .drop), fds.)
+
+  # if (.warn) {
+  #   warning("group_by with facile_frames may get weird")
+  # }
   res <- NextMethod()
-  # as_facile_frame(res, fds(.data), .valid_sample_check = FALSE)
+  # set_fds(res, fds.)
   res
 }
+
+# #' @export
+# #' @noRd
+# ungroup.
 
 #' @export
 #' @noRd

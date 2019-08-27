@@ -21,10 +21,6 @@ test_that("We can get pdata metadata", {
 
 test_that("exampleFacileDataSet -> DGELists -> as.FacileDataSet", {
   efds <- exampleFacileDataSet()
-  # dlists <- efds %>%
-  #   sample_info_tbl() %>%
-  #   group_by(dataset) %>%
-  #   do(as.DGEList(., .fds = efds))
   dsets <- sample_info_tbl(efds) %>%
     distinct(dataset) %>%
     pull(dataset)

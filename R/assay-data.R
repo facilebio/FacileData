@@ -261,6 +261,7 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
       vals[, feature_name := 'aggregated']
     }
     vals <- as.tbl(setDF(vals))
+    vals <- left_join(samples, vals, by = c("dataset", "sample_id"))
   }
 
   set_fds(vals, x)
