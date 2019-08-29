@@ -437,8 +437,8 @@ assay_feature_info.FacileDataSet <- function(x, assay_name, feature_ids = NULL,
 #' @noRd
 features.FacileDataSet <- function(x, assay_name = NULL, feature_type = NULL,
                                    feature_ids = NULL, ...) {
-  null.aname <- is.null(assay_name)
-  null.ftype <- is.null(feature_type)
+  null.aname <- onull.aname <- is.null(assay_name)
+  null.ftype <- onull.ftype <- is.null(feature_type)
 
   # Is the user asking for feature information from the features measured on
   # a given assay, or for all features of a given feature_type.
@@ -496,6 +496,9 @@ features.FacileDataSet <- function(x, assay_name = NULL, feature_type = NULL,
     out <- inner_join(out, finfo, by = c("feature_type", "feature_id"))
   }
 
+  if (onull.aname) {
+    out <- select(out, -assay, -hdf5_index, -assay_type)
+  }
   as_facile_frame(out, x)
 }
 
@@ -797,6 +800,7 @@ with_assay_data.data.frame <- function(x, features, assay_name = NULL,
   adata <- fetch_assay_data(.fds, features, x, normalized = normalized,
                             aggregate = aggregate, aggregate.by = aggregate.by,
                             verbose = verbose, ...)
+  adata <- filter(adata, !is.na(value))
 
   if (is.character(spread)) {
     spread.vals <- unique(adata[[spread]])

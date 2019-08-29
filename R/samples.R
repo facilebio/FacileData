@@ -89,8 +89,10 @@ join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
     samples <- distinct(samples, dataset, sample_id)
   }
 
-  inner_join(x, samples, by=c('dataset', 'sample_id'),
-             copy=internalize, auto_index=internalize)
+  # inner_join(x, samples, by=c('dataset', 'sample_id'),
+  #            copy=internalize, auto_index=internalize)
+  left_join(x, samples, by=c('dataset', 'sample_id'),
+            copy=internalize, auto_index=internalize)
 }
 
 ## Filter x down to specific samples

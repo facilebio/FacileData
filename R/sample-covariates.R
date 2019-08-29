@@ -127,8 +127,9 @@ fetch_sample_covariates.FacileDataSet <- function(
   dat <- collect(dat, n=Inf)
   dat <- set_fds(dat, x) ## explicitly added here to do `collect` above
 
-  out <- join_samples(dat, samples, semi=TRUE)
-  out <- collect(out, n = Inf)
+  # out <- join_samples(dat, samples, semi=TRUE)
+  # out <- collect(out, n = Inf)
+  out <- semi_join(dat, samples, by = c("dataset", "sample_id"))
   if (with_source) {
     out <- mutate(out, source = "datastore")
   }
