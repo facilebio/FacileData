@@ -7,8 +7,11 @@ output: github_document
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
+  echo = TRUE,
+  message = FALSE,
+  error = FALSE,
   comment = "#>",
-  fig.path = "README-"
+  fig.path = "man/figures/"
 )
 ```
 
@@ -87,7 +90,7 @@ ggplot(fdat, aes(cnv_score_ERBB2, ERBB2, color = sex)) +
   facet_wrap(~ indication)
 ```
 
-<img src="vignettes/images/her2_cnv_vs_expression.png" />
+<img src="man/figures/her2_cnv_vs_expression.png" width="66%" />
 
 Let's compare how you might do the same using data stored in a
 `SummarizedExperiment` named `se.tcga` that stores RNA-seq (raw and normalized)

@@ -1,7 +1,10 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+# FacileData
+
 <!-- 
+badges: start
 checkout https://lazappi.github.io/clustree/ package for some badge-inspiration
 -->
 
@@ -9,8 +12,11 @@ checkout https://lazappi.github.io/clustree/ package for some badge-inspiration
 Status](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![Lifecycle:
 Experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
-
-# Overview
+[![Travis build
+status](https://travis-ci.org/facileverse/FacileData.svg?branch=master)](https://travis-ci.org/facileverse/FacileData)
+[![Codecov test
+coverage](https://codecov.io/gh/facileverse/FacileData/branch/master/graph/badge.svg)](https://codecov.io/gh/facileverse/FacileData?branch=master)
+<!-- badges: end -->
 
 The `FacileData` package was written to facilitate easier analysis of
 large, multi-assay high-throughput genomics datasets. To this end, the
@@ -30,6 +36,13 @@ large, multi-assay high-throughput genomics datasets. To this end, the
     Atlas](https://cancergenome.nih.gov/). This singular `FacileDataSet`
     allows analysts easy access to arbitrary subsets of these data
     without having to load all of it into memory.
+
+**A note on the experimental lifecycle**: This package is tagged as
+“experimental” due to its limited use by a broader audience, and not
+as a sign of the commitment to its development or how long it has been
+in (internal) use. As we find the edge cases and pain points in the APIs
+through broader adoption, we expect to soon move to “maturing” (and
+eventually “stable”) [lifecycle](https://www.tidyverse.org/lifecycle/).
 
 # Installation
 
@@ -67,7 +80,7 @@ ggplot(fdat, aes(cnv_score_ERBB2, ERBB2, color = sex)) +
   facet_wrap(~ indication)
 ```
 
-<img src="vignettes/images/her2_cnv_vs_expression.png" />
+<img src="man/figures/her2_cnv_vs_expression.png" width="66%" />
 
 Let’s compare how you might do the same using data stored in a
 `SummarizedExperiment` named `se.tcga` that stores RNA-seq (raw and
