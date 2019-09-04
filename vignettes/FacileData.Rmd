@@ -123,11 +123,12 @@ vs. expression across the TCGA "BLCA" and "BRCA" indications using the
 `FacileDataSet`. We'll then compare that to how the same code might be written
 using more traditional bioconductor containers.
 
-```{r her2-cnv-expression}
+```{r her2-cnv-expression, eval = FALSE}
 library(FacileData)
-library(FacileTCGADataSet)
+# library(FacileTCGADataSet)
 library(ggplot2)
-tcga <- FacileTCGADataSet()
+# tcga <- FacileTCGADataSet()
+tcga <- exampleFacileDataSet()
 
 samples <- filter_samples(tcga, indication %in% c("BLCA", "BRCA"))
 features <- filter_features(tcga, name == "ERBB2")
@@ -146,8 +147,10 @@ ggplot(fdat, aes(cnv_score_ERBB2, ERBB2, color=sex)) +
 
 ```{r tcga-sample-distribution}
 library(FacileData)
-library(FacileTCGADataSet)
-tcga <- FacileTCGADataSet()
+library(dplyr)
+# library(FacileTCGADataSet)
+# tcga <- FacileTCGADataSet()
+tcga <- exampleFacileDataSet()
 distro <- samples(tcga) %>%
   with_sample_covariates(c("indication", "sample_type"))
 ggplot(distro, aes(indication, fill=sample_type)) +

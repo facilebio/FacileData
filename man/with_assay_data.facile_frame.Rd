@@ -5,8 +5,9 @@
 \title{Append expression values to sample-descriptor}
 \usage{
 \method{with_assay_data}{facile_frame}(x, features, assay_name = NULL,
-  normalized = TRUE, aggregate.by = NULL, spread = TRUE,
-  with_assay_name = FALSE, ..., verbose = FALSE, .fds = fds(x))
+  normalized = TRUE, aggregate = FALSE, aggregate.by = "ewm",
+  spread = TRUE, with_assay_name = FALSE, ..., verbose = FALSE,
+  .fds = fds(x))
 }
 \arguments{
 \item{.fds}{A \code{FacileDataSet} object}
