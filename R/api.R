@@ -1,10 +1,92 @@
-####################################################################################################
-### The FacileAPI: Classes from the FacileVerse must implement methods on each of these generics ###
-####################################################################################################
+# Defines generic used across the facileverse.
+#
+# This is split into two parts:
+# 1. Generic functions for a wide variety of objects (like `facilitate`)
+# 2. The FacileData API itself, for querying and retrieving data from
+#    multi-assay genomics data stores.
 
-#' The Facile API
+# Universal Funcitons ----------------------------------------------------------
+
+#' Converts an arbitrary object into one that works in the facile ecosystem.
 #'
-#' This is a stub for a manpage all about the FacileAPI
+#' There will be many times when the particular analysis you want to conduct
+#' is not well supported in the facileverse. In this case, we will endeavor
+#' to implement ways for you to take these results and bring them back into
+#' the facile ecosystem so that you can benefit from the interactivity provided
+#' therein.
+#'
+#' We'll want to define `facilitate()` over a wide variety of objects. For
+#' instance:
+#'
+#' * `facilitate(a_DGElist)` would convert an [edgeR::DGEList()] object into
+#'   a `FacileDGEList`, which is just the same DGEList that implements the
+#'   FacileData API. This is a work in progress and will be implemented in the
+#'   FacileBioc package.
+#'
+#' * You might perform a differential expression analysis using standard a
+#'   standard limma pipeline, but you'll want to be able to drop this result
+#'   into the facile ecosystem provided in the FacileAnalysis package.
+#'   The particulars of this `faciltate()` implementation would be defined in
+#'   the FacileAnalysis package, and migth look something like this:
+#'
+#'    ```
+#'    fit <- eBayes(lmFit(elist, design))
+#'    limma.res <- topTable(fit, coef = "something", n = Inf)
+#'    facile.res <- facilitate(elist, fit, limma.res)
+#'    ```
+#'
+#' It's not clear how well well we'll be able to do this, or if this is even
+#' the right way to do it, but we'll need to do something.
+#'
+#' @export
+#' @param x A non-facile object that we want to bring into the facile ecosystem
+#' @param ... we're going to need a lot of flexibility in the implementation of
+#'   this function for different types of analyses
+#' @return A facile-subclass of `x` that can take advantage of the interactive
+#'   facile ecosystem.
+facilitate <- function(x, ...) {
+  UseMethod("facilitate", x)
+}
+
+# Labeled ----------------------------------------------------------------------
+
+# Covaraites (and similar things) have can have both "labels" and "names". The
+# "name" is the R-friendly name of the object/variable/etc. and the "label" is
+# a human-readable version of the same, ie. "PFS" might be a name, and
+# "Progression Free Survival" might be the label
+
+#' Labeled acts like interface to reactive modules.
+#'
+#' Modules that implement this interface must return `label` and `name` reactive
+#' elements within them.
+#'
+#' We use these when something (like a `assayFeatureSelect`) needs
+#' a "computer friendly" name for itself (`name()`), or a more human readable
+#' name (`label()`)
+#'
+#' @export
+#' @rdname labeled
+name <- function(x, ...) {
+  UseMethod("name", x)
+}
+
+#' @noRd
+#' @export
+name.NULL <- function(x, ...) NULL
+
+#' @noRd
+#' @export
+#' @rdname labeled
+label <- function(x, ...) {
+  UseMethod("label")
+}
+
+#' @noRd
+#' @export
+#' @rdname labeled
+label.NULL <- function(x, ...) NULL
+
+# FacileData API ---------------------------------------------------------------
 
 #' Units of measure in an assay
 #'
@@ -380,42 +462,4 @@ with_sample_covariates.default <- function(x, covariates = NULL, na.rm = FALSE,
                                            .fds = NULL, ...) {
   stop("The FacileAPI requires a specific method be written for this type.")
 }
-
-# Labeled ======================================================================
-
-# Covaraites (and similar things) have can have both "labels" and "names". The
-# "name" is the R-friendly name of the object/variable/etc. and the "label" is
-# a human-readable version of the same, ie. "PFS" might be a name, and
-# "Progression Free Survival" might be the label
-
-#' Labeled acts like interface to reactive modules.
-#'
-#' Modules that implement this interface must return `label` and `name` reactive
-#' elements within them.
-#'
-#' We use these when something (like a `assayFeatureSelect`) needs
-#' a "computer friendly" name for itself (`name()`), or a more human readable
-#' name (`label()`)
-#'
-#' @export
-#' @rdname labeled
-name <- function(x, ...) {
-  UseMethod("name", x)
-}
-
-#' @noRd
-#' @export
-name.NULL <- function(x, ...) NULL
-
-#' @noRd
-#' @export
-#' @rdname labeled
-label <- function(x, ...) {
-  UseMethod("label")
-}
-
-#' @noRd
-#' @export
-#' @rdname labeled
-label.NULL <- function(x, ...) NULL
 

@@ -121,7 +121,7 @@ legit.as.classes <- c(
 #' @export
 as.FacileDataSet.default <- function(x, ...) {
     xclass = class(x)[1L]
-    if (! xclass %in% legit.as.classes) {
+    if (!xclass %in% legit.as.classes) {
         stop("as.FacileDataSet not defined for object of class: ", xclass)
     }
     as.FacileDataSet(list(x), ...)
@@ -184,6 +184,16 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   stopifnot(all(same.fspace))
 
   finfo <- fdata(first, validate = TRUE)
+
+  # It's possible that expression containers have colnames(x) == NULL (ugh),
+  # so let's provide default sample names if they are missing
+  x <- lapply(x, function(xdat) {
+    cnames <- colnames(xdat)
+    if (is.null(cnames) || any(duplicated(cnames))) {
+      colnames(xdat) <- paste0("sample_", seq(ncol(xdat)))
+    }
+    xdat
+  })
 
   pdats <- lapply(names(x), function(dname) {
     obj <- x[[dname]]
