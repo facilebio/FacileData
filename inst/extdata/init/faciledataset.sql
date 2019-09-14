@@ -25,7 +25,7 @@ CREATE TABLE feature_info (
 --  start INTEGER,
 --  end INTEGER,
 --  strand INTEGER,    -- 1, -1, 0: positive, negative, unstranded
-  effective_length INTEGER,
+--  effective_length INTEGER,
   source TEXT,
   PRIMARY KEY (feature_type, feature_id));
 CREATE INDEX feature_info__feature_id ON feature_info (feature_id);

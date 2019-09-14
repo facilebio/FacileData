@@ -14,7 +14,11 @@
 #' @param fn the path to the ENSEMBL (or GENCODE) GTF
 #' @importMethodsFrom S4Vectors mcols
 #' @return a list of tibbles with `$transcript_info` and `$gene_info` elements
-extract_transcribed_info_from_ensembl_gtf <- function(fn) {
+extract_transcribed_info_from_ensembl_gtf <- function(
+    fn, gene_type = "gene_type", transcript_type = "transcript_type") {
+  assert_string(gene_type)
+  assert_string(transcript_type)
+
   if (!requireNamespace("rtracklayer")) {
     stop("rtacklayer required to play with gtfs")
   }
@@ -25,15 +29,18 @@ extract_transcribed_info_from_ensembl_gtf <- function(fn) {
   gtf <- rtracklayer::import(fn)
 
   # Working with at least release_28?
-  stopifnot(
-    "gene_type" %in% colnames(S4Vectors::mcols(gtf)),
-    "transcript_type" %in% colnames(S4Vectors::mcols(gtf)))
+  assert_choice(gene_type, colnames(S4Vectors::mcols(gtf)))
+  S4Vectors::mcols(gtf)[[gene_type]] <-
+    .level_biotypes(S4Vectors::mcols(gtf)[[gene_type]])
 
-  gtf$gene_type <- .level_biotypes(gtf$gene_type)
-  gtf$transcript_type <- .level_biotypes(gtf$transcript_type)
+  if (transcript_type != gene_type) {
+    assert_choice(transcript_type, colnames(S4Vectors::mcols(gtf)))
+    S4Vectors::mcols(gtf)[[transcript_type]] <-
+      .level_biotypes(S4Vectors::mcols(gtf)[[transcript_type]])
+  }
 
-  tx.info <- .transcript_info(gtf)
-  gn.info <- .gene_info(gtf, tx.info)
+  tx.info <- .transcript_info(gtf, transcript_type)
+  gn.info <- .gene_info(gtf, tx.info, gene_type)
 
   # Note that stripping the version information from gene_id (and transcript_id)
   # will result in duplicate identifiers. These identifiers come from the
@@ -79,7 +86,7 @@ extract_transcribed_info_from_ensembl_gtf <- function(fn) {
 #'
 #' @param gr a GRanges object initialized from an ENSEMBL/GENOCDE GTF
 #' @return a table of transcript information
-.transcript_info <- function(gr) {
+.transcript_info <- function(gr, transcript_type) {
   requireNamespace("GenomicRanges", quietly = TRUE)
   dfa <- GenomicRanges::as.data.frame(gr)
 
@@ -90,7 +97,7 @@ extract_transcribed_info_from_ensembl_gtf <- function(fn) {
 
   tx.meta <- dfa %>%
     filter(type == "transcript") %>%
-    select(transcript_id, transcript_name, transcript_type,
+    select(transcript_id, transcript_name, {{transcript_type}},
            gene_name, gene_id, source, seqnames, start, end, strand)
   if (any(duplicated(tx.meta$transcript_id))) {
     stop("Duplicated transcript ids found in gtf file")
@@ -109,7 +116,7 @@ extract_transcribed_info_from_ensembl_gtf <- function(fn) {
 #' @param gr a GRanges object initialized from an ENSEMBL/GENOCDE GTF
 #' @param tx_info the tibble that came from .transcript_info()
 #' @return a tibble of gene-level information
-.gene_info <- function(gr, tx_info) {
+.gene_info <- function(gr, tx_info, gene_type) {
   requireNamespace("GenomicRanges", quietly = TRUE)
   gr.exons <- gr[gr$type == "exon"]
 
@@ -126,7 +133,7 @@ extract_transcribed_info_from_ensembl_gtf <- function(fn) {
     filter(type == "gene") %>%
     arrange(gene_id, source, gene_type, seqnames) %>%
     distinct(gene_id, .keep_all = TRUE) %>%
-    select(gene_id, symbol = gene_name, gene_type, seqnames, start, end,
+    select(gene_id, symbol = gene_name, {{gene_type}}, seqnames, start, end,
            strand, source)
 
   ntx <- tx_info %>%

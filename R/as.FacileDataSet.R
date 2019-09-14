@@ -386,7 +386,7 @@ validate.fdata <- function(x, ...) {
     feature_id="character",
     name="character",
     meta="character",
-    effective_length="numeric",
+    # effective_length="numeric",
     source="character"
   )
 

@@ -48,6 +48,70 @@ facilitate <- function(x, ...) {
   UseMethod("facilitate", x)
 }
 
+# fds() getters/setters ........................................................
+
+#' Get/set the FacileDataStore from an object
+#'
+#' @rdname fds
+#' @export
+#' @param x the object
+#' @param db The \code{FacileDb} object
+fds <- function(x, ...) {
+  UseMethod("fds", x)
+}
+
+#' @export
+#' @rdname fds
+fds.FacileDataStore <- function(x) {
+  return(x)
+}
+
+
+#' @export
+#' @rdname fds
+fds.default <- function(x, ...) {
+  out <- attr(x, 'fds')
+  if (is.null(out)) {
+    warning("No FacileDataStore found in x (", class(x)[1L], ")",
+            immediate.=TRUE)
+  }
+  out
+}
+
+#' @rdname fds
+#' @export
+"fds<-" <- function(x, value) {
+  UseMethod("fds<-", x)
+}
+
+#' @rdname fds
+#' @export
+"fds<-.tbl" <- function(x, value) {
+  attr(x, 'fds') <- value
+  x
+}
+
+#' @rdname fds
+#' @export
+"fds<-.data.frame" <- function(x, value) {
+  attr(x, 'fds') <- value
+  x
+}
+
+#' @export
+#' @noRd
+"fds<-.default" <- function(x, value) {
+  attr(x, 'fds') <- value
+  x
+}
+
+#' @rdname fds
+#' @export
+set_fds <- function(x, value) {
+  attr(x, "fds") <- value
+  x
+}
+
 # Labeled ----------------------------------------------------------------------
 
 # Covaraites (and similar things) have can have both "labels" and "names". The

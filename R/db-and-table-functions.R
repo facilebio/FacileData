@@ -122,7 +122,8 @@ gene_info_tbl <- function(x) {
   gi <- feature_info_tbl(x) %>%
     filter(feature_type == 'entrez') %>%
     select(feature_id, feature_type, symbol=name, n_exons=-1,
-           length=effective_length, source) %>%
+           # length=effective_length,
+           source) %>%
     inner_join(hdf5.info, by='feature_id') %>%
     as_facile_frame(x, .valid_sample_check = FALSE)
 }
@@ -150,68 +151,6 @@ sample_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
   out <- tbl(x$con, 'sample_info')
   as_facile_frame(out, x, .valid_sample_check = FALSE)
-}
-
-# fds() getters/setters ========================================================
-
-#' Get/set db
-#'
-#' @rdname getsetdb
-#' @export
-#' @param x the object
-#' @param db The \code{FacileDb} object
-fds <- function(x, ...) {
-  UseMethod("fds", x)
-}
-
-#' @export
-#' @rdname getsetdb
-fds.FacileDataStore <- function(x) {
-  return(x)
-}
-
-
-#' @export
-#' @rdname getsetdb
-fds.default <- function(x, ...) {
-  out <- attr(x, 'fds')
-  if (is.null(out)) {
-    warning("No FacileDataStore found in x (", class(x)[1L], ")",
-            immediate.=TRUE)
-  }
-  out
-}
-
-#' @rdname getsetdb
-#' @export
-"fds<-" <- function(x, value) {
-  UseMethod("fds<-", x)
-}
-
-#' @rdname getsetdb
-#' @export
-"fds<-.tbl" <- function(x, value) {
-  attr(x, 'fds') <- value
-  x
-}
-
-#' @rdname getsetdb
-#' @export
-"fds<-.data.frame" <- function(x, value) {
-  attr(x, 'fds') <- value
-  x
-}
-
-"fds<-.default" <- function(x, value) {
-  attr(x, 'fds') <- value
-  x
-}
-
-#' @rdname getsetdb
-#' @export
-set_fds <- function(x, value) {
-  attr(x, "fds") <- value
-  x
 }
 
 ## Unexported utility functions ================================================

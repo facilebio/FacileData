@@ -44,6 +44,12 @@ samples.facile_frame <- function(x, ...) {
   distinct(x, dataset, sample_id, .keep_all = TRUE)
 }
 
+#' @noRd
+#' @export
+organism.facile_frame <- function(x, ...) {
+  organism(fds(x), ...)
+}
+
 # dplyr++ manipulation =========================================================
 
 #' Retrieves the extra class information that might be ahead of the root
