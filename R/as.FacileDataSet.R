@@ -131,7 +131,7 @@ as.FacileDataSet.default <- function(x, ...) {
 #' @export
 #' @rdname as.FacileDataSet
 as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
-                                  source_assay,
+                                  source_assay = NULL,
                                   assay_description = paste("Description for ", assay_name),
                                   dataset_name = "DEFAULT_NAME",
                                   dataset_meta = list(),
@@ -155,7 +155,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   } else if (!is.character(names(x))) {
     # there's only one dataset here and no name is provided, so we use a
     # default dataset name if the list is unnamed
-    names(x) <- tolower(fclass)
+    names(x) <- "dataset"
   }
 
 
@@ -310,7 +310,10 @@ ds_annot <- function(x, meta = NULL, validate = FALSE, ...) {
 
 ds_annot.SummarizedExperiment <- function(x, meta = NULL, validate = FALSE,
                                           ...) {
-  out <- .merge_ds_annot(metadata(x), meta)
+  ns4 <- tryCatch(loadNamespace("S4Vectors"), error = function(e) NULL)
+  if (is.null(ns4)) stop("S4Vectors required")
+
+  out <- .merge_ds_annot(ns4$metadata(x), meta)
   if (validate) .ds_annot_validate(out)
   out
 }
@@ -363,8 +366,11 @@ fdata <- function(x, validate = FALSE, ...) {
 fdata.SummarizedExperiment <- function(x, validate = FALSE, ...) {
   ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
   if (is.null(ns)) stop("SummarizedExperiment required")
+  ns4 <- tryCatch(loadNamespace("S4Vectors"), error = function(e) NULL)
+  if (is.null(ns4)) stop("S4Vectors required")
 
-  out <- ns$as.data.frame(ns$mcols(x))
+  # out <- ns$as.data.frame(ns$mcols(x))
+  out <- ns4$as.data.frame.DataTable(ns$rowData(x))
   if (validate) validate.fdata(out, ...) else out
 }
 fdata.ExpressionSet <- function(x, validate = FALSE, ...) {
@@ -381,6 +387,10 @@ fdata.DGEList <- function(x, validate = FALSE, ...) {
 }
 validate.fdata <- function(x, ...) {
   stopifnot(is.data.frame(x))
+  if (is.null(x[["source"]])) {
+    x[["source"]] <- rep("unspecified", nrow(x))
+  }
+
   req.cols <- c(
     feature_type="character",
     feature_id="character",
@@ -416,9 +426,12 @@ pdata <- function(x, covariate_metadata = NULL, ...) {
 pdata.SummarizedExperiment <- function(x, covariate_metadata = NULL,  ...) {
   ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
   if (is.null(ns)) stop("SummarizedExperiment required")
-  df = ns$colData(x)
-    ds = ns$as.data.frame(df)
-    validate.pdata(ds, ...)
+  ns4 <- tryCatch(loadNamespace("S4Vectors"), error = function(e) NULL)
+  if (is.null(ns4)) stop("S4Vectors required")
+
+  df <- ns$colData(x)
+  ds <- ns4$as.data.frame.DataTable(df)
+  validate.pdata(ds, ...)
 }
 pdata.ExpressionSet <- function(x, covariate_metadata = NULL,  ...) {
   ns <- tryCatch(loadNamespace("Biobase"), error = function(e) NULL)
