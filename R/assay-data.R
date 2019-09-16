@@ -557,24 +557,9 @@ assay_info_over_samples <- function(x, samples = NULL) {
 }
 
 #' @section Removing Batch Effects:
-#' We leverage limma's `removeBatchEffect` functionality, with a simplified
-#' interface. The `batch` parameter replaces `batch`, `batch2`, and
-#' `covariates`. The `design` parameter is replaced with `main`.
-#'
-#' All these parameters must be characters, which reference columns that
-#' have been passed down into the samples frame, or ones that we can pull
-#' out of the facile data store and spank onto the samples frame.
-#'
-#' We'll use these parameters to build a model.matrix with main and batch
-#' effect and follow the use of `removeBatchEffect` as outlined in the post
-#' linked to below to pull the design matrix apart and call the function with
-#' the corresponding `design` and `covariates` parameters:
-#'
-#' https://support.bioconductor.org/p/83286/#83287
-#'
-#' Setting the `batch.scale` parameter to `TRUE` (the default), ensures that
-#' the `rowMeans` of the returned data matrix are the same as the original
-#' dataset.
+#' When normalized data is returned, we assume these data are log-like, and you
+#' have the option to regress out batch effects using our
+#' [remove_batch_effect()] wrapper to [limma::removeBatchEffect()].
 #'
 #' @rdname fetch_assay_data
 #' @importFrom edgeR cpm
@@ -591,9 +576,7 @@ assay_info_over_samples <- function(x, samples = NULL) {
 #'                        batch = c("sex", "RIN"), main = "treatment")
 normalize.assay.matrix <- function(vals, feature.info, sample.info, fds,
                                    log = TRUE, prior.count = 1,
-                                   batch = NULL, main = NULL,
-                                   maintain.rowmeans = TRUE,
-                                   verbose = FALSE, ...) {
+                                   batch = NULL, verbose = FALSE, ...) {
   stopifnot(
     nrow(vals) == nrow(feature.info),
     all(rownames(vals) == feature.info$feature_id),
@@ -621,7 +604,7 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info, fds,
       nf <- sample.info[["normfactor"]]
     }
     libsize <- lsize * nf
-    out <- edgeR::cpm(vals, libsize, log=log, prior.count=prior.count)
+    out <- edgeR::cpm(vals, libsize, log = log, prior.count = prior.count)
   } else if (atype == "tpm") {
     # someone processed their data with salmon or kallisto and wanted to store
     # tpm. Normalizing this is just log2(val + prior.count)
@@ -634,64 +617,31 @@ normalize.assay.matrix <- function(vals, feature.info, sample.info, fds,
     out <- vals
   }
 
-  # We assume we've got log-transformed data here, and removeBatchEffect
-  # if that was asked for.
   if (test_character(batch, min.len = 1L)) {
-    if (is.character(main) && length(main) == 0L) main <- NULL
-    if (!is.null(main)) {
-      assert_string(main)
-    }
-    retrieve.covs <- setdiff(c(batch, main), colnames(sample.info))
-    sample.info <- try({
-      with_sample_covariates(sample.info, retrieve.covs, .fds = fds)
-    }, silent = TRUE)
-    if (is(sample.info, "try-error")) {
-      stop("Covariates for batch correction could not be found: ",
-           paste(retrieve.covs, collapse = ","))
-    }
-
-    # It's possible that the main and batch covariates are all singular,
-    # ie. all factors with the same level, or whatever. Let's protect against
-    # that before we removeBatchEffect
-    batch.df <- sample.info[, c(main, batch), drop = FALSE]
-    is.singular <- sapply(batch.df, function(vals) length(unique(vals)) == 1L)
-
-    if (!is.null(main) && is.singular[main]) main <- NULL
-    batch <- setdiff(batch, names(is.singular)[is.singular])
-
-    if (length(batch)) {
-      is.num <- sapply(sample.info[, batch, drop = FALSE], is.numeric)
-      if (is.null(main)) {
-        if (any(!is.num)) {
-          cat.mats <- lapply(batch[!is.num], function(bcov) {
-            # in limma we trust (code taken from limma::removeBatchEffect)
-            batch. <- droplevels(as.factor(sample.info[[bcov]]))
-            contrasts(batch.) <- contr.sum(levels(batch.))
-            model.matrix(~ batch.)[, -1, drop = FALSE]
-          })
-          cat.mats <- do.call(cbind, cat.mats)
-        } else {
-          cat.mats <- matrix(0, nrow = nrow(sample.info), ncol = 0)
-        }
-        num.mats <- sample.info[, batch[is.num], drop = FALSE]
-        batch.design <- cbind(cat.mats, num.mats)
-        treatment.design <- matrix(1, nrow(sample.info), 1)
-      } else {
-        batch.formula <- paste(batch, collapse = " + ")
-        des.formula <- paste("~", main, "+", batch.formula)
-        des.matrix <- model.matrix(formula(des.formula), data = sample.info)
-        main.cols <- c(1, grep(sprintf("^%s", main), colnames(des.matrix)))
-        treatment.design <- des.matrix[, main.cols, drop = FALSE]
-        batch.design <- des.matrix[, -(main.cols), drop = FALSE]
-      }
-      if (maintain.rowmeans) {
-        batch.design <- scale(batch.design)
-      }
-      out <- removeBatchEffect(out, design = treatment.design,
-                               covariates = batch.design)
-    }
+    out <- remove_batch_effect(out, sample.info, batch, ...)
   }
+
   out
+}
+
+#' Check if character vector of sample ids in `ids` can plausably be the
+#' sample_id's in the sample_info table.
+#'
+#' @noRd
+samples_look_concordant <- function(ids, sample_info) {
+  assert_multi_class(sample_info, c("data.frame", "tbl"))
+  assert_character(ids, len = nrow(sample_info))
+  if ("sample_id" %in% colnames(sample_info)) {
+    sids <- sample_info[["sample_id"]]
+    # let's take the last N entries from ids, where N is the length of the
+    # sister entry in sids
+    ids.trim <- substr(ids, nchar(ids) - nchar(sids) + 1L, nchar(ids))
+    kosher <- isTRUE(all.equal(ids.trim, sids))
+  } else {
+    sids <- rownames(sample_info)
+    kosher <- isTRUE(all.equal(ids, sids))
+  }
+  kosher
 }
 
 .extract_batch_terms <- function(sample.info, batch, batch2, covariates,
