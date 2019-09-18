@@ -95,6 +95,17 @@ available within the bioconductor ecosystem for data assembly:
    for paired-end RNA-Seq data from experiments on primary cultures of 
    parathyroid tumors.
 
+:::tip
+If you are looking for help wrangling raw RNA-seq data into something like a
+SummarizedExperiment object, we currently favor processing the reads using
+either [salmon][salmon] or [kallisto][kallisto], then importing these results
+using the [tximport][tximport] package.
+:::
+
+[salmon]: https://combine-lab.github.io/salmon/
+[kallisto]: https://pachterlab.github.io/kallisto/
+[tximport]: http://bioconductor.org/packages/tximport
+
 ```{r get-data, message=FALSE, warning=FALSE}
 library(SummarizedExperiment)
 # Note that you will need the airway and parathyroidSE packages installed.
