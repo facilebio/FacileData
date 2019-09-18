@@ -7,8 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FacileData API Overview • FacileData</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="FacileData API Overview">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
@@ -30,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.3</span>
       </span>
     </div>
 
@@ -38,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -56,6 +57,12 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/FacileDataSet-architecture.html">FacileDataSet Architecture</a>
+    </li>
+    <li>
+      <a href="../articles/FacileDataSet-assembly.html">FacileDataSet Assembly</a>
+    </li>
+    <li>
       <a href="../articles/FacileDataSet.html">FacileDataSet Overview</a>
     </li>
   </ul>
@@ -73,13 +80,14 @@
 <!--/.navbar -->
 
       
+
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>FacileData API Overview</h1>
                         <h4 class="author">Steve Lianoglou</h4>
             
-            <h4 class="date">2019-09-04</h4>
+            <h4 class="date">2019-09-18</h4>
       
       
       <div class="hidden name"><code>FacileData.Rmd</code></div>
@@ -120,19 +128,19 @@
 <p>To provide illustrative examples of the utility of the <em>FacileData API</em>, we rely on the <code>FacileTCGADataSet</code> package, which provides the full RNA-seq expression, miRNA expresion, and copy number data across all 33 indications (11,000+ samples) from the TCGA. Please see the <code>FacileTCGADataSet</code> package for more information regarding how these data were put together, and how to extend it.</p>
 </div>
 <p>As a teaser, we provide code snippets that show how to plot HER2 copy number vs. expression across the TCGA “BLCA” and “BRCA” indications using the <code>FacileDataSet</code>. We’ll then compare that to how the same code might be written using more traditional bioconductor containers.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(FacileData)</a>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(FacileData)</a>
 <a class="sourceLine" id="cb1-2" data-line-number="2"><span class="co"># library(FacileTCGADataSet)</span></a>
-<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ggplot2)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(ggplot2)</a>
 <a class="sourceLine" id="cb1-4" data-line-number="4"><span class="co"># tcga &lt;- FacileTCGADataSet()</span></a>
 <a class="sourceLine" id="cb1-5" data-line-number="5">tcga &lt;-<span class="st"> </span><span class="kw"><a href="../reference/exampleFacileDataSet.html">exampleFacileDataSet</a></span>()</a>
 <a class="sourceLine" id="cb1-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb1-7" data-line-number="7">samples &lt;-<span class="st"> </span><span class="kw">filter_samples</span>(tcga, indication <span class="op">%in%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"BLCA"</span>, <span class="st">"BRCA"</span>))</a>
+<a class="sourceLine" id="cb1-7" data-line-number="7">samples &lt;-<span class="st"> </span><span class="kw">filter_samples</span>(tcga, indication <span class="op">%in%</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"BLCA"</span>, <span class="st">"BRCA"</span>))</a>
 <a class="sourceLine" id="cb1-8" data-line-number="8">features &lt;-<span class="st"> </span><span class="kw">filter_features</span>(tcga, name <span class="op">==</span><span class="st"> "ERBB2"</span>)</a>
 <a class="sourceLine" id="cb1-9" data-line-number="9"></a>
 <a class="sourceLine" id="cb1-10" data-line-number="10">fdat &lt;-<span class="st"> </span>samples <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb1-11" data-line-number="11"><span class="st">  </span><span class="kw">with_assay_data</span>(features, <span class="dt">assay_name =</span> <span class="st">"rnaseq"</span>, <span class="dt">normalized =</span> <span class="ot">TRUE</span>) <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb1-12" data-line-number="12"><span class="st">  </span><span class="kw">with_assay_data</span>(features, <span class="dt">assay_name =</span> <span class="st">"cnv_score"</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="st">  </span><span class="kw"><a href="../reference/with_sample_covariates.html">with_sample_covariates</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"indication"</span>, <span class="st">"sex"</span>))</a>
+<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="st">  </span><span class="kw"><a href="../reference/with_sample_covariates.html">with_sample_covariates</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"indication"</span>, <span class="st">"sex"</span>))</a>
 <a class="sourceLine" id="cb1-14" data-line-number="14"></a>
 <a class="sourceLine" id="cb1-15" data-line-number="15"><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(fdat, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(cnv_score_ERBB2, ERBB2, <span class="dt">color=</span>sex)) <span class="op">+</span></a>
 <a class="sourceLine" id="cb1-16" data-line-number="16"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span>() <span class="op">+</span></a>
@@ -141,13 +149,13 @@
 <div id="example-analysis" class="section level1">
 <h1 class="hasAnchor">
 <a href="#example-analysis" class="anchor"></a>Example Analysis</h1>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(FacileData)</a>
-<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(dplyr)</a>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(FacileData)</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(dplyr)</a>
 <a class="sourceLine" id="cb2-3" data-line-number="3"><span class="co"># library(FacileTCGADataSet)</span></a>
 <a class="sourceLine" id="cb2-4" data-line-number="4"><span class="co"># tcga &lt;- FacileTCGADataSet()</span></a>
 <a class="sourceLine" id="cb2-5" data-line-number="5">tcga &lt;-<span class="st"> </span><span class="kw"><a href="../reference/exampleFacileDataSet.html">exampleFacileDataSet</a></span>()</a>
 <a class="sourceLine" id="cb2-6" data-line-number="6">distro &lt;-<span class="st"> </span><span class="kw">samples</span>(tcga) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb2-7" data-line-number="7"><span class="st">  </span><span class="kw"><a href="../reference/with_sample_covariates.html">with_sample_covariates</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"indication"</span>, <span class="st">"sample_type"</span>))</a>
+<a class="sourceLine" id="cb2-7" data-line-number="7"><span class="st">  </span><span class="kw"><a href="../reference/with_sample_covariates.html">with_sample_covariates</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"indication"</span>, <span class="st">"sample_type"</span>))</a>
 <a class="sourceLine" id="cb2-8" data-line-number="8"><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(distro, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(indication, <span class="dt">fill=</span>sample_type)) <span class="op">+</span></a>
 <a class="sourceLine" id="cb2-9" data-line-number="9"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html">geom_bar</a></span>() <span class="op">+</span></a>
 <a class="sourceLine" id="cb2-10" data-line-number="10"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span>(<span class="dt">axis.text.x=</span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span>(<span class="dt">angle=</span><span class="dv">90</span>, <span class="dt">hjust=</span><span class="dv">1</span>))</a></code></pre></div>
@@ -158,14 +166,14 @@
 <a href="#faciledata-access-api" class="anchor"></a>FacileData Access API</h1>
 <p>The base interface is the <code>FacileDataStore</code>. There are no objects of this class, it rather serves as an interface that should be implemented by a subclass, i.e. a <code>FacileDataSet</code>, or a <code>FacileSummarizedExperiment</code>. An object that <code>is(x, "FacileDataStore") == TRUE</code> is assumed to implement the entire <em>FacileData API</em>.</p>
 <p>Broadly speaking, there are two classes of functions that are used to pull data out of a <code>FacileDataSet</code>, the <code>fetch_*</code> and <code>with_*</code> functions. To a first approximation, we can consider the <code>fetch_*</code> functions to be the lowest level functions, and the <code>with_*</code> functions are higher-level accessors.</p>
-<p>The <code>with_*</code> functions were written so that they can naturally be combined in pipe (<code>%&gt;%</code>) data-manipulation chains. They provide analysts with a fluent and succinct API with which to perform exploratory data analyses.</p>
+<p>The <code>with_*</code> functions were written so that they can naturally be combined in pipe (<code><a href="https://dplyr.tidyverse.org/reference/reexports.html">%&gt;%</a></code>) data-manipulation chains. They provide analysts with a fluent and succinct API with which to perform exploratory data analyses.</p>
 <p>For example, to retrieve normalized RNA-seq expression values for CXCL9 and GZMA along with survival and sex information for the samples inin the TCGA bladder (“BLCA”) indication, you can write:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">features &lt;-<span class="st"> </span><span class="kw">filter_features</span>(tcga, name <span class="op">%in%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"CXCL9"</span>, <span class="st">"GZMA"</span>))</a>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">features &lt;-<span class="st"> </span><span class="kw">filter_features</span>(tcga, name <span class="op">%in%</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"CXCL9"</span>, <span class="st">"GZMA"</span>))</a>
 <a class="sourceLine" id="cb3-2" data-line-number="2"></a>
 <a class="sourceLine" id="cb3-3" data-line-number="3">blca.dat &lt;-<span class="st"> </span>tcga <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb3-4" data-line-number="4"><span class="st">  </span><span class="kw">filter_samples</span>(indication <span class="op">==</span><span class="st"> "BLCA"</span>) <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb3-5" data-line-number="5"><span class="st">  </span><span class="kw">with_assay_data</span>(features, <span class="dt">assay_name=</span><span class="st">"rnaseq"</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb3-6" data-line-number="6"><span class="st">  </span><span class="kw"><a href="../reference/with_sample_covariates.html">with_sample_covariates</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"OS"</span>, <span class="st">"sex"</span>))</a>
+<a class="sourceLine" id="cb3-6" data-line-number="6"><span class="st">  </span><span class="kw"><a href="../reference/with_sample_covariates.html">with_sample_covariates</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"OS"</span>, <span class="st">"sex"</span>))</a>
 <a class="sourceLine" id="cb3-7" data-line-number="7"></a>
 <a class="sourceLine" id="cb3-8" data-line-number="8"><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(blca.dat, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(CXCL9, GZMA, <span class="dt">color=</span>sex)) <span class="op">+</span></a>
 <a class="sourceLine" id="cb3-9" data-line-number="9"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span>()</a></code></pre></div>
@@ -195,7 +203,7 @@
 <a href="#classes" class="anchor"></a>Classes</h2>
 <ul>
 <li>
-<code>facile_frame</code>: this works like a <code>tibble</code>, but has a handle to the <code>FacileDataStore</code> that it came from in a slot. We provide <code>.facet_frame</code> implementations for the dplyr and <code><a href="https://www.rdocumentation.org/packages/base/topics/subset">base::subset</a></code> like verbs, as well as <code>[</code> and <code>[[</code> so that we can manipulate this as transparently as possible.</li>
+<code>facile_frame</code>: this works like a <code>tibble</code>, but has a handle to the <code>FacileDataStore</code> that it came from in a slot. We provide <code>.facet_frame</code> implementations for the dplyr and <code><a href="https://rdrr.io/r/base/subset.html">base::subset</a></code> like verbs, as well as <code><a href="https://rdrr.io/r/base/Extract.html">[</a></code> and <code><a href="https://rdrr.io/r/base/Extract.html">[[</a></code> so that we can manipulate this as transparently as possible.</li>
 </ul>
 </div>
 </div>
@@ -234,17 +242,20 @@
 </div>
 
 
+
       <footer><div class="copyright">
   <p>Developed by Steve Lianoglou, Vincent Rouilly, Peter Haverty, Denali Therapeutics, Genentech.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
 </div>
+
       </footer>
 </div>
 
   
+
 
   </body>
 </html>

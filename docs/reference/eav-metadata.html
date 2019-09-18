@@ -18,13 +18,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -56,6 +58,7 @@ meta.yaml file." />
 <![endif]-->
 
 
+
   </head>
 
   <body>
@@ -72,7 +75,7 @@ meta.yaml file." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.3</span>
       </span>
     </div>
 
@@ -80,7 +83,7 @@ meta.yaml file." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -97,6 +100,12 @@ meta.yaml file." />
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/FacileDataSet-architecture.html">FacileDataSet Architecture</a>
+    </li>
+    <li>
+      <a href="../articles/FacileDataSet-assembly.html">FacileDataSet Assembly</a>
+    </li>
     <li>
       <a href="../articles/FacileDataSet.html">FacileDataSet Overview</a>
     </li>
@@ -115,6 +124,7 @@ meta.yaml file." />
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
@@ -135,8 +145,8 @@ list-of-list structure to represent the <code>sample_covariates</code> section o
 <code>meta.yaml</code> file.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>eav_metadata_create</span>(<span class='no'>x</span>, <span class='kw'>ignore</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"dataset"</span>, <span class='st'>"sample_id"</span>),
-  <span class='kw'>covariate_def</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>())</pre>
+    <pre class="usage"><span class='fu'>eav_metadata_create</span>(<span class='no'>x</span>, <span class='kw'>ignore</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"dataset"</span>, <span class='st'>"sample_id"</span>),
+  <span class='kw'>covariate_def</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>())</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -148,7 +158,7 @@ list-of-list structure to represent the <code>sample_covariates</code> section o
     <tr>
       <th>ignore</th>
       <td><p>the columns in <code>x</code> to not create covariate definitions for.
-This defaults to <code><a href='https://www.rdocumentation.org/packages/base/topics/c'>c("dataset", "sample_id")</a></code> since we are in the
+This defaults to <code><a href='https://rdrr.io/r/base/c.html'>c("dataset", "sample_id")</a></code> since we are in the
 facileverse.</p></td>
     </tr>
     <tr>
@@ -156,12 +166,12 @@ facileverse.</p></td>
       <td><p>a named list of covariate definitions. The names of
 this list are the names the covariates will be called in the target
 <code>FacileDataSet</code>. The values of the list are:</p><ul>
-<li><p><code>varname</code>: a <code><a href='https://www.rdocumentation.org/packages/base/topics/character'>character()</a></code> of the column name(s) in <code>x</code> that this
+<li><p><code>varname</code>: a <code><a href='https://rdrr.io/r/base/character.html'>character()</a></code> of the column name(s) in <code>x</code> that this
 sample covariate was derived from. If more than one column is to be used
 for the facile covariate conversion (e.g. if we are encoding survival),
 then provide a <code>length() &gt; 1</code> character vector with the names of the
 columns in <code>x</code> that were used for the encoding. If this were encoding
-survival this might be <code><a href='https://www.rdocumentation.org/packages/base/topics/c'>c("time", "event")</a></code> columns, in that order.</p></li>
+survival this might be <code><a href='https://rdrr.io/r/base/c.html'>c("time", "event")</a></code> columns, in that order.</p></li>
 <li><p><code>label</code>: a human readable label to use for this covariate in user facing
 scenarios in the facileverse.</p></li>
 <li><p><code>class</code>: the "facile class" of the covariate. This can either be
@@ -206,7 +216,9 @@ some more information.</p>
     <h2 class="hasAnchor" id="encoding-survival-covariates"><a class="anchor" href="#encoding-survival-covariates"></a>Encoding Survival Covariates</h2>
 
     
-    <p>UPDATE: FacileData can now use survival data encoded as a <code><a href='https://www.rdocumentation.org/packages/survival/topics/Surv'>survival::Surv</a></code> object
+
+
+<p>UPDATE: FacileData can now use survival data encoded as a <code><a href='https://rdrr.io/pkg/survival/man/Surv.html'>survival::Surv</a></code> object
 stored as a pData column. Read on for the original encoding strategy, which
 is still implemented.</p>
 <p>Survival data in R is typically encoded by two vectors. One vector that
@@ -228,11 +240,12 @@ that captures this encoding would look like this:</p><pre>covariate_def &lt;- li
     type="clinical",
     description="Overall survival in days"))
 </pre>
-    <p>Note how the name of the list-entry in <code>covariate_def</code> defines the name of
+
+<p>Note how the name of the list-entry in <code>covariate_def</code> defines the name of
 the covariate in the <code>FacileDataSet</code>. The <code>class</code> entry for the <code>OS</code>
 definition indicates the type of variable this is. The <code>arguments</code> section
 is only used when encoding a wide <code>pData</code> into the EAV value column.
-<code><a href='https://www.rdocumentation.org/packages/base/topics/names'>names(arguments)</a></code> correspond to the parameters in the
+<code><a href='https://rdrr.io/r/base/names.html'>names(arguments)</a></code> correspond to the parameters in the
 <code>[eav_encode_right_censored()]</code> function, and their values are the columns in
 the target <code>pData</code> that populate the respective parameters in the function
 call. The analagous <code>meta.yaml</code> entry in the <code>sample_covariates</code> section for
@@ -246,10 +259,13 @@ the <code>"OS"</code> <code>covariate_def</code> entry looks like so:</p><pre>sa
     type: "clinical"
     description: "Overall survival in days"
 </pre>
+
     <h2 class="hasAnchor" id="encoding-arbitrarily-complex-covariates"><a class="anchor" href="#encoding-arbitrarily-complex-covariates"></a>Encoding Arbitrarily Complex Covariates</h2>
 
     
-    <p>To encode a new type of complex covariate from a wide <code>pData</code> data.frame,
+
+
+<p>To encode a new type of complex covariate from a wide <code>pData</code> data.frame,
 we need to:</p><ol>
 <li><p>Specify a new <code>class</code> (like <code>"right_censored"</code>) for use within a
 <code>FacileDataSet</code>.</p></li>
@@ -266,12 +282,13 @@ vector(s).</p><ul>
 </ul></li>
 </ol>
 
+
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># covariate_def definition to take tte_OS and tte_event columns and turn</span>
 <span class='co'># into a facile "OS" right_censored survival covariate</span>
-<span class='no'>cc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(
-  <span class='kw'>OS</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(
-    <span class='kw'>arguments</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>time</span><span class='kw'>=</span><span class='st'>"tte_OS"</span>, <span class='kw'>event</span><span class='kw'>=</span><span class='st'>"event_OS"</span>),
+<span class='no'>cc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
+  <span class='kw'>OS</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
+    <span class='kw'>arguments</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>time</span><span class='kw'>=</span><span class='st'>"tte_OS"</span>, <span class='kw'>event</span><span class='kw'>=</span><span class='st'>"event_OS"</span>),
     <span class='kw'>label</span><span class='kw'>=</span><span class='st'>"Overall Survival"</span>,
     <span class='kw'>class</span><span class='kw'>=</span><span class='st'>"right_censored"</span>,
     <span class='kw'>type</span><span class='kw'>=</span><span class='st'>"clinical"</span>,
@@ -291,19 +308,23 @@ vector(s).</p><ul>
   </div>
 </div>
 
+
       <footer>
       <div class="copyright">
   <p>Developed by Steve Lianoglou, Vincent Rouilly, Peter Haverty, Denali Therapeutics, Genentech.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

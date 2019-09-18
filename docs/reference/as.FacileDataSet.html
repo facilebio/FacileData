@@ -18,13 +18,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -60,6 +62,7 @@ you will be creating." />
 <![endif]-->
 
 
+
   </head>
 
   <body>
@@ -76,7 +79,7 @@ you will be creating." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.3</span>
       </span>
     </div>
 
@@ -84,7 +87,7 @@ you will be creating." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -101,6 +104,12 @@ you will be creating." />
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/FacileDataSet-architecture.html">FacileDataSet Architecture</a>
+    </li>
+    <li>
+      <a href="../articles/FacileDataSet-assembly.html">FacileDataSet Assembly</a>
+    </li>
     <li>
       <a href="../articles/FacileDataSet.html">FacileDataSet Overview</a>
     </li>
@@ -119,6 +128,7 @@ you will be creating." />
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
@@ -144,7 +154,7 @@ you will be creating.</p>
     </div>
 
     <pre class="usage"><span class='fu'>as.FacileDataSet</span>(<span class='no'>x</span>, <span class='no'>path</span>, <span class='no'>assay_name</span>, <span class='no'>assay_type</span>, <span class='no'>source_assay</span>,
-  <span class='kw'>assay_description</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/paste'>paste</a></span>(<span class='st'>"Description for "</span>, <span class='no'>assay_name</span>),
+  <span class='kw'>assay_description</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span>(<span class='st'>"Description for "</span>, <span class='no'>assay_name</span>),
   <span class='kw'>dataset_name</span> <span class='kw'>=</span> <span class='st'>"DEFAULT_NAME"</span>, <span class='kw'>dataset_meta</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>organism</span> <span class='kw'>=</span> <span class='st'>"unspecified"</span>, <span class='kw'>page_size</span> <span class='kw'>=</span> <span class='fl'>2</span>^<span class='fl'>12</span>, <span class='kw'>cache_size</span> <span class='kw'>=</span> <span class='fl'>2e+05</span>,
   <span class='kw'>chunk_rows</span> <span class='kw'>=</span> <span class='fl'>5000</span>, <span class='kw'>chunk_cols</span> <span class='kw'>=</span> <span class='st'>"ncol"</span>, <span class='kw'>chunk_compression</span> <span class='kw'>=</span> <span class='fl'>5</span>,
@@ -152,8 +162,8 @@ you will be creating.</p>
 
 <span class='co'># S3 method for list</span>
 <span class='fu'>as.FacileDataSet</span>(<span class='no'>x</span>, <span class='no'>path</span>, <span class='no'>assay_name</span>, <span class='no'>assay_type</span>,
-  <span class='no'>source_assay</span>, <span class='kw'>assay_description</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/paste'>paste</a></span>(<span class='st'>"Description for "</span>,
-  <span class='no'>assay_name</span>), <span class='kw'>dataset_name</span> <span class='kw'>=</span> <span class='st'>"DEFAULT_NAME"</span>, <span class='kw'>dataset_meta</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(),
+  <span class='kw'>source_assay</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>assay_description</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span>(<span class='st'>"Description for "</span>,
+  <span class='no'>assay_name</span>), <span class='kw'>dataset_name</span> <span class='kw'>=</span> <span class='st'>"DEFAULT_NAME"</span>, <span class='kw'>dataset_meta</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
   <span class='kw'>organism</span> <span class='kw'>=</span> <span class='st'>"unspecified"</span>, <span class='kw'>page_size</span> <span class='kw'>=</span> <span class='fl'>2</span>^<span class='fl'>12</span>, <span class='kw'>cache_size</span> <span class='kw'>=</span> <span class='fl'>2e+05</span>,
   <span class='kw'>chunk_rows</span> <span class='kw'>=</span> <span class='fl'>5000</span>, <span class='kw'>chunk_cols</span> <span class='kw'>=</span> <span class='st'>"ncol"</span>, <span class='kw'>chunk_compression</span> <span class='kw'>=</span> <span class='fl'>5</span>,
   <span class='kw'>covariate_def</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
@@ -236,18 +246,20 @@ which isn't really helpful.</p></td>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>A <code>FacileDataSet</code> can be created from a number of different Bioconductor
-containers, such as a <code><a href='https://www.rdocumentation.org/packages/Biobase/topics/class.ExpressionSet'>Biobase::ExpressionSet</a></code>,
-<code><a href='https://www.rdocumentation.org/packages/SummarizedExperiment/topics/RangedSummarizedExperiment-class'>SummarizedExperiment::SummarizedExperiment</a></code>, or an <code><a href='https://www.rdocumentation.org/packages/edgeR/topics/DGEList'>edgeR::DGEList</a></code>. To
+containers, such as a <code><a href='https://rdrr.io/pkg/Biobase/man/class.ExpressionSet.html'>Biobase::ExpressionSet</a></code>,
+<code><a href='https://rdrr.io/pkg/SummarizedExperiment/man/RangedSummarizedExperiment-class.html'>SummarizedExperiment::SummarizedExperiment</a></code>, or an <code><a href='https://rdrr.io/pkg/edgeR/man/DGEList.html'>edgeR::DGEList</a></code>. To
 create a <code>FacileDataSet</code> that spans multiple Bioc containters, i.e. you may
 have one ExpressionSet per indication in the TCGA. You can make
 <code>FacileDataSet</code> to encompass the data from <em>all</em> of these indications by
-providing a <code>list</code> of <code>ExpressionSet</code>s. The <code>list</code> should have its <code><a href='https://www.rdocumentation.org/packages/base/topics/names'>names()</a></code>
+providing a <code>list</code> of <code>ExpressionSet</code>s. The <code>list</code> should have its <code><a href='https://rdrr.io/r/base/names.html'>names()</a></code>
 set to each of the TCGA indications ("BLCA", "BRCA", etc.) the data came
 from.</p>
     <h2 class="hasAnchor" id="sample-covariates"><a class="anchor" href="#sample-covariates"></a>Sample Covariates</h2>
 
     
-    <p>The <code>pData</code> data.frame object will be picked off from all of the containers
+
+
+<p>The <code>pData</code> data.frame object will be picked off from all of the containers
 provided in the list of datasets you are using to create the FacileDataSet.
 <code>dataset</code> and <code>sample_id</code> columns will be forcibly added (or modified) as
 columns to all of the individual <code>pData</code> data.frames.</p>
@@ -268,7 +280,9 @@ been harmonized!</p>
     <h2 class="hasAnchor" id="feature-meta-information"><a class="anchor" href="#feature-meta-information"></a>Feature meta-information</h2>
 
     
-    <p>The feature information (aka "fData") are stored in an internal
+
+
+<p>The feature information (aka "fData") are stored in an internal
 <code>feature_info</code> SQLite table within the <code>FacileDataSet</code>. The information to
 populate this table will be retrieved from the corresponding <code>fData</code>-like
 <code>data.frame</code> from <strong>the first</strong> given bioc-container in the list.
@@ -281,6 +295,7 @@ This <code>data.frame</code> must define the following columns:</p><ul>
 <li><p>"effective_length": <code>integer</code></p></li>
 <li><p>"source": <code>string</code></p></li>
 </ul>
+
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -296,19 +311,23 @@ This <code>data.frame</code> must define the following columns:</p><ul>
   </div>
 </div>
 
+
       <footer>
       <div class="copyright">
   <p>Developed by Steve Lianoglou, Vincent Rouilly, Peter Haverty, Denali Therapeutics, Genentech.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

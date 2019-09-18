@@ -1,7 +1,7 @@
 Package: FacileData
 Type: Package
 Title: A fluent API for accessing multi-assay high-throughput genomics data
-Version: 0.10.3
+Version: 0.10.4
 Authors@R: c(
     person("Steve", "Lianoglou", , "lianoglou@dnli.com", c("aut", "cre"),
       comment = c(ORCID = "0000-0002-0924-1754")),
@@ -39,11 +39,13 @@ Imports:
   utils,
   yaml
 Suggests:
+  airway,
   AnnotationDbi,
   Biobase,
   knitr,
   org.Hs.eg.db,
   org.Mm.eg.db,
+  parathyroidGenesSE,
   roxygen2 (>= 6.1.0),
   stringr,
   S4Vectors,

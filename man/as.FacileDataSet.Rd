@@ -13,7 +13,7 @@ as.FacileDataSet(x, path, assay_name, assay_type, source_assay,
   covariate_def = NULL, ...)
 
 \method{as.FacileDataSet}{list}(x, path, assay_name, assay_type,
-  source_assay, assay_description = paste("Description for ",
+  source_assay = NULL, assay_description = paste("Description for ",
   assay_name), dataset_name = "DEFAULT_NAME", dataset_meta = list(),
   organism = "unspecified", page_size = 2^12, cache_size = 2e+05,
   chunk_rows = 5000, chunk_cols = "ncol", chunk_compression = 5,

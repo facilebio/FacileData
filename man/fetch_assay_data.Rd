@@ -17,8 +17,7 @@
   verbose = FALSE)
 
 normalize.assay.matrix(vals, feature.info, sample.info, fds, log = TRUE,
-  prior.count = 1, batch = NULL, main = NULL,
-  maintain.rowmeans = TRUE, verbose = FALSE, ...)
+  prior.count = 1, batch = NULL, verbose = FALSE, ...)
 }
 \arguments{
 \item{x}{A \code{FacileDataSrote} object.}
@@ -56,24 +55,9 @@ Fetch data from single assay of choice
 }
 \section{Removing Batch Effects}{
 
-We leverage limma's \code{removeBatchEffect} functionality, with a simplified
-interface. The \code{batch} parameter replaces \code{batch}, \code{batch2}, and
-\code{covariates}. The \code{design} parameter is replaced with \code{main}.
-
-All these parameters must be characters, which reference columns that
-have been passed down into the samples frame, or ones that we can pull
-out of the facile data store and spank onto the samples frame.
-
-We'll use these parameters to build a model.matrix with main and batch
-effect and follow the use of \code{removeBatchEffect} as outlined in the post
-linked to below to pull the design matrix apart and call the function with
-the corresponding \code{design} and \code{covariates} parameters:
-
-https://support.bioconductor.org/p/83286/#83287
-
-Setting the \code{batch.scale} parameter to \code{TRUE} (the default), ensures that
-the \code{rowMeans} of the returned data matrix are the same as the original
-dataset.
+When normalized data is returned, we assume these data are log-like, and you
+have the option to regress out batch effects using our
+\code{\link[=remove_batch_effect]{remove_batch_effect()}} wrapper to \code{\link[limma:removeBatchEffect]{limma::removeBatchEffect()}}.
 }
 
 \examples{

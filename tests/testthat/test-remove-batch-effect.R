@@ -129,3 +129,13 @@ test_that("single-gene batch correction is equivalent to all data correction", {
   expect_equal(colnames(bc.1), colnames(orig.1))
   expect_true(!isTRUE(all.equal(bc.1[1,], orig.1[1,])))
 })
+
+test_that("including `main` with `batch` works as expected", {
+  # TODO: compare batch correction using airway dataset. It seems like including
+  # `main = "cell"` doesn't have any effect, as it is being performed in the
+  # FacileAnalysis,FacileAnalysis-RNAseq.Rmd vignette
+  #
+  # Shouldn't these two be different?
+  # bc.1 <- remove_batch_effect(airway, batch = "cell")
+  # bc.2 <- remove_batch_effect(airway, batch = "cell", main = "dex")
+})

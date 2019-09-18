@@ -4,7 +4,8 @@
 \alias{extract_transcribed_info_from_ensembl_gtf}
 \title{Extract gene- and transcript-level information from an ENSEMBL gtf.}
 \usage{
-extract_transcribed_info_from_ensembl_gtf(fn)
+extract_transcribed_info_from_ensembl_gtf(fn, gene_type = "gene_type",
+  transcript_type = "transcript_type")
 }
 \arguments{
 \item{fn}{the path to the ENSEMBL (or GENCODE) GTF}

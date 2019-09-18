@@ -7,8 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FacileDataSet Overview • FacileData</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="FacileDataSet Overview">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
@@ -30,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.3</span>
       </span>
     </div>
 
@@ -38,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -56,6 +57,12 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/FacileDataSet-architecture.html">FacileDataSet Architecture</a>
+    </li>
+    <li>
+      <a href="../articles/FacileDataSet-assembly.html">FacileDataSet Assembly</a>
+    </li>
+    <li>
       <a href="../articles/FacileDataSet.html">FacileDataSet Overview</a>
     </li>
   </ul>
@@ -73,13 +80,14 @@
 <!--/.navbar -->
 
       
+
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>FacileDataSet Overview</h1>
                         <h4 class="author">Steve Lianoglou</h4>
             
-            <h4 class="date">2019-09-04</h4>
+            <h4 class="date">2019-09-18</h4>
       
       
       <div class="hidden name"><code>FacileDataSet.Rmd</code></div>
@@ -117,8 +125,8 @@
 <div id="well-groomed-pdata" class="section level3">
 <h3 class="hasAnchor">
 <a href="#well-groomed-pdata" class="anchor"></a>Well Groomed pData</h3>
-<p>Given a list of <code>SummarizedExperiment</code>s, we collect the individual <code>pData()</code>/<code>mcols()</code>. When <code><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames()</a></code> match across these <code>data.frame</code>s, we assume that the covariates <em>mean the same thing</em> and are <em>encoded using the same scheme</em> (ie. factor levels match).</p>
-<p>Where <code><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames()</a></code> differ between <code>pData</code> <code>data.frame</code>s, even if it is just by a single letter, or their case, are treated as being different.</p>
+<p>Given a list of <code>SummarizedExperiment</code>s, we collect the individual <code>pData()</code>/<code>mcols()</code>. When <code><a href="https://rdrr.io/r/base/colnames.html">colnames()</a></code> match across these <code>data.frame</code>s, we assume that the covariates <em>mean the same thing</em> and are <em>encoded using the same scheme</em> (ie. factor levels match).</p>
+<p>Where <code><a href="https://rdrr.io/r/base/colnames.html">colnames()</a></code> differ between <code>pData</code> <code>data.frame</code>s, even if it is just by a single letter, or their case, are treated as being different.</p>
 </div>
 </div>
 </div>
@@ -166,7 +174,7 @@
 <div id="encoding-survival-covariates" class="section level3">
 <h3 class="hasAnchor">
 <a href="#encoding-survival-covariates" class="anchor"></a>Encoding Survival Covariates:</h3>
-<p><em>UPDATE:</em> Survival covariates can now be encoded simply as a <code><a href="https://www.rdocumentation.org/packages/survival/topics/Surv">survival::Surv</a></code> object and provided as a column in the pData data.frame. The following describes the original, and still supported, method.</p>
+<p><em>UPDATE:</em> Survival covariates can now be encoded simply as a <code><a href="https://rdrr.io/pkg/survival/man/Surv.html">survival::Surv</a></code> object and provided as a column in the pData data.frame. The following describes the original, and still supported, method.</p>
 <p>Survival data in R is typically encoded by two vectors. One vector that indicates the “time to event” (tte), and a second to indicate whether or not the denoted tte is an “event” (1) or “censored” (0).</p>
 <p>Normally these vectors appear as two columns in an experiment’s <code>pData</code>, and therefore need to be encoded into the <code>FacileDataSet</code>’s EAV table. To do so, the pair of vectors are turned into a signed numeric value. The absolute value of the numeric indicates the “time to event” and the sign of the value indicates its censoring status.</p>
 <p>Let’s assume we have <code>tte_OS</code> and <code>event_OS</code> column that are used to encode a patient’s overall survival (time and censor status). To store this as an “OS” covariate in the EAV table, a <code>covariate_def</code> list-of-list definition that captures this encoding would look like this:</p>
@@ -177,7 +185,7 @@
     label="Overall Survival",
     type="clinical",
     description="Overall survival in days"))</code></pre>
-<p>Note how the name of the list-entry in <code>covariate_def</code> defines the name of the covariate in the <code>FacileDataSet</code>. The <code>class</code> entry for the <code>OS</code> definition indicates the type of variable this is. The <code>varname</code> entry lists the columns in the <code>pData</code> that are combined to make this value. The <code><a href="https://www.rdocumentation.org/packages/base/topics/names">names(varnames)</a></code> correspond to the parameters in the [eav_encode_right_censored()] function. The analagous <code>meta.yaml</code> entry in the <code>sample_covariates</code> section for the <code>"OS"</code> <code>covariate_def</code> entry looks like so:</p>
+<p>Note how the name of the list-entry in <code>covariate_def</code> defines the name of the covariate in the <code>FacileDataSet</code>. The <code>class</code> entry for the <code>OS</code> definition indicates the type of variable this is. The <code>varname</code> entry lists the columns in the <code>pData</code> that are combined to make this value. The <code><a href="https://rdrr.io/r/base/names.html">names(varnames)</a></code> correspond to the parameters in the [eav_encode_right_censored()] function. The analagous <code>meta.yaml</code> entry in the <code>sample_covariates</code> section for the <code>"OS"</code> <code>covariate_def</code> entry looks like so:</p>
 <pre><code>sample_covariates:
   OS:
     class: right_censored
@@ -262,17 +270,20 @@
 </div>
 
 
+
       <footer><div class="copyright">
   <p>Developed by Steve Lianoglou, Vincent Rouilly, Peter Haverty, Denali Therapeutics, Genentech.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
 </div>
+
       </footer>
 </div>
 
   
+
 
   </body>
 </html>

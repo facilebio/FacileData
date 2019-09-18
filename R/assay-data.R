@@ -706,6 +706,8 @@ with_assay_data.facile_frame <- function(x, features, assay_name = NULL,
   NextMethod(x, .fds = .fds)
 }
 
+#' @export
+#' @noRd
 with_assay_data.tbl <- function(x, features, assay_name = NULL,
                                 normalized = TRUE, aggregate = FALSE,
                                 aggregate.by = "ewm", spread = TRUE,
