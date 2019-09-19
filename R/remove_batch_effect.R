@@ -24,6 +24,7 @@
 #' dataset.
 #'
 #' @export
+#' @importFrom limma removeBatchEffect
 #' @param x A matrix of values that needs to be corrected
 #' @param sample_info a data.frame of covariate information for the data in `x`.
 #'   The rows of `sample_info` are assumed to match the columns of `x`. This

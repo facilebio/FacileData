@@ -563,7 +563,6 @@ assay_info_over_samples <- function(x, samples = NULL) {
 #'
 #' @rdname fetch_assay_data
 #' @importFrom edgeR cpm
-#' @importFrom limma removeBatchEffect
 #' @importFrom stats contr.sum model.matrix
 #' @examples
 #' samples <- exampleFacileDataSet() %>%
