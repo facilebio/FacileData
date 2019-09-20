@@ -574,7 +574,7 @@ assay_info_over_samples <- function(x, samples = NULL) {
 #' dat <- with_assay_data(samples, features, normalized = TRUE,
 #'                        batch = c("sex", "RIN"), main = "treatment")
 normalize.assay.matrix <- function(vals, feature.info, sample.info, fds,
-                                   log = TRUE, prior.count = 1,
+                                   log = TRUE, prior.count = 0.1,
                                    batch = NULL, verbose = FALSE, ...) {
   stopifnot(
     nrow(vals) == nrow(feature.info),
