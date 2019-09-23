@@ -70,7 +70,9 @@ assemble_example_dataset <- function(directory = tempdir(),
   mart.info <- local({
     fn <- system.file("extdata", "ensembl-v75-gene-info.csv.gz",
                       package = "FacileData")
-    read.csv(gzfile(fn, "rt"), stringsAsFactors = FALSE)
+    con <- gzfile(fn, "rt")
+    on.exit(close.connection(con))
+    read.csv(con, stringsAsFactors = FALSE)
   })
 
   shared.ids <- intersect(rownames(se.airway), rownames(se.parathyroid))
