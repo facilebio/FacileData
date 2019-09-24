@@ -4,23 +4,29 @@
 \alias{fetch_assay_data.FacileDataSet}
 \alias{fetch_assay_data.facile_frame}
 \alias{normalize.assay.matrix}
-\title{Fetch data from single assay of choice}
+\alias{with_assay_data.facile_frame}
+\title{Fetch assay data from single assay of choice}
 \usage{
 \method{fetch_assay_data}{FacileDataSet}(x, features, samples = NULL,
-  assay_name = default_assay(x), normalized = FALSE,
+  assay_name = default_assay(x), normalized = FALSE, batch = NULL,
+  main = NULL, as.matrix = FALSE, ..., subset.threshold = 700,
+  aggregate = FALSE, aggregate.by = "ewm", verbose = FALSE)
+
+\method{fetch_assay_data}{facile_frame}(x, features, samples = NULL,
+  assay_name = NULL, normalized = FALSE, batch = NULL, main = NULL,
   as.matrix = FALSE, ..., subset.threshold = 700, aggregate = FALSE,
   aggregate.by = "ewm", verbose = FALSE)
 
-\method{fetch_assay_data}{facile_frame}(x, features, samples = NULL,
-  assay_name = NULL, normalized = FALSE, as.matrix = FALSE, ...,
-  subset.threshold = 700, aggregate = FALSE, aggregate.by = "ewm",
-  verbose = FALSE)
-
 normalize.assay.matrix(vals, feature.info, sample.info, fds, log = TRUE,
-  prior.count = 1, batch = NULL, verbose = FALSE, ...)
+  prior.count = 0.1, batch = NULL, verbose = FALSE, ...)
+
+\method{with_assay_data}{facile_frame}(x, features, assay_name = NULL,
+  normalized = TRUE, aggregate = FALSE, aggregate.by = "ewm",
+  spread = TRUE, with_assay_name = FALSE, ..., verbose = FALSE,
+  .fds = fds(x))
 }
 \arguments{
-\item{x}{A \code{FacileDataSrote} object.}
+\item{x}{A \code{FacileDataSrote} object, or \code{facile_frame}}
 
 \item{features}{a feature descriptor (data.frame with assay and feature_id
 columms)}
@@ -31,8 +37,11 @@ from.}
 \item{assay_name}{the name of the assay to fetch data from. Defaults to the
 value of \code{\link[=default_assay]{default_assay()}} for \code{x}. Must be a subset of \code{assay_names(x)}.}
 
-\item{normalized}{return normalize or raw data values, defaults to
-\code{raw}}
+\item{normalized}{return normalize or raw data values, defaults to \code{FALSE}.
+This is only really "functional" for for \code{assay_type = "rnaseq"} types
+of assays, where the normalized data is log2(CPM). These values can
+be tweaked with \code{log = (TRUE|FALSE)} and \code{prior.count} parameters, which
+can passed down internally to (eventually) \code{\link[edgeR:cpm]{edgeR::cpm()}}.}
 
 \item{as.matrix}{by default, the data is returned in a long-form tbl-like
 result. If set to \code{TRUE}, the data is returned as a matrix.}
@@ -46,12 +55,33 @@ the elbow.}
 
 \item{aggregate.by}{do you want individual level results or geneset
 scores? Use 'ewm' for eigenWeightedMean, and that's all.}
+
+\item{.fds}{A \code{FacileDataSet} object}
+
+\item{samples}{a samples descriptor}
+
+\item{feature_ids}{character vector of feature_ids}
+
+\item{with_symbols}{Do you want gene symbols returned, too?}
 }
 \value{
 A \code{tibble} (lazy or not) with assay data.
+
+a tbl-like result
 }
 \description{
-Fetch data from single assay of choice
+The \code{(fetch|with)_assay_data} functions are some of the main workhose
+functions of the facile ecosystem. These calls enable you to retrieve
+raw and noramlized assay data from a FacileData container.
+}
+\details{
+\code{fetch_assay_data(x, ...)} will return the data in long form.
+\code{with_assay_data(x, ...)} is most typically used when you already have
+a dataset \code{x} (a \code{facile_frame}) that you want to decorate with more assay
+data. The assay data asked for will be appended on to \code{x} in wide format.
+Because \code{fetch} is (most often) used at a lower level of granularity,
+\code{normalize} is by default set to \code{FALSE}, while it is set to \code{TRUE} in
+\code{with_assay_data}.
 }
 \section{Removing Batch Effects}{
 

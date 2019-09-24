@@ -4,6 +4,7 @@
 \name{reexports}
 \alias{reexports}
 \alias{tidy}
+\alias{\%>\%}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -12,5 +13,7 @@ below to see their documentation.
 
 \describe{
   \item{broom}{\code{\link[broom]{tidy}}}
+
+  \item{magrittr}{\code{\link[magrittr]{\%>\%}}}
 }}
 

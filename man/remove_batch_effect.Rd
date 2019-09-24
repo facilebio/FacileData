@@ -18,6 +18,13 @@ to pull any covariate named in \code{batch} and \code{main} that do not already
 appear in the columns of \code{sample_info}. Unlike limma's removeBatchEffect,
 we do not try to fish out the covariate values from anywhere in the
 "ether". They \emph{must} be found in this data.frame.}
+
+\item{batch}{The column names in \code{sample_info} that specify the batch
+covariates in the data that will be regressed out.}
+
+\item{main}{The name of a covaraite in \code{sample_info} that contains a known
+covariate that describes the "effect" of an experiment that should not
+be regressed out. Please refer to the Details section for more informaiton.}
 }
 \value{
 a corrected version of the data matrix \code{x}.
@@ -46,4 +53,23 @@ https://support.bioconductor.org/p/83286/#83287
 Setting the \code{batch.scale} parameter to \code{TRUE} (the default), ensures that
 the \code{rowMeans} of the returned data matrix are the same as the original
 dataset.
+}
+\examples{
+# We'll materialize a data matrix and sample_info table from the
+# exampleFacileDataSet, then correct the data matrix.
+efds <- exampleFacileDataSet()
+sample.info <- efds \%>\%
+  filter_samples(indication == "CRC") \%>\%
+  with_sample_covariates()
+m <- fetch_assay_data(sample.info, normalized = TRUE, as.matrix = TRUE)
+m.rmsex <- remove_batch_effect(m, sample.info, "sex")
+
+# this functionality is called internally from fetch_assay_data to make
+# your life easy from within the facile ecosystem itself
+m2 <- fetch_assay_data(sample.info, normalized = TRUE,
+                       batch = "sex", as.matrix = TRUE)
+all.equal(m.rmsex[, 1], m2[, 1])
+}
+\seealso{
+\code{\link[=fetch_assay_data]{fetch_assay_data()}} when \code{batch = "something"}
 }

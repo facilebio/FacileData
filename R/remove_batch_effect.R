@@ -25,6 +25,7 @@
 #'
 #' @export
 #' @importFrom limma removeBatchEffect
+#' @seealso [fetch_assay_data()] when `batch = "something"`
 #' @param x A matrix of values that needs to be corrected
 #' @param sample_info a data.frame of covariate information for the data in `x`.
 #'   The rows of `sample_info` are assumed to match the columns of `x`. This
@@ -34,7 +35,27 @@
 #'   appear in the columns of `sample_info`. Unlike limma's removeBatchEffect,
 #'   we do not try to fish out the covariate values from anywhere in the
 #'   "ether". They *must* be found in this data.frame.
+#' @param batch The column names in `sample_info` that specify the batch
+#'   covariates in the data that will be regressed out.
+#' @param main The name of a covaraite in `sample_info` that contains a known
+#'   covariate that describes the "effect" of an experiment that should not
+#'   be regressed out. Please refer to the Details section for more informaiton.
 #' @return a corrected version of the data matrix `x`.
+#' @examples
+#' # We'll materialize a data matrix and sample_info table from the
+#' # exampleFacileDataSet, then correct the data matrix.
+#' efds <- exampleFacileDataSet()
+#' sample.info <- efds %>%
+#'   filter_samples(indication == "CRC") %>%
+#'   with_sample_covariates()
+#' m <- fetch_assay_data(sample.info, normalized = TRUE, as.matrix = TRUE)
+#' m.rmsex <- remove_batch_effect(m, sample.info, "sex")
+#'
+#' # this functionality is called internally from fetch_assay_data to make
+#' # your life easy from within the facile ecosystem itself
+#' m2 <- fetch_assay_data(sample.info, normalized = TRUE,
+#'                        batch = "sex", as.matrix = TRUE)
+#' all.equal(m.rmsex[, 1], m2[, 1])
 remove_batch_effect <- function(x, sample_info, batch = NULL, main = NULL,
                                 maintain.rowmeans = TRUE, ...) {
   if (is.null(batch) || !test_character(batch, min.len = 1L)) {
