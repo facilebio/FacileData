@@ -18,7 +18,8 @@
   aggregate.by = "ewm", verbose = FALSE)
 
 normalize.assay.matrix(vals, feature.info, sample.info, fds, log = TRUE,
-  prior.count = 0.1, batch = NULL, verbose = FALSE, ...)
+  prior.count = 0.1, batch = NULL, main = NULL, verbose = FALSE,
+  ...)
 
 \method{with_assay_data}{facile_frame}(x, features, assay_name = NULL,
   normalized = TRUE, aggregate = FALSE, aggregate.by = "ewm",

@@ -55,7 +55,7 @@
 #' # your life easy from within the facile ecosystem itself
 #' m2 <- fetch_assay_data(sample.info, normalized = TRUE,
 #'                        batch = "sex", as.matrix = TRUE)
-#' all.equal(m.rmsex[, 1], m2[, 1])
+#' all.equal(m.rmsex, m2)
 remove_batch_effect <- function(x, sample_info, batch = NULL, main = NULL,
                                 maintain.rowmeans = TRUE, ...) {
   if (is.null(batch) || !test_character(batch, min.len = 1L)) {

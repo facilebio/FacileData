@@ -14,6 +14,6 @@ below to see their documentation.
 \describe{
   \item{broom}{\code{\link[broom]{tidy}}}
 
-  \item{magrittr}{\code{\link[magrittr]{\%>\%}}}
+  \item{dplyr}{\code{\link[dplyr]{\%>\%}}}
 }}
 

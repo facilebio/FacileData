@@ -8,6 +8,6 @@
 #' @export
 broom::tidy
 
-#' @importFrom magrittr %>%
+#' @importFrom dplyr %>%
 #' @export
-magrittr::`%>%`
+dplyr::`%>%`
