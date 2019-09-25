@@ -44,6 +44,13 @@ of assays, where the normalized data is log2(CPM). These values can
 be tweaked with \code{log = (TRUE|FALSE)} and \code{prior.count} parameters, which
 can passed down internally to (eventually) \code{\link[edgeR:cpm]{edgeR::cpm()}}.}
 
+\item{batch}{The column names in \code{sample_info} that specify the batch
+covariates in the data that will be regressed out.}
+
+\item{main}{The name of a covaraite in \code{sample_info} that contains a known
+covariate that describes the "effect" of an experiment that should not
+be regressed out. Please refer to the Details section for more informaiton.}
+
 \item{as.matrix}{by default, the data is returned in a long-form tbl-like
 result. If set to \code{TRUE}, the data is returned as a matrix.}
 

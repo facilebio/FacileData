@@ -5,6 +5,18 @@
 \alias{reexports}
 \alias{tidy}
 \alias{\%>\%}
+\alias{arrange}
+\alias{collect}
+\alias{distinct}
+\alias{filter}
+\alias{group_by}
+\alias{mutate}
+\alias{select}
+\alias{transmute}
+\alias{ungroup}
+\alias{left_join}
+\alias{inner_join}
+\alias{semi_join}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -14,6 +26,6 @@ below to see their documentation.
 \describe{
   \item{broom}{\code{\link[broom]{tidy}}}
 
-  \item{dplyr}{\code{\link[dplyr]{\%>\%}}}
+  \item{dplyr}{\code{\link[dplyr]{\%>\%}}, \code{\link[dplyr]{arrange}}, \code{\link[dplyr]{collect}}, \code{\link[dplyr]{distinct}}, \code{\link[dplyr]{filter}}, \code{\link[dplyr]{group_by}}, \code{\link[dplyr]{mutate}}, \code{\link[dplyr]{select}}, \code{\link[dplyr]{transmute}}, \code{\link[dplyr]{ungroup}}, \code{\link[dplyr]{left_join}}, \code{\link[dplyr]{inner_join}}, \code{\link[dplyr]{semi_join}}}
 }}
 

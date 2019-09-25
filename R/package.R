@@ -8,6 +8,44 @@
 #' @export
 broom::tidy
 
-#' @importFrom dplyr %>%
+# Export oft-used dplyr stuff --------------------------------------------------
+# Should we just but dplyr in Depends?
+
 #' @export
 dplyr::`%>%`
+
+#' @export
+dplyr::arrange
+
+#' @export
+dplyr::collect
+
+#' @export
+dplyr::distinct
+
+#' @export
+dplyr::filter
+
+#' @export
+dplyr::group_by
+
+#' @export
+dplyr::mutate
+
+#' @export
+dplyr::select
+
+#' @export
+dplyr::transmute
+
+#' @export
+dplyr::ungroup
+
+#' @export
+dplyr::left_join
+
+#' @export
+dplyr::inner_join
+
+#' @export
+dplyr::semi_join

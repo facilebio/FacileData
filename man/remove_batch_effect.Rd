@@ -68,7 +68,7 @@ m.rmsex <- remove_batch_effect(m, sample.info, "sex")
 # your life easy from within the facile ecosystem itself
 m2 <- fetch_assay_data(sample.info, normalized = TRUE,
                        batch = "sex", as.matrix = TRUE)
-all.equal(m.rmsex[, 1], m2[, 1])
+all.equal(m.rmsex, m2)
 }
 \seealso{
 \code{\link[=fetch_assay_data]{fetch_assay_data()}} when \code{batch = "something"}

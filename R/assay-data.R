@@ -16,7 +16,7 @@
 #' @importFrom rhdf5 h5read
 #' @importFrom multiGSEA eigenWeightedMean
 #' @rdname fetch_assay_data
-#' @inhertParams remove_batch_effect
+#' @inheritParams remove_batch_effect
 #'
 #' @param x A `FacileDataSrote` object, or `facile_frame`
 #' @param features a feature descriptor (data.frame with assay and feature_id
