@@ -40,11 +40,8 @@ Imports:
   yaml
 Suggests:
   airway,
-  AnnotationDbi,
   Biobase,
   knitr,
-  org.Hs.eg.db,
-  org.Mm.eg.db,
   parathyroidGenesSE,
   roxygen2 (>= 6.1.0),
   stringr,
