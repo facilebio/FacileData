@@ -20,7 +20,7 @@ Description: Defines the "FacileData" API over multi-assay, high-throughput
   efficient access to arbitrary subsets of these data without loading it all
   into memory.
 Depends:
-  R (>= 3.4.3),
+  R (>= 3.6.0),
 Imports:
   broom,
   checkmate (>= 1.8.5),
