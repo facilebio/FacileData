@@ -57,7 +57,7 @@
 #'                        batch = "sex", as.matrix = TRUE)
 #' all.equal(m.rmsex, m2)
 remove_batch_effect <- function(x, sample_info, batch = NULL, main = NULL,
-                                maintain.rowmeans = TRUE, ...) {
+                                maintain.rowmeans = FALSE, ...) {
   if (is.null(batch) || !test_character(batch, min.len = 1L)) {
     warning("No batch covariates provided for correction", immediate. = TRUE)
     return(x)
@@ -115,7 +115,7 @@ remove_batch_effect <- function(x, sample_info, batch = NULL, main = NULL,
           # in limma we trust (code taken from limma::removeBatchEffect)
           batch. <- droplevels(as.factor(sample_info[[bcov]]))
           contrasts(batch.) <- contr.sum(levels(batch.))
-          model.matrix(~ batch.)[, -1, drop = FALSE]
+          model.matrix(~ batch.)[, -1L, drop = FALSE]
         })
         cat.mats <- do.call(cbind, cat.mats)
       } else {
@@ -135,8 +135,11 @@ remove_batch_effect <- function(x, sample_info, batch = NULL, main = NULL,
     if (maintain.rowmeans) {
       batch.design <- scale(batch.design)
     }
-    x <- removeBatchEffect(x, design = treatment.design,
-                           covariates = batch.design)
+    x <- suppressWarnings({
+      # partial match of 'coef' to 'coefficients'
+      removeBatchEffect(x, design = treatment.design,
+                        covariates = batch.design)
+    })
   }
   x
 }

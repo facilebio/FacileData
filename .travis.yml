@@ -51,9 +51,14 @@ r_binary_packages:
 #  - htmlTable (depends on r-recommended)
 
 bioc_packages:
+  - airway
+  - Biobase
   - edgeR
   - limma
   - rhdf5
+  - Rhdf5lib
+  - parathyroidGenesSE
+  - SummarizedExperiment
 
 r_github_packages:
   - lianos/multiGSEA
