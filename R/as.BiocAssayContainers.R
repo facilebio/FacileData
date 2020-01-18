@@ -135,7 +135,9 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
     features(assay_name = assay_name, feature_ids = feature_ids) %>%
     as.data.frame()
   rownames(genes) <- genes[["feature_id"]]
-  if (genes[["feature_type"]][1L] %in% c("entrez", "ensgid")) {
+  if (genes[["feature_type"]][1L] %in% c("entrez", "ensgid") || TRUE) {
+    # After adding fluidigm/qPCR support, I wish I never renamed `name` to
+    # `symbol`
     genes <- rename(genes, symbol = "name")
   }
 
@@ -153,6 +155,12 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
     as.data.frame()
   rownames(sample.stats) <- sample.stats[["samid"]]
   sample.stats <- sample.stats[colnames(x),,drop=FALSE]
+
+  # TODO: since this is being used a general assay retrieval wrapper, what we
+  # want might not even be appropriate for a DGEList (ie. negative numbers
+  # inside) we hack for now, but need to address this!
+  is.neg <- which(x < 0, arr.ind = TRUE)
+  if (nrow(is.neg)) x[is.neg] <- x[is.neg] * -1
 
   y <- DGEList(x, genes = genes, lib.size = sample.stats[["libsize"]],
                norm.factors = sample.stats[["normfactor"]])
@@ -192,6 +200,10 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
     }
 
     y$samples <- cbind(y$samples, covs)
+  }
+
+  if (nrow(is.neg)) {
+    y$counts[is.neg] <- y$counts[is.neg] * -1
   }
 
   set_fds(y, .fds)

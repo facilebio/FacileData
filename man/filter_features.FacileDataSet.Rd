@@ -20,14 +20,15 @@ column names in feature table, for instance, does not work right now.
 TODO: Use tidyeval
 }
 \seealso{
-Other API: \code{\link{fetch_assay_data.FacileDataSet}},
-  \code{\link{fetch_assay_score.FacileDataSet}},
-  \code{\link{fetch_custom_sample_covariates.FacileDataSet}},
-  \code{\link{fetch_sample_covariates}},
-  \code{\link{fetch_sample_statistics.FacileDataSet}},
-  \code{\link{fetch_samples.FacileDataSet}},
-  \code{\link{filter_samples.FacileDataSet}},
-  \code{\link{organism.FacileDataSet}},
-  \code{\link{samples.FacileDataSet}}
+Other API: 
+\code{\link{fetch_assay_data.FacileDataSet}()},
+\code{\link{fetch_assay_score.FacileDataSet}()},
+\code{\link{fetch_custom_sample_covariates.FacileDataSet}()},
+\code{\link{fetch_sample_covariates}()},
+\code{\link{fetch_sample_statistics.FacileDataSet}()},
+\code{\link{fetch_samples.FacileDataSet}()},
+\code{\link{filter_samples.FacileDataSet}()},
+\code{\link{organism.FacileDataSet}()},
+\code{\link{samples.FacileDataSet}()}
 }
 \concept{API}

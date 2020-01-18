@@ -73,8 +73,10 @@ assert_valid_meta_file <- function(fn, as.list = FALSE) {
   if (as.list) dat else fn
 }
 
-.feature.types <- c('entrez', 'ensgid', 'enstid')
-.assay.types <- c('rnaseq', 'isoseq', 'normcounts', 'lognorm', 'nanostring', 'fluidigm')
+.feature.types <- c('entrez', 'ensgid', 'enstid', 'custom')
+.assay.types <- c(
+  'rnaseq', 'isoseq', 'normcounts', 'lognorm', 'nanostring',
+  'qpcrct', 'qpcrdct')
 .storage.modes <- c('integer', 'numeric')
 
 supported.assay.container <- function(x) {

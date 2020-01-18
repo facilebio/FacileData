@@ -4,8 +4,10 @@
 \alias{assemble_example_dataset}
 \title{Assembles an example facile dataset to play with}
 \usage{
-assemble_example_dataset(directory = tempdir(),
-  name = "ExampleRnaFacileDataSet")
+assemble_example_dataset(
+  directory = tempdir(),
+  name = "ExampleRnaFacileDataSet"
+)
 }
 \arguments{
 \item{directory}{The name of the parent directory to hold the dataset}

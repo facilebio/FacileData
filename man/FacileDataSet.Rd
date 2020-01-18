@@ -4,11 +4,17 @@
 \alias{FacileDataSet}
 \title{Instantiates a FacileDataSet object from disk.}
 \usage{
-FacileDataSet(path, data.fn = file.path(path, "data.sqlite"),
-  sqlite.fn = file.path(path, "data.sqlite"), hdf5.fn = file.path(path,
-  "data.h5"), meta.fn = file.path(path, "meta.yaml"),
-  anno.dir = file.path(path, "custom-annotation"), cache_size = 80000,
-  db.loc = c("reference", "temporary", "memory"), ...)
+FacileDataSet(
+  path,
+  data.fn = file.path(path, "data.sqlite"),
+  sqlite.fn = file.path(path, "data.sqlite"),
+  hdf5.fn = file.path(path, "data.h5"),
+  meta.fn = file.path(path, "meta.yaml"),
+  anno.dir = file.path(path, "custom-annotation"),
+  cache_size = 80000,
+  db.loc = c("reference", "temporary", "memory"),
+  ...
+)
 }
 \arguments{
 \item{path}{The path to the FacileData repository}
@@ -88,7 +94,9 @@ fn <- system.file("extdata", "exampleFacileDataSet", package = "FacileData")
 fds <- FacileDataSet(fn)
 }
 \seealso{
-Other FacileDataSet: \code{\link{dbfn}},
-  \code{\link{hdf5fn}}, \code{\link{meta_file}}
+Other FacileDataSet: 
+\code{\link{dbfn}()},
+\code{\link{hdf5fn}()},
+\code{\link{meta_file}()}
 }
 \concept{FacileDataSet}

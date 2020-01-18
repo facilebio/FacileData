@@ -4,8 +4,13 @@
 \alias{spread_assay_data}
 \title{Takes a result from fetch_expression and spreads out genes across columns}
 \usage{
-spread_assay_data(x, assay_name, key = c("name", "feature_id"),
-  value = c("cpm", "value", "count"), .fds = fds(x))
+spread_assay_data(
+  x,
+  assay_name,
+  key = c("name", "feature_id"),
+  value = c("cpm", "value", "count"),
+  .fds = fds(x)
+)
 }
 \arguments{
 \item{x}{facile expression result from \code{fetch_expression}}

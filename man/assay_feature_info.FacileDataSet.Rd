@@ -4,8 +4,7 @@
 \alias{assay_feature_info.FacileDataSet}
 \title{Materializes a table with all feature information for a given assay.}
 \usage{
-\method{assay_feature_info}{FacileDataSet}(x, assay_name,
-  feature_ids = NULL, ...)
+\method{assay_feature_info}{FacileDataSet}(x, assay_name, feature_ids = NULL, ...)
 }
 \arguments{
 \item{x}{\code{FacileDataSet}}

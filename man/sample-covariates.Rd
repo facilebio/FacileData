@@ -6,16 +6,32 @@
 \alias{fetch_sample_covariates.facile_frame}
 \title{Fetch rows from sample_covariate table for specified samples and covariates}
 \usage{
-fetch_sample_covariates(x, samples = NULL, covariates = NULL,
-  custom_key = Sys.getenv("USER"), with_source = FALSE, ...)
+fetch_sample_covariates(
+  x,
+  samples = NULL,
+  covariates = NULL,
+  custom_key = Sys.getenv("USER"),
+  with_source = FALSE,
+  ...
+)
 
-\method{fetch_sample_covariates}{FacileDataSet}(x, samples = NULL,
-  covariates = NULL, custom_key = Sys.getenv("USER"),
-  with_source = FALSE, ...)
+\method{fetch_sample_covariates}{FacileDataSet}(
+  x,
+  samples = NULL,
+  covariates = NULL,
+  custom_key = Sys.getenv("USER"),
+  with_source = FALSE,
+  ...
+)
 
-\method{fetch_sample_covariates}{facile_frame}(x, samples = NULL,
-  covariates = NULL, custom_key = Sys.getenv("USER"),
-  with_source = FALSE, ...)
+\method{fetch_sample_covariates}{facile_frame}(
+  x,
+  samples = NULL,
+  covariates = NULL,
+  custom_key = Sys.getenv("USER"),
+  with_source = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{a \code{FacileDataSet} connection}
@@ -34,40 +50,44 @@ rows from the \code{sample_covariate} table
 Fetch rows from sample_covariate table for specified samples and covariates
 }
 \seealso{
-Other FacileInterface: \code{\link{facet_frame.FacileDataSet}},
-  \code{\link{fetch_assay_score}},
-  \code{\link{fetch_sample_statistics}},
-  \code{\link{with_sample_covariates}}
+Other FacileInterface: 
+\code{\link{facet_frame.FacileDataSet}()},
+\code{\link{fetch_assay_score}()},
+\code{\link{fetch_sample_statistics}()},
+\code{\link{with_sample_covariates}()}
 
-Other API: \code{\link{fetch_assay_data.FacileDataSet}},
-  \code{\link{fetch_assay_score.FacileDataSet}},
-  \code{\link{fetch_custom_sample_covariates.FacileDataSet}},
-  \code{\link{fetch_sample_statistics.FacileDataSet}},
-  \code{\link{fetch_samples.FacileDataSet}},
-  \code{\link{filter_features.FacileDataSet}},
-  \code{\link{filter_samples.FacileDataSet}},
-  \code{\link{organism.FacileDataSet}},
-  \code{\link{samples.FacileDataSet}}
+Other API: 
+\code{\link{fetch_assay_data.FacileDataSet}()},
+\code{\link{fetch_assay_score.FacileDataSet}()},
+\code{\link{fetch_custom_sample_covariates.FacileDataSet}()},
+\code{\link{fetch_sample_statistics.FacileDataSet}()},
+\code{\link{fetch_samples.FacileDataSet}()},
+\code{\link{filter_features.FacileDataSet}()},
+\code{\link{filter_samples.FacileDataSet}()},
+\code{\link{organism.FacileDataSet}()},
+\code{\link{samples.FacileDataSet}()}
 
-Other API: \code{\link{fetch_assay_data.FacileDataSet}},
-  \code{\link{fetch_assay_score.FacileDataSet}},
-  \code{\link{fetch_custom_sample_covariates.FacileDataSet}},
-  \code{\link{fetch_sample_statistics.FacileDataSet}},
-  \code{\link{fetch_samples.FacileDataSet}},
-  \code{\link{filter_features.FacileDataSet}},
-  \code{\link{filter_samples.FacileDataSet}},
-  \code{\link{organism.FacileDataSet}},
-  \code{\link{samples.FacileDataSet}}
+Other API: 
+\code{\link{fetch_assay_data.FacileDataSet}()},
+\code{\link{fetch_assay_score.FacileDataSet}()},
+\code{\link{fetch_custom_sample_covariates.FacileDataSet}()},
+\code{\link{fetch_sample_statistics.FacileDataSet}()},
+\code{\link{fetch_samples.FacileDataSet}()},
+\code{\link{filter_features.FacileDataSet}()},
+\code{\link{filter_samples.FacileDataSet}()},
+\code{\link{organism.FacileDataSet}()},
+\code{\link{samples.FacileDataSet}()}
 
-Other API: \code{\link{fetch_assay_data.FacileDataSet}},
-  \code{\link{fetch_assay_score.FacileDataSet}},
-  \code{\link{fetch_custom_sample_covariates.FacileDataSet}},
-  \code{\link{fetch_sample_statistics.FacileDataSet}},
-  \code{\link{fetch_samples.FacileDataSet}},
-  \code{\link{filter_features.FacileDataSet}},
-  \code{\link{filter_samples.FacileDataSet}},
-  \code{\link{organism.FacileDataSet}},
-  \code{\link{samples.FacileDataSet}}
+Other API: 
+\code{\link{fetch_assay_data.FacileDataSet}()},
+\code{\link{fetch_assay_score.FacileDataSet}()},
+\code{\link{fetch_custom_sample_covariates.FacileDataSet}()},
+\code{\link{fetch_sample_statistics.FacileDataSet}()},
+\code{\link{fetch_samples.FacileDataSet}()},
+\code{\link{filter_features.FacileDataSet}()},
+\code{\link{filter_samples.FacileDataSet}()},
+\code{\link{organism.FacileDataSet}()},
+\code{\link{samples.FacileDataSet}()}
 }
 \concept{API}
 \concept{FacileInterface}

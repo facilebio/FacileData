@@ -4,9 +4,18 @@
 \alias{flog}
 \title{Generates a logging message using glue and crayon, with some bells/whistles.}
 \usage{
-flog(..., level = "info", ns = NULL, session = NULL,
-  file = stderr(), sep = "", fill = FALSE, labels = NULL,
-  append = FALSE, newline = !is.null(file))
+flog(
+  ...,
+  level = "info",
+  ns = NULL,
+  session = NULL,
+  file = stderr(),
+  sep = "",
+  fill = FALSE,
+  labels = NULL,
+  append = FALSE,
+  newline = !is.null(file)
+)
 }
 \arguments{
 \item{...}{the string elements to pass into \code{\link[glue:glue]{glue::glue()}}}
@@ -18,7 +27,7 @@ namespace-specific logging priority}
 
 \item{session, file, sep, fill, labels, append}{sent to \code{\link[base:cat]{base::cat()}}}
 
-\item{newline}{If \code{TRUE}, appends a \code{\\n} to the message. By default, this
+\item{newline}{If \code{TRUE}, appends a \verb{\\\\n} to the message. By default, this
 is \code{TRUE} when \code{file} is not \code{NULL}.}
 }
 \value{
@@ -35,7 +44,7 @@ level/priority hierarchy.
 }
 \details{
 Conveninece wrapper functions are provided for each logging level, ie.
-call \code{fwarn("message")} instead of flog("message", level = "warn")\code{. Also, each facile* package provides its own }flog()\code{function which sets the namespace}ns` parameter to default to a package-specific namespace so you
+call \code{fwarn("message")} instead of flog("message", level = "warn")\verb{. Also, each facile* package provides its own }flog()\verb{function which sets the namespace}ns` parameter to default to a package-specific namespace so you
 can control logging at the different package level.
 }
 \section{Logging Levels}{
@@ -49,7 +58,7 @@ Logging levels are\preformatted{.flog_levels <- c("all"  = 0, "trace" = 1, "debu
 \section{crayon}{
 
 Glue lets you put cayon functions in \code{{}} to stylize output. For instance,
-you can make "bold and red" the color red and also bold, like so:\preformatted{flog("This is {red}{bold}bold and red{reset}, right?")
+you can make "bold and red" the color red and also bold, like so:\preformatted{flog("This is \{red\}\{bold\}bold and red\{reset\}, right?")
 }
 
 Nice! It might be more convenient if we could make it a bit more terse,

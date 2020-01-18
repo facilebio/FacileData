@@ -4,8 +4,11 @@
 \alias{eav_metadata_create}
 \title{Create a facile covariate definition file from a sample \code{pData} data.frame}
 \usage{
-eav_metadata_create(x, ignore = c("dataset", "sample_id"),
-  covariate_def = list())
+eav_metadata_create(
+  x,
+  ignore = c("dataset", "sample_id"),
+  covariate_def = list()
+)
 }
 \arguments{
 \item{x}{a \code{pData} \code{data.frame}}
@@ -107,7 +110,7 @@ the covariate in the \code{FacileDataSet}. The \code{class} entry for the \code{
 definition indicates the type of variable this is. The \code{arguments} section
 is only used when encoding a wide \code{pData} into the EAV value column.
 \code{names(arguments)} correspond to the parameters in the
-\code{[eav_encode_right_censored()]} function, and their values are the columns in
+\verb{[eav_encode_right_censored()]} function, and their values are the columns in
 the target \code{pData} that populate the respective parameters in the function
 call. The analagous \code{meta.yaml} entry in the \code{sample_covariates} section for
 the \code{"OS"} \code{covariate_def} entry looks like so:\preformatted{sample_covariates:
@@ -130,10 +133,10 @@ we need to:
 \enumerate{
 \item Specify a new \code{class} (like \code{"right_censored"}) for use within a
 \code{FacileDataSet}.
-\item Define an \code{eav_encode_<class>(arg1, arg2, ...)} function which takes the
+\item Define an \verb{eav_encode_<class>(arg1, arg2, ...)} function which takes the
 R data vectors (arg1, arg2) and converts them into a single value for the
 EAV table.
-\item Define a \code{eav_decode_<class>(x, attrname, def, ...)} function which takes
+\item Define a \verb{eav_decode_<class>(x, attrname, def, ...)} function which takes
 the single value in the EAV table and casts it back into the R-naive data
 vector(s).
 \itemize{

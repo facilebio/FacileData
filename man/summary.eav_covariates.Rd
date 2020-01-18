@@ -4,8 +4,7 @@
 \alias{summary.eav_covariates}
 \title{Provides a summary table of sample covariates.}
 \usage{
-\method{summary}{eav_covariates}(object, expanded = FALSE,
-  droplevels = TRUE, ...)
+\method{summary}{eav_covariates}(object, expanded = FALSE, droplevels = TRUE, ...)
 }
 \arguments{
 \item{object}{A sample covariate table, the likes returned from

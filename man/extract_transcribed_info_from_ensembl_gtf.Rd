@@ -4,14 +4,17 @@
 \alias{extract_transcribed_info_from_ensembl_gtf}
 \title{Extract gene- and transcript-level information from an ENSEMBL gtf.}
 \usage{
-extract_transcribed_info_from_ensembl_gtf(fn, gene_type = "gene_type",
-  transcript_type = "transcript_type")
+extract_transcribed_info_from_ensembl_gtf(
+  fn,
+  gene_type = "gene_type",
+  transcript_type = "transcript_type"
+)
 }
 \arguments{
 \item{fn}{the path to the ENSEMBL (or GENCODE) GTF}
 }
 \value{
-a list of tibbles with \code{$transcript_info} and \code{$gene_info} elements
+a list of tibbles with \verb{$transcript_info} and \verb{$gene_info} elements
 }
 \description{
 This was written for release_28 annotations. This is noted because some

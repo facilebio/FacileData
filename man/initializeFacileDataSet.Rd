@@ -4,8 +4,7 @@
 \alias{initializeFacileDataSet}
 \title{Create an empty FacileDataSet}
 \usage{
-initializeFacileDataSet(path, meta_file, page_size = 2^12,
-  cache_size = 2e+05)
+initializeFacileDataSet(path, meta_file, page_size = 2^12, cache_size = 2e+05)
 }
 \arguments{
 \item{path}{the directory to create which will house the

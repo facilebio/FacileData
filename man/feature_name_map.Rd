@@ -15,8 +15,6 @@ feature_name_map(x, feature_type)
 \item{assay_name}{the name of assay to get the feature map for.}
 
 \item{feature_type}{a character vector specifying the feature type}
-
-\item{x}{\code{FacileDataSet}}
 }
 \value{
 a tibble with \code{feature_id, name, type} columns, where type

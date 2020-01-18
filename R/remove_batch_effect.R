@@ -25,7 +25,9 @@
 #'
 #' @export
 #' @importFrom limma removeBatchEffect
+#' @importFrom stats contr.sum model.matrix
 #' @seealso [fetch_assay_data()] when `batch = "something"`
+#'
 #' @param x A matrix of values that needs to be corrected
 #' @param sample_info a data.frame of covariate information for the data in `x`.
 #'   The rows of `sample_info` are assumed to match the columns of `x`. This

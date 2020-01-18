@@ -18,7 +18,9 @@ path to HDF5 file
 Get location of the FacileDataSet HDF5 file
 }
 \seealso{
-Other FacileDataSet: \code{\link{FacileDataSet}},
-  \code{\link{dbfn}}, \code{\link{meta_file}}
+Other FacileDataSet: 
+\code{\link{FacileDataSet}()},
+\code{\link{dbfn}()},
+\code{\link{meta_file}()}
 }
 \concept{FacileDataSet}

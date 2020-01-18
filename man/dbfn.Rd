@@ -20,7 +20,9 @@ the filepath to the sqlite database
 Get location of the FacileDataSet database
 }
 \seealso{
-Other FacileDataSet: \code{\link{FacileDataSet}},
-  \code{\link{hdf5fn}}, \code{\link{meta_file}}
+Other FacileDataSet: 
+\code{\link{FacileDataSet}()},
+\code{\link{hdf5fn}()},
+\code{\link{meta_file}()}
 }
 \concept{FacileDataSet}

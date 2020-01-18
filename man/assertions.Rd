@@ -20,8 +20,7 @@
 \alias{is_covariate_definitions}
 \title{Check to see that samples are referenced correctly}
 \usage{
-assert_sample_subset(x, fds = NULL, ..., .var.name = vname(x),
-  add = NULL)
+assert_sample_subset(x, fds = NULL, ..., .var.name = vname(x), add = NULL)
 
 check_sample_subset(x, fds = NULL, ...)
 

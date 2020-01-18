@@ -23,8 +23,13 @@ eav_encode_cSurv(x, ...)
 
 eav_decode_cSurv(x, attrname = character(), def = list(), ...)
 
-eav_decode_categorical(x, attrname = character(), def = list(),
-  droplevels = TRUE, ...)
+eav_decode_categorical(
+  x,
+  attrname = character(),
+  def = list(),
+  droplevels = TRUE,
+  ...
+)
 
 eav_encode_categorical(x, ...)
 }

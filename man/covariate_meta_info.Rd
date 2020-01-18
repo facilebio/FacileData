@@ -15,8 +15,8 @@ covariate_meta_info(covariate, .fds, covdefs = NULL)
 }
 \value{
 a list of covariate information with the following elements:
-\code{$name}, \code{$type}, \code{$class}, \code{$description},
-\code{$label}, \code{$is.factor}, (and maybe \code{$levels})
+\verb{$name}, \verb{$type}, \verb{$class}, \verb{$description},
+\verb{$label}, \verb{$is.factor}, (and maybe \verb{$levels})
 }
 \description{
 Mappings that define attribute-value encodings into R-native objects are
