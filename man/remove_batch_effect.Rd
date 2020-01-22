@@ -4,8 +4,14 @@
 \alias{remove_batch_effect}
 \title{Regress out confounding variables from a data matrix.}
 \usage{
-remove_batch_effect(x, sample_info, batch = NULL, main = NULL,
-  maintain.rowmeans = TRUE, ...)
+remove_batch_effect(
+  x,
+  sample_info,
+  batch = NULL,
+  main = NULL,
+  maintain.rowmeans = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{A matrix of values that needs to be corrected}

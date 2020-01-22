@@ -4,8 +4,13 @@
 \alias{filter_samples.FacileDataSet}
 \title{Filter against the sample_covariate_tbl EAV table as if it were wide.}
 \usage{
-\method{filter_samples}{FacileDataSet}(x, ..., samples. = samples(x),
-  custom_key = Sys.getenv("USER"), with_covariates = FALSE)
+\method{filter_samples}{FacileDataSet}(
+  x,
+  ...,
+  samples. = samples(x),
+  custom_key = Sys.getenv("USER"),
+  with_covariates = FALSE
+)
 }
 \arguments{
 \item{x}{A \code{FacileDataSet}}
@@ -43,14 +48,15 @@ setequal(crc.34$sample_id, eav.query$sample_id)
 crc.34.male <- filter_sample(crc.34, sex == "m")
 }
 \seealso{
-Other API: \code{\link{fetch_assay_data.FacileDataSet}},
-  \code{\link{fetch_assay_score.FacileDataSet}},
-  \code{\link{fetch_custom_sample_covariates.FacileDataSet}},
-  \code{\link{fetch_sample_covariates}},
-  \code{\link{fetch_sample_statistics.FacileDataSet}},
-  \code{\link{fetch_samples.FacileDataSet}},
-  \code{\link{filter_features.FacileDataSet}},
-  \code{\link{organism.FacileDataSet}},
-  \code{\link{samples.FacileDataSet}}
+Other API: 
+\code{\link{fetch_assay_data.FacileDataSet}()},
+\code{\link{fetch_assay_score.FacileDataSet}()},
+\code{\link{fetch_custom_sample_covariates.FacileDataSet}()},
+\code{\link{fetch_sample_covariates}()},
+\code{\link{fetch_sample_statistics.FacileDataSet}()},
+\code{\link{fetch_samples.FacileDataSet}()},
+\code{\link{filter_features.FacileDataSet}()},
+\code{\link{organism.FacileDataSet}()},
+\code{\link{samples.FacileDataSet}()}
 }
 \concept{API}

@@ -7,8 +7,14 @@
 \usage{
 eav_encode_right_censored(time, event, sas.encoding = FALSE, ...)
 
-eav_decode_right_censored(x, attrname = character(), def = list(),
-  suffix = attrname, sas.encoding = FALSE, ...)
+eav_decode_right_censored(
+  x,
+  attrname = character(),
+  def = list(),
+  suffix = attrname,
+  sas.encoding = FALSE,
+  ...
+)
 }
 \arguments{
 \item{time}{\code{numeric} time to event}
@@ -23,14 +29,14 @@ right censored.}
 
 \item{def}{the covariate definition for this variable}
 
-\item{suffix}{adds \code{_<suffix>} to the \code{tte} and \code{event} columns of the
+\item{suffix}{adds \verb{_<suffix>} to the \code{tte} and \code{event} columns of the
 outgoing \code{data.frame}}
 }
 \value{
 returns a numeric vector that combines time-to-event and censoring
 info (sign of the value).
 
-two column \code{data.frame} with \code{tte(_SUFFIX)?} and \code{event(_SUFFIX)?}
+two column \code{data.frame} with \verb{tte(_SUFFIX)?} and \verb{event(_SUFFIX)?}
 columns.
 }
 \description{

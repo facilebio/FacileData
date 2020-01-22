@@ -4,8 +4,7 @@
 \alias{fetch_samples.FacileDataSet}
 \title{Fetches a sample descriptor that matches the filter criterion}
 \usage{
-\method{fetch_samples}{FacileDataSet}(x, samples = NULL,
-  assay = "rnaseq", ...)
+\method{fetch_samples}{FacileDataSet}(x, samples = NULL, assay = "rnaseq", ...)
 }
 \arguments{
 \item{x}{A \code{FacileDataRepository}}
@@ -25,14 +24,15 @@ just one boolean operation. Multiple terms passed into \code{...} will be
 "AND"ed together.
 }
 \seealso{
-Other API: \code{\link{fetch_assay_data.FacileDataSet}},
-  \code{\link{fetch_assay_score.FacileDataSet}},
-  \code{\link{fetch_custom_sample_covariates.FacileDataSet}},
-  \code{\link{fetch_sample_covariates}},
-  \code{\link{fetch_sample_statistics.FacileDataSet}},
-  \code{\link{filter_features.FacileDataSet}},
-  \code{\link{filter_samples.FacileDataSet}},
-  \code{\link{organism.FacileDataSet}},
-  \code{\link{samples.FacileDataSet}}
+Other API: 
+\code{\link{fetch_assay_data.FacileDataSet}()},
+\code{\link{fetch_assay_score.FacileDataSet}()},
+\code{\link{fetch_custom_sample_covariates.FacileDataSet}()},
+\code{\link{fetch_sample_covariates}()},
+\code{\link{fetch_sample_statistics.FacileDataSet}()},
+\code{\link{filter_features.FacileDataSet}()},
+\code{\link{filter_samples.FacileDataSet}()},
+\code{\link{organism.FacileDataSet}()},
+\code{\link{samples.FacileDataSet}()}
 }
 \concept{API}

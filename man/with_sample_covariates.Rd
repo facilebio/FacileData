@@ -4,8 +4,14 @@
 \alias{with_sample_covariates}
 \title{Appends covariate columns to a query result}
 \usage{
-with_sample_covariates(x, covariates = NULL, na.rm = FALSE,
-  custom_key = Sys.getenv("USER"), .fds = NULL, ...)
+with_sample_covariates(
+  x,
+  covariates = NULL,
+  na.rm = FALSE,
+  custom_key = Sys.getenv("USER"),
+  .fds = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{a facile sample descriptor}
@@ -31,9 +37,10 @@ The facile \code{x} object, annotated with the specified covariates.
 Note that this function will force the collection of \code{x}
 }
 \seealso{
-Other FacileInterface: \code{\link{facet_frame.FacileDataSet}},
-  \code{\link{fetch_assay_score}},
-  \code{\link{fetch_sample_covariates}},
-  \code{\link{fetch_sample_statistics}}
+Other FacileInterface: 
+\code{\link{facet_frame.FacileDataSet}()},
+\code{\link{fetch_assay_score}()},
+\code{\link{fetch_sample_covariates}()},
+\code{\link{fetch_sample_statistics}()}
 }
 \concept{FacileInterface}

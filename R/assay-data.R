@@ -12,6 +12,12 @@
 #' `normalize` is by default set to `FALSE`, while it is set to `TRUE` in
 #' `with_assay_data`.
 #'
+#' @section Removing Batch Effects:
+#' When normalized data is returned, we assume these data are log-like, and you
+#' have the option to regress out batch effects using our
+#' [remove_batch_effect()] wrapper to [limma::removeBatchEffect()].
+#'
+#' @rdname fetch_assay_data
 #' @export
 #' @importFrom rhdf5 h5read
 #' @importFrom multiGSEA eigenWeightedMean
@@ -41,6 +47,15 @@
 #'   scores? Use 'ewm' for eigenWeightedMean, and that's all.
 #' @return A `tibble` (lazy or not) with assay data.
 #' @family API
+#' @examples
+#' samples <- exampleFacileDataSet() %>%
+#'   filter_samples(indication == "BLCA", sample_type == "tumor")
+#' features <- c(PRF1='5551', GZMA='3001', CD274='29126')
+#' dat <- with_assay_data(samples, features, normalized = TRUE, batch = "sex")
+#' dat <- with_assay_data(samples, features, normalized = TRUE,
+#'                        batch = c("sex", "RIN"), normalized = TRUE)
+#' dat <- with_assay_data(samples, features, normalized = TRUE,
+#'                        batch = c("sex", "RIN"), main = "treatment")
 fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
                                            assay_name = default_assay(x),
                                            normalized = FALSE,
@@ -245,8 +260,8 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
       }
       dimnames(vals) <- list(finfo$feature_id, .$samid)
       if (normalized) {
-        vals <- normalize.assay.matrix(vals, finfo, ., x, batch = batch,
-                                       main = main, verbose = verbose, ...)
+        vals <- normalize_assay_data(vals, finfo, ., batch = batch,
+                                     main = main, verbose = verbose, ...)
       }
       vals
     }) %>%
@@ -285,74 +300,6 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
   }
 
   set_fds(vals, x)
-}
-
-#' @section Removing Batch Effects:
-#' When normalized data is returned, we assume these data are log-like, and you
-#' have the option to regress out batch effects using our
-#' [remove_batch_effect()] wrapper to [limma::removeBatchEffect()].
-#'
-#' @rdname fetch_assay_data
-#' @importFrom edgeR cpm
-#' @importFrom stats contr.sum model.matrix
-#' @examples
-#' samples <- exampleFacileDataSet() %>%
-#'   filter_samples(indication == "BLCA", sample_type == "tumor")
-#' features <- c(PRF1='5551', GZMA='3001', CD274='29126')
-#' dat <- with_assay_data(samples, features, normalized = TRUE, batch = "sex")
-#' dat <- with_assay_data(samples, features, normalized = TRUE,
-#'                        batch = c("sex", "RIN"), normalized = TRUE)
-#' dat <- with_assay_data(samples, features, normalized = TRUE,
-#'                        batch = c("sex", "RIN"), main = "treatment")
-normalize.assay.matrix <- function(vals, feature.info, sample.info, fds,
-                                   log = TRUE, prior.count = 0.1,
-                                   batch = NULL, main = NULL, verbose = FALSE,
-                                   ...) {
-  stopifnot(
-    nrow(vals) == nrow(feature.info),
-    all(rownames(vals) == feature.info$feature_id),
-    ncol(vals) == nrow(sample.info),
-    all(colnames(vals) == sample.info$samid),
-    is.character(feature.info$assay_type),
-    length(unique(feature.info$assay_type)) == 1L,
-    is.numeric(sample.info$libsize), is.numeric(sample.info$normfactor))
-  atype <- feature.info$assay_type[1L]
-  if (atype %in% c("rnaseq", "isoseq")) {
-    # we assume these are units that are at the count level
-    # the user may have passes in a samples frame with lib.size and norm.factors
-    # columns already attached, if so let's try using those
-    # libsize <- sample.info$libsize * sample.info$normfactor
-    cnames <- colnames(sample.info)
-    if ("lib.size" %in% cnames && is.numeric(sample.info[["lib.size"]])) {
-      lsize <- sample.info[["lib.size"]]
-    } else  {
-      lsize <- sample.info[["libsize"]]
-    }
-    if ("norm.factors" %in% cnames &&
-        is.numeric(sample.info[["norm.factors"]])) {
-      nf <- sample.info[["norm.factors"]]
-    } else {
-      nf <- sample.info[["normfactor"]]
-    }
-    libsize <- lsize * nf
-    out <- edgeR::cpm(vals, libsize, log = log, prior.count = prior.count)
-  } else if (atype == "tpm") {
-    # someone processed their data with salmon or kallisto and wanted to store
-    # tpm. Normalizing this is just log2(val + prior.count)
-    out <- log2(vals + prior.count)
-  } else {
-    if (verbose) {
-      warning("No normalization procedure for ", atype, " assay",
-              immediate.=TRUE)
-    }
-    out <- vals
-  }
-
-  if (test_character(batch, min.len = 1L)) {
-    out <- remove_batch_effect(out, sample.info, batch, main, ...)
-  }
-
-  out
 }
 
 #' @noRd

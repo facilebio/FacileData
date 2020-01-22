@@ -16,41 +16,87 @@
 \usage{
 as.DGEList(x, ...)
 
-\method{as.DGEList}{data.frame}(x, covariates = TRUE,
-  feature_ids = NULL, assay_name = NULL, .fds = NULL,
-  custom_key = Sys.getenv("USER"), ...)
+\method{as.DGEList}{data.frame}(
+  x,
+  covariates = TRUE,
+  feature_ids = NULL,
+  assay_name = NULL,
+  .fds = NULL,
+  custom_key = Sys.getenv("USER"),
+  ...
+)
 
-\method{as.DGEList}{tbl}(x, covariates = TRUE, feature_ids = NULL,
-  assay_name = NULL, .fds = NULL, custom_key = Sys.getenv("USER"),
-  ...)
+\method{as.DGEList}{tbl}(
+  x,
+  covariates = TRUE,
+  feature_ids = NULL,
+  assay_name = NULL,
+  .fds = NULL,
+  custom_key = Sys.getenv("USER"),
+  ...
+)
 
-\method{as.DGEList}{facile_frame}(x, covariates = TRUE,
-  feature_ids = NULL, assay_name = NULL,
-  custom_key = Sys.getenv("USER"), ...)
+\method{as.DGEList}{facile_frame}(
+  x,
+  covariates = TRUE,
+  feature_ids = NULL,
+  assay_name = NULL,
+  custom_key = Sys.getenv("USER"),
+  ...
+)
 
-\method{as.DGEList}{FacileDataSet}(x, covariates = TRUE,
-  feature_ids = NULL, assay_name = NULL,
-  custom_key = Sys.getenv("USER"), ...)
+\method{as.DGEList}{FacileDataSet}(
+  x,
+  covariates = TRUE,
+  feature_ids = NULL,
+  assay_name = NULL,
+  custom_key = Sys.getenv("USER"),
+  ...
+)
 
 as.ExpressionSet(x, ...)
 
-\method{as.ExpressionSet}{data.frame}(x, covariates = TRUE,
-  feature_ids = NULL, assay_name = default_assay(.fds),
-  .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
+\method{as.ExpressionSet}{data.frame}(
+  x,
+  covariates = TRUE,
+  feature_ids = NULL,
+  assay_name = default_assay(.fds),
+  .fds = fds(x),
+  custom_key = Sys.getenv("USER"),
+  ...
+)
 
-\method{as.ExpressionSet}{FacileDataSet}(x, covariates = TRUE,
-  feature_ids = NULL, assay_name = default_assay(.fds),
-  .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
+\method{as.ExpressionSet}{FacileDataSet}(
+  x,
+  covariates = TRUE,
+  feature_ids = NULL,
+  assay_name = default_assay(.fds),
+  .fds = fds(x),
+  custom_key = Sys.getenv("USER"),
+  ...
+)
 
 as.SummarizedExperiment(x, ...)
 
-\method{as.SummarizedExperiment}{data.frame}(x, covariates = TRUE,
-  feature_ids = NULL, assay_name = default_assay(.fds),
-  .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
+\method{as.SummarizedExperiment}{data.frame}(
+  x,
+  covariates = TRUE,
+  feature_ids = NULL,
+  assay_name = default_assay(.fds),
+  .fds = fds(x),
+  custom_key = Sys.getenv("USER"),
+  ...
+)
 
-\method{as.SummarizedExperiment}{FacileDataSet}(x, covariates = TRUE,
-  feature_ids = NULL, assay_name = default_assay(.fds),
-  .fds = fds(x), custom_key = Sys.getenv("USER"), ...)
+\method{as.SummarizedExperiment}{FacileDataSet}(
+  x,
+  covariates = TRUE,
+  feature_ids = NULL,
+  assay_name = default_assay(.fds),
+  .fds = fds(x),
+  custom_key = Sys.getenv("USER"),
+  ...
+)
 }
 \arguments{
 \item{x}{a facile expression-like result}
@@ -73,7 +119,7 @@ in \code{x} descriptor). These correspond to the elements found in the
 \code{feature_info_tbl(x)$feature_id} column.}
 
 \item{assay_name}{the name of the assay matrix to use when populating the
-default assay matrix of the bioconductor container (the \code{$counts}
+default assay matrix of the bioconductor container (the \verb{$counts}
 matrix of a \code{DGEList}, the \code{exprs()} of an \code{ExpressionSet}, etc.).
 The default value is the entry provided by \code{\link[=default_assay]{default_assay()}}}
 

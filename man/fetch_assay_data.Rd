@@ -3,28 +3,54 @@
 \name{fetch_assay_data.FacileDataSet}
 \alias{fetch_assay_data.FacileDataSet}
 \alias{fetch_assay_data.facile_frame}
-\alias{normalize.assay.matrix}
 \alias{with_assay_data.facile_frame}
 \title{Fetch assay data from single assay of choice}
 \usage{
-\method{fetch_assay_data}{FacileDataSet}(x, features, samples = NULL,
-  assay_name = default_assay(x), normalized = FALSE, batch = NULL,
-  main = NULL, as.matrix = FALSE, ..., subset.threshold = 700,
-  aggregate = FALSE, aggregate.by = "ewm", verbose = FALSE)
+\method{fetch_assay_data}{FacileDataSet}(
+  x,
+  features,
+  samples = NULL,
+  assay_name = default_assay(x),
+  normalized = FALSE,
+  batch = NULL,
+  main = NULL,
+  as.matrix = FALSE,
+  ...,
+  subset.threshold = 700,
+  aggregate = FALSE,
+  aggregate.by = "ewm",
+  verbose = FALSE
+)
 
-\method{fetch_assay_data}{facile_frame}(x, features, samples = NULL,
-  assay_name = NULL, normalized = FALSE, batch = NULL, main = NULL,
-  as.matrix = FALSE, ..., subset.threshold = 700, aggregate = FALSE,
-  aggregate.by = "ewm", verbose = FALSE)
+\method{fetch_assay_data}{facile_frame}(
+  x,
+  features,
+  samples = NULL,
+  assay_name = NULL,
+  normalized = FALSE,
+  batch = NULL,
+  main = NULL,
+  as.matrix = FALSE,
+  ...,
+  subset.threshold = 700,
+  aggregate = FALSE,
+  aggregate.by = "ewm",
+  verbose = FALSE
+)
 
-normalize.assay.matrix(vals, feature.info, sample.info, fds, log = TRUE,
-  prior.count = 0.1, batch = NULL, main = NULL, verbose = FALSE,
-  ...)
-
-\method{with_assay_data}{facile_frame}(x, features, assay_name = NULL,
-  normalized = TRUE, aggregate = FALSE, aggregate.by = "ewm",
-  spread = TRUE, with_assay_name = FALSE, ..., verbose = FALSE,
-  .fds = fds(x))
+\method{with_assay_data}{facile_frame}(
+  x,
+  features,
+  assay_name = NULL,
+  normalized = TRUE,
+  aggregate = FALSE,
+  aggregate.by = "ewm",
+  spread = TRUE,
+  with_assay_name = FALSE,
+  ...,
+  verbose = FALSE,
+  .fds = fds(x)
+)
 }
 \arguments{
 \item{x}{A \code{FacileDataSrote} object, or \code{facile_frame}}
@@ -32,8 +58,7 @@ normalize.assay.matrix(vals, feature.info, sample.info, fds, log = TRUE,
 \item{features}{a feature descriptor (data.frame with assay and feature_id
 columms)}
 
-\item{samples}{a sample descriptor to specify which samples to return data
-from.}
+\item{samples}{a samples descriptor}
 
 \item{assay_name}{the name of the assay to fetch data from. Defaults to the
 value of \code{\link[=default_assay]{default_assay()}} for \code{x}. Must be a subset of \code{assay_names(x)}.}
@@ -66,8 +91,6 @@ scores? Use 'ewm' for eigenWeightedMean, and that's all.}
 
 \item{.fds}{A \code{FacileDataSet} object}
 
-\item{samples}{a samples descriptor}
-
 \item{feature_ids}{character vector of feature_ids}
 
 \item{with_symbols}{Do you want gene symbols returned, too?}
@@ -78,7 +101,7 @@ A \code{tibble} (lazy or not) with assay data.
 a tbl-like result
 }
 \description{
-The \code{(fetch|with)_assay_data} functions are some of the main workhose
+The \verb{(fetch|with)_assay_data} functions are some of the main workhose
 functions of the facile ecosystem. These calls enable you to retrieve
 raw and noramlized assay data from a FacileData container.
 }
@@ -109,14 +132,15 @@ dat <- with_assay_data(samples, features, normalized = TRUE,
                        batch = c("sex", "RIN"), main = "treatment")
 }
 \seealso{
-Other API: \code{\link{fetch_assay_score.FacileDataSet}},
-  \code{\link{fetch_custom_sample_covariates.FacileDataSet}},
-  \code{\link{fetch_sample_covariates}},
-  \code{\link{fetch_sample_statistics.FacileDataSet}},
-  \code{\link{fetch_samples.FacileDataSet}},
-  \code{\link{filter_features.FacileDataSet}},
-  \code{\link{filter_samples.FacileDataSet}},
-  \code{\link{organism.FacileDataSet}},
-  \code{\link{samples.FacileDataSet}}
+Other API: 
+\code{\link{fetch_assay_score.FacileDataSet}()},
+\code{\link{fetch_custom_sample_covariates.FacileDataSet}()},
+\code{\link{fetch_sample_covariates}()},
+\code{\link{fetch_sample_statistics.FacileDataSet}()},
+\code{\link{fetch_samples.FacileDataSet}()},
+\code{\link{filter_features.FacileDataSet}()},
+\code{\link{filter_samples.FacileDataSet}()},
+\code{\link{organism.FacileDataSet}()},
+\code{\link{samples.FacileDataSet}()}
 }
 \concept{API}

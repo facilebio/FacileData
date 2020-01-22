@@ -15,7 +15,7 @@ Defines the "FacileData" API over multi-assay, high-throughput
   into memory.
 }
 \author{
-\strong{Maintainer}: Steve Lianoglou \email{lianoglou@dnli.com} (0000-0002-0924-1754)
+\strong{Maintainer}: Steve Lianoglou \email{lianoglou@dnli.com} (\href{https://orcid.org/0000-0002-0924-1754}{ORCID})
 
 Authors:
 \itemize{

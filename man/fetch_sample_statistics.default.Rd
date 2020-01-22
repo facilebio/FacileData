@@ -4,8 +4,7 @@
 \alias{fetch_sample_statistics.default}
 \title{Issue #2}
 \usage{
-\method{fetch_sample_statistics}{default}(x, samples = NULL,
-  semi = TRUE, assay_name = NULL)
+\method{fetch_sample_statistics}{default}(x, samples = NULL, semi = TRUE, assay_name = NULL)
 }
 \description{
 Issue #2

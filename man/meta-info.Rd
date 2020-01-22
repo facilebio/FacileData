@@ -38,7 +38,9 @@ description and URL information that describes these datasets in more detail,
 which is specified in the FacileDataSets \code{meta.yaml} file.
 }
 \seealso{
-Other FacileDataSet: \code{\link{FacileDataSet}},
-  \code{\link{dbfn}}, \code{\link{hdf5fn}}
+Other FacileDataSet: 
+\code{\link{FacileDataSet}()},
+\code{\link{dbfn}()},
+\code{\link{hdf5fn}()}
 }
 \concept{FacileDataSet}

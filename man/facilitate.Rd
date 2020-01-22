@@ -35,10 +35,10 @@ FacileBioc package.
 standard limma pipeline, but you'll want to be able to drop this result
 into the facile ecosystem provided in the FacileAnalysis package.
 The particulars of this \code{faciltate()} implementation would be defined in
-the FacileAnalysis package, and migth look something like this:
-}\preformatted{   fit <- eBayes(lmFit(elist, design))
-   limma.res <- topTable(fit, coef = "something", n = Inf)
-   facile.res <- facilitate(elist, fit, limma.res)
+the FacileAnalysis package, and migth look something like this:\preformatted{fit <- eBayes(lmFit(elist, design))
+limma.res <- topTable(fit, coef = "something", n = Inf)
+facile.res <- facilitate(elist, fit, limma.res)
+}
 }
 
 It's not clear how well well we'll be able to do this, or if this is even

@@ -4,9 +4,15 @@
 \alias{fetch_custom_sample_covariates.FacileDataSet}
 \title{Fetches custom (user) annotations for a given user prefix}
 \usage{
-\method{fetch_custom_sample_covariates}{FacileDataSet}(x, samples = NULL,
-  covariates = NULL, custom_key = Sys.getenv("USER"),
-  with_source = FALSE, file.prefix = "facile", ...)
+\method{fetch_custom_sample_covariates}{FacileDataSet}(
+  x,
+  samples = NULL,
+  covariates = NULL,
+  custom_key = Sys.getenv("USER"),
+  with_source = FALSE,
+  file.prefix = "facile",
+  ...
+)
 }
 \arguments{
 \item{samples}{the facile sample descriptor}
@@ -22,14 +28,15 @@ covariate tbl
 Fetches custom (user) annotations for a given user prefix
 }
 \seealso{
-Other API: \code{\link{fetch_assay_data.FacileDataSet}},
-  \code{\link{fetch_assay_score.FacileDataSet}},
-  \code{\link{fetch_sample_covariates}},
-  \code{\link{fetch_sample_statistics.FacileDataSet}},
-  \code{\link{fetch_samples.FacileDataSet}},
-  \code{\link{filter_features.FacileDataSet}},
-  \code{\link{filter_samples.FacileDataSet}},
-  \code{\link{organism.FacileDataSet}},
-  \code{\link{samples.FacileDataSet}}
+Other API: 
+\code{\link{fetch_assay_data.FacileDataSet}()},
+\code{\link{fetch_assay_score.FacileDataSet}()},
+\code{\link{fetch_sample_covariates}()},
+\code{\link{fetch_sample_statistics.FacileDataSet}()},
+\code{\link{fetch_samples.FacileDataSet}()},
+\code{\link{filter_features.FacileDataSet}()},
+\code{\link{filter_samples.FacileDataSet}()},
+\code{\link{organism.FacileDataSet}()},
+\code{\link{samples.FacileDataSet}()}
 }
 \concept{API}

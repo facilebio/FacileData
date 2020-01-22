@@ -111,17 +111,20 @@ as.FacileDataSet <- function(x, path, assay_name, assay_type, source_assay,
 
 ## These are the containers we can extract data from
 ## package=class
-legit.as.classes <- c(
-    "SummarizedExperiment"="SummarizedExperiment",
-    "SummarizedExperiment"="RangedSummarizedExperiment",
-    "Biobase"="ExpressionSet",
-    "edgeR"="DGEList")
+
+legit.as.classes <- tribble(
+  ~package,               ~class,
+  "SummarizedExperiment", "SummarizedExperiment",
+  "SummarizedExperiment", "RangedSummarizedExperiment",
+  "Biobase",              "ExpressionSet",
+  "edgeR",                "DGEList",
+  "limma",                "EList")
 
 #' @method as.FacileDataSet default
 #' @export
 as.FacileDataSet.default <- function(x, ...) {
     xclass = class(x)[1L]
-    if (!xclass %in% legit.as.classes) {
+    if (!xclass %in% legit.as.classes[["class"]]) {
         stop("as.FacileDataSet not defined for object of class: ", xclass)
     }
     as.FacileDataSet(list(x), ...)
@@ -166,12 +169,12 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   same.classes <- sapply(x, function(xx) class(xx)[1L] == fclass)
   stopifnot(all(same.classes))
   # ... legit class
-  stopifnot(fclass %in% legit.as.classes)
+  stopifnot(fclass %in% legit.as.classes[["class"]])
 
   # load required namespace to deal with object of type `fclass`
   pkg <- local({
-    pkg.idx <- which(sapply(legit.as.classes, function(clz) is(first, clz)))
-    names(legit.as.classes)[pkg.idx]
+    info <- filter(legit.as.classes, class == fclass)
+    info[["package"]]
   })
   if (!requireNamespace(pkg, quietly = TRUE)) {
     stop(pkg, " package required to convert these objects to a FacileDataSet")
@@ -385,6 +388,11 @@ fdata.DGEList <- function(x, validate = FALSE, ...) {
   out <- x$genes
   if (validate) validate.fdata(out, ...) else out
 }
+fdata.EList <- function(x, validate = FALSE, ...) {
+  out <- x$genes
+  if (validate) validate.fdata(out, ...) else out
+}
+
 validate.fdata <- function(x, ...) {
   stopifnot(is.data.frame(x))
   if (is.null(x[["source"]])) {
@@ -423,6 +431,8 @@ validate.fdata <- function(x, ...) {
 pdata <- function(x, covariate_metadata = NULL, ...) {
   UseMethod("pdata")
 }
+
+#' @noRd
 pdata.SummarizedExperiment <- function(x, covariate_metadata = NULL,  ...) {
   ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
   if (is.null(ns)) stop("SummarizedExperiment required")
@@ -433,11 +443,15 @@ pdata.SummarizedExperiment <- function(x, covariate_metadata = NULL,  ...) {
   ds <- ns4$as.data.frame.DataTable(df)
   validate.pdata(ds, ...)
 }
+
+#' @noRd
 pdata.ExpressionSet <- function(x, covariate_metadata = NULL,  ...) {
   ns <- tryCatch(loadNamespace("Biobase"), error = function(e) NULL)
   if (is.null(ns)) stop("Biobase required")
   validate.pdata(ns$pData(x), ...)
 }
+
+#' @noRd
 pdata.DGEList <- function(x, covariate_metadata = NULL,  ...) {
   # stopifnot(requireNamespace("edgeR", quietly = TRUE))
   ignore.cols <- c("lib.size", "norm.factors")
@@ -446,6 +460,11 @@ pdata.DGEList <- function(x, covariate_metadata = NULL,  ...) {
     ignore.cols <- c(ignore.cols, "group")
   }
   validate.pdata(x$samples[, !colnames(x$samples) %in% ignore.cols], ...)
+}
+
+#' @noRd
+pdata.EList <- function(x, covariate_metadata = NULL,  ...) {
+  validate.pdata(x$targets, ...)
 }
 
 validate.pdata <- function(x, ...) {
@@ -466,6 +485,7 @@ pdata_metadata <- function(x, ...) {
 
 #' SummarizedExperiment method
 #' @export
+#' @noRd
 pdata_metadata.SummarizedExperiment <- function(x, ...) {
   ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
   if (is.null(ns)) stop("SummarizedExperiment required")
@@ -478,6 +498,7 @@ pdata_metadata.SummarizedExperiment <- function(x, ...) {
 
 #' ExpressionSet method
 #' @export
+#' @noRd
 pdata_metadata.ExpressionSet <- function(x, ...) {
   sinfo <- pdata(x)
   defs <- attributes(sinfo)$label
@@ -486,10 +507,20 @@ pdata_metadata.ExpressionSet <- function(x, ...) {
   defs
 }
 
-#' DGEList method
 #' @export
+#' @noRd
 pdata_metadata.DGEList <- function(x, ...) {
   sinfo <- x$samples
+  defs <- sapply(colnames(sinfo), function(el) {
+    list(description = el, label = el, type = "general")
+  }, simplify = FALSE)
+  defs
+}
+
+#' @export
+#' @noRd
+pdata_metadata.EList <- function(x, ...) {
+  sinfo <- x$targets
   defs <- sapply(colnames(sinfo), function(el) {
     list(description = el, label = el, type = "general")
   }, simplify = FALSE)
@@ -504,6 +535,8 @@ pdata_metadata.DGEList <- function(x, ...) {
 adata <- function(x, assay = NULL, ...) {
   UseMethod("adata")
 }
+
+#' @noRd
 adata.SummarizedExperiment <- function(x, assay = NULL, ...) {
   ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
   if (is.null(ns)) stop("SummarizedExperiment required")
@@ -514,6 +547,8 @@ adata.SummarizedExperiment <- function(x, assay = NULL, ...) {
   }
   ns$assay(x, assay)
 }
+
+#' @noRd
 adata.ExpressionSet <- function(x, assay = NULL, ...) {
   ns <- tryCatch(loadNamespace("Biobase"), error = function(e) NULL)
   if (is.null(ns)) stop("Biobase required")
@@ -524,8 +559,16 @@ adata.ExpressionSet <- function(x, assay = NULL, ...) {
   }
   ns$assayDataElement(x, assay)
 }
+
+#' @noRd
 adata.DGEList <- function(x, assay = NULL, ...) {
   # stopifnot(requireNamespace("edgeR", quietly = TRUE))
   # DGEList only has one assay
   x$counts
+}
+
+#' @noRd
+adata.EList <- function(x, assay = NULL, ...) {
+  # EList only has one assay
+  x[["E"]]
 }

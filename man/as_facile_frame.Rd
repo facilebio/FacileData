@@ -4,8 +4,13 @@
 \alias{as_facile_frame}
 \title{Converts a normal tibble/data.frame to a facile_frame}
 \usage{
-as_facile_frame(x, datastore = fds(x), classes = NULL, ...,
-  .valid_sample_check = TRUE)
+as_facile_frame(
+  x,
+  datastore = fds(x),
+  classes = NULL,
+  ...,
+  .valid_sample_check = TRUE
+)
 }
 \arguments{
 \item{x}{a sample-like descriptor}

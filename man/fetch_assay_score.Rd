@@ -4,16 +4,24 @@
 \alias{fetch_assay_score}
 \title{NOTE: is fetch_assay_score really necessary?}
 \usage{
-fetch_assay_score(x, features, samples = NULL, assay_name = NULL,
-  as.matrix = FALSE, ..., subset.threshold = 700)
+fetch_assay_score(
+  x,
+  features,
+  samples = NULL,
+  assay_name = NULL,
+  as.matrix = FALSE,
+  ...,
+  subset.threshold = 700
+)
 }
 \description{
 NOTE: is fetch_assay_score really necessary?
 }
 \seealso{
-Other FacileInterface: \code{\link{facet_frame.FacileDataSet}},
-  \code{\link{fetch_sample_covariates}},
-  \code{\link{fetch_sample_statistics}},
-  \code{\link{with_sample_covariates}}
+Other FacileInterface: 
+\code{\link{facet_frame.FacileDataSet}()},
+\code{\link{fetch_sample_covariates}()},
+\code{\link{fetch_sample_statistics}()},
+\code{\link{with_sample_covariates}()}
 }
 \concept{FacileInterface}
