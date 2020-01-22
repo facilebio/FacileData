@@ -156,7 +156,8 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
   rownames(sample.stats) <- sample.stats[["samid"]]
   sample.stats <- sample.stats[colnames(x),,drop=FALSE]
 
-  # TODO: since this is being used a general assay retrieval wrapper, what we
+  # TODO: https://github.com/facileverse/FacileData/issues/9
+  # Since this is being used a general assay retrieval wrapper, what we
   # want might not even be appropriate for a DGEList (ie. negative numbers
   # inside) we hack for now, but need to address this!
   is.neg <- which(x < 0, arr.ind = TRUE)
@@ -202,6 +203,7 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
     y$samples <- cbind(y$samples, covs)
   }
 
+  # TODO: https://github.com/facileverse/FacileData/issues/9
   if (nrow(is.neg)) {
     y$counts[is.neg] <- y$counts[is.neg] * -1
   }
