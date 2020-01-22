@@ -259,10 +259,6 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
         vals <- vals[finfo$hdf5_index,,drop=FALSE]
       }
       dimnames(vals) <- list(finfo$feature_id, .$samid)
-      if (normalized) {
-        vals <- normalize_assay_data(vals, finfo, ., batch = batch,
-                                     main = main, verbose = verbose, ...)
-      }
       vals
     }) %>%
     ungroup
@@ -272,6 +268,15 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
   # We can come back to this to optimize for speed later. The problem is
   # introduced when the aggregate.by parameter was introduced
   vals <- do.call(cbind, dat$res)
+
+  if (normalized) {
+    xref <- match(colnames(vals), sinfo[["samid"]])
+    if (!isTRUE(all.equal(xref, seq(nrow(xref))))) {
+      sinfo <- sinfo[xref,,drop = FALSE]
+    }
+    vals <- normalize_assay_data(vals, finfo, sinfo, batch = batch, main = main,
+                                 verbose = verbose, ...)
+  }
 
   if (nrow(vals) == 1L) {
     if (isTRUE(aggregate) && verbose) {

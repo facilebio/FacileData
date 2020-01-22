@@ -1,9 +1,10 @@
-#' Internal helper functions to normalize assay data into log2 space
+#' Internal helper functions to normalize assay data into log2 space.
 #'
 #' This only works for the supporte assay_types. These functions should not
 #' be exported.
 #'
-#' @param x A matrix of raw/unnormalized assay data
+#' @param x A matrix of raw/unnormalized assay data retrieved from
+#'   within the `fetch_assay_data()` itself.
 #' @param features a feature descriptor data.frame that includes the
 #'   feature_id's of the rows in `x`, as well as the assay name/type they
 #'   were pulled from. We assert that all features come from the same assay
@@ -22,28 +23,15 @@ normalize_assay_data <- function(x, features, samples, batch = NULL,
     is.character(features$assay_type),         # only working with 1 assay_type
     length(unique(features$assay_type)) == 1L) # only working with 1 assay_type
 
+  # Retrieves the log2-like assay-normalized version of the assay data
   atype <- features$assay_type[1L]
+  norm.fn.name <- paste0("normalize_assay_matrix.", atype)
+  normfn <- getFunction(norm.fn.name)
+  out <- normfn(x, features, samples, log = log, prior.count = prior.count, ...)
 
-  if (atype %in% c("rnaseq", "isoseq")) {
-    out <- normalize_assay_matrix.rnaseq(x, features, samples, log = log,
-                                         prior.count = prior.count, ...)
-  } else if (atype == "tpm") {
-    # someone processed their data with salmon or kallisto and wanted to store
-    # tpm. Normalizing this is just log2(val + prior.count)
-    out <- normalize_assay_matrix.tpm(x, features, samples, log = log,
-                                      prior.count = prior.count, ...)
-  } else {
-    if (verbose) {
-      warning("No normalization procedure for ", atype, " assay",
-              immediate.=TRUE)
-    }
-    out <- x
-  }
-
+  # Now batch correct data if desired (and if explicitly log2-like)
   if (test_character(batch, min.len = 1L)) {
-    if (!log) {
-      stop("Do not know how to batch correct un-logged data")
-    }
+    if (!log) stop("Do not know how to batch correct un-logged data")
     out <- remove_batch_effect(out, samples, batch, main, ...)
   }
 
@@ -79,6 +67,11 @@ normalize_assay_matrix.rnaseq <- function(x, features, samples,
   edgeR::cpm(x, lsize * nf, log = log, prior.count = prior.count)
 }
 
+#' @noRd
+normalize_assay_matrix.isoseq <- normalize_assay_matrix.rnaseq
+
+#' someone processed their data with salmon or kallisto and wanted to store
+#' tpm. Normalizing this is just log2(val + prior.count)
 #' @noRd
 normalize_assay_matrix.tpm <- function(x, features, samples,
                                        log = TRUE, prior.count = 0.1,
