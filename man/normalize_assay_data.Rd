@@ -2,7 +2,7 @@
 % Please edit documentation in R/normalize_assay_data.R
 \name{normalize_assay_data}
 \alias{normalize_assay_data}
-\title{Internal helper functions to normalize assay data into log2 space}
+\title{Internal helper functions to normalize assay data into log2 space.}
 \usage{
 normalize_assay_data(
   x,
@@ -17,7 +17,8 @@ normalize_assay_data(
 )
 }
 \arguments{
-\item{x}{A matrix of raw/unnormalized assay data}
+\item{x}{A matrix of raw/unnormalized assay data retrieved from
+within the \code{fetch_assay_data()} itself.}
 
 \item{features}{a feature descriptor data.frame that includes the
 feature_id's of the rows in \code{x}, as well as the assay name/type they

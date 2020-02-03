@@ -81,12 +81,18 @@ assert_valid_meta_file <- function(fn, as.list = FALSE) {
 
 supported.assay.container <- function(x) {
   ## Currently only support DGEList
-  is(x, 'DGEList') || is(x, 'eSet') || is(x, 'SummarizedExperiment') || is(x, 'matrix')
+  is(x, 'DGEList') ||
+    is(x, "EList") ||
+    is(x, 'eSet') ||
+    is(x, 'SummarizedExperiment') ||
+    is(x, 'matrix')
 }
 
 extract.assay <- function(x, assay_name=NULL) {
   if (is(x, 'DGEList')) {
     out <- x$counts
+  } else if (is(x, "EList")) {
+    out <- x$E
   } else if (is(x, 'eSet')) {
     ns <- loadNamespace("Biobase")
     if (is.null(assay_name)) assay_name <- assayDataElementNames(x)[1]

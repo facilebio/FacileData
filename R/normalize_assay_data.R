@@ -82,3 +82,24 @@ normalize_assay_matrix.tpm <- function(x, features, samples,
   }
   out
 }
+
+#' `lognorm` assay data already normalized, nothing more to do
+#' @noRd
+normalize_assay_matrix.lognorm <- function(x, features, samples, ...) {
+  x
+}
+
+#' no internal normalization for `qpcrct` assay data yet, needs to be
+#' normalized externally and saved her -- essentialyl like `lognorm` data
+#' @noRd
+normalize_assay_matrix.qpcrct <- function(x, features, samples, ...) {
+  x
+}
+
+#' no internal normalization for `qpcrdct` assay data yet, needs to be
+#' normalized externally and saved her -- essentialyl like `lognorm` data
+#' @noRd
+normalize_assay_matrix.qpcrdct <- function(x, features, samples, ...) {
+  x
+}
+
