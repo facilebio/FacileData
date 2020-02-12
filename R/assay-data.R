@@ -89,6 +89,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     }
     assert_assay_feature_descriptor(features)
   }
+  features <- distinct(features, feature_id, .keep_all = TRUE)
 
   # I had originally add tests for 0-row datasets returning data from all
   # samples (as if it were NULL) but this was throwing me for a loop in analysis

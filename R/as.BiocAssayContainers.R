@@ -130,7 +130,7 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
   } else {
     feature_ids <- rownames(x)
   }
-
+  feature_ids <- unique(feature_ids)
   genes <- .fds %>%
     features(assay_name = assay_name, feature_ids = feature_ids) %>%
     as.data.frame()
