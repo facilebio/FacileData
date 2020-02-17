@@ -38,6 +38,8 @@
 #' It's not clear how well well we'll be able to do this, or if this is even
 #' the right way to do it, but we'll need to do something.
 #'
+#' @seealso https://github.com/facilebio/FacileBiocData
+#'
 #' @export
 #' @param x A non-facile object that we want to bring into the facile ecosystem
 #' @param ... we're going to need a lot of flexibility in the implementation of
@@ -193,9 +195,36 @@ assay_units.FacileDataStore <- function(x, assay_name = default_assay(x),
 #' @export
 #' @param x A `FacileDataStore`
 #' @param assay_name optional name of the assay to get information for
-#' @return a tibble of meta information for the assays stored in `x`
+#' @return a tibble of meta information for the assays stored in `x`, with these
+#'   columns:
+#'
+#'   * `assay <chr>`: Name of the assay
+#'   * `assay_type <chr>`: `"rnaseq"`, `"lognorm"`, etc. Look at
+#'     `FacileData:::.assay.types` vector
+#'   * `feature_type <chr>`: A string from `FacileData:::.feature.types`, ie.
+#'      `"ensgid"`, `"entrez"`, `"custom"`, etc.
+#'   * `description <chr>`: string description
+#'   * `nfeatures <int>`: number of features we have info for
+#'   * `storage_mode <chr>`: `"integer"`, `"numeric"`
 assay_info <- function(x, assay_name = NULL, ...) {
   UseMethod("assay_info", x)
+}
+
+#' Utility functions to get row and column indices of rnaseq hdf5 files.
+#'
+#' This is called to get things like hdf5_index and scaling factors for
+#' the samples in a given assay.
+#'
+#' @export
+#' @param x \code{FacileDataStore}
+#' @param assay_name the name of the assay
+#' @param samples a sample descriptor
+#' @return an updated version of \code{samples} decorated with hd5_index,
+#'   scaling factors, etc. Note that rows in \code{samples} that do not appear
+#'   in \code{assay_name} will be returnd here with NA values for hd5_index and
+#'   such.
+assay_sample_info <- function(x, assay_name, samples = NULL, ...) {
+  UseMethod("assay_sample_info", x)
 }
 
 ## General getters
@@ -244,7 +273,7 @@ default_assay <- function(x, ...) {
 
 #' @export
 default_assay.default <- function(x, ...) {
-  stop("The FacileAPI requires that a specific method be written for this type.")
+  assay_names(x, ...)[1L]
 }
 
 #' Retrieves grouping table for samples within a FacileDataSet.
@@ -494,7 +523,6 @@ with_assay_data.default <- function(x, features, assay_name = NULL,
 #' Note that this function will force the collection of \code{x}
 #'
 #' @export
-#' @rdname with_sample_covariates
 #'
 #' @importFrom stats complete.cases
 #' @param x a facile sample descriptor

@@ -44,3 +44,6 @@ facile.res <- facilitate(elist, fit, limma.res)
 It's not clear how well well we'll be able to do this, or if this is even
 the right way to do it, but we'll need to do something.
 }
+\seealso{
+https://github.com/facilebio/FacileBiocData
+}

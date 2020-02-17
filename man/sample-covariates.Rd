@@ -2,9 +2,10 @@
 % Please edit documentation in R/api.R, R/sample-covariates.R
 \name{fetch_sample_covariates}
 \alias{fetch_sample_covariates}
+\alias{with_sample_covariates}
 \alias{fetch_sample_covariates.FacileDataSet}
 \alias{fetch_sample_covariates.facile_frame}
-\title{Fetch rows from sample_covariate table for specified samples and covariates}
+\title{Appends covariate columns to a query result}
 \usage{
 fetch_sample_covariates(
   x,
@@ -12,6 +13,15 @@ fetch_sample_covariates(
   covariates = NULL,
   custom_key = Sys.getenv("USER"),
   with_source = FALSE,
+  ...
+)
+
+with_sample_covariates(
+  x,
+  covariates = NULL,
+  na.rm = FALSE,
+  custom_key = Sys.getenv("USER"),
+  .fds = NULL,
   ...
 )
 
@@ -42,19 +52,27 @@ fetch_sample_covariates(
 
 \item{custom_key}{The key to use to fetch more custom annotations over
 the given samples}
+
+\item{na.rm}{if \code{TRUE}, filters outgoing result such that only rows
+with nonNA values for the \code{covariates} specified here will be
+returned. Default: \code{FALSE}. Note that this will not check columns
+not specified in \code{covariates} for NA-ness.}
+
+\item{.fds}{A \code{FacileDataSet} object}
 }
 \value{
+The facile \code{x} object, annotated with the specified covariates.
+
 rows from the \code{sample_covariate} table
 }
 \description{
-Fetch rows from sample_covariate table for specified samples and covariates
+Note that this function will force the collection of \code{x}
 }
 \seealso{
 Other FacileInterface: 
 \code{\link{facet_frame.FacileDataSet}()},
 \code{\link{fetch_assay_score}()},
-\code{\link{fetch_sample_statistics}()},
-\code{\link{with_sample_covariates}()}
+\code{\link{fetch_sample_statistics}()}
 
 Other API: 
 \code{\link{fetch_assay_data.FacileDataSet}()},
@@ -66,6 +84,11 @@ Other API:
 \code{\link{filter_samples.FacileDataSet}()},
 \code{\link{organism.FacileDataSet}()},
 \code{\link{samples.FacileDataSet}()}
+
+Other FacileInterface: 
+\code{\link{facet_frame.FacileDataSet}()},
+\code{\link{fetch_assay_score}()},
+\code{\link{fetch_sample_statistics}()}
 
 Other API: 
 \code{\link{fetch_assay_data.FacileDataSet}()},

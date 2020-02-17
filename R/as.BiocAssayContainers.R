@@ -353,7 +353,6 @@ as.ExpressionSet <- function(x, ...) {
 #' @rdname as.BiocContainer
 #' @export
 #' @method as.ExpressionSet data.frame
-#' @rdname as.BiocContainer
 as.ExpressionSet.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
                                         assay_name=default_assay(.fds),
                                         .fds=fds(x), custom_key=Sys.getenv("USER"), ...) {
@@ -375,7 +374,6 @@ as.ExpressionSet.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
 #' @rdname as.BiocContainer
 #' @export
 #' @method as.ExpressionSet FacileDataSet
-#' @rdname as.BiocContainer
 as.ExpressionSet.FacileDataSet <- function(x, covariates=TRUE, feature_ids=NULL,
                                            assay_name=default_assay(.fds),
                                            .fds=fds(x),
@@ -396,7 +394,6 @@ as.SummarizedExperiment <- function(x, ...) {
 #' @rdname as.BiocContainer
 #' @export
 #' @method as.SummarizedExperiment data.frame
-#' @rdname as.BiocContainer
 as.SummarizedExperiment.data.frame <- function(x, covariates=TRUE, feature_ids=NULL,
                                                assay_name=default_assay(.fds),
                                                .fds=fds(x),
@@ -421,7 +418,6 @@ as.SummarizedExperiment.data.frame <- function(x, covariates=TRUE, feature_ids=N
 #' @rdname as.BiocContainer
 #' @export
 #' @method as.SummarizedExperiment FacileDataSet
-#' @rdname as.BiocContainer
 as.SummarizedExperiment.FacileDataSet <- function(x, covariates=TRUE, feature_ids=NULL,
                                                   assay_name=default_assay(.fds),
                                                   .fds=fds(x), custom_key=Sys.getenv("USER"),

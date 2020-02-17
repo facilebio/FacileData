@@ -14,6 +14,14 @@ Defines the "FacileData" API over multi-assay, high-throughput
   efficient access to arbitrary subsets of these data without loading it all
   into memory.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/facilebio/FacileData}
+  \item Report bugs at \url{https://github.com/facilebio/FacileData/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Steve Lianoglou \email{lianoglou@dnli.com} (\href{https://orcid.org/0000-0002-0924-1754}{ORCID})
 

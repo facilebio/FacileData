@@ -1,7 +1,7 @@
 Package: FacileData
 Type: Package
 Title: A fluent API for accessing multi-assay high-throughput genomics data
-Version: 0.10.9
+Version: 0.10.10
 Authors@R: c(
     person("Steve", "Lianoglou", , "lianoglou@dnli.com", c("aut", "cre"),
       comment = c(ORCID = "0000-0002-0924-1754")),
@@ -19,6 +19,8 @@ Description: Defines the "FacileData" API over multi-assay, high-throughput
   and HDF5 files to store arbitrarily large datasets and provide fast and
   efficient access to arbitrary subsets of these data without loading it all
   into memory.
+URL: https://github.com/facilebio/FacileData
+BugReports: https://github.com/facilebio/FacileData/issues
 Depends:
   R (>= 3.6.0),
 Imports:

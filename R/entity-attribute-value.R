@@ -113,7 +113,6 @@ cast_covariate <- function(covariate, values, cov.def, .fds) {
 #' @param attrname the name of "attribute" (covariate) in the EAV table.
 #' @param def the `covariate_definition` list for this covariate
 #' @return a `numeric` vector of `length(x)`
-#' @rdname simple-eav-decode-functions
 #' @export
 eav_decode_real <- function(x, attrname = character(), def = list(), ...) {
   out <- as.numeric(x)

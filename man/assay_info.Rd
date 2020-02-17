@@ -12,7 +12,18 @@ assay_info(x, assay_name = NULL, ...)
 \item{assay_name}{optional name of the assay to get information for}
 }
 \value{
-a tibble of meta information for the assays stored in \code{x}
+a tibble of meta information for the assays stored in \code{x}, with these
+columns:
+\itemize{
+\item \verb{assay <chr>}: Name of the assay
+\item \verb{assay_type <chr>}: \code{"rnaseq"}, \code{"lognorm"}, etc. Look at
+\code{FacileData:::.assay.types} vector
+\item \verb{feature_type <chr>}: A string from \code{FacileData:::.feature.types}, ie.
+\code{"ensgid"}, \code{"entrez"}, \code{"custom"}, etc.
+\item \verb{description <chr>}: string description
+\item \verb{nfeatures <int>}: number of features we have info for
+\item \verb{storage_mode <chr>}: \code{"integer"}, \code{"numeric"}
+}
 }
 \description{
 Fetches assay meta information for the assays stored in a FacileDataStore

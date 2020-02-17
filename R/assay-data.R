@@ -21,7 +21,6 @@
 #' @export
 #' @importFrom rhdf5 h5read
 #' @importFrom multiGSEA eigenWeightedMean
-#' @rdname fetch_assay_data
 #' @inheritParams remove_batch_effect
 #'
 #' @param x A `FacileDataSrote` object, or `facile_frame`
@@ -70,7 +69,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
   assert_flag(normalized)
   assert_number(subset.threshold)
 
-  if (!is.null(assay_name) || is.character(features)) {
+  if (!is.null(assay_name) || is.character(assay_name)) {
     assert_string(assay_name)
     assert_choice(assay_name, assay_names(x))
   }
@@ -369,20 +368,9 @@ has_assay <- function(x, assay_name) {
   assay_name %in% assay_names(x)
 }
 
-#' Utility functions to get row and column indices of rnaseq hdf5 files.
-#'
-#' This is called to get things like hdf5_index and scaling factors for
-#' the samples in a given assay.
-#'
+#' @noRd
 #' @export
-#' @param x \code{FacileDataSet}
-#' @param assay_name the name of the assay
-#' @param samples a sample descriptor
-#' @return an updated version of \code{samples} decorated with hd5_index,
-#'   scaling factors, etc. Note that rows in \code{samples} that do not appear
-#'   in \code{assay_name} will be returnd here with NA values for hd5_index and
-#'   such.
-assay_sample_info <- function(x, assay_name, samples = NULL) {
+assay_sample_info.FacileDataSet <- function(x, assay_name, samples = NULL, ...) {
   assert_facile_data_store(x)
 
   if (is.null(samples)) {
