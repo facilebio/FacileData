@@ -10,12 +10,14 @@ checkout https://lazappi.github.io/clustree/ package for some badge-inspiration
 
 [![Project
 Status](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+[![Travis build
+status](https://travis-ci.org/facilebio/FacileData.svg?branch=master)](https://travis-ci.org/facilebio/FacileData)
 [![Lifecycle:
 Experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 [![Travis build
-status](https://travis-ci.org/facileverse/FacileData.svg?branch=master)](https://travis-ci.org/facileverse/FacileData)
+status](https://travis-ci.org/facilebio/FacileData.svg?branch=master)](https://travis-ci.org/facilebio/FacileData)
 [![Codecov test
-coverage](https://codecov.io/gh/facileverse/FacileData/branch/master/graph/badge.svg)](https://codecov.io/gh/facileverse/FacileData?branch=master)
+coverage](https://codecov.io/gh/facilebio/FacileData/branch/master/graph/badge.svg)](https://codecov.io/gh/facilebio/FacileData?branch=master)
 <!-- badges: end -->
 
 The `FacileData` package was written to facilitate easier analysis of
@@ -52,7 +54,7 @@ its utility:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("facileverse/FacileData")
+devtools::install_github("facilebio/FacileData")
 ```
 
 # Example Usage
