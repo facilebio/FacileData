@@ -2,7 +2,7 @@
 % Please edit documentation in R/normalize_assay_data.R
 \name{normalize_assay_data}
 \alias{normalize_assay_data}
-\title{Internal helper functions to normalize assay data into log2 space.}
+\title{Helper functions to normalize assay data into log2 space.}
 \usage{
 normalize_assay_data(
   x,
@@ -13,7 +13,8 @@ normalize_assay_data(
   prior.count = 0.1,
   main = NULL,
   verbose = FALSE,
-  ...
+  ...,
+  .fds = NULL
 )
 }
 \arguments{
@@ -31,6 +32,7 @@ should match columns in \code{x} 1:1.}
 \item{batch, main}{paramters sent to \code{\link[=remove_batch_effects]{remove_batch_effects()}} after}
 }
 \description{
-This only works for the supporte assay_types. These functions should not
-be exported.
+This is defined for the assay_types defined within this package. If you are
+writing a package to handle new types of data, you need to define a
+\code{normalize_assay_matrix.ASSAY_TYPE} function. This is experimental.
 }

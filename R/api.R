@@ -7,6 +7,20 @@
 
 # Universal Funcitons ----------------------------------------------------------
 
+#' Materialize a Bioconductor assay container from some facile object.
+#'
+#' Most often, this will be from some facile_frame, but this function can be
+#' overloaded for other purposes. For instance, the FacileAnalysis package
+#' uses this function to materialize bioconductor objects of different
+#' flavors from different analysis results, ie. a DGEList, or perhaps a
+#' limma fit objct, etc.
+#'
+#' @export
+#' @param x A facile object
+biocbox <- function(x, ...) {
+  UseMethod("biocbox", x)
+}
+
 #' Converts an arbitrary object into one that works in the facile ecosystem.
 #'
 #' There will be many times when the particular analysis you want to conduct

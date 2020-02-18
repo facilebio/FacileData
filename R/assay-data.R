@@ -275,7 +275,7 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
       sinfo <- sinfo[xref,,drop = FALSE]
     }
     vals <- normalize_assay_data(vals, finfo, sinfo, batch = batch, main = main,
-                                 verbose = verbose, ...)
+                                 verbose = verbose, ..., .fds = x)
   }
 
   if (nrow(vals) == 1L) {

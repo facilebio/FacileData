@@ -1,8 +1,10 @@
-#' Internal helper functions to normalize assay data into log2 space.
+#' Helper functions to normalize assay data into log2 space.
 #'
-#' This only works for the supporte assay_types. These functions should not
-#' be exported.
+#' This is defined for the assay_types defined within this package. If you are
+#' writing a package to handle new types of data, you need to define a
+#' `normalize_assay_matrix.ASSAY_TYPE` function. This is experimental.
 #'
+#' @export
 #' @param x A matrix of raw/unnormalized assay data retrieved from
 #'   within the `fetch_assay_data()` itself.
 #' @param features a feature descriptor data.frame that includes the
@@ -14,7 +16,8 @@
 #' @param batch,main paramters sent to [remove_batch_effects()] after
 normalize_assay_data <- function(x, features, samples, batch = NULL,
                                  log = TRUE, prior.count = 0.1,
-                                 main = NULL, verbose = FALSE, ...) {
+                                 main = NULL, verbose = FALSE, ...,
+                                 .fds = NULL) {
   stopifnot(
     nrow(x) == nrow(features),                 # x and features are concordant
     all(rownames(x) == features$feature_id),   # x and features are concordant
@@ -27,7 +30,8 @@ normalize_assay_data <- function(x, features, samples, batch = NULL,
   atype <- features$assay_type[1L]
   norm.fn.name <- paste0("normalize_assay_matrix.", atype)
   normfn <- getFunction(norm.fn.name)
-  out <- normfn(x, features, samples, log = log, prior.count = prior.count, ...)
+  out <- normfn(x, features, samples, log = log, prior.count = prior.count, ...,
+                .fds = .fds)
 
   # Now batch correct data if desired (and if explicitly log2-like)
   if (test_character(batch, min.len = 1L)) {
@@ -44,7 +48,7 @@ normalize_assay_data <- function(x, features, samples, batch = NULL,
 #' @importFrom edgeR cpm
 normalize_assay_matrix.rnaseq <- function(x, features, samples,
                                           log = TRUE, prior.count = 0.1,
-                                          verbose = FALSE, ...) {
+                                          verbose = FALSE, ..., .fds = NULL) {
   # libsize and normfactor are currently extracted from the database
   # but this will change when we suport sample_assay covariates
   assert_numeric(samples[["libsize"]])
@@ -75,7 +79,7 @@ normalize_assay_matrix.isoseq <- normalize_assay_matrix.rnaseq
 #' @noRd
 normalize_assay_matrix.tpm <- function(x, features, samples,
                                        log = TRUE, prior.count = 0.1,
-                                       verbose = FALSE, ...) {
+                                       verbose = FALSE, ..., .fds = NULL) {
   out <- x + prior.count
   if (log) {
     out <- log2(out)
@@ -85,21 +89,24 @@ normalize_assay_matrix.tpm <- function(x, features, samples,
 
 #' `lognorm` assay data already normalized, nothing more to do
 #' @noRd
-normalize_assay_matrix.lognorm <- function(x, features, samples, ...) {
+normalize_assay_matrix.lognorm <- function(x, features, samples, ...,
+                                           .fds = NULL) {
   x
 }
 
 #' no internal normalization for `qpcrct` assay data yet, needs to be
 #' normalized externally and saved her -- essentialyl like `lognorm` data
 #' @noRd
-normalize_assay_matrix.qpcrct <- function(x, features, samples, ...) {
+normalize_assay_matrix.qpcrct <- function(x, features, samples, ...,
+                                          .fds = NULL) {
   x
 }
 
 #' no internal normalization for `qpcrdct` assay data yet, needs to be
 #' normalized externally and saved her -- essentialyl like `lognorm` data
 #' @noRd
-normalize_assay_matrix.qpcrdct <- function(x, features, samples, ...) {
+normalize_assay_matrix.qpcrdct <- function(x, features, samples, ...,
+                                           .fds = NULL) {
   x
 }
 
