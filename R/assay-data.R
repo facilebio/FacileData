@@ -146,8 +146,8 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
   if (length(out) == 1L) {
     out <- out[[1L]]
   } else {
-    # We stop if we are asking for a matrix across multiple assays, but maybe
-    # we don't have to ... (in the future, I mean)
+    # We alredy stop()ped if we were asked for a matrix across multiple assays,
+    # so `out`` must be populated with tibbles
     out <- bind_rows(out)
   }
 
