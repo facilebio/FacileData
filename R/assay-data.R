@@ -600,23 +600,26 @@ samples_look_concordant <- function(ids, sample_info) {
 #'   it will trump an already existing assay_name column in \code{features}
 #' @return a feature descriptor with feature_id and assay_name, which can be
 #'   used to absolutely find features
-create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
-  ## TODO: Refactor the code inside `fetch_assay_data` to use this.
-  # stopifnot(is.FacileDataSet(x))
+create_assay_feature_descriptor <- function(x, features = NULL,
+                                            assay_name = NULL) {
+  # TODO: Refactor the code inside `fetch_assay_data` to use this.
   assert_facile_data_store(x)
+  if (is.null(assay_name)) assay_name <- default_assay(x)
 
   if (is.character(features) || is.null(features) || is(features, 'tbl_sql')) {
-    if (is.null(assay_name)) assay_name <- default_assay(x)
     assert_string(assay_name)
     assert_choice(assay_name, assay_names(x))
   }
 
   if (is.null(features)) {
-    features <- features(x, assay_name) %>% collect(n=Inf)
+    features <- collect(features(x, assay_name), n = Inf)
   } else if (is.character(features)) {
     features <- tibble(feature_id = features, assay = assay_name)
   } else if (is(features, 'tbl_sql')) {
-    features <- mutate(collect(features, n = Inf), assay = assay_name)
+    features <- mutate(collect(features, n = Inf))
+    if (is.null(features[["assay"]])) {
+      features[["assay"]] <- assay_name
+    }
   } else if (is.data.frame(features) && is.null(features[["assay"]])) {
     features[["assay"]] <- assay_name
   }

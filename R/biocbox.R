@@ -1,11 +1,11 @@
 #' @noRd
 #' @export
-biocbox.FacileDataStore <- function(x, assay_name = NULL, features = NULL,
-                                    sample_covariates = NULL, class = NULL,
+biocbox.FacileDataStore <- function(x, class = NULL, assay_name = NULL,
+                                    features = NULL, sample_covariates = NULL,
                                     custom_key = Sys.getenv("USER"), ...) {
   xs <- samples(x)
-  biocbox(xs, assay_name = assay_name, features = features,
-          samples = xs, class = class, custom_key = custom_key, ...)
+  biocbox(xs, class = class, assay_name = assay_name, features = features,
+          samples = xs, custom_key = custom_key, ...)
 }
 
 #' Assembles a Bioconductor data container for a given assay.
@@ -23,8 +23,8 @@ biocbox.FacileDataStore <- function(x, assay_name = NULL, features = NULL,
 #'   be included over samples in x. If a data.frame, we will treat the
 #'   extra columns as custom covariates, and include them in the outgoing
 #'   box, along with the internal ones.
-biocbox.facile_frame <- function(x, assay_name = NULL, features = NULL,
-                                 sample_covariates = NULL, class = NULL,
+biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
+                                 features = NULL, sample_covariates = NULL,
                                  custom_key = Sys.getenv("USER"), ...) {
   assert_sample_subset(x)
   extra.covs <- setdiff(colnames(x), c("dataset", "sample_id"))
@@ -63,17 +63,15 @@ biocbox.facile_frame <- function(x, assay_name = NULL, features = NULL,
   fids <- NULL
   if (!is.null(features)) {
     if (is.data.frame(features)) {
-      fids <- assert_character(features[["feature_id"]])
-    } else {
-      stopifnot(is.character(features))
-      fids <- features
+      features <- features[["feature_id"]]
     }
+    fids <- assert_character(features)
   }
 
   features. <- features(fds., assay_name = assay_name, feature_ids = fids)
   if (is.data.frame(features)) {
-    # Add more feature metadata
-    take <- setdiff(c("assay_name", "assay_type"), colnames(feautres.))
+    # User provided more metadata in the features data.frame passed in
+    take <- setdiff(colnames(features), colnames(features.))
     if (length(take)) {
       take <- c("feature_id", take)
       features. <- left_join(features., select(features, {{take}}),
@@ -93,6 +91,7 @@ biocbox.facile_frame <- function(x, assay_name = NULL, features = NULL,
   features. <- select(features., -assay, -hdf5_index, -assay_type)
   features. <- as.data.frame(features.)
   rownames(features.) <- features.[["feature_id"]]
+  features. <- rename(features., symbol = name)
 
   sxref <- match(colnames(A), samples.[["samid"]])
   if (any(is.na(sxref))) {
@@ -112,6 +111,8 @@ biocbox.facile_frame <- function(x, assay_name = NULL, features = NULL,
 
 # Bioconductor Creation Helpers ------------------------------------------------
 
+#' Map assay_types to default bioc containers
+#' @noRd
 .biocboxes <- tribble(
   ~assay_type,     ~class,                   ~package,
   "rnaseq",        "DGEList",                "edgeR",
