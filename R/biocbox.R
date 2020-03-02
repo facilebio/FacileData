@@ -25,7 +25,8 @@ biocbox.FacileDataStore <- function(x, class = NULL, assay_name = NULL,
 #'   box, along with the internal ones.
 biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
                                  features = NULL, sample_covariates = NULL,
-                                 custom_key = Sys.getenv("USER"), ...) {
+                                 custom_key = Sys.getenv("USER"),
+                                 normalized = FALSE, ...) {
   assert_sample_subset(x)
   extra.covs <- setdiff(colnames(x), c("dataset", "sample_id"))
   fds. <- assert_facile_data_store(fds(x))
@@ -38,6 +39,10 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
 
   ainfo <- assay_info(fds., assay_name)
   bb.info <- biocbox_assay_class(ainfo[["assay_type"]], class)
+
+  if (normalized && bb.info[["class"]] != "list") {
+    stop("Can't return normalized version of data in bioc container")
+  }
 
   # setup pData
   if (isFALSE(sample_covariates)) {
@@ -80,7 +85,7 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
   }
 
   A <- fetch_assay_data(fds., fids, samples., assay_name = assay_name,
-                       normalized = FALSE, as.matrix = TRUE)
+                       normalized = normalized, as.matrix = TRUE, ...)
 
   fxref <- match(rownames(A), features.[["feature_id"]])
   if (any(is.na(fxref))) {
@@ -88,11 +93,13 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
          "for, this should not have happend")
   }
   features. <- features.[fxref,,drop = FALSE]
-  features. <- select(features., -assay, -hdf5_index, -assay_type)
+  axe.f.cols <- c("assay", "hd5_index", "assay_type")
+  features. <- select(features., -any_of(axe.f.cols))
   features. <- as.data.frame(features.)
   rownames(features.) <- features.[["feature_id"]]
-  features. <- rename(features., symbol = name)
-
+  if (!"symbol" %in% colnames(features.)) {
+    features. <- mutate(features., symbol = name)
+  }
   sxref <- match(colnames(A), samples.[["samid"]])
   if (any(is.na(sxref))) {
     stop("There are columns in the assay matrix that we don't have sample ",
@@ -106,7 +113,6 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
   bb.info[["fn"]](A, features., samples., fds.,
                   update_libsizes = update_libsizes,
                   update_normfactors = update_normfactors, ...)
-
 }
 
 # Bioconductor Creation Helpers ------------------------------------------------
@@ -129,6 +135,10 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
 #'   class will be used.
 biocbox_assay_class <- function(assay_type, class = NULL) {
   assert_string(assay_type)
+  if (!is.null(class) && class == "list") {
+    return(list(assay_type = assay_type, class = "list", fn = bb.list))
+  }
+
   if (!is.null(class)) assert_choice(class, .biocboxes$class)
 
   if (!assay_type %in% .biocboxes$assay_type) {
@@ -155,6 +165,11 @@ biocbox_assay_class <- function(assay_type, class = NULL) {
   fn.name <- paste0("bb.", class)
   fn <- getFunction(fn.name)
   list(assay_type = assay_type, class = class, fn = fn)
+}
+
+#' @noRd
+bb.list <- function(amatrix, fdat, pdat, fds., ...) {
+  set_fds(list(assay_data = amatrix, features = fdat, samples = pdat), fds.)
 }
 
 #' @noRd

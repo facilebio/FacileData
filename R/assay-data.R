@@ -315,14 +315,6 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
                           variable.name='sample_id')
   setnames(vals, 1L, 'feature_id')
 
-  # vals[, dataset := sub('__.*$', '', sample_id)]
-  # vals[, sample_id := sub('^.*__', '', sample_id)]
-  # vals[, assay := assay_name]
-  # vals[, assay_type := atype]
-  # vals[, feature_type := ftype]
-  # xref <- match(vals$feature_id, finfo$feature_id)
-  # vals[, feature_name := finfo$name[xref]]
-
   set(vals, NULL, "dataset", sub("__.*$", "", vals[["sample_id"]]))
   set(vals, NULL, "sample_id", sub("^.*__", "", vals[["sample_id"]]))
   set(vals, NULL, "assay", assay_name)
