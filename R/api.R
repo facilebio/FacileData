@@ -9,11 +9,12 @@
 
 #' Materialize a Bioconductor assay container from some facile object.
 #'
-#' Most often, this will be from some facile_frame, but this function can be
+#' Most often, this will be from some facile_frame to create a Bioconductor
+#' assay container object, but this function can be
 #' overloaded for other purposes. For instance, the FacileAnalysis package
 #' uses this function to materialize bioconductor objects of different
 #' flavors from different analysis results, ie. a DGEList, or perhaps a
-#' limma fit objct, etc.
+#' limma fit object, etc.
 #'
 #' @export
 #' @param x A facile object

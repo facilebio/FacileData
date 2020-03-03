@@ -146,8 +146,8 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
   if (length(out) == 1L) {
     out <- out[[1L]]
   } else {
-    # We stop if we are asking for a matrix across multiple assays, but maybe
-    # we don't have to ... (in the future, I mean)
+    # We alredy stop()ped if we were asked for a matrix across multiple assays,
+    # so `out`` must be populated with tibbles
     out <- bind_rows(out)
   }
 
@@ -314,14 +314,6 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
   vals <- melt.data.table(vals, id.vars='rn', variable.factor=FALSE,
                           variable.name='sample_id')
   setnames(vals, 1L, 'feature_id')
-
-  # vals[, dataset := sub('__.*$', '', sample_id)]
-  # vals[, sample_id := sub('^.*__', '', sample_id)]
-  # vals[, assay := assay_name]
-  # vals[, assay_type := atype]
-  # vals[, feature_type := ftype]
-  # xref <- match(vals$feature_id, finfo$feature_id)
-  # vals[, feature_name := finfo$name[xref]]
 
   set(vals, NULL, "dataset", sub("__.*$", "", vals[["sample_id"]]))
   set(vals, NULL, "sample_id", sub("^.*__", "", vals[["sample_id"]]))
@@ -600,23 +592,26 @@ samples_look_concordant <- function(ids, sample_info) {
 #'   it will trump an already existing assay_name column in \code{features}
 #' @return a feature descriptor with feature_id and assay_name, which can be
 #'   used to absolutely find features
-create_assay_feature_descriptor <- function(x, features=NULL, assay_name=NULL) {
-  ## TODO: Refactor the code inside `fetch_assay_data` to use this.
-  # stopifnot(is.FacileDataSet(x))
+create_assay_feature_descriptor <- function(x, features = NULL,
+                                            assay_name = NULL) {
+  # TODO: Refactor the code inside `fetch_assay_data` to use this.
   assert_facile_data_store(x)
+  if (is.null(assay_name)) assay_name <- default_assay(x)
 
   if (is.character(features) || is.null(features) || is(features, 'tbl_sql')) {
-    if (is.null(assay_name)) assay_name <- default_assay(x)
     assert_string(assay_name)
     assert_choice(assay_name, assay_names(x))
   }
 
   if (is.null(features)) {
-    features <- features(x, assay_name) %>% collect(n=Inf)
+    features <- collect(features(x, assay_name), n = Inf)
   } else if (is.character(features)) {
     features <- tibble(feature_id = features, assay = assay_name)
   } else if (is(features, 'tbl_sql')) {
-    features <- mutate(collect(features, n = Inf), assay = assay_name)
+    features <- mutate(collect(features, n = Inf))
+    if (is.null(features[["assay"]])) {
+      features[["assay"]] <- assay_name
+    }
   } else if (is.data.frame(features) && is.null(features[["assay"]])) {
     features[["assay"]] <- assay_name
   }
