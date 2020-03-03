@@ -2,6 +2,7 @@
 #' @export
 biocbox.FacileDataStore <- function(x, class = NULL, assay_name = NULL,
                                     features = NULL, sample_covariates = NULL,
+                                    feature_covariates = NULL,
                                     custom_key = Sys.getenv("USER"), ...) {
   xs <- samples(x)
   biocbox(xs, class = class, assay_name = assay_name, features = features,
@@ -25,8 +26,13 @@ biocbox.FacileDataStore <- function(x, class = NULL, assay_name = NULL,
 #'   box, along with the internal ones.
 biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
                                  features = NULL, sample_covariates = NULL,
+                                 feature_covariates = NULL,
                                  custom_key = Sys.getenv("USER"),
                                  normalized = FALSE, ...) {
+  if (!is.null(feature_covariates)) {
+    warning("We currently are not trying to merge extra feature_covariates.",
+            immediate. = TRUE)
+  }
   assert_sample_subset(x)
   extra.covs <- setdiff(colnames(x), c("dataset", "sample_id"))
   fds. <- assert_facile_data_store(fds(x))
@@ -83,9 +89,16 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
                              by = "feature_id")
     }
   }
+  axe.f.cols <- c("assay", "hd5_index", "assay_type")
+  features. <- select(features., -any_of(axe.f.cols))
+  features. <- as.data.frame(features.)
+  if (!"symbol" %in% colnames(features.)) {
+    features.[["symbol"]] <- features.[["name"]]
+  }
+  rownames(features.) <- features.[["feature_id"]]
 
   A <- fetch_assay_data(fds., fids, samples., assay_name = assay_name,
-                       normalized = normalized, as.matrix = TRUE, ...)
+                        normalized = normalized, as.matrix = TRUE, ...)
 
   fxref <- match(rownames(A), features.[["feature_id"]])
   if (any(is.na(fxref))) {
@@ -93,13 +106,7 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
          "for, this should not have happend")
   }
   features. <- features.[fxref,,drop = FALSE]
-  axe.f.cols <- c("assay", "hd5_index", "assay_type")
-  features. <- select(features., -any_of(axe.f.cols))
-  features. <- as.data.frame(features.)
-  rownames(features.) <- features.[["feature_id"]]
-  if (!"symbol" %in% colnames(features.)) {
-    features. <- mutate(features., symbol = name)
-  }
+
   sxref <- match(colnames(A), samples.[["samid"]])
   if (any(is.na(sxref))) {
     stop("There are columns in the assay matrix that we don't have sample ",
