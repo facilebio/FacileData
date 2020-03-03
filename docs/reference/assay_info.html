@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -112,7 +112,12 @@
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -127,7 +132,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Fetches assay meta information for the assays stored in a FacileDataStore</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/api.R'><code>R/api.R</code></a></small>
     <div class="hidden name"><code>assay_info.Rd</code></div>
     </div>
 
@@ -152,7 +157,18 @@
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a tibble of meta information for the assays stored in <code>x</code></p>
+    <p>a tibble of meta information for the assays stored in <code>x</code>, with these
+columns:</p><ul>
+<li><p><code>assay &lt;chr&gt;</code>: Name of the assay</p></li>
+<li><p><code>assay_type &lt;chr&gt;</code>: <code>"rnaseq"</code>, <code>"lognorm"</code>, etc. Look at
+<code>FacileData:::.assay.types</code> vector</p></li>
+<li><p><code>feature_type &lt;chr&gt;</code>: A string from <code>FacileData:::.feature.types</code>, ie.
+<code>"ensgid"</code>, <code>"entrez"</code>, <code>"custom"</code>, etc.</p></li>
+<li><p><code>description &lt;chr&gt;</code>: string description</p></li>
+<li><p><code>nfeatures &lt;int&gt;</code>: number of features we have info for</p></li>
+<li><p><code>storage_mode &lt;chr&gt;</code>: <code>"integer"</code>, <code>"numeric"</code></p></li>
+</ul>
+
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -172,7 +188,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

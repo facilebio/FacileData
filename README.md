@@ -6,6 +6,10 @@
 <!-- 
 badges: start
 checkout https://lazappi.github.io/clustree/ package for some badge-inspiration
+
+[![Travis build status](https://travis-ci.org/facilebio/FacileData.svg?branch=master)](https://travis-ci.org/facilebio/FacileData)
+[![Codecov test coverage](https://codecov.io/gh/facilebio/FacileData/branch/master/graph/badge.svg)](https://codecov.io/gh/facilebio/FacileData?branch=master)
+
 -->
 
 [![Project
@@ -13,11 +17,7 @@ Status](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostat
 [![Travis build
 status](https://travis-ci.org/facilebio/FacileData.svg?branch=master)](https://travis-ci.org/facilebio/FacileData)
 [![Lifecycle:
-Experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
-[![Travis build
-status](https://travis-ci.org/facilebio/FacileData.svg?branch=master)](https://travis-ci.org/facilebio/FacileData)
-[![Codecov test
-coverage](https://codecov.io/gh/facilebio/FacileData/branch/master/graph/badge.svg)](https://codecov.io/gh/facilebio/FacileData?branch=master)
+Maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
 <!-- badges: end -->
 
 The `FacileData` package was written to facilitate easier analysis of
@@ -38,13 +38,6 @@ large, multi-assay high-throughput genomics datasets. To this end, the
     Atlas](https://cancergenome.nih.gov/). This singular `FacileDataSet`
     allows analysts easy access to arbitrary subsets of these data
     without having to load all of it into memory.
-
-**A note on the experimental lifecycle**: This package is tagged as
-“experimental” due to its limited use by a broader audience, and not
-as a sign of the commitment to its development or how long it has been
-in (internal) use. As we find the edge cases and pain points in the APIs
-through broader adoption, we expect to soon move to “maturing” (and
-eventually “stable”) [lifecycle](https://www.tidyverse.org/lifecycle/).
 
 # Installation
 
@@ -104,4 +97,4 @@ ggplot(fdat, aes(cnv_score_ERBB2, ERBB2, color=sex)) +
   facet_wrap(~ indication)
 ```
 
-Or peharps using [biobroom](http://bioconductor.org/packages/biobroom)
+TODO: Show same analysis using MultiAssayEperiment

@@ -76,7 +76,7 @@ found, then we'll pick the feature_id and count column." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -117,7 +117,12 @@ found, then we'll pick the feature_id and count column." />
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -132,7 +137,7 @@ found, then we'll pick the feature_id and count column." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Takes a result from fetch_expression and spreads out genes across columns</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/assay-data.R'><code>R/assay-data.R</code></a></small>
     <div class="hidden name"><code>spread_assay_data.Rd</code></div>
     </div>
 
@@ -145,8 +150,13 @@ data analysis if they're in the incoming dataset. If those columns aren't
 found, then we'll pick the feature_id and count column.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>spread_assay_data</span>(<span class='no'>x</span>, <span class='no'>assay_name</span>, <span class='kw'>key</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"name"</span>, <span class='st'>"feature_id"</span>),
-  <span class='kw'>value</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"cpm"</span>, <span class='st'>"value"</span>, <span class='st'>"count"</span>), <span class='kw'>.fds</span> <span class='kw'>=</span> <span class='fu'><a href='fds.html'>fds</a></span>(<span class='no'>x</span>))</pre>
+    <pre class="usage"><span class='fu'>spread_assay_data</span>(
+  <span class='no'>x</span>,
+  <span class='no'>assay_name</span>,
+  <span class='kw'>key</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"name"</span>, <span class='st'>"feature_id"</span>),
+  <span class='kw'>value</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"cpm"</span>, <span class='st'>"value"</span>, <span class='st'>"count"</span>),
+  <span class='kw'>.fds</span> <span class='kw'>=</span> <span class='fu'><a href='fds.html'>fds</a></span>(<span class='no'>x</span>)
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -194,7 +204,7 @@ columns.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

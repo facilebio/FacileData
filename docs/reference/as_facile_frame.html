@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -112,7 +112,12 @@
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -127,7 +132,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Converts a normal tibble/data.frame to a facile_frame</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/facile_frame.R'><code>R/facile_frame.R</code></a></small>
     <div class="hidden name"><code>as_facile_frame.Rd</code></div>
     </div>
 
@@ -135,8 +140,13 @@
     <p>Converts a normal tibble/data.frame to a facile_frame</p>
     </div>
 
-    <pre class="usage"><span class='fu'>as_facile_frame</span>(<span class='no'>x</span>, <span class='kw'>datastore</span> <span class='kw'>=</span> <span class='fu'><a href='fds.html'>fds</a></span>(<span class='no'>x</span>), <span class='kw'>classes</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>,
-  <span class='kw'>.valid_sample_check</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>as_facile_frame</span>(
+  <span class='no'>x</span>,
+  <span class='kw'>datastore</span> <span class='kw'>=</span> <span class='fu'><a href='fds.html'>fds</a></span>(<span class='no'>x</span>),
+  <span class='kw'>classes</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='no'>...</span>,
+  <span class='kw'>.valid_sample_check</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -185,7 +195,7 @@ recursion in the call to <code>assert_sample_subset</code>.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

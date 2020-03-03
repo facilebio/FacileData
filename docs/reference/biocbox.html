@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Retrieve the meta information about a covariate for EAV decoding — covariate_meta_info • FacileData</title>
+<title>Materialize a Bioconductor assay container from some facile object. — biocbox • FacileData</title>
 
 
 <!-- jquery -->
@@ -37,10 +37,13 @@
   <link href="../extra.css" rel="stylesheet">
   
 
-<meta property="og:title" content="Retrieve the meta information about a covariate for EAV decoding — covariate_meta_info" />
-<meta property="og:description" content="Mappings that define attribute-value encodings into R-native objects are
-stored in a FacileDataSet's meta.yaml file, in the sample_covariate
-section." />
+<meta property="og:title" content="Materialize a Bioconductor assay container from some facile object. — biocbox" />
+<meta property="og:description" content="Most often, this will be from some facile_frame to create a Bioconductor
+assay container object, but this function can be
+overloaded for other purposes. For instance, the FacileAnalysis package
+uses this function to materialize bioconductor objects of different
+flavors from different analysis results, ie. a DGEList, or perhaps a
+limma fit object, etc." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -133,48 +136,37 @@ section." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Retrieve the meta information about a covariate for EAV decoding</h1>
-    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/entity-attribute-value.R'><code>R/entity-attribute-value.R</code></a></small>
-    <div class="hidden name"><code>covariate_meta_info.Rd</code></div>
+    <h1>Materialize a Bioconductor assay container from some facile object.</h1>
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/api.R'><code>R/api.R</code></a></small>
+    <div class="hidden name"><code>biocbox.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Mappings that define attribute-value encodings into R-native objects are
-stored in a <code>FacileDataSet</code>'s <code>meta.yaml</code> file, in the <code>sample_covariate</code>
-section.</p>
+    <p>Most often, this will be from some facile_frame to create a Bioconductor
+assay container object, but this function can be
+overloaded for other purposes. For instance, the FacileAnalysis package
+uses this function to materialize bioconductor objects of different
+flavors from different analysis results, ie. a DGEList, or perhaps a
+limma fit object, etc.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>covariate_meta_info</span>(<span class='no'>covariate</span>, <span class='no'>.fds</span>, <span class='kw'>covdefs</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>biocbox</span>(<span class='no'>x</span>, <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>covariate</th>
-      <td><p>the name of the covariate</p></td>
-    </tr>
-    <tr>
-      <th>.fds</th>
-      <td><p>the <code>FacileDataSet</code></p></td>
-    </tr>
-    <tr>
-      <th>covdefs</th>
-      <td><p>The <code><a href='covariate_definitions.html'>covariate_definitions(.fds)</a></code> list</p></td>
+      <th>x</th>
+      <td><p>A facile object</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>a list of covariate information with the following elements:
-<code>$name</code>, <code>$type</code>, <code>$class</code>, <code>$description</code>,
-<code>$label</code>, <code>$is.factor</code>, (and maybe <code>$levels</code>)</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#value">Value</a></li>
     </ul>
 
   </div>

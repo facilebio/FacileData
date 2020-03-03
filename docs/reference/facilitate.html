@@ -75,7 +75,7 @@ therein." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -116,7 +116,12 @@ therein." />
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -131,7 +136,7 @@ therein." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Converts an arbitrary object into one that works in the facile ecosystem.</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/api.R'><code>R/api.R</code></a></small>
     <div class="hidden name"><code>facilitate.Rd</code></div>
     </div>
 
@@ -175,14 +180,17 @@ FacileBioc package.</p></li>
 standard limma pipeline, but you'll want to be able to drop this result
 into the facile ecosystem provided in the FacileAnalysis package.
 The particulars of this <code>faciltate()</code> implementation would be defined in
-the FacileAnalysis package, and migth look something like this:</p></li>
-</ul><pre>   fit &lt;- eBayes(lmFit(elist, design))
-   limma.res &lt;- topTable(fit, coef = "something", n = Inf)
-   facile.res &lt;- facilitate(elist, fit, limma.res)
-</pre>
+the FacileAnalysis package, and migth look something like this:</p><pre>fit &lt;- eBayes(lmFit(elist, design))
+limma.res &lt;- topTable(fit, coef = "something", n = Inf)
+facile.res &lt;- facilitate(elist, fit, limma.res)
+</pre></li>
+</ul>
 
 <p>It's not clear how well well we'll be able to do this, or if this is even
 the right way to do it, but we'll need to do something.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p>https://github.com/facilebio/FacileBiocData</p></div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -191,6 +199,7 @@ the right way to do it, but we'll need to do something.</p>
       <li><a href="#arguments">Arguments</a></li>
       <li><a href="#value">Value</a></li>
       <li><a href="#details">Details</a></li>
+      <li><a href="#see-also">See also</a></li>
     </ul>
 
   </div>
@@ -203,7 +212,7 @@ the right way to do it, but we'll need to do something.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

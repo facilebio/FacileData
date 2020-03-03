@@ -73,7 +73,7 @@ column names seemsed to have changed, ie. &quot;gene_type&quot; instead of
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -114,7 +114,12 @@ column names seemsed to have changed, ie. &quot;gene_type&quot; instead of
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -129,7 +134,7 @@ column names seemsed to have changed, ie. &quot;gene_type&quot; instead of
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Extract gene- and transcript-level information from an ENSEMBL gtf.</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/extract_transcribed_info_from_ensembl_gtf.R'><code>R/extract_transcribed_info_from_ensembl_gtf.R</code></a></small>
     <div class="hidden name"><code>extract_transcribed_info_from_ensembl_gtf.Rd</code></div>
     </div>
 
@@ -139,8 +144,11 @@ column names seemsed to have changed, ie. "gene_type" instead of
 "gene_biotype", etc. Let's see how consistent this is!</p>
     </div>
 
-    <pre class="usage"><span class='fu'>extract_transcribed_info_from_ensembl_gtf</span>(<span class='no'>fn</span>, <span class='kw'>gene_type</span> <span class='kw'>=</span> <span class='st'>"gene_type"</span>,
-  <span class='kw'>transcript_type</span> <span class='kw'>=</span> <span class='st'>"transcript_type"</span>)</pre>
+    <pre class="usage"><span class='fu'>extract_transcribed_info_from_ensembl_gtf</span>(
+  <span class='no'>fn</span>,
+  <span class='kw'>gene_type</span> <span class='kw'>=</span> <span class='st'>"gene_type"</span>,
+  <span class='kw'>transcript_type</span> <span class='kw'>=</span> <span class='st'>"transcript_type"</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -173,7 +181,7 @@ column names seemsed to have changed, ie. "gene_type" instead of
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

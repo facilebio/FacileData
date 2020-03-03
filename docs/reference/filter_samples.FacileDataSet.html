@@ -72,7 +72,7 @@ pData data.frame of all its covariates." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -113,7 +113,12 @@ pData data.frame of all its covariates." />
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -128,7 +133,7 @@ pData data.frame of all its covariates." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Filter against the sample_covariate_tbl EAV table as if it were wide.</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/NSE-filter-samples.R'><code>R/NSE-filter-samples.R</code></a></small>
     <div class="hidden name"><code>filter_samples.FacileDataSet.Rd</code></div>
     </div>
 
@@ -138,8 +143,13 @@ pData data.frame of all its covariates." />
     </div>
 
     <pre class="usage"><span class='co'># S3 method for FacileDataSet</span>
-<span class='fu'>filter_samples</span>(<span class='no'>x</span>, <span class='no'>...</span>, <span class='kw'>samples.</span> <span class='kw'>=</span> <span class='fu'>samples</span>(<span class='no'>x</span>),
-  <span class='kw'>custom_key</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.getenv.html'>Sys.getenv</a></span>(<span class='st'>"USER"</span>), <span class='kw'>with_covariates</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+<span class='fu'>filter_samples</span>(
+  <span class='no'>x</span>,
+  <span class='no'>...</span>,
+  <span class='kw'>samples.</span> <span class='kw'>=</span> <span class='fu'>samples</span>(<span class='no'>x</span>),
+  <span class='kw'>custom_key</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.getenv.html'>Sys.getenv</a></span>(<span class='st'>"USER"</span>),
+  <span class='kw'>with_covariates</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -157,7 +167,7 @@ pData data.frame of all its covariates." />
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>a sample-descriptor <code>data.frame</code> that includes the dataset,sample_id
-pairs that match the virtual <code><a href='https://rdrr.io/r/stats/filter.html'>filter(covaries, ...)</a></code> clause executed here.</p>
+pairs that match the virtual <code><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter(covaries, ...)</a></code> clause executed here.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>This feature is only really meant to be
@@ -166,15 +176,16 @@ the covariates, for instance, does not work right now.</p>
 <p>TODO: Implement using <code>tidyeval</code></p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p>Other API: <code><a href='fetch_assay_data.html'>fetch_assay_data.FacileDataSet</a></code>,
-  <code><a href='fetch_assay_score.FacileDataSet.html'>fetch_assay_score.FacileDataSet</a></code>,
-  <code><a href='fetch_custom_sample_covariates.FacileDataSet.html'>fetch_custom_sample_covariates.FacileDataSet</a></code>,
-  <code><a href='sample-covariates.html'>fetch_sample_covariates</a></code>,
-  <code><a href='fetch_sample_statistics.FacileDataSet.html'>fetch_sample_statistics.FacileDataSet</a></code>,
-  <code><a href='fetch_samples.FacileDataSet.html'>fetch_samples.FacileDataSet</a></code>,
-  <code><a href='filter_features.FacileDataSet.html'>filter_features.FacileDataSet</a></code>,
-  <code><a href='organism.FacileDataSet.html'>organism.FacileDataSet</a></code>,
-  <code><a href='samples.FacileDataSet.html'>samples.FacileDataSet</a></code></p></div>
+    <div class='dont-index'><p>Other API: 
+<code><a href='fetch_assay_data.html'>fetch_assay_data.FacileDataSet</a>()</code>,
+<code><a href='fetch_assay_score.FacileDataSet.html'>fetch_assay_score.FacileDataSet</a>()</code>,
+<code><a href='fetch_custom_sample_covariates.FacileDataSet.html'>fetch_custom_sample_covariates.FacileDataSet</a>()</code>,
+<code><a href='sample-covariates.html'>fetch_sample_covariates</a>()</code>,
+<code><a href='fetch_sample_statistics.FacileDataSet.html'>fetch_sample_statistics.FacileDataSet</a>()</code>,
+<code><a href='fetch_samples.FacileDataSet.html'>fetch_samples.FacileDataSet</a>()</code>,
+<code><a href='filter_features.FacileDataSet.html'>filter_features.FacileDataSet</a>()</code>,
+<code><a href='organism.FacileDataSet.html'>organism.FacileDataSet</a>()</code>,
+<code><a href='samples.FacileDataSet.html'>samples.FacileDataSet</a>()</code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='no'>fds</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='exampleFacileDataSet.html'>exampleFacileDataSet</a></span>()
@@ -184,8 +195,9 @@ the covariates, for instance, does not work right now.</p>
 <span class='no'>crc.34</span> <span class='kw'>&lt;-</span> <span class='fu'>filter_samples</span>(<span class='no'>fds</span>, <span class='no'>subtype_crc_cms</span> <span class='kw'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"CMS3"</span>, <span class='st'>"CMS4"</span>))
 <span class='no'>eav.query</span> <span class='kw'>&lt;-</span> <span class='no'>fds</span> <span class='kw'>%&gt;%</span>
   <span class='fu'><a href='sample-covariates.html'>fetch_sample_covariates</a></span>(<span class='kw'>covariates</span> <span class='kw'>=</span> <span class='st'>"subtype_crc_cms"</span>) <span class='kw'>%&gt;%</span>
-  <span class='fu'><a href='https://rdrr.io/r/stats/filter.html'>filter</a></span>(<span class='no'>value</span> <span class='kw'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"CMS3"</span>, <span class='st'>"CMS4"</span>)) <span class='kw'>%&gt;%</span>
-  <span class='fu'>collect</span>()</div><div class='output co'>#&gt; <span class='warning'>Warning: NAs introduced by coercion</span></div><div class='output co'>#&gt; <span class='warning'>Warning: NAs introduced by coercion</span></div><div class='output co'>#&gt; <span class='warning'>Warning: NAs introduced by coercion</span></div><div class='output co'>#&gt; <span class='warning'>Warning: NAs introduced by coercion</span></div><div class='output co'>#&gt; <span class='warning'>Warning: NAs introduced by coercion</span></div><div class='output co'>#&gt; <span class='warning'>Warning: NAs introduced by coercion</span></div><div class='output co'>#&gt; <span class='error'>Error in value %in% c("CMS3", "CMS4"): object 'value' not found</span></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/sets.html'>setequal</a></span>(<span class='no'>crc.34</span>$<span class='no'>sample_id</span>, <span class='no'>eav.query</span>$<span class='no'>sample_id</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.vector(y): object 'eav.query' not found</span></div><div class='input'>
+  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span>(<span class='no'>value</span> <span class='kw'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"CMS3"</span>, <span class='st'>"CMS4"</span>)) <span class='kw'>%&gt;%</span>
+  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/compute.html'>collect</a></span>()
+<span class='fu'><a href='https://rdrr.io/r/base/sets.html'>setequal</a></span>(<span class='no'>crc.34</span>$<span class='no'>sample_id</span>, <span class='no'>eav.query</span>$<span class='no'>sample_id</span>)</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'>
 <span class='co'># You can keep filtering a filtered dataset</span>
 <span class='no'>crc.34.male</span> <span class='kw'>&lt;-</span> <span class='fu'>filter_sample</span>(<span class='no'>crc.34</span>, <span class='no'>sex</span> <span class='kw'>==</span> <span class='st'>"m"</span>)</div><div class='output co'>#&gt; <span class='error'>Error in filter_sample(crc.34, sex == "m"): could not find function "filter_sample"</span></div></pre>
   </div>
@@ -209,7 +221,7 @@ the covariates, for instance, does not work right now.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

@@ -77,7 +77,7 @@ meta.yaml file." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -118,7 +118,12 @@ meta.yaml file." />
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -133,7 +138,7 @@ meta.yaml file." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Create a facile covariate definition file from a sample <code>pData</code> data.frame</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/entity-attribute-value.R'><code>R/entity-attribute-value.R</code></a></small>
     <div class="hidden name"><code>eav-metadata.Rd</code></div>
     </div>
 
@@ -147,8 +152,11 @@ list-of-list structure to represent the <code>sample_covariates</code> section o
 <code>meta.yaml</code> file.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>eav_metadata_create</span>(<span class='no'>x</span>, <span class='kw'>ignore</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"dataset"</span>, <span class='st'>"sample_id"</span>),
-  <span class='kw'>covariate_def</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>())</pre>
+    <pre class="usage"><span class='fu'>eav_metadata_create</span>(
+  <span class='no'>x</span>,
+  <span class='kw'>ignore</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"dataset"</span>, <span class='st'>"sample_id"</span>),
+  <span class='kw'>covariate_def</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -317,7 +325,7 @@ vector(s).</p><ul>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

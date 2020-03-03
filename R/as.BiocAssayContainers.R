@@ -120,6 +120,7 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
   if (is(feature_ids, "data.frame") || is(feature_ids, "tbl")) {
     feature_ids <- feature_ids[["feature_id"]]
   }
+  if (is.factor(features)) features <- as.character(features)
   if (!is.null(feature_ids) && is.character(feature_ids)) {
     keep <- feature_ids %in% rownames(x)
     if (mean(keep) != 1) {
@@ -231,6 +232,7 @@ as.DGEList.data.frame <- function(x, covariates = TRUE, feature_ids = NULL,
 
   ## Do we want to fetch counts from the FacileDataSet?
   if (has.count) {
+    if (is.factor(feature_ids)) feature_ids <- as.character(feature_ids)
     if (is.character(feature_ids) && !all(feature_ids %in% x[['feature_id']])) {
       fetch.counts <- TRUE
     }

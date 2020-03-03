@@ -76,7 +76,7 @@ but refactored out here for general re-use." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -117,7 +117,12 @@ but refactored out here for general re-use." />
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -132,7 +137,7 @@ but refactored out here for general re-use." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Regress out confounding variables from a data matrix.</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/remove_batch_effect.R'><code>R/remove_batch_effect.R</code></a></small>
     <div class="hidden name"><code>remove_batch_effect.Rd</code></div>
     </div>
 
@@ -145,8 +150,14 @@ interface to <code><a href='https://rdrr.io/pkg/limma/man/removeBatchEffect.html
 but refactored out here for general re-use.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>remove_batch_effect</span>(<span class='no'>x</span>, <span class='no'>sample_info</span>, <span class='kw'>batch</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>maintain.rowmeans</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>remove_batch_effect</span>(
+  <span class='no'>x</span>,
+  <span class='no'>sample_info</span>,
+  <span class='kw'>batch</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>main</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>maintain.rowmeans</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='no'>...</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -165,6 +176,17 @@ to pull any covariate named in <code>batch</code> and <code>main</code> that do 
 appear in the columns of <code>sample_info</code>. Unlike limma's removeBatchEffect,
 we do not try to fish out the covariate values from anywhere in the
 "ether". They <em>must</em> be found in this data.frame.</p></td>
+    </tr>
+    <tr>
+      <th>batch</th>
+      <td><p>The column names in <code>sample_info</code> that specify the batch
+covariates in the data that will be regressed out.</p></td>
+    </tr>
+    <tr>
+      <th>main</th>
+      <td><p>The name of a covaraite in <code>sample_info</code> that contains a known
+covariate that describes the "effect" of an experiment that should not
+be regressed out. Please refer to the Details section for more informaiton.</p></td>
     </tr>
     </table>
 
@@ -185,7 +207,25 @@ the corresponding <code>design</code> and <code>covariates</code> parameters:</p
 <p>Setting the <code>batch.scale</code> parameter to <code>TRUE</code> (the default), ensures that
 the <code>rowMeans</code> of the returned data matrix are the same as the original
 dataset.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
+    <div class='dont-index'><p><code>fetch_assay_data()</code> when <code>batch = "something"</code></p></div>
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='co'># We'll materialize a data matrix and sample_info table from the</span>
+<span class='co'># exampleFacileDataSet, then correct the data matrix.</span>
+<span class='no'>efds</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='exampleFacileDataSet.html'>exampleFacileDataSet</a></span>()
+<span class='no'>sample.info</span> <span class='kw'>&lt;-</span> <span class='no'>efds</span> <span class='kw'>%&gt;%</span>
+  <span class='fu'>filter_samples</span>(<span class='no'>indication</span> <span class='kw'>==</span> <span class='st'>"CRC"</span>) <span class='kw'>%&gt;%</span>
+  <span class='fu'><a href='sample-covariates.html'>with_sample_covariates</a></span>()
+<span class='no'>m</span> <span class='kw'>&lt;-</span> <span class='fu'>fetch_assay_data</span>(<span class='no'>sample.info</span>, <span class='kw'>normalized</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>as.matrix</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+<span class='no'>m.rmsex</span> <span class='kw'>&lt;-</span> <span class='fu'>remove_batch_effect</span>(<span class='no'>m</span>, <span class='no'>sample.info</span>, <span class='st'>"sex"</span>)
+
+<span class='co'># this functionality is called internally from fetch_assay_data to make</span>
+<span class='co'># your life easy from within the facile ecosystem itself</span>
+<span class='no'>m2</span> <span class='kw'>&lt;-</span> <span class='fu'>fetch_assay_data</span>(<span class='no'>sample.info</span>, <span class='kw'>normalized</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+                       <span class='kw'>batch</span> <span class='kw'>=</span> <span class='st'>"sex"</span>, <span class='kw'>as.matrix</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/all.equal.html'>all.equal</a></span>(<span class='no'>m.rmsex</span>, <span class='no'>m2</span>)</div><div class='output co'>#&gt; [1] TRUE</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -193,6 +233,8 @@ dataset.</p>
       <li><a href="#arguments">Arguments</a></li>
       <li><a href="#value">Value</a></li>
       <li><a href="#details">Details</a></li>
+      <li><a href="#see-also">See also</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>
@@ -205,7 +247,7 @@ dataset.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

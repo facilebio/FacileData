@@ -38,7 +38,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -78,7 +78,14 @@
   <a href="news/index.html">Changelog</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -97,6 +104,10 @@
 <!-- 
 badges: start
 checkout https://lazappi.github.io/clustree/ package for some badge-inspiration
+
+[![Travis build status](https://travis-ci.org/facilebio/FacileData.svg?branch=master)](https://travis-ci.org/facilebio/FacileData)
+[![Codecov test coverage](https://codecov.io/gh/facilebio/FacileData/branch/master/graph/badge.svg)](https://codecov.io/gh/facilebio/FacileData?branch=master)
+
 -->
 
 <p>The <code>FacileData</code> package was written to facilitate easier analysis of large, multi-assay high-throughput genomics datasets. To this end, the <code>FacileData</code> package provides two things:</p>
@@ -104,57 +115,65 @@ checkout https://lazappi.github.io/clustree/ package for some badge-inspiration
 <li>A <em>FacileData Access API</em> that defines a fluent interface over multi-assay genomics datasets that fits into the <a href="https://www.tidyverse.org/">tidyverse</a>. This enables analysts to more naturally query and retrieve data for general exploratory data analysis; and</li>
 <li>A reference implementation of a datastore that implements the <em>FacileData Access API</em> called a <em>FacileDataSet</em>. The <code>FacileDataSet</code> provides efficient storage and retrieval of arbitrarily large high-throughput genomics datasets. For example, a single <code>FacileDataSet</code> can be used to store <em>all</em> of the RNA-seq, microarray, RPPA, etc. data from the <a href="https://cancergenome.nih.gov/">The Cancer Genome Atlas</a>. This singular <code>FacileDataSet</code> allows analysts easy access to arbitrary subsets of these data without having to load all of it into memory.</li>
 </ol>
-<p><strong>A note on the experimental lifecycle</strong>: This package is tagged as “experimental” due to its limited use by a broader audience, and not as a sign of the commitment to its development or how long it has been in (internal) use. As we find the edge cases and pain points in the APIs through broader adoption, we expect to soon move to “maturing” (and eventually “stable”) <a href="https://www.tidyverse.org/lifecycle/">lifecycle</a>.</p>
 </div>
 <div id="installation" class="section level1">
 <h1 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h1>
 <p>The FacileData suite of packages is only available from github from now. You will want to install three <code>FacileData*</code> packages to appreciate the its utility:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># install.packages("devtools")</span></a>
-<a class="sourceLine" id="cb1-2" data-line-number="2">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/reexports.html">install_github</a></span>(<span class="st">"facileverse/FacileData"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># install.packages("devtools")</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>devtools<span class="op">::</span><span class="kw"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"facilebio/FacileData"</span>)</span></code></pre></div>
 </div>
 <div id="example-usage" class="section level1">
 <h1 class="hasAnchor">
 <a href="#example-usage" class="anchor"></a>Example Usage</h1>
 <p>As a teaser, we’ll show how to plot HER2 copy number vs expression across the TCGA bladder and breast indications (“BLCA” and “BRCA”) using a <code>FacileDataSet</code>.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(ggplot2)</a>
-<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(FacileData)</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(FacileTCGADataSet)</a>
-<a class="sourceLine" id="cb2-4" data-line-number="4">tcga &lt;-<span class="st"> </span><span class="kw">FacileTCGADataSet</span>()</a>
-<a class="sourceLine" id="cb2-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb2-6" data-line-number="6">features &lt;-<span class="st"> </span><span class="kw">filter_features</span>(tcga, name <span class="op">==</span><span class="st"> "ERBB2"</span>)</a>
-<a class="sourceLine" id="cb2-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb2-8" data-line-number="8">fdat &lt;-<span class="st"> </span>tcga <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb2-9" data-line-number="9"><span class="st">  </span><span class="kw">filter_samples</span>(indication <span class="op">%in%</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"BLCA"</span>, <span class="st">"BRCA"</span>)) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb2-10" data-line-number="10"><span class="st">  </span><span class="kw">with_assay_data</span>(features, <span class="dt">assay_name =</span> <span class="st">"rnaseq"</span>, <span class="dt">normalized =</span> <span class="ot">TRUE</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb2-11" data-line-number="11"><span class="st">  </span><span class="kw">with_assay_data</span>(features, <span class="dt">assay_name =</span> <span class="st">"cnv_score"</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb2-12" data-line-number="12"><span class="st">  </span><span class="kw"><a href="reference/with_sample_covariates.html">with_sample_covariates</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"indication"</span>, <span class="st">"sex"</span>))</a>
-<a class="sourceLine" id="cb2-13" data-line-number="13"></a>
-<a class="sourceLine" id="cb2-14" data-line-number="14"><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(fdat, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(cnv_score_ERBB2, ERBB2, <span class="dt">color =</span> sex)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-15" data-line-number="15"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span>() <span class="op">+</span></a>
-<a class="sourceLine" id="cb2-16" data-line-number="16"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span>(<span class="op">~</span><span class="st"> </span>indication)</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(ggplot2)</span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(FacileData)</span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(FacileTCGADataSet)</span>
+<span id="cb2-4"><a href="#cb2-4"></a>tcga &lt;-<span class="st"> </span><span class="kw">FacileTCGADataSet</span>()</span>
+<span id="cb2-5"><a href="#cb2-5"></a></span>
+<span id="cb2-6"><a href="#cb2-6"></a>features &lt;-<span class="st"> </span><span class="kw">filter_features</span>(tcga, name <span class="op">==</span><span class="st"> "ERBB2"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7"></a></span>
+<span id="cb2-8"><a href="#cb2-8"></a>fdat &lt;-<span class="st"> </span>tcga <span class="op">%&gt;%</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a><span class="st">  </span><span class="kw">filter_samples</span>(indication <span class="op">%in%</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"BLCA"</span>, <span class="st">"BRCA"</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a><span class="st">  </span><span class="kw">with_assay_data</span>(features, <span class="dt">assay_name =</span> <span class="st">"rnaseq"</span>, <span class="dt">normalized =</span> <span class="ot">TRUE</span>) <span class="op">%&gt;%</span></span>
+<span id="cb2-11"><a href="#cb2-11"></a><span class="st">  </span><span class="kw">with_assay_data</span>(features, <span class="dt">assay_name =</span> <span class="st">"cnv_score"</span>) <span class="op">%&gt;%</span></span>
+<span id="cb2-12"><a href="#cb2-12"></a><span class="st">  </span><span class="kw"><a href="reference/sample-covariates.html">with_sample_covariates</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"indication"</span>, <span class="st">"sex"</span>))</span>
+<span id="cb2-13"><a href="#cb2-13"></a></span>
+<span id="cb2-14"><a href="#cb2-14"></a><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(fdat, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(cnv_score_ERBB2, ERBB2, <span class="dt">color =</span> sex)) <span class="op">+</span></span>
+<span id="cb2-15"><a href="#cb2-15"></a><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span>() <span class="op">+</span></span>
+<span id="cb2-16"><a href="#cb2-16"></a><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span>(<span class="op">~</span><span class="st"> </span>indication)</span></code></pre></div>
 <p><img src="reference/figures/her2_cnv_vs_expression.png" width="66%"></p>
 <p>Let’s compare how you might do the same using data stored in a <code>SummarizedExperiment</code> named <code>se.tcga</code> that stores RNA-seq (raw and normalized) and copy number data.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># load / get `se.all` from somewhere</span></a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">fidx &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="kw">mcols</span>(se.all)<span class="op">$</span>name <span class="op">==</span><span class="st"> "ERBB2"</span>)</a>
-<a class="sourceLine" id="cb3-3" data-line-number="3">se &lt;-<span class="st"> </span>se.all[, se.all<span class="op">$</span>indication <span class="op">%in%</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"BLCA"</span>, <span class="st">"BRCA"</span>)]</a>
-<a class="sourceLine" id="cb3-4" data-line-number="4"></a>
-<a class="sourceLine" id="cb3-5" data-line-number="5">sdat &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(</a>
-<a class="sourceLine" id="cb3-6" data-line-number="6">  <span class="dt">ERBB2 =</span> <span class="kw">assay</span>(se, <span class="st">"rnaseq_norm"</span>)[fidx,],</a>
-<a class="sourceLine" id="cb3-7" data-line-number="7">  <span class="dt">cnv_score_ERBB2 =</span> <span class="kw">assay</span>(se, <span class="st">"cnv_score"</span>)[fidx,],</a>
-<a class="sourceLine" id="cb3-8" data-line-number="8">  <span class="dt">sex =</span> se<span class="op">$</span>sex,</a>
-<a class="sourceLine" id="cb3-9" data-line-number="9">  <span class="dt">indication =</span> se<span class="op">$</span>indication)</a>
-<a class="sourceLine" id="cb3-10" data-line-number="10"></a>
-<a class="sourceLine" id="cb3-11" data-line-number="11"><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(fdat, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(cnv_score_ERBB2, ERBB2, <span class="dt">color=</span>sex)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb3-12" data-line-number="12"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span>() <span class="op">+</span></a>
-<a class="sourceLine" id="cb3-13" data-line-number="13"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span>(<span class="op">~</span><span class="st"> </span>indication)</a></code></pre></div>
-<p>Or peharps using <a href="http://bioconductor.org/packages/biobroom">biobroom</a></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># load / get `se.all` from somewhere</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a>fidx &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="kw">mcols</span>(se.all)<span class="op">$</span>name <span class="op">==</span><span class="st"> "ERBB2"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3"></a>se &lt;-<span class="st"> </span>se.all[, se.all<span class="op">$</span>indication <span class="op">%in%</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"BLCA"</span>, <span class="st">"BRCA"</span>)]</span>
+<span id="cb3-4"><a href="#cb3-4"></a></span>
+<span id="cb3-5"><a href="#cb3-5"></a>sdat &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(</span>
+<span id="cb3-6"><a href="#cb3-6"></a>  <span class="dt">ERBB2 =</span> <span class="kw">assay</span>(se, <span class="st">"rnaseq_norm"</span>)[fidx,],</span>
+<span id="cb3-7"><a href="#cb3-7"></a>  <span class="dt">cnv_score_ERBB2 =</span> <span class="kw">assay</span>(se, <span class="st">"cnv_score"</span>)[fidx,],</span>
+<span id="cb3-8"><a href="#cb3-8"></a>  <span class="dt">sex =</span> se<span class="op">$</span>sex,</span>
+<span id="cb3-9"><a href="#cb3-9"></a>  <span class="dt">indication =</span> se<span class="op">$</span>indication)</span>
+<span id="cb3-10"><a href="#cb3-10"></a></span>
+<span id="cb3-11"><a href="#cb3-11"></a><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(fdat, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(cnv_score_ERBB2, ERBB2, <span class="dt">color=</span>sex)) <span class="op">+</span></span>
+<span id="cb3-12"><a href="#cb3-12"></a><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span>() <span class="op">+</span></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span>(<span class="op">~</span><span class="st"> </span>indication)</span></code></pre></div>
+<p>TODO: Show same analysis using MultiAssayEperiment</p>
 </div>
 
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <div class="license">
+    <div class="links">
+<h2>Links</h2>
+<ul class="list-unstyled">
+<li>Browse source code at <br><a href="https://github.com/facilebio/FacileData">https://​github.com/​facilebio/​FacileData</a>
+</li>
+<li>Report a bug at <br><a href="https://github.com/facilebio/FacileData/issues">https://​github.com/​facilebio/​FacileData/​issues</a>
+</li>
+</ul>
+</div>
+<div class="license">
 <h2>License</h2>
 <ul class="list-unstyled">
 <li>
@@ -180,9 +199,8 @@ checkout https://lazappi.github.io/clustree/ package for some badge-inspiration
 <h2>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="http://www.repostatus.org/#active"><img src="http://www.repostatus.org/badges/latest/active.svg" alt="Project Status"></a></li>
-<li><a href="https://www.tidyverse.org/lifecycle/#experimental"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: Experimental"></a></li>
-<li><a href="https://travis-ci.org/facileverse/FacileData"><img src="https://travis-ci.org/facileverse/FacileData.svg?branch=master" alt="Travis build status"></a></li>
-<li><a href="https://codecov.io/gh/facileverse/FacileData?branch=master"><img src="https://codecov.io/gh/facileverse/FacileData/branch/master/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://travis-ci.org/facilebio/FacileData"><img src="https://travis-ci.org/facilebio/FacileData.svg?branch=master" alt="Travis build status"></a></li>
+<li><a href="https://www.tidyverse.org/lifecycle/#maturing"><img src="https://img.shields.io/badge/lifecycle-maturing-blue.svg" alt="Lifecycle: Maturing"></a></li>
 </ul>
 </div>
 </div>
@@ -194,7 +212,7 @@ checkout https://lazappi.github.io/clustree/ package for some badge-inspiration
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

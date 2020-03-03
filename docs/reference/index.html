@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -110,7 +110,12 @@
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -250,6 +255,12 @@
           <p><code><a href="assertions.html">assert_sample_subset()</a></code> <code><a href="assertions.html">check_sample_subset()</a></code> <code><a href="assertions.html">test_sample_subset()</a></code> <code><a href="assertions.html">assert_facet_descriptor()</a></code> <code><a href="assertions.html">is_facet_descriptor()</a></code> <code><a href="assertions.html">assert_assay_feature_descriptor()</a></code> <code><a href="assertions.html">is_assay_feature_descriptor()</a></code> <code><a href="assertions.html">assert_expression_result()</a></code> <code><a href="assertions.html">is_expression_result()</a></code> <code><a href="assertions.html">assert_sample_statistics()</a></code> <code><a href="assertions.html">is_sample_statistics()</a></code> <code><a href="assertions.html">assert_sample_covariates()</a></code> <code><a href="assertions.html">is_sample_covariates()</a></code> <code><a href="assertions.html">assert_columns()</a></code> <code><a href="assertions.html">has_columns()</a></code> <code><a href="assertions.html">assert_covariate_definitions()</a></code> <code><a href="assertions.html">is_covariate_definitions()</a></code> </p>
         </td>
         <td><p>Check to see that samples are referenced correctly</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="biocbox.html">biocbox()</a></code> </p>
+        </td>
+        <td><p>Materialize a Bioconductor assay container from some facile object.</p></td>
       </tr><tr>
         
         <td>
@@ -421,9 +432,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="fetch_assay_data.html">fetch_assay_data(<i>&lt;FacileDataSet&gt;</i>)</a></code> <code><a href="fetch_assay_data.html">fetch_assay_data(<i>&lt;facile_frame&gt;</i>)</a></code> <code><a href="fetch_assay_data.html">normalize.assay.matrix()</a></code> </p>
+          <p><code><a href="fetch_assay_data.html">fetch_assay_data(<i>&lt;FacileDataSet&gt;</i>)</a></code> <code><a href="fetch_assay_data.html">fetch_assay_data(<i>&lt;facile_frame&gt;</i>)</a></code> <code><a href="fetch_assay_data.html">with_assay_data(<i>&lt;facile_frame&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Fetch data from single assay of choice</p></td>
+        <td><p>Fetch assay data from single assay of choice</p></td>
       </tr><tr>
         
         <td>
@@ -512,6 +523,12 @@ Issue #2</p></td>
       </tr><tr>
         
         <td>
+          <p><code><a href="infer_feature_type.html">infer_feature_type()</a></code> </p>
+        </td>
+        <td><p>Guesses the type of feature identifiers from a character vector.</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="initializeFacileDataSet.html">initializeFacileDataSet()</a></code> </p>
         </td>
         <td><p>Create an empty FacileDataSet</p></td>
@@ -548,6 +565,12 @@ Issue #2</p></td>
       </tr><tr>
         
         <td>
+          <p><code><a href="normalize_assay_data.html">normalize_assay_data()</a></code> </p>
+        </td>
+        <td><p>Helper functions to normalize assay data into log2 space.</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="organism.FacileDataSet.html">organism(<i>&lt;FacileDataSet&gt;</i>)</a></code> </p>
         </td>
         <td><p>Retrieves the organism the data is defined over</p></td>
@@ -566,27 +589,9 @@ Issue #2</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="pdata_metadata.DGEList.html">pdata_metadata(<i>&lt;DGEList&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>DGEList method</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="pdata_metadata.ExpressionSet.html">pdata_metadata(<i>&lt;ExpressionSet&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>ExpressionSet method</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="pdata_metadata.html">pdata_metadata()</a></code> </p>
         </td>
         <td><p>Bioc-container specific pData extraction functions</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="pdata_metadata.SummarizedExperiment.html">pdata_metadata(<i>&lt;SummarizedExperiment&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>SummarizedExperiment method</p></td>
       </tr><tr>
         
         <td>
@@ -602,9 +607,9 @@ Issue #2</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="sample-covariates.html">fetch_sample_covariates()</a></code> </p>
+          <p><code><a href="sample-covariates.html">fetch_sample_covariates()</a></code> <code><a href="sample-covariates.html">with_sample_covariates()</a></code> </p>
         </td>
-        <td><p>Fetch rows from sample_covariate table for specified samples and covariates</p></td>
+        <td><p>Appends covariate columns to a query result</p></td>
       </tr><tr>
         
         <td>
@@ -674,21 +679,9 @@ Issue #2</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="with_assay_data.facile_frame.html">with_assay_data(<i>&lt;facile_frame&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Append expression values to sample-descriptor</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="with_feature_info.html">with_feature_info()</a></code> </p>
         </td>
         <td><p>Append feature information columns to (feature-rows)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="with_sample_covariates.html">with_sample_covariates()</a></code> </p>
-        </td>
-        <td><p>Appends covariate columns to a query result</p></td>
       </tr>
     </tbody>
     </table>
@@ -709,7 +702,7 @@ Issue #2</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

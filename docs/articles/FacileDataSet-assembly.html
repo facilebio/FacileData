@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -72,7 +72,14 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -90,7 +97,7 @@
             
             <h4 class="date">5/17/2019</h4>
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/facilebio/FacileData/blob/master/vignettes/FacileDataSet-assembly.Rmd"><code>vignettes/FacileDataSet-assembly.Rmd</code></a></small>
       <div class="hidden name"><code>FacileDataSet-assembly.Rmd</code></div>
 
     </div>
@@ -127,20 +134,20 @@
 <div class="tip">
 <p>If you are looking for help wrangling raw RNA-seq data into something like a SummarizedExperiment object, we currently favor processing the reads using either <a href="https://combine-lab.github.io/salmon/">salmon</a> or <a href="https://pachterlab.github.io/kallisto/">kallisto</a>, then importing these results using the <a href="http://bioconductor.org/packages/tximport">tximport</a> package.</p>
 </div>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(SummarizedExperiment)</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="co"># Note that you will need the airway and parathyroidSE packages installed.</span></a>
-<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="co"># If you don't have those, install them like so:</span></a>
-<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="co"># </span></a>
-<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co"># BiocManager::install(c("airway", "parathyroidSE"))</span></a>
-<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="kw"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="st">"airway"</span>, <span class="dt">package =</span> <span class="st">"airway"</span>)</a>
-<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="kw"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="st">"parathyroidGenesSE"</span>, <span class="dt">package =</span> <span class="st">"parathyroidSE"</span>)</a>
-<a class="sourceLine" id="cb1-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb1-9" data-line-number="9"><span class="co"># We load this after the Bioconductor stuff, because there are some facile</span></a>
-<a class="sourceLine" id="cb1-10" data-line-number="10"><span class="co"># generic functions that collide w/ Bioconductor ones. `samples` is defined</span></a>
-<a class="sourceLine" id="cb1-11" data-line-number="11"><span class="co"># in Biocbase, for instance.</span></a>
-<a class="sourceLine" id="cb1-12" data-line-number="12"></a>
-<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(FacileData)</a>
-<a class="sourceLine" id="cb1-14" data-line-number="14"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(dplyr)</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(SummarizedExperiment)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="co"># Note that you will need the airway and parathyroidSE packages installed.</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="co"># If you don't have those, install them like so:</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="co"># </span></span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="co"># BiocManager::install(c("airway", "parathyroidSE"))</span></span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="kw"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="st">"airway"</span>, <span class="dt">package =</span> <span class="st">"airway"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7"></a><span class="kw"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="st">"parathyroidGenesSE"</span>, <span class="dt">package =</span> <span class="st">"parathyroidSE"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8"></a></span>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="co"># We load this after the Bioconductor stuff, because there are some facile</span></span>
+<span id="cb1-10"><a href="#cb1-10"></a><span class="co"># generic functions that collide w/ Bioconductor ones. `samples` is defined</span></span>
+<span id="cb1-11"><a href="#cb1-11"></a><span class="co"># in Biocbase, for instance.</span></span>
+<span id="cb1-12"><a href="#cb1-12"></a></span>
+<span id="cb1-13"><a href="#cb1-13"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(FacileData)</span>
+<span id="cb1-14"><a href="#cb1-14"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(dplyr)</span></code></pre></div>
 </div>
 <div id="well-groomed-datasets" class="section level2">
 <h2 class="hasAnchor">
@@ -160,7 +167,7 @@
 <h4 class="hasAnchor">
 <a href="#harmonization-put-to-practice" class="anchor"></a>Harmonization put to practice</h4>
 <p>Let’s take a look at the <code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData()</a></code> from our two datasets, and see how we might harmonize them:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span>(<span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(airway))</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span>(<span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(airway))</span></code></pre></div>
 <pre><code>##            SampleName    cell   dex albut        Run avgLength Experiment
 ## SRR1039508 GSM1275862  N61311 untrt untrt SRR1039508       126  SRX384345
 ## SRR1039509 GSM1275863  N61311   trt untrt SRR1039509       126  SRX384346
@@ -179,63 +186,35 @@
 ## SRR1039517 SRS508576 SAMN02422673
 ## SRR1039520 SRS508579 SAMN02422683
 ## SRR1039521 SRS508580 SAMN02422677</code></pre>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span>(<span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(parathyroidGenesSE))</a></code></pre></div>
-<pre><code>##          run experiment patient treatment time submission     study
-## 1  SRR479052  SRX140503       1   Control  24h  SRA051611 SRP012167
-## 2  SRR479053  SRX140504       1   Control  48h  SRA051611 SRP012167
-## 3  SRR479054  SRX140505       1       DPN  24h  SRA051611 SRP012167
-## 4  SRR479055  SRX140506       1       DPN  48h  SRA051611 SRP012167
-## 5  SRR479056  SRX140507       1       OHT  24h  SRA051611 SRP012167
-## 6  SRR479057  SRX140508       1       OHT  48h  SRA051611 SRP012167
-## 7  SRR479058  SRX140509       2   Control  24h  SRA051611 SRP012167
-## 8  SRR479059  SRX140510       2   Control  48h  SRA051611 SRP012167
-## 9  SRR479060  SRX140511       2       DPN  24h  SRA051611 SRP012167
-## 10 SRR479061  SRX140511       2       DPN  24h  SRA051611 SRP012167
-## 11 SRR479062  SRX140512       2       DPN  48h  SRA051611 SRP012167
-## 12 SRR479063  SRX140513       2       OHT  24h  SRA051611 SRP012167
-## 13 SRR479064  SRX140513       2       OHT  24h  SRA051611 SRP012167
-## 14 SRR479065  SRX140514       2       OHT  48h  SRA051611 SRP012167
-## 15 SRR479066  SRX140515       3   Control  24h  SRA051611 SRP012167
-## 16 SRR479067  SRX140516       3   Control  48h  SRA051611 SRP012167
-## 17 SRR479068  SRX140517       3       DPN  24h  SRA051611 SRP012167
-## 18 SRR479069  SRX140518       3       DPN  48h  SRA051611 SRP012167
-## 19 SRR479070  SRX140519       3       OHT  24h  SRA051611 SRP012167
-## 20 SRR479071  SRX140520       3       OHT  48h  SRA051611 SRP012167
-## 21 SRR479072  SRX140521       4   Control  48h  SRA051611 SRP012167
-## 22 SRR479073  SRX140522       4       DPN  24h  SRA051611 SRP012167
-## 23 SRR479074  SRX140523       4       DPN  48h  SRA051611 SRP012167
-## 24 SRR479075  SRX140523       4       DPN  48h  SRA051611 SRP012167
-## 25 SRR479076  SRX140524       4       OHT  24h  SRA051611 SRP012167
-## 26 SRR479077  SRX140525       4       OHT  48h  SRA051611 SRP012167
-## 27 SRR479078  SRX140525       4       OHT  48h  SRA051611 SRP012167
-##       sample
-## 1  SRS308865
-## 2  SRS308866
-## 3  SRS308867
-## 4  SRS308868
-## 5  SRS308869
-## 6  SRS308870
-## 7  SRS308871
-## 8  SRS308872
-## 9  SRS308873
-## 10 SRS308873
-## 11 SRS308874
-## 12 SRS308875
-## 13 SRS308875
-## 14 SRS308876
-## 15 SRS308877
-## 16 SRS308878
-## 17 SRS308879
-## 18 SRS308880
-## 19 SRS308881
-## 20 SRS308882
-## 21 SRS308883
-## 22 SRS308884
-## 23 SRS308885
-## 24 SRS308885
-## 25 SRS308886
-## 26 SRS308887
-## 27 SRS308887</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span>(<span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(parathyroidGenesSE))</span></code></pre></div>
+<pre><code>##          run experiment patient treatment time submission     study    sample
+## 1  SRR479052  SRX140503       1   Control  24h  SRA051611 SRP012167 SRS308865
+## 2  SRR479053  SRX140504       1   Control  48h  SRA051611 SRP012167 SRS308866
+## 3  SRR479054  SRX140505       1       DPN  24h  SRA051611 SRP012167 SRS308867
+## 4  SRR479055  SRX140506       1       DPN  48h  SRA051611 SRP012167 SRS308868
+## 5  SRR479056  SRX140507       1       OHT  24h  SRA051611 SRP012167 SRS308869
+## 6  SRR479057  SRX140508       1       OHT  48h  SRA051611 SRP012167 SRS308870
+## 7  SRR479058  SRX140509       2   Control  24h  SRA051611 SRP012167 SRS308871
+## 8  SRR479059  SRX140510       2   Control  48h  SRA051611 SRP012167 SRS308872
+## 9  SRR479060  SRX140511       2       DPN  24h  SRA051611 SRP012167 SRS308873
+## 10 SRR479061  SRX140511       2       DPN  24h  SRA051611 SRP012167 SRS308873
+## 11 SRR479062  SRX140512       2       DPN  48h  SRA051611 SRP012167 SRS308874
+## 12 SRR479063  SRX140513       2       OHT  24h  SRA051611 SRP012167 SRS308875
+## 13 SRR479064  SRX140513       2       OHT  24h  SRA051611 SRP012167 SRS308875
+## 14 SRR479065  SRX140514       2       OHT  48h  SRA051611 SRP012167 SRS308876
+## 15 SRR479066  SRX140515       3   Control  24h  SRA051611 SRP012167 SRS308877
+## 16 SRR479067  SRX140516       3   Control  48h  SRA051611 SRP012167 SRS308878
+## 17 SRR479068  SRX140517       3       DPN  24h  SRA051611 SRP012167 SRS308879
+## 18 SRR479069  SRX140518       3       DPN  48h  SRA051611 SRP012167 SRS308880
+## 19 SRR479070  SRX140519       3       OHT  24h  SRA051611 SRP012167 SRS308881
+## 20 SRR479071  SRX140520       3       OHT  48h  SRA051611 SRP012167 SRS308882
+## 21 SRR479072  SRX140521       4   Control  48h  SRA051611 SRP012167 SRS308883
+## 22 SRR479073  SRX140522       4       DPN  24h  SRA051611 SRP012167 SRS308884
+## 23 SRR479074  SRX140523       4       DPN  48h  SRA051611 SRP012167 SRS308885
+## 24 SRR479075  SRX140523       4       DPN  48h  SRA051611 SRP012167 SRS308885
+## 25 SRR479076  SRX140524       4       OHT  24h  SRA051611 SRP012167 SRS308886
+## 26 SRR479077  SRX140525       4       OHT  48h  SRA051611 SRP012167 SRS308887
+## 27 SRR479078  SRX140525       4       OHT  48h  SRA051611 SRP012167 SRS308887</code></pre>
 <p>Here are some things to consider:</p>
 <ol style="list-style-type: decimal">
 <li><p>There are only a subset of columns from the two experiments that tell us something about the characteristics of their samples, such as the “cell”, and “dex” columns of the airway dataset, and patient, treatment, and time, column of the parathyroid dataset. The “albut” column in the airway dataset is non-informative in this subset of the data, since it is always the same value, so we’ll drop that, too.</p></li>
@@ -246,32 +225,32 @@
 </ol>
 <p>With these things in mind, let’s create new SummarizedExperiment objects, with harmonized <code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData()</a></code>.</p>
 <p><strong>airway</strong></p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">se.airway &lt;-<span class="st"> </span>airway</a>
-<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(se.airway) &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/eval.html">local</a></span>({</a>
-<a class="sourceLine" id="cb6-3" data-line-number="3">  cd &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(airway) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb6-4" data-line-number="4"><span class="st">    </span><span class="kw"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span>() <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb6-5" data-line-number="5"><span class="st">    </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span>(</a>
-<a class="sourceLine" id="cb6-6" data-line-number="6">      <span class="dt">sample_type =</span> <span class="st">"cell_line"</span>,</a>
-<a class="sourceLine" id="cb6-7" data-line-number="7">      <span class="dt">cell_line =</span> cell,</a>
-<a class="sourceLine" id="cb6-8" data-line-number="8">      <span class="dt">treatment =</span> <span class="kw"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span>(dex <span class="op">==</span><span class="st"> "untrt"</span>, <span class="st">"control"</span>, <span class="st">"dex"</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb6-9" data-line-number="9"><span class="st">    </span><span class="kw">DataFrame</span>()</a>
-<a class="sourceLine" id="cb6-10" data-line-number="10">  <span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(cd) &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(se.airway)</a>
-<a class="sourceLine" id="cb6-11" data-line-number="11">  cd</a>
-<a class="sourceLine" id="cb6-12" data-line-number="12">})</a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>se.airway &lt;-<span class="st"> </span>airway</span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(se.airway) &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/eval.html">local</a></span>({</span>
+<span id="cb6-3"><a href="#cb6-3"></a>  cd &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(airway) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="st">    </span><span class="kw"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span>() <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="st">    </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span>(</span>
+<span id="cb6-6"><a href="#cb6-6"></a>      <span class="dt">sample_type =</span> <span class="st">"cell_line"</span>,</span>
+<span id="cb6-7"><a href="#cb6-7"></a>      <span class="dt">cell_line =</span> cell,</span>
+<span id="cb6-8"><a href="#cb6-8"></a>      <span class="dt">treatment =</span> <span class="kw"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span>(dex <span class="op">==</span><span class="st"> "untrt"</span>, <span class="st">"control"</span>, <span class="st">"dex"</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb6-9"><a href="#cb6-9"></a><span class="st">    </span><span class="kw">DataFrame</span>()</span>
+<span id="cb6-10"><a href="#cb6-10"></a>  <span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(cd) &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(se.airway)</span>
+<span id="cb6-11"><a href="#cb6-11"></a>  cd</span>
+<span id="cb6-12"><a href="#cb6-12"></a>})</span></code></pre></div>
 <p><strong>parathyroid</strong></p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">se.parathyroid &lt;-<span class="st"> </span>parathyroidGenesSE</a>
-<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(se.parathyroid) &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/eval.html">local</a></span>({</a>
-<a class="sourceLine" id="cb7-3" data-line-number="3">  cd &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(parathyroidGenesSE) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb7-4" data-line-number="4"><span class="st">    </span><span class="kw"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span>() <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb7-5" data-line-number="5"><span class="st">    </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span>(</a>
-<a class="sourceLine" id="cb7-6" data-line-number="6">      <span class="dt">sample_type =</span> <span class="st">"primary"</span>,</a>
-<a class="sourceLine" id="cb7-7" data-line-number="7">      <span class="dt">subject_id =</span> <span class="kw"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">"patient_"</span>, patient),</a>
-<a class="sourceLine" id="cb7-8" data-line-number="8">      <span class="dt">treatment =</span> <span class="kw"><a href="https://rdrr.io/r/base/chartr.html">tolower</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/character.html">as.character</a></span>(treatment)),</a>
-<a class="sourceLine" id="cb7-9" data-line-number="9">      <span class="dt">time =</span> <span class="kw"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">"hrs"</span>, <span class="kw"><a href="https://rdrr.io/r/base/grep.html">sub</a></span>(<span class="st">"h$"</span>, <span class="st">""</span>, time))) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb7-10" data-line-number="10"><span class="st">    </span><span class="kw">DataFrame</span>()</a>
-<a class="sourceLine" id="cb7-11" data-line-number="11">  <span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(cd) &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(se.parathyroid)</a>
-<a class="sourceLine" id="cb7-12" data-line-number="12">  cd</a>
-<a class="sourceLine" id="cb7-13" data-line-number="13">})</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>se.parathyroid &lt;-<span class="st"> </span>parathyroidGenesSE</span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(se.parathyroid) &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/eval.html">local</a></span>({</span>
+<span id="cb7-3"><a href="#cb7-3"></a>  cd &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(parathyroidGenesSE) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="st">    </span><span class="kw"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span>() <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="st">    </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span>(</span>
+<span id="cb7-6"><a href="#cb7-6"></a>      <span class="dt">sample_type =</span> <span class="st">"primary"</span>,</span>
+<span id="cb7-7"><a href="#cb7-7"></a>      <span class="dt">subject_id =</span> <span class="kw"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">"patient_"</span>, patient),</span>
+<span id="cb7-8"><a href="#cb7-8"></a>      <span class="dt">treatment =</span> <span class="kw"><a href="https://rdrr.io/r/base/chartr.html">tolower</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/character.html">as.character</a></span>(treatment)),</span>
+<span id="cb7-9"><a href="#cb7-9"></a>      <span class="dt">time =</span> <span class="kw"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">"hrs"</span>, <span class="kw"><a href="https://rdrr.io/r/base/grep.html">sub</a></span>(<span class="st">"h$"</span>, <span class="st">""</span>, time))) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="st">    </span><span class="kw">DataFrame</span>()</span>
+<span id="cb7-11"><a href="#cb7-11"></a>  <span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(cd) &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span>(se.parathyroid)</span>
+<span id="cb7-12"><a href="#cb7-12"></a>  cd</span>
+<span id="cb7-13"><a href="#cb7-13"></a>})</span></code></pre></div>
 </div>
 </div>
 <div id="assay-data-assembly" class="section level3">
@@ -281,43 +260,43 @@
 <p>You might decide to assemble these data together using two different assay types, one named <code>"gene_count_PE"</code> and the other <code>"gene_count_SE"</code>. There will be a disjoint set of samples that have assay data from one or the other. You then might decide to make a third assay type, <code>"gene_count_norm"</code> which somehow normalizes these data together and make that available for exploratory analysis.</p>
 <p>In this example, for the sake of simplicity we will assume that the <code>airway</code> and <code>parathyroid</code> experiments were run on the same assay, and load them up together. This also means that they must share the same <em>feature space</em> for the assay, and we need to ensure that the <code><a href="https://rdrr.io/r/base/colnames.html">rownames()</a></code> of the two objects are equal.</p>
 <p>Neither dataset provides gene information for its rows aside from the Ensembl identifiers. Because these were both quantitated against v75 (ish) of Ensembl’s gene annotations, we’ll iuse the <a href="http://bioconductor.org/packages/biomaRt">biomaRt</a> package to retrieve the information from the assembly close to that (<code><a href="https://rdrr.io/pkg/biomaRt/man/listEnsemblArchives.html">biomaRt::listEnsemblArchives()</a></code> points us to the URL we should query).</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">bm &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/ns-load.html">loadNamespace</a></span>(<span class="st">"biomaRt"</span>)</a>
-<a class="sourceLine" id="cb8-2" data-line-number="2">mart &lt;-<span class="st"> </span>bm<span class="op">$</span><span class="kw">useMart</span>(</a>
-<a class="sourceLine" id="cb8-3" data-line-number="3">  <span class="dt">host =</span> <span class="st">"feb2014.archive.ensembl.org"</span>,</a>
-<a class="sourceLine" id="cb8-4" data-line-number="4">  <span class="dt">biomart =</span> <span class="st">"ENSEMBL_MART_ENSEMBL"</span>,</a>
-<a class="sourceLine" id="cb8-5" data-line-number="5">  <span class="dt">dataset =</span> <span class="st">"hsapiens_gene_ensembl"</span>)</a>
-<a class="sourceLine" id="cb8-6" data-line-number="6">mart.info &lt;-<span class="st"> </span>bm<span class="op">$</span><span class="kw">getBM</span>(</a>
-<a class="sourceLine" id="cb8-7" data-line-number="7">  <span class="dt">attributes =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"ensembl_gene_id"</span>, <span class="st">"hgnc_symbol"</span>, <span class="st">"gene_biotype"</span>),</a>
-<a class="sourceLine" id="cb8-8" data-line-number="8">  <span class="dt">filters =</span> <span class="st">"ensembl_gene_id"</span>,</a>
-<a class="sourceLine" id="cb8-9" data-line-number="9">  <span class="dt">values =</span> <span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(se),</a>
-<a class="sourceLine" id="cb8-10" data-line-number="10">  <span class="dt">mart =</span> mart)</a></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>bm &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/ns-load.html">loadNamespace</a></span>(<span class="st">"biomaRt"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2"></a>mart &lt;-<span class="st"> </span>bm<span class="op">$</span><span class="kw">useMart</span>(</span>
+<span id="cb8-3"><a href="#cb8-3"></a>  <span class="dt">host =</span> <span class="st">"feb2014.archive.ensembl.org"</span>,</span>
+<span id="cb8-4"><a href="#cb8-4"></a>  <span class="dt">biomart =</span> <span class="st">"ENSEMBL_MART_ENSEMBL"</span>,</span>
+<span id="cb8-5"><a href="#cb8-5"></a>  <span class="dt">dataset =</span> <span class="st">"hsapiens_gene_ensembl"</span>)</span>
+<span id="cb8-6"><a href="#cb8-6"></a>mart.info &lt;-<span class="st"> </span>bm<span class="op">$</span><span class="kw">getBM</span>(</span>
+<span id="cb8-7"><a href="#cb8-7"></a>  <span class="dt">attributes =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"ensembl_gene_id"</span>, <span class="st">"hgnc_symbol"</span>, <span class="st">"gene_biotype"</span>),</span>
+<span id="cb8-8"><a href="#cb8-8"></a>  <span class="dt">filters =</span> <span class="st">"ensembl_gene_id"</span>,</span>
+<span id="cb8-9"><a href="#cb8-9"></a>  <span class="dt">values =</span> <span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(se),</span>
+<span id="cb8-10"><a href="#cb8-10"></a>  <span class="dt">mart =</span> mart)</span></code></pre></div>
 <p>The query above retrieves the data we need, but it can take a long time to run. To save time while compiling this vignette, we have serialized the result of the query, and will use that here.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1">mart.info &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/eval.html">local</a></span>({</a>
-<a class="sourceLine" id="cb9-2" data-line-number="2">  fn &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span>(<span class="st">"extdata"</span>, <span class="st">"ensembl-v75-gene-info.csv.gz"</span>,</a>
-<a class="sourceLine" id="cb9-3" data-line-number="3">                    <span class="dt">package =</span> <span class="st">"FacileData"</span>)</a>
-<a class="sourceLine" id="cb9-4" data-line-number="4">  <span class="kw"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/connections.html">gzfile</a></span>(fn, <span class="st">"rt"</span>), <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb9-5" data-line-number="5">})</a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>mart.info &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/eval.html">local</a></span>({</span>
+<span id="cb9-2"><a href="#cb9-2"></a>  fn &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span>(<span class="st">"extdata"</span>, <span class="st">"ensembl-v75-gene-info.csv.gz"</span>,</span>
+<span id="cb9-3"><a href="#cb9-3"></a>                    <span class="dt">package =</span> <span class="st">"FacileData"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4"></a>  <span class="kw"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/connections.html">gzfile</a></span>(fn, <span class="st">"rt"</span>), <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)</span>
+<span id="cb9-5"><a href="#cb9-5"></a>})</span></code></pre></div>
 <p>The column names of the <code>gene.info</code> table need to be tweaked, and we will only keep the rows (genes) that are shared between our two datasets.</p>
 <div class="note">
 <p>This mismatched gene matching wouldn’t be an issue if these data were from the same assay and processed in the same way. When you are assembling assay data into single assay of a FacileDataSet, the implicit assumption is that all of the data were processed in the same way.</p>
 </div>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1">shared.ids &lt;-<span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/setops.html">intersect</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(se.airway), <span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(se.parathyroid))</a>
-<a class="sourceLine" id="cb10-2" data-line-number="2">gene.info &lt;-<span class="st"> </span>mart.info <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb10-3" data-line-number="3"><span class="st">  </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span>(<span class="dt">feature_id =</span> ensembl_gene_id,</a>
-<a class="sourceLine" id="cb10-4" data-line-number="4">            <span class="dt">feature_type =</span> <span class="st">"ensgid"</span>,</a>
-<a class="sourceLine" id="cb10-5" data-line-number="5">            <span class="dt">name =</span> hgnc_symbol, </a>
-<a class="sourceLine" id="cb10-6" data-line-number="6">            <span class="dt">meta =</span> gene_biotype,</a>
-<a class="sourceLine" id="cb10-7" data-line-number="7">            <span class="dt">source =</span> <span class="st">"Ensembl_v75"</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb10-8" data-line-number="8"><span class="st">  </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(feature_id <span class="op">%in%</span><span class="st"> </span>shared.ids) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb10-9" data-line-number="9"><span class="st">  </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/distinct.html">distinct</a></span>(feature_id, <span class="dt">.keep_all =</span> <span class="ot">TRUE</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb10-10" data-line-number="10"><span class="st">  </span><span class="kw">DataFrame</span>()</a>
-<a class="sourceLine" id="cb10-11" data-line-number="11"><span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(gene.info) &lt;-<span class="st"> </span>gene.info[[<span class="st">"feature_id"</span>]]</a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>shared.ids &lt;-<span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/setops.html">intersect</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(se.airway), <span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(se.parathyroid))</span>
+<span id="cb10-2"><a href="#cb10-2"></a>gene.info &lt;-<span class="st"> </span>mart.info <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="st">  </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span>(<span class="dt">feature_id =</span> ensembl_gene_id,</span>
+<span id="cb10-4"><a href="#cb10-4"></a>            <span class="dt">feature_type =</span> <span class="st">"ensgid"</span>,</span>
+<span id="cb10-5"><a href="#cb10-5"></a>            <span class="dt">name =</span> hgnc_symbol, </span>
+<span id="cb10-6"><a href="#cb10-6"></a>            <span class="dt">meta =</span> gene_biotype,</span>
+<span id="cb10-7"><a href="#cb10-7"></a>            <span class="dt">source =</span> <span class="st">"Ensembl_v75"</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-8"><a href="#cb10-8"></a><span class="st">  </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(feature_id <span class="op">%in%</span><span class="st"> </span>shared.ids) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-9"><a href="#cb10-9"></a><span class="st">  </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/distinct.html">distinct</a></span>(feature_id, <span class="dt">.keep_all =</span> <span class="ot">TRUE</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-10"><a href="#cb10-10"></a><span class="st">  </span><span class="kw">DataFrame</span>()</span>
+<span id="cb10-11"><a href="#cb10-11"></a><span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(gene.info) &lt;-<span class="st"> </span>gene.info[[<span class="st">"feature_id"</span>]]</span></code></pre></div>
 <p>Now we can cleanup the rowdata of our SummarizedExperiment and make them row-wise concordant.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">se.airway &lt;-<span class="st"> </span>se.airway[<span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(gene.info),]</a>
-<a class="sourceLine" id="cb11-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span>(se.airway) &lt;-<span class="st"> </span>gene.info</a>
-<a class="sourceLine" id="cb11-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb11-4" data-line-number="4">se.parathyroid &lt;-<span class="st"> </span>se.parathyroid[<span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(gene.info),]</a>
-<a class="sourceLine" id="cb11-5" data-line-number="5"><span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span>(se.parathyroid) &lt;-<span class="st"> </span>gene.info</a></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>se.airway &lt;-<span class="st"> </span>se.airway[<span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(gene.info),]</span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span>(se.airway) &lt;-<span class="st"> </span>gene.info</span>
+<span id="cb11-3"><a href="#cb11-3"></a></span>
+<span id="cb11-4"><a href="#cb11-4"></a>se.parathyroid &lt;-<span class="st"> </span>se.parathyroid[<span class="kw"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(gene.info),]</span>
+<span id="cb11-5"><a href="#cb11-5"></a><span class="kw"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span>(se.parathyroid) &lt;-<span class="st"> </span>gene.info</span></code></pre></div>
 </div>
 </div>
 <div id="faciledataset-creation" class="section level2">
@@ -325,39 +304,39 @@
 <a href="#faciledataset-creation" class="anchor"></a>FacileDataSet Creation</h2>
 <p>Like we’ve been saying all along … <em>all</em> you need is a named list of well-curated bioconductor experiments, and here we are!</p>
 <p>We initialize a new FacileDataSet with our list of SummarizedExperiments (you can even just have one SummarizedExperiment), and specify which assay you are dropping in first.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1">se.all &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="dt">airway =</span> se.airway, <span class="dt">parathyroid =</span> se.parathyroid)</a>
-<a class="sourceLine" id="cb12-2" data-line-number="2">xfds &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as.FacileDataSet.html">as.FacileDataSet</a></span>(</a>
-<a class="sourceLine" id="cb12-3" data-line-number="3">  se.all,</a>
-<a class="sourceLine" id="cb12-4" data-line-number="4">  <span class="dt">path =</span> <span class="kw"><a href="https://rdrr.io/r/base/tempfile.html">tempfile</a></span>(),</a>
-<a class="sourceLine" id="cb12-5" data-line-number="5">  <span class="dt">dataset_name =</span> <span class="st">"ExampleRnaFacileDataSet"</span>,</a>
-<a class="sourceLine" id="cb12-6" data-line-number="6">  <span class="dt">assay_name =</span> <span class="st">"gene_counts"</span>,</a>
-<a class="sourceLine" id="cb12-7" data-line-number="7">  <span class="dt">assay_description =</span> <span class="st">"Gene counts from their respective Bioconductor packages"</span>,</a>
-<a class="sourceLine" id="cb12-8" data-line-number="8">  <span class="dt">assay_type =</span> <span class="st">"rnaseq"</span>,</a>
-<a class="sourceLine" id="cb12-9" data-line-number="9">  <span class="dt">organism =</span> <span class="st">"Homo sapiens"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>se.all &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="dt">airway =</span> se.airway, <span class="dt">parathyroid =</span> se.parathyroid)</span>
+<span id="cb12-2"><a href="#cb12-2"></a>xfds &lt;-<span class="st"> </span><span class="kw"><a href="../reference/as.FacileDataSet.html">as.FacileDataSet</a></span>(</span>
+<span id="cb12-3"><a href="#cb12-3"></a>  se.all,</span>
+<span id="cb12-4"><a href="#cb12-4"></a>  <span class="dt">path =</span> <span class="kw"><a href="https://rdrr.io/r/base/tempfile.html">tempfile</a></span>(),</span>
+<span id="cb12-5"><a href="#cb12-5"></a>  <span class="dt">dataset_name =</span> <span class="st">"ExampleRnaFacileDataSet"</span>,</span>
+<span id="cb12-6"><a href="#cb12-6"></a>  <span class="dt">assay_name =</span> <span class="st">"gene_counts"</span>,</span>
+<span id="cb12-7"><a href="#cb12-7"></a>  <span class="dt">assay_description =</span> <span class="st">"Gene counts from their respective Bioconductor packages"</span>,</span>
+<span id="cb12-8"><a href="#cb12-8"></a>  <span class="dt">assay_type =</span> <span class="st">"rnaseq"</span>,</span>
+<span id="cb12-9"><a href="#cb12-9"></a>  <span class="dt">organism =</span> <span class="st">"Homo sapiens"</span>)</span></code></pre></div>
 </div>
 <div id="tidy-like-data-retrieval" class="section level2">
 <h2 class="hasAnchor">
 <a href="#tidy-like-data-retrieval" class="anchor"></a>Tidy-like data retrieval</h2>
 <p>Let’s look at how the correlation of TLN1 and ITGB1 change across datasets</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(ggplot2)</a>
-<a class="sourceLine" id="cb13-2" data-line-number="2"><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set</a></span>(<span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>())</a>
-<a class="sourceLine" id="cb13-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb13-4" data-line-number="4">dat &lt;-<span class="st"> </span><span class="kw">samples</span>(xfds) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb13-5" data-line-number="5"><span class="st">  </span><span class="kw">with_assay_data</span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"ENSG00000137076"</span>, <span class="st">"ENSG00000150093"</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb13-6" data-line-number="6"><span class="st">  </span><span class="kw"><a href="../reference/with_sample_covariates.html">with_sample_covariates</a></span>(<span class="st">"treatment"</span>)</a>
-<a class="sourceLine" id="cb13-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb13-8" data-line-number="8"><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(dat, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(ITGB1, TLN1)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb13-9" data-line-number="9"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span>(<span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="dt">color =</span> treatment)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb13-10" data-line-number="10"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span>(<span class="op">~</span><span class="st"> </span>dataset)</a></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(ggplot2)</span>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set</a></span>(<span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>())</span>
+<span id="cb13-3"><a href="#cb13-3"></a></span>
+<span id="cb13-4"><a href="#cb13-4"></a>dat &lt;-<span class="st"> </span><span class="kw">samples</span>(xfds) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="st">  </span><span class="kw">with_assay_data</span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"ENSG00000137076"</span>, <span class="st">"ENSG00000150093"</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="st">  </span><span class="kw"><a href="../reference/sample-covariates.html">with_sample_covariates</a></span>(<span class="st">"treatment"</span>)</span>
+<span id="cb13-7"><a href="#cb13-7"></a></span>
+<span id="cb13-8"><a href="#cb13-8"></a><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(dat, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(ITGB1, TLN1)) <span class="op">+</span></span>
+<span id="cb13-9"><a href="#cb13-9"></a><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span>(<span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="dt">color =</span> treatment)) <span class="op">+</span></span>
+<span id="cb13-10"><a href="#cb13-10"></a><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span>(<span class="op">~</span><span class="st"> </span>dataset)</span></code></pre></div>
 <p><img src="FacileDataSet-assembly_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1">bdat &lt;-<span class="st"> </span><span class="kw">samples</span>(xfds) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb14-2" data-line-number="2"><span class="st">  </span><span class="kw">fetch_assay_data</span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"ENSG00000137076"</span>, <span class="st">"ENSG00000150093"</span>),</a>
-<a class="sourceLine" id="cb14-3" data-line-number="3">                   <span class="dt">normalized =</span> <span class="ot">TRUE</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb14-4" data-line-number="4"><span class="st">  </span><span class="kw"><a href="../reference/with_sample_covariates.html">with_sample_covariates</a></span>(<span class="st">"treatment"</span>)</a>
-<a class="sourceLine" id="cb14-5" data-line-number="5"><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(bdat, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="dt">x =</span> feature_name, <span class="dt">y =</span>value)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb14-6" data-line-number="6"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html">geom_boxplot</a></span>(<span class="dt">outlier.shape =</span> <span class="ot">NA</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb14-7" data-line-number="7"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_jitter.html">geom_jitter</a></span>(<span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="dt">color =</span> treatment), <span class="dt">width =</span> <span class="fl">0.2</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb14-8" data-line-number="8"><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span>(<span class="op">~</span><span class="st"> </span>dataset)</a></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>bdat &lt;-<span class="st"> </span><span class="kw">samples</span>(xfds) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb14-2"><a href="#cb14-2"></a><span class="st">  </span><span class="kw">fetch_assay_data</span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"ENSG00000137076"</span>, <span class="st">"ENSG00000150093"</span>),</span>
+<span id="cb14-3"><a href="#cb14-3"></a>                   <span class="dt">normalized =</span> <span class="ot">TRUE</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb14-4"><a href="#cb14-4"></a><span class="st">  </span><span class="kw"><a href="../reference/sample-covariates.html">with_sample_covariates</a></span>(<span class="st">"treatment"</span>)</span>
+<span id="cb14-5"><a href="#cb14-5"></a><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(bdat, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="dt">x =</span> feature_name, <span class="dt">y =</span>value)) <span class="op">+</span></span>
+<span id="cb14-6"><a href="#cb14-6"></a><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html">geom_boxplot</a></span>(<span class="dt">outlier.shape =</span> <span class="ot">NA</span>) <span class="op">+</span></span>
+<span id="cb14-7"><a href="#cb14-7"></a><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_jitter.html">geom_jitter</a></span>(<span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="dt">color =</span> treatment), <span class="dt">width =</span> <span class="fl">0.2</span>) <span class="op">+</span></span>
+<span id="cb14-8"><a href="#cb14-8"></a><span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span>(<span class="op">~</span><span class="st"> </span>dataset)</span></code></pre></div>
 <p><img src="FacileDataSet-assembly_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
 </div>
   </div>
@@ -386,7 +365,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

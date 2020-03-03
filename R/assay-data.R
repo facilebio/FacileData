@@ -78,6 +78,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     assert_string(assay_name)
     features <- FacileData::features(x, assay_name) %>% collect(n=Inf)
   } else {
+    if (is.factor(features)) features <- as.character(features)
     if (is.character(features)) {
       features <- tibble(feature_id=features, assay=assay_name)
     }
@@ -597,6 +598,7 @@ create_assay_feature_descriptor <- function(x, features = NULL,
   # TODO: Refactor the code inside `fetch_assay_data` to use this.
   assert_facile_data_store(x)
   if (is.null(assay_name)) assay_name <- default_assay(x)
+  if (is.factor(features)) features <- as.character(features)
 
   if (is.character(features) || is.null(features) || is(features, 'tbl_sql')) {
     assert_string(assay_name)

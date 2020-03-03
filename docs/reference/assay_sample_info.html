@@ -72,7 +72,7 @@ the samples in a given assay." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -113,7 +113,12 @@ the samples in a given assay." />
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -128,7 +133,7 @@ the samples in a given assay." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Utility functions to get row and column indices of rnaseq hdf5 files.</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/api.R'><code>R/api.R</code></a></small>
     <div class="hidden name"><code>assay_sample_info.Rd</code></div>
     </div>
 
@@ -137,14 +142,14 @@ the samples in a given assay." />
 the samples in a given assay.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>assay_sample_info</span>(<span class='no'>x</span>, <span class='no'>assay_name</span>, <span class='kw'>samples</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>assay_sample_info</span>(<span class='no'>x</span>, <span class='no'>assay_name</span>, <span class='kw'>samples</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p><code>FacileDataSet</code></p></td>
+      <td><p><code>FacileDataStore</code></p></td>
     </tr>
     <tr>
       <th>assay_name</th>
@@ -181,7 +186,7 @@ such.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

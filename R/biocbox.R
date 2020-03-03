@@ -76,6 +76,7 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
     if (is.data.frame(features)) {
       features <- features[["feature_id"]]
     }
+    if (is.factor(features)) features <- as.character(features)
     fids <- assert_character(features)
   }
 

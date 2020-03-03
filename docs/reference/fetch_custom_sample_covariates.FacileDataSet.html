@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -112,7 +112,12 @@
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -127,7 +132,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Fetches custom (user) annotations for a given user prefix</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/sample-covariates.R'><code>R/sample-covariates.R</code></a></small>
     <div class="hidden name"><code>fetch_custom_sample_covariates.FacileDataSet.Rd</code></div>
     </div>
 
@@ -136,9 +141,15 @@
     </div>
 
     <pre class="usage"><span class='co'># S3 method for FacileDataSet</span>
-<span class='fu'>fetch_custom_sample_covariates</span>(<span class='no'>x</span>, <span class='kw'>samples</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>covariates</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>custom_key</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.getenv.html'>Sys.getenv</a></span>(<span class='st'>"USER"</span>),
-  <span class='kw'>with_source</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>file.prefix</span> <span class='kw'>=</span> <span class='st'>"facile"</span>, <span class='no'>...</span>)</pre>
+<span class='fu'>fetch_custom_sample_covariates</span>(
+  <span class='no'>x</span>,
+  <span class='kw'>samples</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>covariates</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>custom_key</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.getenv.html'>Sys.getenv</a></span>(<span class='st'>"USER"</span>),
+  <span class='kw'>with_source</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>file.prefix</span> <span class='kw'>=</span> <span class='st'>"facile"</span>,
+  <span class='no'>...</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -162,15 +173,16 @@
     <p>covariate tbl</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p>Other API: <code><a href='fetch_assay_data.html'>fetch_assay_data.FacileDataSet</a></code>,
-  <code><a href='fetch_assay_score.FacileDataSet.html'>fetch_assay_score.FacileDataSet</a></code>,
-  <code><a href='sample-covariates.html'>fetch_sample_covariates</a></code>,
-  <code><a href='fetch_sample_statistics.FacileDataSet.html'>fetch_sample_statistics.FacileDataSet</a></code>,
-  <code><a href='fetch_samples.FacileDataSet.html'>fetch_samples.FacileDataSet</a></code>,
-  <code><a href='filter_features.FacileDataSet.html'>filter_features.FacileDataSet</a></code>,
-  <code><a href='filter_samples.FacileDataSet.html'>filter_samples.FacileDataSet</a></code>,
-  <code><a href='organism.FacileDataSet.html'>organism.FacileDataSet</a></code>,
-  <code><a href='samples.FacileDataSet.html'>samples.FacileDataSet</a></code></p></div>
+    <div class='dont-index'><p>Other API: 
+<code><a href='fetch_assay_data.html'>fetch_assay_data.FacileDataSet</a>()</code>,
+<code><a href='fetch_assay_score.FacileDataSet.html'>fetch_assay_score.FacileDataSet</a>()</code>,
+<code><a href='sample-covariates.html'>fetch_sample_covariates</a>()</code>,
+<code><a href='fetch_sample_statistics.FacileDataSet.html'>fetch_sample_statistics.FacileDataSet</a>()</code>,
+<code><a href='fetch_samples.FacileDataSet.html'>fetch_samples.FacileDataSet</a>()</code>,
+<code><a href='filter_features.FacileDataSet.html'>filter_features.FacileDataSet</a>()</code>,
+<code><a href='filter_samples.FacileDataSet.html'>filter_samples.FacileDataSet</a>()</code>,
+<code><a href='organism.FacileDataSet.html'>organism.FacileDataSet</a>()</code>,
+<code><a href='samples.FacileDataSet.html'>samples.FacileDataSet</a>()</code></p></div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -191,7 +203,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

@@ -73,7 +73,7 @@ a subset of samples." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -114,7 +114,12 @@ a subset of samples." />
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -129,7 +134,7 @@ a subset of samples." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Filters the samples down in a dataset to ones specified</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/samples.R'><code>R/samples.R</code></a></small>
     <div class="hidden name"><code>join_samples.Rd</code></div>
     </div>
 
@@ -139,8 +144,7 @@ datapoints per sample, and we often want to only retreive data points over
 a subset of samples.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>join_samples</span>(<span class='no'>x</span>, <span class='kw'>samples</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>semi</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>distinct.samples</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+    <pre class="usage"><span class='fu'>join_samples</span>(<span class='no'>x</span>, <span class='kw'>samples</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>semi</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>distinct.samples</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -186,7 +190,7 @@ otherwise does an inner_join between <code>x</code> and <code>samples</code>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

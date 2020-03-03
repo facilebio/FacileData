@@ -75,7 +75,7 @@ function." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.0</span>
       </span>
     </div>
 
@@ -116,7 +116,12 @@ function." />
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/facilebio/FacileData">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -131,7 +136,7 @@ function." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Adds new set of assay data for all samples in a FacileDataSet</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/construction.R'><code>R/construction.R</code></a></small>
     <div class="hidden name"><code>addFacileAssaySet.Rd</code></div>
     </div>
 
@@ -143,13 +148,21 @@ assays (i.e. RNA-seq, microarray, etc.) to the FacileDataSet using this
 function.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>addFacileAssaySet</span>(<span class='no'>x</span>, <span class='no'>datasets</span>, <span class='no'>facile_assay_name</span>,
+    <pre class="usage"><span class='fu'>addFacileAssaySet</span>(
+  <span class='no'>x</span>,
+  <span class='no'>datasets</span>,
+  <span class='no'>facile_assay_name</span>,
   <span class='kw'>facile_assay_type</span> <span class='kw'>=</span> <span class='no'>.assay.types</span>,
   <span class='kw'>facile_feature_type</span> <span class='kw'>=</span> <span class='no'>.feature.types</span>,
-  <span class='kw'>facile_assay_description</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>facile_feature_info</span>,
-  <span class='kw'>storage_mode</span> <span class='kw'>=</span> <span class='no'>.storage.modes</span>, <span class='kw'>chunk_rows</span> <span class='kw'>=</span> <span class='fl'>5000</span>,
-  <span class='kw'>chunk_cols</span> <span class='kw'>=</span> <span class='st'>"ncol"</span>, <span class='kw'>chunk_compression</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>assay_name</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>warn_existing</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+  <span class='kw'>facile_assay_description</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='no'>facile_feature_info</span>,
+  <span class='kw'>storage_mode</span> <span class='kw'>=</span> <span class='no'>.storage.modes</span>,
+  <span class='kw'>chunk_rows</span> <span class='kw'>=</span> <span class='fl'>5000</span>,
+  <span class='kw'>chunk_cols</span> <span class='kw'>=</span> <span class='st'>"ncol"</span>,
+  <span class='kw'>chunk_compression</span> <span class='kw'>=</span> <span class='fl'>4</span>,
+  <span class='kw'>assay_name</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>warn_existing</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -227,7 +240,7 @@ this function once to add copynumber data
 (addFacileAssaySet(..., facile_assay_type = "cnv") to a subset of samples
 and later call this function again to add copynumber to the rest of the
 samples. The function will throw an error if
-facile_assay_type <!-- %in% assay_names(x) == TRUE. --></p>
+facile_assay_type %in% assay_names(x) == TRUE.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -248,7 +261,7 @@ facile_assay_type <!-- %in% assay_names(x) == TRUE. --></p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>
