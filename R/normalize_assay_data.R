@@ -29,9 +29,16 @@ normalize_assay_data <- function(x, features, samples, batch = NULL,
   # Retrieves the log2-like assay-normalized version of the assay data
   atype <- features$assay_type[1L]
   norm.fn.name <- paste0("normalize_assay_matrix.", atype)
-  normfn <- getFunction(norm.fn.name)
-  out <- normfn(x, features, samples, log = log, prior.count = prior.count, ...,
-                .fds = .fds)
+  normfn <- try(getFunction(norm.fn.name), silent = TRUE)
+
+  if (is.function(normfn)) {
+    out <- normfn(x, features, samples, log = log, prior.count = prior.count, ...,
+                  .fds = .fds)
+  } else {
+    warning("No normalization function defined for assay type (", atype, "), ",
+            "returning raw data", immediate. = TRUE, call. = FALSE)
+    out <- x
+  }
 
   # Now batch correct data if desired (and if explicitly log2-like)
   if (test_character(batch, min.len = 1L)) {
@@ -110,3 +117,8 @@ normalize_assay_matrix.qpcrdct <- function(x, features, samples, ...,
   x
 }
 
+#' `raw` assay data: we have no idea how to normalize
+#' @noRd
+normalize_assay_matrix.raw <- function(x, features, samples, ..., .fds = NULL) {
+  x
+}

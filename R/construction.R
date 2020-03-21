@@ -75,17 +75,14 @@ assert_valid_meta_file <- function(fn, as.list = FALSE) {
 
 .feature.types <- c('entrez', 'ensgid', 'enstid', 'custom')
 .assay.types <- c(
-  'rnaseq', 'isoseq', 'normcounts', 'lognorm', 'nanostring',
-  'qpcrct', 'qpcrdct')
+  "rnaseq", "isoseq", "normcounts", "nanostring",
+  "qpcrct", "qpcrdct", "lognorm", "raw")
+
 .storage.modes <- c('integer', 'numeric')
 
 supported.assay.container <- function(x) {
-  ## Currently only support DGEList
-  is(x, 'DGEList') ||
-    is(x, "EList") ||
-    is(x, 'eSet') ||
-    is(x, 'SummarizedExperiment') ||
-    is(x, 'matrix')
+  supported <- c("DGEList", "EList", "eSet", "SummarizedExperiment", "matrix")
+  any(is(x) %in% supported)
 }
 
 extract.assay <- function(x, assay_name=NULL) {

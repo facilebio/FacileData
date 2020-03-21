@@ -664,7 +664,7 @@ with_assay_data.data.frame <- function(x, features, assay_name = NULL,
                                        ..., verbose = FALSE, .fds = NULL) {
   .fds <- assert_facile_data_store(.fds)
   assert_sample_subset(x)
-  assert_flag(normalized)
+  # assert_flag(normalized)
 
   ## Check that parameters are kosher before fetching data
   features <- create_assay_feature_descriptor(.fds, features,
@@ -683,9 +683,9 @@ with_assay_data.data.frame <- function(x, features, assay_name = NULL,
   }
 
   # Hit the datastore
-  adata <- fetch_assay_data(.fds, features, x, normalized = normalized,
-                            aggregate = aggregate, aggregate.by = aggregate.by,
-                            verbose = verbose, ...)
+  adata <- fetch_assay_data(.fds, features, x, assay_name = assay_name,
+                            normalized = normalized, aggregate = aggregate,
+                            aggregate.by = aggregate.by, verbose = verbose, ...)
   adata <- filter(adata, !is.na(value))
 
   if (is.character(spread)) {

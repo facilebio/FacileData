@@ -50,6 +50,21 @@ organism.facile_frame <- function(x, ...) {
   organism(fds(x), ...)
 }
 
+#' For some reason, as of RStudio 1.3 preview, facile_frames became very slow
+#' to render inline in an Rmd document when the FacileDataStore came along
+#' with it.
+#'
+#' TODO: We may want to add the possible covariates you can pull from the
+#' database in the printed output, just like tibbles show a list of column
+#' names that are not shown in the (horizontal) output.
+#'
+#' @noRd
+#' @export
+print.facile_frame <- function(x, ..., n = NULL, width = NULL, n_extra = NULL) {
+  x <- set_fds(x, NULL)
+  NextMethod()
+}
+
 # dplyr++ manipulation =========================================================
 
 #' Retrieves the extra class information that might be ahead of the root
