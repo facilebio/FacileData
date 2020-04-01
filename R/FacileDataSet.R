@@ -63,17 +63,21 @@
 #' @examples
 #' fn <- system.file("extdata", "exampleFacileDataSet", package = "FacileData")
 #' fds <- FacileDataSet(fn)
-FacileDataSet <- function(path, data.fn=file.path(path, 'data.sqlite'),
-                          sqlite.fn=file.path(path, 'data.sqlite'),
-                          hdf5.fn=file.path(path, 'data.h5'),
-                          meta.fn=file.path(path, 'meta.yaml'),
-                          anno.dir=file.path(path, 'custom-annotation'),
-                          cache_size=80000,
-                          db.loc=c('reference', 'temporary', 'memory'),
+FacileDataSet <- function(path, data.fn = NULL, sqlite.fn = NULL,
+                          hdf5.fn = NULL, meta.fn = NULL, anno.dir = NULL,
+                          cache_size = 80000,
+                          db.loc = c('reference', 'temporary', 'memory'),
                           ...) {
+  db.loc <- match.arg(db.loc)
+
+  if (is.null(data.fn)) data.fn <- file.path(path, 'data.sqlite')
+  if (is.null(sqlite.fn)) sqlite.fn <- file.path(path, 'data.sqlite')
+  if (is.null(hdf5.fn)) hdf5.fn <- file.path(path, 'data.h5')
+  if (is.null(meta.fn)) meta.fn <- file.path(path, 'meta.yaml')
+  if (is.null(anno.dir)) anno.dir <- file.path(path, 'custom-annotation')
+
   paths <- validate.facile.dirs(path, data.fn, sqlite.fn, hdf5.fn, meta.fn,
                                 anno.dir)
-  db.loc <- match.arg(db.loc)
   ## Update some parameters in the connection for increased speed
   ## http://stackoverflow.com/questions/1711631
   ##
