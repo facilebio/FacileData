@@ -305,8 +305,7 @@ name.FacileDataSet <- function(x, ...) {
 samples.FacileDataSet <- function(x, ...) {
   assert_facile_data_set(x)
   sample_info_tbl(x) %>%
-    select(dataset, sample_id) %>%
-    as_facile_frame(x, ...)
+    select(dataset, sample_id)
 }
 
 #' @export
@@ -314,8 +313,7 @@ samples.FacileDataSet <- function(x, ...) {
 facet_frame.FacileDataSet <- function(x, name = "default", ...) {
   samples(x) %>%
     mutate(facet = dataset) %>%
-    select(facet, dataset, sample_id) %>%
-    as_facile_frame(x)
+    select(facet, dataset, sample_id)
 }
 
 #' @noRd

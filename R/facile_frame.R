@@ -13,7 +13,8 @@
 #'   recursion in the call to `assert_sample_subset`.
 as_facile_frame <- function(x, datastore = fds(x), classes = NULL, ...,
                             .valid_sample_check = TRUE) {
-  stopifnot(is.tbl(x) || is.data.frame(x))
+  assert_class(datastore, "FacileDataStore")
+  assert_multi_class(x, c("tbl", "data.frame"))
 
   .valid_sample_check <- .valid_sample_check &&
     has_columns(x, c("dataset", "sample_id"), warn = FALSE)
@@ -21,8 +22,6 @@ as_facile_frame <- function(x, datastore = fds(x), classes = NULL, ...,
     assert_sample_subset(x, datastore)
   }
 
-  # if (!is(datastore, "FacileDataStore")) browser()
-  assert_class(datastore, "FacileDataStore")
   if (!is.null(classes)) assert_character(classes)
   if (!is(x, "facile_frame")) {
     classes <- c(classes, "facile_frame")
@@ -62,6 +61,7 @@ organism.facile_frame <- function(x, ...) {
 #' @export
 print.facile_frame <- function(x, ..., n = NULL, width = NULL, n_extra = NULL) {
   x <- set_fds(x, NULL)
+  class(x) <- setdiff(class(x), "facile_frame")
   NextMethod()
 }
 
