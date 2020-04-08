@@ -55,7 +55,9 @@ normalize_assay_data <- function(x, features, samples, batch = NULL,
 #' @importFrom edgeR cpm
 normalize_assay_matrix.rnaseq <- function(x, features, samples,
                                           log = TRUE, prior.count = 0.1,
-                                          verbose = FALSE, ..., .fds = NULL) {
+                                          verbose = FALSE, ...,
+                                          .update_norm_factors = FALSE,
+                                          .fds = NULL) {
   # libsize and normfactor are currently extracted from the database
   # but this will change when we suport sample_assay covariates
   assert_numeric(samples[["libsize"]])
@@ -74,6 +76,9 @@ normalize_assay_matrix.rnaseq <- function(x, features, samples,
     nf <- samples[["norm.factors"]]
   } else {
     nf <- samples[["normfactor"]]
+  }
+  if (isTRUE(.update_norm_factors)) {
+    nf <- edgeR::calcNormFactors(x, lsize, ...)
   }
   edgeR::cpm(x, lsize * nf, log = log, prior.count = prior.count)
 }
