@@ -52,9 +52,9 @@
 #' features <- c(PRF1='5551', GZMA='3001', CD274='29126')
 #' dat <- with_assay_data(samples, features, normalized = TRUE, batch = "sex")
 #' dat <- with_assay_data(samples, features, normalized = TRUE,
-#'                        batch = c("sex", "RIN"))
+#'                        batch = c("sex", "stage"))
 #' dat <- with_assay_data(samples, features, normealized = TRUE,
-#'                        batch = c("sex", "RIN"), main = "treatment")
+#'                        batch = c("sex", "stage"), main = "sample_type")
 fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
                                            assay_name = default_assay(x),
                                            normalized = FALSE,

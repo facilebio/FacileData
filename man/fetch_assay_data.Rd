@@ -127,9 +127,9 @@ samples <- exampleFacileDataSet() \%>\%
 features <- c(PRF1='5551', GZMA='3001', CD274='29126')
 dat <- with_assay_data(samples, features, normalized = TRUE, batch = "sex")
 dat <- with_assay_data(samples, features, normalized = TRUE,
-                       batch = c("sex", "RIN"))
+                       batch = c("sex", "stage"))
 dat <- with_assay_data(samples, features, normealized = TRUE,
-                       batch = c("sex", "RIN"), main = "treatment")
+                       batch = c("sex", "stage"), main = "sample_type")
 }
 \seealso{
 Other API: 
