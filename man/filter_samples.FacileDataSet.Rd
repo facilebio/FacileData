@@ -45,7 +45,7 @@ eav.query <- fds \%>\%
 setequal(crc.34$sample_id, eav.query$sample_id)
 
 # You can keep filtering a filtered dataset
-crc.34.male <- filter_sample(crc.34, sex == "m")
+crc.34.male <- filter_samples(crc.34, sex == "m")
 }
 \seealso{
 Other API: 
