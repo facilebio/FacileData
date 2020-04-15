@@ -5,7 +5,7 @@ name: R-CMD-check
 jobs:
   R-CMD-check:
     runs-on: ubuntu-latest
-    container: facilebio/facilebio
+    container: facilebio/facilebio_base_extra
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
 
