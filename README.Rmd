@@ -17,18 +17,11 @@ knitr::opts_chunk$set(
 
 # FacileData
 
-<!-- 
-badges: start
-checkout https://lazappi.github.io/clustree/ package for some badge-inspiration
-
-[![Travis build status](https://travis-ci.org/facilebio/FacileData.svg?branch=master)](https://travis-ci.org/facilebio/FacileData)
-[![Codecov test coverage](https://codecov.io/gh/facilebio/FacileData/branch/master/graph/badge.svg)](https://codecov.io/gh/facilebio/FacileData?branch=master)
-
--->
-
+<!-- badges: start -->
+[![R build status](https://github.com/facilebio/FacileData/workflows/R-CMD-check/badge.svg)](https://github.com/facilebio/FacileData/actions)
 [![Project Status](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
-[![Travis build status](https://travis-ci.org/facilebio/FacileData.svg?branch=master)](https://travis-ci.org/facilebio/FacileData)
 [![Lifecycle: Maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
+[![codecov](https://codecov.io/gh/facilebio/FacileData/branch/master/graph/badge.svg)](https://codecov.io/gh/facilebio/FacileData)
 <!-- badges: end -->
 
 The `FacileData` package was written to facilitate easier analysis of large,
