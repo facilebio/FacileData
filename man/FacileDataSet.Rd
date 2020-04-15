@@ -6,11 +6,11 @@
 \usage{
 FacileDataSet(
   path,
-  data.fn = file.path(path, "data.sqlite"),
-  sqlite.fn = file.path(path, "data.sqlite"),
-  hdf5.fn = file.path(path, "data.h5"),
-  meta.fn = file.path(path, "meta.yaml"),
-  anno.dir = file.path(path, "custom-annotation"),
+  data.fn = NULL,
+  sqlite.fn = NULL,
+  hdf5.fn = NULL,
+  meta.fn = NULL,
+  anno.dir = NULL,
   cache_size = 80000,
   db.loc = c("reference", "temporary", "memory"),
   ...

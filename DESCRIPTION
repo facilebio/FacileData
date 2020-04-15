@@ -26,6 +26,7 @@ Depends:
 Imports:
   broom,
   checkmate (>= 1.8.5),
+  crayon,
   DBI,
   data.table,
   dbplyr (>= 1.4.0),
@@ -33,7 +34,9 @@ Imports:
   glue,
   edgeR,
   jsonlite,
+  lazyeval,
   limma,
+  methods,
   multiGSEA (>= 0.10.4),
   reshape2,
   rhdf5,
@@ -55,7 +58,7 @@ Suggests:
 Remotes:
   lianos/multiGSEA@develop
 biocViews: Infrastructure, DataRepresentation
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Roxygen: list(markdown = TRUE)
 License: MIT + file LICENSE
 Encoding: UTF-8

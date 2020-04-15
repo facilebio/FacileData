@@ -52,7 +52,7 @@ covariate_meta_info <- function(covariate, .fds, covdefs=NULL) {
 #'
 #' @md
 #' @export
-#' @importFrom methods getFunction
+#'
 #' @seealso [covariate_meta_info()], [covariate_definitions()]
 #'
 #' @param covariate the name of the covariate

@@ -12,7 +12,6 @@
 #' @export
 #'
 #' @param fn the path to the ENSEMBL (or GENCODE) GTF
-#' @importMethodsFrom S4Vectors mcols
 #' @return a list of tibbles with `$transcript_info` and `$gene_info` elements
 extract_transcribed_info_from_ensembl_gtf <- function(
     fn, gene_type = "gene_type", transcript_type = "transcript_type") {
