@@ -45,7 +45,7 @@ Suggests:
   airway,
   Biobase,
   knitr,
-  parathyroidGenesSE,
+  parathyroidSE,
   roxygen2 (>= 6.1.0),
   stringr,
   S4Vectors,
