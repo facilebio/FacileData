@@ -1,9 +1,0 @@
-pandoc: 2.7.3
-pkgdown: 1.4.1
-pkgdown_sha: ~
-articles:
-  FacileData: FacileData.html
-  FacileDataSet-architecture: FacileDataSet-architecture.html
-  FacileDataSet-assembly: FacileDataSet-assembly.html
-  FacileDataSet: FacileDataSet.html
-
