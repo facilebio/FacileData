@@ -1,0 +1,75 @@
+/* This version of the css file is different from vignettes because this css
+ * file needs to link into the articles folder for the image assets
+ */
+
+/************************ Callouts ********************************************/
+/* Too bad you can't inhert in CSS, change one of these you should change all */
+div.tip {
+  margin: 2px 10px 10px 0px;
+  min-height: 55px;
+  padding: 2px 10px 2px 85px;
+  background-position: 5px 5px, 68px 0px;
+  background-image: url('articles/images/icons/tip.png'), url('articles/images/icons/callout-border.png');
+  background-repeat: no-repeat, repeat-y;
+  width: 90%;
+}
+
+div.note {
+  margin: 2px 10px 10px 0px;
+  min-height: 55px;
+  padding: 2px 10px 2px 85px;
+  background-position: 5px 5px, 68px 0px;
+  background-image: url('articles/images/icons/note.png'), url('articles/images/icons/callout-border.png');
+  background-repeat: no-repeat, repeat-y;
+  width: 90%;
+}
+
+div.caution {
+  margin: 2px 10px 10px 0px;
+  min-height: 55px;
+  padding: 2px 10px 2px 85px;
+  background-position: 5px 5px, 68px 0px;
+  background-image: url('articles/images/icons/caution.png'), url('articles/images/icons/callout-border.png');
+  background-repeat: no-repeat, repeat-y;
+  width: 90%;
+}
+
+div.warning {
+  margin: 2px 10px 10px 0px;
+  min-height: 55px;
+  padding: 2px 10px 2px 85px;
+  background-position: 5px 5px, 68px 0px;
+  background-image: url('articles/images/icons/warning.png'), url('articles/images/icons/callout-border.png');
+  background-repeat: no-repeat, repeat-y;
+  width: 90%;
+}
+
+div.important {
+  margin: 2px 10px 10px 0px;
+  min-height: 55px;
+  padding: 2px 10px 2px 85px;
+  background-position: 5px 5px, 68px 0px;
+  background-image: url('articles/images/icons/important.png'), url('articles/images/icons/callout-border.png');
+  background-repeat: no-repeat, repeat-y;
+  width: 90%;
+}
+
+div.example {
+  margin: 2px 10px 10px 0px;
+  min-height: 55px;
+  padding: 2px 10px 2px 85px;
+  background-position: 5px 5px, 68px 0px;
+  background-image: url('articles/images/icons/example.png'), url('articles/images/icons/callout-border.png');
+  background-repeat: no-repeat, repeat-y;
+  width: 90%;
+}
+
+div.download {
+  margin: 2px 10px 10px 0px;
+  min-height: 55px;
+  padding: 2px 10px 2px 85px;
+  background-position: 5px 5px, 68px 0px;
+  background-image: url('articles/images/icons/download.png'), url('articles/images/icons/callout-border.png');
+  background-repeat: no-repeat, repeat-y;
+  width: 90%;
+}
