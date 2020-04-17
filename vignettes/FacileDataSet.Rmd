@@ -23,8 +23,6 @@ vignette: >
 ```{r setup, include=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(
   echo=TRUE, warning=FALSE, message=FALSE, error=FALSE) #, dpi=150)
-library(ggplot2)
-library(cowplot)
 ```
 
 # Overview
