@@ -449,7 +449,8 @@ with_assay_covariates <- function(x, covariates = NULL,
 #' @export
 fetch_assay_data <- function(x, features, samples = NULL,
                              assay_name = ndefault_assay(x),
-                             normalized = FALSE, as.matrix = FALSE, ...,
+                             normalized = FALSE, batch = NULL, main = NULL,
+                             as.matrix = FALSE, ...,
                              subset.threshold=700, aggregate = FALSE,
                              aggregate.by = "ewm", verbose=FALSE) {
   UseMethod("fetch_assay_data")
@@ -458,7 +459,8 @@ fetch_assay_data <- function(x, features, samples = NULL,
 #' @export
 fetch_assay_data.default <- function(x, features, samples=NULL,
                              assay_name=default_assay(x),
-                             normalized=FALSE, as.matrix=FALSE, ...,
+                             normalized=FALSE, batch = NULL, main = NULL,
+                             as.matrix=FALSE, ...,
                              subset.threshold=700, aggregate.by=NULL,
                              verbose=FALSE) {
   stop("The FacileAPI requires that a specific method be written for this type.")

@@ -136,6 +136,9 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     }
   }
 
+  if (!is.null(batch)) {
+    normalized <- TRUE
+  }
   out <- lapply(assays, function(a) {
     f <- filter(features, assay == a)
     .fetch_assay_data(x, a, f$feature_id, samples, normalized,
