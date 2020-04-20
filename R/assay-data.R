@@ -68,6 +68,14 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
   assert_flag(as.matrix)
   assert_flag(normalized)
   assert_number(subset.threshold)
+  if (!is.null(batch)) {
+    normalize <- TRUE
+    assert_character(batch, min.len = 1L)
+    if (!is.null(main)) {
+      assert_character(main)
+      if (length(main) == 0L) main <- NULL
+    }
+  }
 
   if (!is.null(assay_name) || is.character(assay_name)) {
     assert_string(assay_name)
@@ -136,9 +144,6 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     }
   }
 
-  if (!is.null(batch)) {
-    normalized <- TRUE
-  }
   out <- lapply(assays, function(a) {
     f <- filter(features, assay == a)
     .fetch_assay_data(x, a, f$feature_id, samples, normalized,

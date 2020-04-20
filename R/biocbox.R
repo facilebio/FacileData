@@ -3,10 +3,11 @@
 biocbox.FacileDataStore <- function(x, class = NULL, assay_name = NULL,
                                     features = NULL, sample_covariates = NULL,
                                     feature_covariates = NULL,
+                                    normalized = FALSE,
                                     custom_key = Sys.getenv("USER"), ...) {
   xs <- samples(x)
   biocbox(xs, class = class, assay_name = assay_name, features = features,
-          samples = xs, custom_key = custom_key, ...)
+          normalized = normalized, custom_key = custom_key, ...)
 }
 
 #' Assembles a Bioconductor data container for a given assay.
@@ -27,8 +28,8 @@ biocbox.FacileDataStore <- function(x, class = NULL, assay_name = NULL,
 biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
                                  features = NULL, sample_covariates = NULL,
                                  feature_covariates = NULL,
-                                 custom_key = Sys.getenv("USER"),
-                                 normalized = FALSE, ...) {
+                                 normalized = FALSE,
+                                 custom_key = Sys.getenv("USER"), ...) {
   if (!is.null(feature_covariates)) {
     warning("We currently are not trying to merge extra feature_covariates.",
             immediate. = TRUE)
@@ -45,7 +46,7 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
 
   ainfo <- assay_info(fds., assay_name)
   bb.info <- biocbox_assay_class(ainfo[["assay_type"]], class)
-
+  assert_flag(normalized)
   if (normalized && bb.info[["class"]] != "list") {
     stop("Can't return normalized version of data in bioc container")
   }
