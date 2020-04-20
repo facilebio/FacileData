@@ -298,7 +298,7 @@ provided in the list of datasets you are using to create the FacileDataSet.
 <code>dataset</code> and <code>sample_id</code> columns will be forcibly added (or modified) as
 columns to all of the individual <code>pData</code> data.frames.</p>
 <p>In order to insert the entirety of the <code>pData</code> elements into the internal
-<code>sample_covariate</code> table, we rely on the <code><a href='https://dplyr.tidyverse.org/reference/bind.html'>dplyr::bind_rows</a></code> function to
+<code>sample_covariate</code> table, we rely on the <code><a href='https://rdrr.io/pkg/dplyr/man/bind.html'>dplyr::bind_rows</a></code> function to
 create an uber <code>data.frame</code> which will be converted into an
 entity-attribute-value table. Note that when row-binding, columns are matched
 by name, and any missing columns with be filled with <code>NA</code>.</p>

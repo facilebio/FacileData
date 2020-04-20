@@ -229,7 +229,7 @@
 <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(<span class="no">se.airway</span>) <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html">local</a></span>({
   <span class="no">cd</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(<span class="no">airway</span>) <span class="kw">%&gt;%</span>
     <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span>() <span class="kw">%&gt;%</span>
-    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span>(
+    <span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/mutate.html">transmute</a></span>(
       <span class="kw">sample_type</span> <span class="kw">=</span> <span class="st">"cell_line"</span>,
       <span class="kw">cell_line</span> <span class="kw">=</span> <span class="no">cell</span>,
       <span class="kw">treatment</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span>(<span class="no">dex</span> <span class="kw">==</span> <span class="st">"untrt"</span>, <span class="st">"control"</span>, <span class="st">"dex"</span>)) <span class="kw">%&gt;%</span>
@@ -242,7 +242,7 @@
 <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(<span class="no">se.parathyroid</span>) <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html">local</a></span>({
   <span class="no">cd</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span>(<span class="no">parathyroidGenesSE</span>) <span class="kw">%&gt;%</span>
     <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span>() <span class="kw">%&gt;%</span>
-    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span>(
+    <span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/mutate.html">transmute</a></span>(
       <span class="kw">sample_type</span> <span class="kw">=</span> <span class="st">"primary"</span>,
       <span class="kw">subject_id</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="st">"patient_"</span>, <span class="no">patient</span>),
       <span class="kw">treatment</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/chartr.html">tolower</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span>(<span class="no">treatment</span>)),
@@ -280,15 +280,15 @@
 <div class="note">
 <p>This mismatched gene matching wouldn’t be an issue if these data were from the same assay and processed in the same way. When you are assembling assay data into single assay of a FacileDataSet, the implicit assumption is that all of the data were processed in the same way.</p>
 </div>
-<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">shared.ids</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/setops.html">intersect</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(<span class="no">se.airway</span>), <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(<span class="no">se.parathyroid</span>))
+<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">shared.ids</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/setops.html">intersect</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(<span class="no">se.airway</span>), <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(<span class="no">se.parathyroid</span>))
 <span class="no">gene.info</span> <span class="kw">&lt;-</span> <span class="no">mart.info</span> <span class="kw">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span>(<span class="kw">feature_id</span> <span class="kw">=</span> <span class="no">ensembl_gene_id</span>,
+  <span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/mutate.html">transmute</a></span>(<span class="kw">feature_id</span> <span class="kw">=</span> <span class="no">ensembl_gene_id</span>,
             <span class="kw">feature_type</span> <span class="kw">=</span> <span class="st">"ensgid"</span>,
             <span class="kw">name</span> <span class="kw">=</span> <span class="no">hgnc_symbol</span>,
             <span class="kw">meta</span> <span class="kw">=</span> <span class="no">gene_biotype</span>,
             <span class="kw">source</span> <span class="kw">=</span> <span class="st">"Ensembl_v75"</span>) <span class="kw">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">feature_id</span> <span class="kw">%in%</span> <span class="no">shared.ids</span>) <span class="kw">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html">distinct</a></span>(<span class="no">feature_id</span>, <span class="kw">.keep_all</span> <span class="kw">=</span> <span class="fl">TRUE</span>) <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/filter.html">filter</a></span>(<span class="no">feature_id</span> <span class="kw">%in%</span> <span class="no">shared.ids</span>) <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/distinct.html">distinct</a></span>(<span class="no">feature_id</span>, <span class="kw">.keep_all</span> <span class="kw">=</span> <span class="fl">TRUE</span>) <span class="kw">%&gt;%</span>
   <span class="fu">DataFrame</span>()
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(<span class="no">gene.info</span>) <span class="kw">&lt;-</span> <span class="no">gene.info</span><span class="kw">[[</span><span class="st">"feature_id"</span>]]</pre></body></html></div>
 <p>Now we can cleanup the rowdata of our SummarizedExperiment and make them row-wise concordant.</p>
