@@ -1,0 +1,24 @@
+on:
+  schedule:
+    # Only push the test coverage up on a schedule. We can use the full
+    # facilebio image for this for expediency
+    - cron: '30 12 * * *'
+
+name: test-coverage
+
+jobs:
+  test-coverage:
+    runs-on: ubuntu-latest
+    container: facilebio/facilebio
+    env:
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      NOT_CRAN: true
+      CI: true
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: r-lib/actions/setup-r@master
+
+      - name: Test coverage
+        run: covr::codecov(quiet = FALSE)
+        shell: Rscript {0}

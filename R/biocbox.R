@@ -3,11 +3,12 @@
 biocbox.FacileDataStore <- function(x, class = NULL, assay_name = NULL,
                                     features = NULL, sample_covariates = NULL,
                                     feature_covariates = NULL,
-                                    normalized = FALSE,
+                                    normalized = FALSE, with_fds = FALSE,
                                     custom_key = Sys.getenv("USER"), ...) {
   xs <- samples(x)
   biocbox(xs, class = class, assay_name = assay_name, features = features,
-          normalized = normalized, custom_key = custom_key, ...)
+          normalized = normalized, with_fds = with_fds, custom_key = custom_key,
+          ...)
 }
 
 #' Assembles a Bioconductor data container for a given assay.
@@ -28,7 +29,7 @@ biocbox.FacileDataStore <- function(x, class = NULL, assay_name = NULL,
 biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
                                  features = NULL, sample_covariates = NULL,
                                  feature_covariates = NULL,
-                                 normalized = FALSE,
+                                 normalized = FALSE, with_fds = FALSE,
                                  custom_key = Sys.getenv("USER"), ...) {
   if (!is.null(feature_covariates)) {
     warning("We currently are not trying to merge extra feature_covariates.",
@@ -119,9 +120,14 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
   rownames(samples.) <- samples.[["samid"]]
   samples.[["samid"]] <- NULL
 
-  bb.info[["fn"]](A, features., samples., fds.,
-                  update_libsizes = update_libsizes,
-                  update_normfactors = update_normfactors, ...)
+  out <- bb.info[["fn"]](A, features., samples., fds.,
+                         update_libsizes = update_libsizes,
+                         update_normfactors = update_normfactors, ...)
+  if (!with_fds) {
+    out <- set_fds(out, NULL)
+  }
+
+  out
 }
 
 # Bioconductor Creation Helpers ------------------------------------------------
