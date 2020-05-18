@@ -124,7 +124,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
   samples <- distinct(samples, dataset, sample_id, .keep_all = TRUE)
 
   if (nrow(samples) == 0) {
-    warning("Emtpy sample descriptor provided", immediate. = TRUE)
+    warning("Empty sample descriptor provided", immediate. = TRUE)
     return(samples)
   }
 
