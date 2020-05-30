@@ -280,7 +280,7 @@
 <div class="note">
 <p>This mismatched gene matching wouldn’t be an issue if these data were from the same assay and processed in the same way. When you are assembling assay data into single assay of a FacileDataSet, the implicit assumption is that all of the data were processed in the same way.</p>
 </div>
-<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">shared.ids</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/setops.html">intersect</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(<span class="no">se.airway</span>), <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(<span class="no">se.parathyroid</span>))
+<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">shared.ids</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/reexports.html">intersect</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(<span class="no">se.airway</span>), <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span>(<span class="no">se.parathyroid</span>))
 <span class="no">gene.info</span> <span class="kw">&lt;-</span> <span class="no">mart.info</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span>(<span class="kw">feature_id</span> <span class="kw">=</span> <span class="no">ensembl_gene_id</span>,
             <span class="kw">feature_type</span> <span class="kw">=</span> <span class="st">"ensgid"</span>,
