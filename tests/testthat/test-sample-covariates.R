@@ -20,7 +20,7 @@ test_that("fetch_sample_covariates retrieves all covariates if not specified", {
     inner_join(sample_covariate_tbl(FDS), by=c('dataset', 'sample_id')) %>%
     collect(n=Inf) %>%
     arrange(dataset, sample_id, variable, value)
-  expect_equal(covs, ecovs)
+  expect_equal(covs, ecovs, check.attributes = FALSE)
 })
 
 test_that("fetch_sample_covariates::samples arg limits samples correctly", {
@@ -136,7 +136,7 @@ test_that('with_sample_covariates returns long input with wide covariates', {
     with_sample_covariates(covs) %>%
     arrange(dataset, sample_id, feature_id)
 
-  expect_equal(ecovs, expected)
+  expect_equal(ecovs, expected, check.attributes = FALSE)
 })
 
 test_that("successive with_sample_covariate calls build correct frame", {

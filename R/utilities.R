@@ -44,7 +44,7 @@ conform_data_frame <- function(x, to) {
            "`", x.class, "` instead")
     }
   }
-  x <- as.tbl(x)
+  x <- as_tibble(x)
   x[, colnames(to)]
 }
 

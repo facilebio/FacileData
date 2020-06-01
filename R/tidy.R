@@ -180,5 +180,5 @@ tidy.matrix <- function(x, row_covariates, col_covariates, ...) {
   adat <- adat[, !duplicated(colnames(adat))]
   out <- inner_join(adat, select(genes, !!gcols), by = gid.col)
   out <- inner_join(out, select(samples, !!scols), by = sid.col)
-  as.tbl(out)
+  as_tibble(out)
 }

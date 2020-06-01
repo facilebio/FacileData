@@ -648,7 +648,7 @@ as.EAVtable <- function(x, ignore = c("dataset", "sample_id"),
     bind_cols(meta, e)
   }, simplify = FALSE)
 
-  out <- as.tbl(bind_rows(encoded))
+  out <- as_tibble(bind_rows(encoded))
   if (na.rm) {
     out <- filter(out, !is.na(value))
   }

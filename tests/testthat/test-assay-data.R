@@ -38,7 +38,7 @@ test_that("spreading data works with_assay_data", {
     with_assay_data(genes, normalized = TRUE, .fds = FDS) %>%
     collect
 
-  expect_equal(result, expected)
+  expect_equal(result, expected, check.attributes = FALSE)
 })
 
 test_that("fetch_assay_data(..., aggregate = TRUE) provides scores", {

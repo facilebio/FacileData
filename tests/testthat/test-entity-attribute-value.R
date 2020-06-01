@@ -72,10 +72,10 @@ test_that("Successful EAV creation of data.frame with a Surv object column", {
     tidyr::gather("variable", "value", -dataset, -sample_id) %>%
     mutate(class = ifelse(variable == "x", "cSurv", "real"),
            type = "general") %>%
-    as.tbl()
+    as_tibble()
 
   long <- as.EAVtable(df)
-  expect_equal(long, expected)
+  expect_equal(long, expected, check.attributes = FALSE)
 })
 
 test_that("basic encoding and decoding of EAV columns works", {

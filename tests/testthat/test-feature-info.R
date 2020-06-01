@@ -10,10 +10,10 @@ test_that("with_feature_info grabs the right goods", {
   finfo <- with_feature_info(genes, .fds = FDS)
 
   expected <- left_join(genes, finfo.all, by = c("feature_id", "feature_type"))
-  expect_equal(finfo, expected)
+  expect_equal(finfo, expected, check.attributes = FALSE)
 
   f2 <- with_feature_info(genes, c("name", "meta"), .fds = FDS)
-  expect_equal(f2, select(expected, !!colnames(f2)))
+  expect_equal(f2, select(expected, !!colnames(f2)), check.attributes = FALSE)
 })
 
 test_that("with_feature_info can rename feature covariates", {

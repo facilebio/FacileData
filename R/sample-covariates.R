@@ -206,7 +206,7 @@ fetch_custom_sample_covariates.FacileDataSet <- function(
     ## Make a dummy, 0 row tibble to send back
     out <- sapply(out.cols, function(x) character(), simplify=FALSE)
     out$date_entered <- integer()
-    out <- as.data.frame(out, stringsAsFactors=FALSE) %>% as.tbl
+    out <- as.data.frame(out, stringsAsFactors=FALSE) %>% as_tibble()
   }
 
   if (!is.null(covariates)) {
@@ -355,7 +355,7 @@ spread_covariates <- function(x, .fds = fds(x), cov.def = NULL, ...) {
     dcast(dataset + sample_id ~ variable, value.var = "value") %>%
     setDF() %>%
     mutate(.dummy. = NULL) %>%
-    as.tbl()
+    as_tibble()
 
   # sample-covariates -------------------------------------------------------
   if (is.null(cov.def)) {
