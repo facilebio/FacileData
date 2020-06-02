@@ -77,7 +77,7 @@ like as.DGEList(...)." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.5</span>
       </span>
     </div>
 
@@ -307,15 +307,13 @@ expression container are not guaranteed.</p>
     <pre class="examples"><div class='input'><span class='no'>fds</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='exampleFacileDataSet.html'>exampleFacileDataSet</a></span>()
 
 <span class='co'># Retrieve DGEList of gene expression for all samples</span>
-<span class='no'>y.all</span> <span class='kw'>&lt;-</span> <span class='fu'>as.DGEList</span>(<span class='no'>fds</span>) <span class='co'># gene expression of all samples</span></div><div class='output co'>#&gt; <span class='warning'>Warning: `as.tbl()` is deprecated as of dplyr 1.0.0.</span>
-#&gt; <span class='warning'>Please use `tibble::as_tibble()` instead.</span>
-#&gt; <span class='warning'><span style='color: #555555;'>This warning is displayed once every 8 hours.</span><span></span>
-#&gt; <span class='warning'></span><span style='color: #555555;'>Call `lifecycle::last_warnings()` to see where this warning was generated.</span><span></span></div><div class='input'>
+<span class='no'>y.all</span> <span class='kw'>&lt;-</span> <span class='fu'>as.DGEList</span>(<span class='no'>fds</span>) <span class='co'># gene expression of all samples</span>
+
 <span class='co'># Retrieve data for only 3 genes</span>
 <span class='co'># Suppose we only wanted female samples in our DGEList</span>
 <span class='no'>y.fem</span> <span class='kw'>&lt;-</span> <span class='no'>fds</span> <span class='kw'>%&gt;%</span>
   <span class='fu'>filter_samples</span>(<span class='no'>sex</span> <span class='kw'>==</span> <span class='st'>"f"</span>) <span class='kw'>%&gt;%</span>
-  <span class='fu'>as.DGEList</span>() <span class='co'># or `as.ExpressionSet()`</span></div><div class='output co'>#&gt; <span class='warning'>Warning: norm factors don't multiply to 1</span></div></span></pre>
+  <span class='fu'>as.DGEList</span>() <span class='co'># or `as.ExpressionSet()`</span></div><div class='output co'>#&gt; <span class='warning'>Warning: norm factors don't multiply to 1</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
