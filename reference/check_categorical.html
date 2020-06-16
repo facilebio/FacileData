@@ -74,7 +74,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.6</span>
       </span>
     </div>
 
@@ -143,9 +143,27 @@
     <p>Check to see if a vector is categorical (character or string)</p>
     </div>
 
-    <pre class="usage"><span class='fu'>check_categorical</span>(<span class='no'>x</span>, <span class='no'>...</span>)
+    <pre class="usage"><span class='fu'>check_categorical</span>(
+  <span class='no'>x</span>,
+  <span class='kw'>any.missing</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>all.missing</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>len</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>min.len</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>max.len</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='no'>...</span>
+)
 
-<span class='fu'>assert_categorical</span>(<span class='no'>x</span>, <span class='no'>...</span>, <span class='kw'>.var.name</span> <span class='kw'>=</span> <span class='fu'>vname</span>(<span class='no'>x</span>), <span class='kw'>add</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>assert_categorical</span>(
+  <span class='no'>x</span>,
+  <span class='kw'>any.missing</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>all.missing</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>len</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>min.len</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>max.len</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='no'>...</span>,
+  <span class='kw'>.var.name</span> <span class='kw'>=</span> <span class='fu'>vname</span>(<span class='no'>x</span>),
+  <span class='kw'>add</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
+)
 
 <span class='fu'>test_categorical</span>(<span class='no'>x</span>, <span class='no'>...</span>)</pre>
 
@@ -155,6 +173,27 @@
     <tr>
       <th>x</th>
       <td><p>a vector of things</p></td>
+    </tr>
+    <tr>
+      <th>any.missing</th>
+      <td><p>are vectors with missing values allowed? Default is <code>TRUE</code></p></td>
+    </tr>
+    <tr>
+      <th>all.missing</th>
+      <td><p>are vectors with missing values allowed? Default is <code>TRUE</code></p></td>
+    </tr>
+    <tr>
+      <th>len</th>
+      <td><p>expected length of <code>x</code>. If provided, overrides <code>min.len</code> and
+<code>max.len</code>. Defaults to <code>NULL</code>.</p></td>
+    </tr>
+    <tr>
+      <th>min.len</th>
+      <td><p>minimum length for <code>x</code></p></td>
+    </tr>
+    <tr>
+      <th>max.len</th>
+      <td><p>maximum length for <code>x</code></p></td>
     </tr>
     <tr>
       <th>...</th>
