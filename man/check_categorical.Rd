@@ -6,14 +6,43 @@
 \alias{test_categorical}
 \title{Check to see if a vector is categorical (character or string)}
 \usage{
-check_categorical(x, ...)
+check_categorical(
+  x,
+  any.missing = TRUE,
+  all.missing = TRUE,
+  len = NULL,
+  min.len = NULL,
+  max.len = NULL,
+  ...
+)
 
-assert_categorical(x, ..., .var.name = vname(x), add = NULL)
+assert_categorical(
+  x,
+  any.missing = TRUE,
+  all.missing = TRUE,
+  len = NULL,
+  min.len = NULL,
+  max.len = NULL,
+  ...,
+  .var.name = vname(x),
+  add = NULL
+)
 
 test_categorical(x, ...)
 }
 \arguments{
 \item{x}{a vector of things}
+
+\item{any.missing}{are vectors with missing values allowed? Default is \code{TRUE}}
+
+\item{all.missing}{are vectors with missing values allowed? Default is \code{TRUE}}
+
+\item{len}{expected length of \code{x}. If provided, overrides \code{min.len} and
+\code{max.len}. Defaults to \code{NULL}.}
+
+\item{min.len}{minimum length for \code{x}}
+
+\item{max.len}{maximum length for \code{x}}
 
 \item{...}{dots}
 }

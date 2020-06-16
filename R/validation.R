@@ -4,19 +4,37 @@
 #'
 #' @export
 #' @param x a vector of things
+#' @param any.missing are vectors with missing values allowed? Default is `TRUE`
+#' @param all.missing are vectors with missing values allowed? Default is `TRUE`
+#' @param len expected length of `x`. If provided, overrides `min.len` and
+#'   `max.len`. Defaults to `NULL`.
+#' @param min.len minimum length for `x`
+#' @param max.len maximum length for `x`
 #' @param ... dots
-check_categorical <- function(x, ...) {
+check_categorical <- function(x, any.missing = TRUE, all.missing = TRUE,
+                              len = NULL, min.len = NULL, max.len = NULL, ...) {
   e <- character()
-  if (!is.character(x) && !is.factor(x)) {
-    e <- c(e, "e is not a character or factor vector")
+  if (is.character(x)) {
+    e <- check_character(x, any.missing = any.missing, all.missing = all.missing,
+                         len = len, min.len = min.len, max.len = max.len)
+  } else if (is.factor(x)) {
+    e <- check_factor(x, any.missing = any.missing, all.missing = all.missing,
+                      len = len, min.len = min.len, max.len = max.len)
+  } else {
+    e <- "x is not a character or factor vector"
   }
+
   if (length(e)) e else TRUE
 }
 
 #' @rdname check_categorical
 #' @export
-assert_categorical <- function(x, ..., .var.name = vname(x), add = NULL) {
-  res <- check_categorical(x, ...)
+assert_categorical <- function(x, any.missing = TRUE, all.missing = TRUE,
+                               len = NULL, min.len = NULL, max.len = NULL, ...,
+                               .var.name = vname(x), add = NULL) {
+  res <- check_categorical(x, any.missing = any.missing,
+                           all.missing = all.missing, len = len,
+                           min.len = min.len, max.len = max.len, ...)
   makeAssertion(x, res, .var.name, add)
 }
 
