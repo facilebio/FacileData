@@ -84,6 +84,9 @@ normalize_assay_matrix.rnaseq <- function(x, features, samples,
 }
 
 #' @noRd
+normalize_assay_matrix.pseudobulk <- normalize_assay_matrix.rnaseq
+
+#' @noRd
 normalize_assay_matrix.isoseq <- normalize_assay_matrix.rnaseq
 
 #' someone processed their data with salmon or kallisto and wanted to store

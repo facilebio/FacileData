@@ -75,7 +75,7 @@ assert_valid_meta_file <- function(fn, as.list = FALSE) {
 
 .feature.types <- c('entrez', 'ensgid', 'enstid', 'custom')
 .assay.types <- c(
-  "rnaseq", "isoseq", "normcounts", "nanostring",
+  "rnaseq", "pseudobulk", "isoseq", "normcounts", "nanostring",
   "qpcrct", "qpcrdct", "lognorm", "raw")
 
 .storage.modes <- c('integer', 'numeric')

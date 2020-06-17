@@ -139,7 +139,7 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
   "rnaseq",        "DGEList",                "edgeR",
   "rnaseq",        "SummarizedExperiment",   "SummarizedExperiment",
   "rnaseq",        "ExpressionSet",          "Biobase",
-  "lognorm",       "EList",                  "limma",
+  "pseudobulk",    "DGEList",                "edgeR",
   "lognorm",       "EList",                  "limma")
 
 #' Returns the class info to use to instantiate the right biocbox class
