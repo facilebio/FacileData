@@ -34,14 +34,14 @@ test_that("fetch_assay_data results converted to biocboxes", {
 
     rnaseq.compat <- is.element(
       "rnaseq",
-      filter(FacileData:::.biocboxes, .data$class == .env$class))
+      filter(FacileData:::.biocboxes, .data$class == .env$class)$assay_type)
 
     if (rnaseq.compat) {
       bb <- biocbox(samples, features = genes, class = class)
     } else {
       bb <- expect_warning({
         biocbox(samples, features = genes, class = class)
-      }, "not compatible", info = class)
+      }, "not compatible.*assay_type", info = class)
     }
 
     expect_is(bb, class, info = class)
@@ -51,7 +51,8 @@ test_that("fetch_assay_data results converted to biocboxes", {
     bb <- bb[rownames(e), colnames(e)]
 
     # Check assay data is same
-    expect_equal(adata(bb), e, check.attributes = FALSE, info = class)
+    expect_equal(adata(bb), e, check.attributes = FALSE,
+                 info = class)
 
     # Check that sample covariates are the same
     pdat <- as.data.frame(pdata(bb))
