@@ -110,6 +110,14 @@ test_that("batch correction using 'facile' covariate works", {
   expect_true(all.equal(dat.norm1, dat.norm2))
 })
 
+test_that("batch effect correction will handle missing covariate levels", {
+  set.seed(122)
+  s <- samples %>%
+    mutate(bcov = sample(c("a", "b", NA), nrow(samples), replace = TRUE))
+  bc <- fetch_assay_data(s, genes, batch = "bcov", normalize = TRUE,
+                         as.matrix = TRUE)
+})
+
 test_that("single-gene batch correction is equivalent to all data correction", {
   set.seed(0xBEEF)
   smpls <- filter_samples(FDS, indication == "BLCA") %>%

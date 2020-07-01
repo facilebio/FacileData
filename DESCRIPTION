@@ -58,7 +58,7 @@ Suggests:
 Remotes:
   lianos/multiGSEA@develop
 biocViews: Infrastructure, DataRepresentation
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
 License: Apache License (>= 2.0)
 Encoding: UTF-8

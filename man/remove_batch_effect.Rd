@@ -60,6 +60,15 @@ Setting the \code{batch.scale} parameter to \code{TRUE} (the default), ensures t
 the \code{rowMeans} of the returned data matrix are the same as the original
 dataset.
 }
+\section{Missing values in batch covariates}{
+
+It can be that some of the levels of the \code{batch} and \code{main} covariates
+are missing \code{NA}. When these covariates are categorical, all missing values
+will be replaced with a dummy value.
+
+If numeric covariates are missing, then this will throw an error.
+}
+
 \examples{
 # We'll materialize a data matrix and sample_info table from the
 # exampleFacileDataSet, then correct the data matrix.
