@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Objects exported from other packages — reexports • FacileData</title>
+<title>Replaces NA's with specified values. — freplace_na • FacileData</title>
 
 
 <!-- jquery -->
@@ -41,15 +41,11 @@
   <link href="../extra.css" rel="stylesheet">
   
 
-<meta property="og:title" content="Objects exported from other packages — reexports" />
-<meta property="og:description" content="These objects are imported from other packages. Follow the links
-below to see their documentation.
-
-  broomtidy
-
-  dplyr%&amp;gt;%, arrange, collect, distinct, filter, group_by, inner_join, left_join, mutate, select, semi_join, transmute, ungroup
-
-" />
+<meta property="og:title" content="Replaces NA's with specified values. — freplace_na" />
+<meta property="og:description" content="Some the downstream uses of a FacileDataStore can throw problems when NA's
+are found in data or covariates, so we often want to fill in NA's with
+non-NA markers of missing values. Note that unless specified otherwise
+(using the replace and defaults parameters)," />
 
 
 
@@ -141,25 +137,67 @@ below to see their documentation.
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Objects exported from other packages</h1>
-    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/package.R'><code>R/package.R</code></a></small>
-    <div class="hidden name"><code>reexports.Rd</code></div>
+    <h1>Replaces NA's with specified values.</h1>
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/replace_na.R'><code>R/replace_na.R</code></a></small>
+    <div class="hidden name"><code>freplace_na.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>These objects are imported from other packages. Follow the links
-below to see their documentation.</p>
-<dl'>
-  <dt>broom</dt><dd><p><code><a href='https://rdrr.io/pkg/broom/man/reexports.html'>tidy</a></code></p></dd>
-
-  <dt>dplyr</dt><dd><p><code><a href='https://dplyr.tidyverse.org/reference/reexports.html'>%&gt;%</a></code>, <code><a href='https://dplyr.tidyverse.org/reference/arrange.html'>arrange</a></code>, <code><a href='https://dplyr.tidyverse.org/reference/compute.html'>collect</a></code>, <code><a href='https://dplyr.tidyverse.org/reference/distinct.html'>distinct</a></code>, <code><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></code>, <code><a href='https://dplyr.tidyverse.org/reference/group_by.html'>group_by</a></code>, <code><a href='https://dplyr.tidyverse.org/reference/mutate-joins.html'>inner_join</a></code>, <code><a href='https://dplyr.tidyverse.org/reference/mutate-joins.html'>left_join</a></code>, <code><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></code>, <code><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></code>, <code><a href='https://dplyr.tidyverse.org/reference/filter-joins.html'>semi_join</a></code>, <code><a href='https://dplyr.tidyverse.org/reference/mutate.html'>transmute</a></code>, <code><a href='https://dplyr.tidyverse.org/reference/group_by.html'>ungroup</a></code></p></dd>
-
-</dl>
+    <p>Some the downstream uses of a FacileDataStore can throw problems when NA's
+are found in data or covariates, so we often want to fill in NA's with
+non-NA markers of missing values. Note that unless specified otherwise
+(using the <code>replace</code> and <code>defaults</code> parameters),</p>
     </div>
 
+    <pre class="usage"><span class='fu'>freplace_na</span>(
+  <span class='no'>data</span>,
+  <span class='kw'>replace</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
+  <span class='kw'>defaults</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
+  <span class='kw'>ignore</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/character.html'>character</a></span>(),
+  <span class='no'>...</span>
+)</pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>data</th>
+      <td><p>the thing that has NA's in it (a data.frame or vector)</p></td>
+    </tr>
+    <tr>
+      <th>replace</th>
+      <td><p>a named list of elements to use for custom replacement values</p></td>
+    </tr>
+    <tr>
+      <th>defaults</th>
+      <td><p>if named elements in <code>data</code> do not appear in <code>replace</code>, you
+can provide default values for categories of parameters (ie.
+<code>"categorical"</code> or <code>"numeric"</code>), otherwise
+FacileData:::defaults.freplace_na will be used.</p></td>
+    </tr>
+    </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
+    <p>an NA-replaced version of <code>data</code></p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>Depending on the atomic type of the thing that NA's are being replaced with,
+a default value is assumed. These can be overriden by using the <code>defaults</code>
+parameter, or specifically by column (or list) names via the <code>replace</code>
+parameter.</p>
+<p>Missing values (NA's) come up often in FacileDataStores since we often use
+them to include data from multiple datasets, which induces "ragged" (sparse)
+covariate (pData) entries. In man</p>
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span>(
+  <span class='kw'>a</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>10</span>),
+  <span class='kw'>b</span> <span class='kw'>=</span> <span class='no'>letters</span>[<span class='fl'>1</span>:<span class='fl'>10</span>],
+  <span class='kw'>c</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span>(<span class='no'>LETTERS</span>[<span class='fl'>1</span>:<span class='fl'>10</span>]))
+<span class='no'>data</span>[<span class='fl'>3</span>, ] <span class='kw'>&lt;-</span> <span class='fl'>NA</span>
+<span class='no'>r1</span> <span class='kw'>&lt;-</span> <span class='fu'>freplace_na</span>(<span class='no'>data</span>, <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>b</span> <span class='kw'>=</span> <span class='st'>"bee"</span>), <span class='kw'>ignore</span> <span class='kw'>=</span> <span class='st'>"a"</span>)
+<span class='no'>r2</span> <span class='kw'>&lt;-</span> <span class='fu'>freplace_na</span>(<span class='no'>data</span>, <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>b</span> <span class='kw'>=</span> <span class='st'>"bee"</span>), <span class='kw'>defaults</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>numeric</span> <span class='kw'>=</span> -<span class='fl'>Inf</span>))</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

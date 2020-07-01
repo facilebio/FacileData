@@ -210,6 +210,14 @@ the corresponding <code>design</code> and <code>covariates</code> parameters:</p
 <p>Setting the <code>batch.scale</code> parameter to <code>TRUE</code> (the default), ensures that
 the <code>rowMeans</code> of the returned data matrix are the same as the original
 dataset.</p>
+    <h2 class="hasAnchor" id="missing-values-in-batch-covariates"><a class="anchor" href="#missing-values-in-batch-covariates"></a>Missing values in batch covariates</h2>
+
+    
+
+<p>It can be that some of the levels of the <code>batch</code> and <code>main</code> covariates
+are missing <code>NA</code>. When these covariates are categorical, all missing values
+will be replaced with a dummy value.</p>
+<p>If numeric covariates are missing, then this will throw an error.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code>fetch_assay_data()</code> when <code>batch = "something"</code></p></div>
