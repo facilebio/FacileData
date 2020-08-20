@@ -29,6 +29,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-r@master
+        with:
+          install-r: false
+
       # pandoc is already installed in the docker container
       # - uses: r-lib/actions/setup-pandoc@master
 
