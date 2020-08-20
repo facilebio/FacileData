@@ -11,7 +11,9 @@ biocbox.FacileDataStore <- function(x, class = NULL, assay_name = NULL,
           ...)
 }
 
-#' Assembles a Bioconductor data container for a given assay.
+#' @section facile_frame:
+#' We can materialize a Bioconductor data container for a given assay over a set
+#' of samples.
 #'
 #' There is a default bioc class provided for different assay types, however
 #' the class type can be overrided by the `class` parameter. This function
@@ -19,7 +21,6 @@ biocbox.FacileDataStore <- function(x, class = NULL, assay_name = NULL,
 #' sepcial functionality that happens downstream of that (for instance,
 #' DGEList lib.size calculated from the data that made its way into the DGEList)
 #'
-#' @noRd
 #' @export
 #'
 #' @param sample_covariates If `NULL` (default), all sample covariates will
