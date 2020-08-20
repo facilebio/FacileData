@@ -68,7 +68,7 @@ facilitate <- function(x, ...) {
 
 # fds() getters/setters ........................................................
 
-#' Get/set the FacileDataStore from an object
+#' Get or set the FacileDataStore for an object
 #'
 #' @rdname fds
 #' @export

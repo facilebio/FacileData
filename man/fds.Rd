@@ -8,7 +8,7 @@
 \alias{fds<-.tbl}
 \alias{fds<-.data.frame}
 \alias{set_fds}
-\title{Get/set the FacileDataStore from an object}
+\title{Get or set the FacileDataStore for an object}
 \usage{
 fds(x, ...)
 
@@ -30,5 +30,5 @@ set_fds(x, value)
 \item{db}{The \code{FacileDb} object}
 }
 \description{
-Get/set the FacileDataStore from an object
+Get or set the FacileDataStore for an object
 }
