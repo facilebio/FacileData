@@ -73,7 +73,7 @@ facilitate <- function(x, ...) {
 #' @rdname fds
 #' @export
 #' @param x the object
-#' @param db The \code{FacileDb} object
+#' @param value The \code{FacileDataStore} object
 fds <- function(x, ...) {
   UseMethod("fds", x)
 }

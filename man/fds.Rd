@@ -27,7 +27,7 @@ set_fds(x, value)
 \arguments{
 \item{x}{the object}
 
-\item{db}{The \code{FacileDb} object}
+\item{value}{The \code{FacileDataStore} object}
 }
 \description{
 Get or set the FacileDataStore for an object
