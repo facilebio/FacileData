@@ -64,7 +64,7 @@ dataset.
 
 It can be that some of the levels of the \code{batch} and \code{main} covariates
 are missing \code{NA}. When these covariates are categorical, all missing values
-will be replaced with a dummy value.
+will be replaced with a dummy value using the logic from \code{\link[=freplace_na]{freplace_na()}}
 
 If numeric covariates are missing, then this will throw an error.
 }

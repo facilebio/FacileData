@@ -25,7 +25,6 @@ just one boolean operation. Multiple terms passed into \code{...} will be
 }
 \seealso{
 Other API: 
-\code{\link{fetch_assay_data.FacileDataSet}()},
 \code{\link{fetch_assay_score.FacileDataSet}()},
 \code{\link{fetch_custom_sample_covariates.FacileDataSet}()},
 \code{\link{fetch_sample_covariates}()},

@@ -1,60 +1,5 @@
-#' Fetch assay data from single assay of choice
-#'
-#' The `(fetch|with)_assay_data` functions are some of the main workhose
-#' functions of the facile ecosystem. These calls enable you to retrieve
-#' raw and noramlized assay data from a FacileData container.
-#'
-#' `fetch_assay_data(x, ...)` will return the data in long form.
-#' `with_assay_data(x, ...)` is most typically used when you already have
-#' a dataset `x` (a `facile_frame`) that you want to decorate with more assay
-#' data. The assay data asked for will be appended on to `x` in wide format.
-#' Because `fetch` is (most often) used at a lower level of granularity,
-#' `normalize` is by default set to `FALSE`, while it is set to `TRUE` in
-#' `with_assay_data`.
-#'
-#' @section Removing Batch Effects:
-#' When normalized data is returned, we assume these data are log-like, and you
-#' have the option to regress out batch effects using our
-#' [remove_batch_effect()] wrapper to [limma::removeBatchEffect()].
-#'
-#' @rdname fetch_assay_data
 #' @export
-#' @importFrom rhdf5 h5read
-#' @importFrom multiGSEA eigenWeightedMean
-#' @inheritParams remove_batch_effect
-#'
-#' @param x A `FacileDataSrote` object, or `facile_frame`
-#' @param features a feature descriptor (data.frame with assay and feature_id
-#'   columms)
-#' @param samples a sample descriptor to specify which samples to return data
-#'   from.
-#' @param assay_name the name of the assay to fetch data from. Defaults to the
-#'   value of [default_assay()] for `x`. Must be a subset of `assay_names(x)`.
-#' @param normalized return normalize or raw data values, defaults to `FALSE`.
-#'   This is only really "functional" for for `assay_type = "rnaseq"` types
-#'   of assays, where the normalized data is log2(CPM). These values can
-#'   be tweaked with `log = (TRUE|FALSE)` and `prior.count` parameters, which
-#'   can passed down internally to (eventually) [edgeR::cpm()].
-#' @param as.matrix by default, the data is returned in a long-form tbl-like
-#'   result. If set to `TRUE`, the data is returned as a matrix.
-#' @param ... parameters to pass to normalization methods
-#' @param subset.threshold sometimes fetching all the genes is faster than
-#'   trying to subset. We have to figure out why that is, but I've previously
-#'   tested random features of different lengths, and around 700 features was
-#'   the elbow.
-#' @param aggregate.by do you want individual level results or geneset
-#'   scores? Use 'ewm' for eigenWeightedMean, and that's all.
-#' @return A `tibble` (lazy or not) with assay data.
-#' @family API
-#' @examples
-#' samples <- exampleFacileDataSet() %>%
-#'   filter_samples(indication == "BLCA", sample_type == "tumor")
-#' features <- c(PRF1='5551', GZMA='3001', CD274='29126')
-#' dat <- with_assay_data(samples, features, normalized = TRUE, batch = "sex")
-#' dat <- with_assay_data(samples, features, normalized = TRUE,
-#'                        batch = c("sex", "stage"))
-#' dat <- with_assay_data(samples, features, normealized = TRUE,
-#'                        batch = c("sex", "stage"), main = "sample_type")
+#' @noRd
 fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
                                            assay_name = default_assay(x),
                                            normalized = FALSE,
@@ -169,8 +114,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
 }
 
 #' @export
-#' @rdname fetch_assay_data
-#' @importFrom data.table setDF
+#' @noRd
 fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
                                           assay_name = NULL,
                                           normalized = FALSE,
@@ -199,6 +143,10 @@ fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
 }
 
 
+#' @noRd
+#' @importFrom rhdf5 h5read
+#' @importFrom multiGSEA eigenWeightedMean
+#' @importFrom data.table setDF
 .fetch_assay_data <- function(x, assay_name, feature_ids, samples,
                               normalized = FALSE, batch = NULL, main = NULL,
                               as.matrix = FALSE,
