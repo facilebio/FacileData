@@ -95,7 +95,7 @@
       <h1 data-toc-skip>FacileData API Overview</h1>
                         <h4 class="author">Steve Lianoglou</h4>
             
-            <h4 class="date">2020-07-30</h4>
+            <h4 class="date">2020-08-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/facilebio/FacileData/blob/master/vignettes/FacileData.Rmd"><code>vignettes/FacileData.Rmd</code></a></small>
       <div class="hidden name"><code>FacileData.Rmd</code></div>
@@ -172,7 +172,7 @@
 <div id="faciledata-access-api" class="section level1">
 <h1 class="hasAnchor">
 <a href="#faciledata-access-api" class="anchor"></a>FacileData Access API</h1>
-<p>The base interface is the <code>FacileDataStore</code>. There are no objects of this class, it rather serves as an interface that should be implemented by a subclass, i.e. a <code>FacileDataSet</code>, or a <code>FacileSummarizedExperiment</code>. An object that <code>is(x, "FacileDataStore") == TRUE</code> is assumed to implement the entire <em>FacileData API</em>.</p>
+<p>The base interface is the <code>FacileDataStore</code>. There are no objects of this class, it rather serves as an interface that should be implemented by a subclass, i.e. a <code>FacileDataSet</code>, or a <code>FacileSummarizedExperiment</code>. An object that <code>is(x, "FacileDataStore") == TRUE</code> is assumed to implement the entire <em>FacileData API</em>.</p>
 <p>Broadly speaking, there are two classes of functions that are used to pull data out of a <code>FacileDataSet</code>, the <code>fetch_*</code> and <code>with_*</code> functions. To a first approximation, we can consider the <code>fetch_*</code> functions to be the lowest level functions, and the <code>with_*</code> functions are higher-level accessors.</p>
 <p>The <code>with_*</code> functions were written so that they can naturally be combined in pipe (<code><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></code>) data-manipulation chains. They provide analysts with a fluent and succinct API with which to perform exploratory data analyses.</p>
 <p>For example, to retrieve normalized RNA-seq expression values for CXCL9 and GZMA along with survival and sex information for the samples inin the TCGA bladder (“BLCA”) indication, you can write:</p>
@@ -195,7 +195,7 @@
 <li>filter_samples</li>
 <li>fetch_assay_data</li>
 <li>with_assay_data</li>
-<li>fetch_assay_score (x): just use <code>fetch_assay_data(..., aggregate = TRUE)</code>
+<li>fetch_assay_score (x): just use <code><a href="../reference/fetch_assay_data.html">fetch_assay_data(..., aggregate = TRUE)</a></code>
 </li>
 <li>fetch_custom_sample_covariates (this probably isn’t user facing)</li>
 <li>fetch_sample_covariates</li>

@@ -330,7 +330,7 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span>(~ <span class="no">dataset</span>)</pre></body></html></div>
 <p><img src="FacileDataSet-assembly_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
 <div class="sourceCode" id="cb14"><html><body><pre class="r"><span class="no">bdat</span> <span class="kw">&lt;-</span> <span class="fu">samples</span>(<span class="no">xfds</span>) <span class="kw">%&gt;%</span>
-  <span class="fu">fetch_assay_data</span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"ENSG00000137076"</span>, <span class="st">"ENSG00000150093"</span>),
+  <span class="fu"><a href="../reference/fetch_assay_data.html">fetch_assay_data</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"ENSG00000137076"</span>, <span class="st">"ENSG00000150093"</span>),
                    <span class="kw">normalized</span> <span class="kw">=</span> <span class="fl">TRUE</span>) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="../reference/sample-covariates.html">with_sample_covariates</a></span>(<span class="st">"treatment"</span>)
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(<span class="no">bdat</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="kw">x</span> <span class="kw">=</span> <span class="no">feature_name</span>, <span class="kw">y</span> <span class="kw">=</span><span class="no">value</span>)) +
