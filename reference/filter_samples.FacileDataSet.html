@@ -147,11 +147,11 @@ pData data.frame of all its covariates." />
 
     <pre class="usage"><span class='co'># S3 method for FacileDataSet</span>
 <span class='fu'>filter_samples</span>(
-  <span class='no'>x</span>,
-  <span class='no'>...</span>,
-  <span class='kw'>samples.</span> <span class='kw'>=</span> <span class='fu'>samples</span>(<span class='no'>x</span>),
-  <span class='kw'>custom_key</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.getenv.html'>Sys.getenv</a></span>(<span class='st'>"USER"</span>),
-  <span class='kw'>with_covariates</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+  <span class='kw'>x</span>,
+  <span class='kw'>...</span>,
+  samples. = <span class='fu'>samples</span>(<span class='kw'>x</span>),
+  custom_key = <span class='fu'><a href='https://rdrr.io/r/base/Sys.getenv.html'>Sys.getenv</a></span>(<span class='st'>"USER"</span>),
+  with_covariates = <span class='fl'>FALSE</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -182,7 +182,7 @@ the covariates, for instance, does not work right now.</p>
     <div class='dont-index'><p>Other API: 
 <code><a href='fetch_assay_score.FacileDataSet.html'>fetch_assay_score.FacileDataSet</a>()</code>,
 <code><a href='fetch_custom_sample_covariates.FacileDataSet.html'>fetch_custom_sample_covariates.FacileDataSet</a>()</code>,
-<code><a href='sample-covariates.html'>fetch_sample_covariates</a>()</code>,
+<code><a href='fetch_sample_covariates.html'>fetch_sample_covariates</a>()</code>,
 <code><a href='fetch_sample_statistics.FacileDataSet.html'>fetch_sample_statistics.FacileDataSet</a>()</code>,
 <code><a href='fetch_samples.FacileDataSet.html'>fetch_samples.FacileDataSet</a>()</code>,
 <code><a href='filter_features.FacileDataSet.html'>filter_features.FacileDataSet</a>()</code>,
@@ -190,18 +190,20 @@ the covariates, for instance, does not work right now.</p>
 <code><a href='samples.FacileDataSet.html'>samples.FacileDataSet</a>()</code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>fds</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='exampleFacileDataSet.html'>exampleFacileDataSet</a></span>()
+    <pre class="examples"><div class='input'><span class='kw'>fds</span> <span class='op'>&lt;-</span> <span class='fu'><a href='exampleFacileDataSet.html'>exampleFacileDataSet</a></span>()
 
 <span class='co'># To identify all samples that are of "CMS3" or "CMS4" subtype(</span>
 <span class='co'># stored in the "subtype_crc_cms" covariate:</span>
-<span class='no'>crc.34</span> <span class='kw'>&lt;-</span> <span class='fu'>filter_samples</span>(<span class='no'>fds</span>, <span class='no'>subtype_crc_cms</span> <span class='kw'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"CMS3"</span>, <span class='st'>"CMS4"</span>))
-<span class='no'>eav.query</span> <span class='kw'>&lt;-</span> <span class='no'>fds</span> <span class='kw'>%&gt;%</span>
-  <span class='fu'><a href='sample-covariates.html'>fetch_sample_covariates</a></span>(<span class='kw'>covariates</span> <span class='kw'>=</span> <span class='st'>"subtype_crc_cms"</span>) <span class='kw'>%&gt;%</span>
-  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span>(<span class='no'>value</span> <span class='kw'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"CMS3"</span>, <span class='st'>"CMS4"</span>)) <span class='kw'>%&gt;%</span>
+<span class='kw'>crc.34</span> <span class='op'>&lt;-</span> <span class='fu'>filter_samples</span>(<span class='kw'>fds</span>, <span class='kw'>subtype_crc_cms</span> <span class='op'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"CMS3"</span>, <span class='st'>"CMS4"</span>))
+<span class='kw'>eav.query</span> <span class='op'>&lt;-</span> <span class='kw'>fds</span> <span class='op'>%&gt;%</span>
+  <span class='fu'><a href='fetch_sample_covariates.html'>fetch_sample_covariates</a></span>(covariates = <span class='st'>"subtype_crc_cms"</span>) <span class='op'>%&gt;%</span>
+  <span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span>(<span class='kw'>value</span> <span class='op'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"CMS3"</span>, <span class='st'>"CMS4"</span>)) <span class='op'>%&gt;%</span>
   <span class='fu'><a href='https://dplyr.tidyverse.org/reference/compute.html'>collect</a></span>()
-<span class='fu'><a href='https://rdrr.io/r/base/sets.html'>setequal</a></span>(<span class='no'>crc.34</span>$<span class='no'>sample_id</span>, <span class='no'>eav.query</span>$<span class='no'>sample_id</span>)</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'>
+<span class='fu'><a href='https://rdrr.io/r/base/sets.html'>setequal</a></span>(<span class='kw'>crc.34</span><span class='op'>$</span><span class='kw'>sample_id</span>, <span class='kw'>eav.query</span><span class='op'>$</span><span class='kw'>sample_id</span>)
+</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'>
 <span class='co'># You can keep filtering a filtered dataset</span>
-<span class='no'>crc.34.male</span> <span class='kw'>&lt;-</span> <span class='fu'>filter_samples</span>(<span class='no'>crc.34</span>, <span class='no'>sex</span> <span class='kw'>==</span> <span class='st'>"m"</span>)</div></pre>
+<span class='kw'>crc.34.male</span> <span class='op'>&lt;-</span> <span class='fu'>filter_samples</span>(<span class='kw'>crc.34</span>, <span class='kw'>sex</span> <span class='op'>==</span> <span class='st'>"m"</span>)
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -217,7 +219,7 @@ the covariates, for instance, does not work right now.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

@@ -154,15 +154,15 @@ intensities, etc.) run over the samples.</p>
     </div>
 
     <pre class="usage"><span class='fu'>FacileDataSet</span>(
-  <span class='no'>path</span>,
-  <span class='kw'>data.fn</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>sqlite.fn</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>hdf5.fn</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>meta.fn</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>anno.dir</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>cache_size</span> <span class='kw'>=</span> <span class='fl'>80000</span>,
-  <span class='kw'>db.loc</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"reference"</span>, <span class='st'>"temporary"</span>, <span class='st'>"memory"</span>),
-  <span class='no'>...</span>
+  <span class='kw'>path</span>,
+  data.fn = <span class='kw'>NULL</span>,
+  sqlite.fn = <span class='kw'>NULL</span>,
+  hdf5.fn = <span class='kw'>NULL</span>,
+  meta.fn = <span class='kw'>NULL</span>,
+  anno.dir = <span class='kw'>NULL</span>,
+  cache_size = <span class='fl'>80000</span>,
+  db.loc = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"reference"</span>, <span class='st'>"temporary"</span>, <span class='st'>"memory"</span>),
+  <span class='kw'>...</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -226,7 +226,7 @@ To better understand the structure and contents of this file, you can
 refer to the following:
 a. The included <code>testdata/expected-meta.yaml</code> file, which is an
 exemplar file for <code><a href='exampleFacileDataSet.html'>exampleFacileDataSet()</a></code>.
-b. The help file provided by the <code><a href='eav-metadata.html'>eav_metadata_create()</a></code> function, which
+b. The help file provided by the <code><a href='eav_metadata_create.html'>eav_metadata_create()</a></code> function, which
 describes in greater detail how we track a dataset's sample-level
 covariates (aka, "pData" in the bioconductor world).
 In the meantime, a short description of the entries found in the
@@ -241,7 +241,7 @@ a <code><a href='https://rdrr.io/pkg/Biobase/man/class.ExpressionSet.html'>Bioba
 The datasets are further enumerated.</p></li>
 <li><p><code>sample_covariates</code>: a section that enumerates the covariatets that
 are tracked over the samples inside the <code>FacileDataSet</code> (ie. a mapping
-of the <code>pData</code> for the samples). Reference <code><a href='eav-metadata.html'>eav_metadata_create()</a></code>
+of the <code>pData</code> for the samples). Reference <code><a href='eav_metadata_create.html'>eav_metadata_create()</a></code>
 for more information.</p></li>
 </ul></li>
 <li><p>A <code>custom-annotation</code> directory, which stores custom <code>sample_covariate</code>
@@ -258,11 +258,12 @@ elsewhere.</p></li>
     <div class='dont-index'><p>Other FacileDataSet: 
 <code><a href='dbfn.html'>dbfn</a>()</code>,
 <code><a href='hdf5fn.html'>hdf5fn</a>()</code>,
-<code><a href='meta-info.html'>meta_file</a>()</code></p></div>
+<code><a href='meta_file.html'>meta_file</a>()</code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>fn</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"extdata"</span>, <span class='st'>"exampleFacileDataSet"</span>, <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"FacileData"</span>)
-<span class='no'>fds</span> <span class='kw'>&lt;-</span> <span class='fu'>FacileDataSet</span>(<span class='no'>fn</span>)</div></pre>
+    <pre class="examples"><div class='input'><span class='kw'>fn</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"extdata"</span>, <span class='st'>"exampleFacileDataSet"</span>, package = <span class='st'>"FacileData"</span>)
+<span class='kw'>fds</span> <span class='op'>&lt;-</span> <span class='fu'>FacileDataSet</span>(<span class='kw'>fn</span>)
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -278,7 +279,7 @@ elsewhere.</p></li>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

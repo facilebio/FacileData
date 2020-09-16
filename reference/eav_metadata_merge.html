@@ -144,12 +144,12 @@ attribute definition list." />
 
     <div class="ref-description">
     <p>Takes a list of (perhaps) default sets of entity-attribute metadata, as would
-be generated from <code><a href='eav-metadata.html'>eav_metadata_create(pData(eSet), covariate_def = NULL)</a></code>,
+be generated from <code><a href='eav_metadata_create.html'>eav_metadata_create(pData(eSet), covariate_def = NULL)</a></code>,
 and pulls out the sister custom-definitions from the <code>covariate_def</code>
 attribute definition list.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>eav_metadata_merge</span>(<span class='no'>default_def</span>, <span class='kw'>covariate_def</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>())</pre>
+    <pre class="usage"><span class='fu'>eav_metadata_merge</span>(<span class='kw'>default_def</span>, covariate_def = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>())</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -157,7 +157,7 @@ attribute definition list.</p>
     <tr>
       <th>default_def</th>
       <td><p>A list of covariate-definition-lists, as would be returned
-from <code><a href='eav-metadata.html'>eav_metadata_create()</a></code></p></td>
+from <code><a href='eav_metadata_create.html'>eav_metadata_create()</a></code></p></td>
     </tr>
     <tr>
       <th>covariate_def</th>
@@ -192,7 +192,7 @@ the object returned from this funciton.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

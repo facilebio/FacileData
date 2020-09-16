@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Create a facile covariate definition file from a sample <code>pData</code> data.frame — eav_metadata_create • FacileData</title>
+<title>Create a facile covariate definition file from a sample pData data.frame — eav_metadata_create • FacileData</title>
 
 
 <!-- jquery -->
@@ -41,7 +41,7 @@
   <link href="../extra.css" rel="stylesheet">
   
 
-<meta property="og:title" content="Create a facile covariate definition file from a sample <code>pData</code> data.frame — eav_metadata_create" />
+<meta property="og:title" content="Create a facile covariate definition file from a sample pData data.frame — eav_metadata_create" />
 <meta property="og:description" content="Sample covariates (aka pData) are encoded in an
 entity-attribute-value (EAV) table.
 Metadata about these covariates are stored in a meta.yaml file in the
@@ -156,9 +156,9 @@ list-of-list structure to represent the <code>sample_covariates</code> section o
     </div>
 
     <pre class="usage"><span class='fu'>eav_metadata_create</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>ignore</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"dataset"</span>, <span class='st'>"sample_id"</span>),
-  <span class='kw'>covariate_def</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+  <span class='kw'>x</span>,
+  ignore = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"dataset"</span>, <span class='st'>"sample_id"</span>),
+  covariate_def = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -245,13 +245,14 @@ indicates its censoring status.</p>
 <p>Let's assume we have <code>tte_OS</code> and <code>event_OS</code> column that are used to encode
 a patient's overall survival (time and censor status). To store this as an
 "OS" covariate in the EAV table, a <code>covariate_def</code> list-of-list definition
-that captures this encoding would look like this:</p><pre><span class='no'>covariate_def</span> <span class='kw'>&amp;</span><span class='no'>lt</span>;- <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
-  <span class='kw'>OS</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
-    <span class='kw'>class</span><span class='kw'>=</span><span class='st'>"right_censored"</span>,
-    <span class='kw'>arguments</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>time</span><span class='kw'>=</span><span class='st'>"tte_OS"</span>, <span class='kw'>event</span><span class='kw'>=</span><span class='st'>"event_OS"</span>),
-    <span class='kw'>label</span><span class='kw'>=</span><span class='st'>"Overall Survival"</span>,
-    <span class='kw'>type</span><span class='kw'>=</span><span class='st'>"clinical"</span>,
-    <span class='kw'>description</span><span class='kw'>=</span><span class='st'>"Overall survival in days"</span>))</pre>
+that captures this encoding would look like this:</p><pre><span class='kw'>covariate_def</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
+  OS=<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
+    class=<span class='st'>"right_censored"</span>,
+    arguments=<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(time=<span class='st'>"tte_OS"</span>, event=<span class='st'>"event_OS"</span>),
+    label=<span class='st'>"Overall Survival"</span>,
+    type=<span class='st'>"clinical"</span>,
+    description=<span class='st'>"Overall survival in days"</span>))
+</pre>
 
 <p>Note how the name of the list-entry in <code>covariate_def</code> defines the name of
 the covariate in the <code>FacileDataSet</code>. The <code>class</code> entry for the <code>OS</code>
@@ -261,15 +262,16 @@ is only used when encoding a wide <code>pData</code> into the EAV value column.
 <code>[eav_encode_right_censored()]</code> function, and their values are the columns in
 the target <code>pData</code> that populate the respective parameters in the function
 call. The analagous <code>meta.yaml</code> entry in the <code>sample_covariates</code> section for
-the <code>"OS"</code> <code>covariate_def</code> entry looks like so:</p><pre><span class='no'>sample_covariates</span>:
-  <span class='no'>OS</span>:
-    <span class='no'>class</span>: <span class='no'>right_censored</span>
-    <span class='no'>arguments</span>:
-      <span class='no'>time</span>: <span class='no'>tte_OS</span>
-      <span class='no'>event</span>: <span class='no'>event_OS</span>
-    <span class='no'>label</span>: <span class='st'>"Overall Survival"</span>
-    <span class='no'>type</span>: <span class='st'>"clinical"</span>
-    <span class='no'>description</span>: <span class='st'>"Overall survival in days"</span></pre>
+the <code>"OS"</code> <code>covariate_def</code> entry looks like so:</p><pre><span class='kw'>sample_covariates</span><span class='op'>:</span>
+  <span class='kw'>OS</span><span class='op'>:</span>
+    <span class='kw'>class</span><span class='op'>:</span> <span class='kw'>right_censored</span>
+    <span class='kw'>arguments</span><span class='op'>:</span>
+      <span class='kw'>time</span><span class='op'>:</span> <span class='kw'>tte_OS</span>
+      <span class='kw'>event</span><span class='op'>:</span> <span class='kw'>event_OS</span>
+    <span class='kw'>label</span><span class='op'>:</span> <span class='st'>"Overall Survival"</span>
+    <span class='kw'>type</span><span class='op'>:</span> <span class='st'>"clinical"</span>
+    <span class='kw'>description</span><span class='op'>:</span> <span class='st'>"Overall survival in days"</span>
+</pre>
 
     <h2 class="hasAnchor" id="encoding-arbitrarily-complex-covariates"><a class="anchor" href="#encoding-arbitrarily-complex-covariates"></a>Encoding Arbitrarily Complex Covariates</h2>
 
@@ -297,13 +299,14 @@ vector(s).</p><ul>
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># covariate_def definition to take tte_OS and tte_event columns and turn</span>
 <span class='co'># into a facile "OS" right_censored survival covariate</span>
-<span class='no'>cc</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
-  <span class='kw'>OS</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
-    <span class='kw'>arguments</span><span class='kw'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>time</span><span class='kw'>=</span><span class='st'>"tte_OS"</span>, <span class='kw'>event</span><span class='kw'>=</span><span class='st'>"event_OS"</span>),
-    <span class='kw'>label</span><span class='kw'>=</span><span class='st'>"Overall Survival"</span>,
-    <span class='kw'>class</span><span class='kw'>=</span><span class='st'>"right_censored"</span>,
-    <span class='kw'>type</span><span class='kw'>=</span><span class='st'>"clinical"</span>,
-    <span class='kw'>description</span><span class='kw'>=</span><span class='st'>"Overall survival in days"</span>))</div></pre>
+<span class='kw'>cc</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
+  OS=<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
+    arguments=<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(time=<span class='st'>"tte_OS"</span>, event=<span class='st'>"event_OS"</span>),
+    label=<span class='st'>"Overall Survival"</span>,
+    class=<span class='st'>"right_censored"</span>,
+    type=<span class='st'>"clinical"</span>,
+    description=<span class='st'>"Overall survival in days"</span>))
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -319,7 +322,7 @@ vector(s).</p><ul>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

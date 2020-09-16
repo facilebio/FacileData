@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Convert a <code>pData</code> data.frame to a melted EAV table — as.EAVtable • FacileData</title>
+<title>Convert a pData data.frame to a melted EAV table — as.EAVtable • FacileData</title>
 
 
 <!-- jquery -->
@@ -41,7 +41,7 @@
   <link href="../extra.css" rel="stylesheet">
   
 
-<meta property="og:title" content="Convert a <code>pData</code> data.frame to a melted EAV table — as.EAVtable" />
+<meta property="og:title" content="Convert a pData data.frame to a melted EAV table — as.EAVtable" />
 <meta property="og:description" content="Transforms a wide pData data.frame into a melted EAV table for use in
 a FacileDataSet. This function will also produce the list-of-list encodings
 that are generated from eav_metadata_create() to do its thing as an
@@ -145,15 +145,15 @@ attribute of the returned object." />
     <div class="ref-description">
     <p>Transforms a wide <code>pData</code> data.frame into a melted EAV table for use in
 a <code>FacileDataSet</code>. This function will also produce the list-of-list encodings
-that are generated from <code><a href='eav-metadata.html'>eav_metadata_create()</a></code> to do its thing as an
+that are generated from <code><a href='eav_metadata_create.html'>eav_metadata_create()</a></code> to do its thing as an
 attribute of the returned object.</p>
     </div>
 
     <pre class="usage"><span class='fu'>as.EAVtable</span>(
-  <span class='no'>x</span>,
-  <span class='kw'>ignore</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"dataset"</span>, <span class='st'>"sample_id"</span>),
-  <span class='kw'>covariate_def</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
-  <span class='kw'>na.rm</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>
+  <span class='kw'>x</span>,
+  ignore = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"dataset"</span>, <span class='st'>"sample_id"</span>),
+  covariate_def = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
+  na.rm = <span class='fl'>TRUE</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -165,7 +165,7 @@ attribute of the returned object.</p>
     </tr>
     <tr>
       <th>covariate_def</th>
-      <td><p>passed to <code><a href='eav-metadata.html'>eav_metadata_create()</a></code> that is used to
+      <td><p>passed to <code><a href='eav_metadata_create.html'>eav_metadata_create()</a></code> that is used to
 override default covariate definitions extracted from the columns of <code>x</code></p></td>
     </tr>
     </table>
@@ -176,7 +176,7 @@ override default covariate definitions extracted from the columns of <code>x</co
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>If you want to provide custom definitions for the covariates in the EAVtable
-that are different than the ones generated in <code><a href='eav-metadata.html'>eav_metadata_create()</a></code>, then
+that are different than the ones generated in <code><a href='eav_metadata_create.html'>eav_metadata_create()</a></code>, then
 provie that definition list in the <code>covariate_def</code> parameter.</p>
 
   </div>
@@ -194,7 +194,7 @@ provie that definition list in the <code>covariate_def</code> parameter.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

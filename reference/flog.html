@@ -156,16 +156,16 @@ level/priority hierarchy.</p>
     </div>
 
     <pre class="usage"><span class='fu'>flog</span>(
-  <span class='no'>...</span>,
-  <span class='kw'>level</span> <span class='kw'>=</span> <span class='st'>"info"</span>,
-  <span class='kw'>ns</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>session</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>file</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/showConnections.html'>stderr</a></span>(),
-  <span class='kw'>sep</span> <span class='kw'>=</span> <span class='st'>""</span>,
-  <span class='kw'>fill</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>labels</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>append</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>newline</span> <span class='kw'>=</span> !<span class='fu'><a href='https://rdrr.io/r/base/NULL.html'>is.null</a></span>(<span class='no'>file</span>)
+  <span class='kw'>...</span>,
+  level = <span class='st'>"info"</span>,
+  ns = <span class='kw'>NULL</span>,
+  session = <span class='kw'>NULL</span>,
+  file = <span class='fu'><a href='https://rdrr.io/r/base/showConnections.html'>stderr</a></span>(),
+  sep = <span class='st'>""</span>,
+  fill = <span class='fl'>FALSE</span>,
+  labels = <span class='kw'>NULL</span>,
+  append = <span class='fl'>FALSE</span>,
+  newline = <span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NULL.html'>is.null</a></span>(<span class='kw'>file</span>)
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -208,18 +208,21 @@ can control logging at the different package level.</p>
     
 
 
-<p>Logging levels are</p><pre><span class='no'>.flog_levels</span> <span class='kw'>&amp;</span><span class='no'>lt</span>;- <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"all"</span>  <span class='kw'>=</span> <span class='fl'>0</span>, <span class='st'>"trace"</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='st'>"debug"</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='st'>"info"</span> <span class='kw'>=</span> <span class='fl'>3</span>,
-                  <span class='st'>"warn"</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='st'>"error"</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='st'>"fatal"</span> <span class='kw'>=</span> <span class='fl'>6</span>)</pre>
+<p>Logging levels are</p><pre><span class='kw'>.flog_levels</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"all"</span>  = <span class='fl'>0</span>, <span class='st'>"trace"</span> = <span class='fl'>1</span>, <span class='st'>"debug"</span> = <span class='fl'>2</span>, <span class='st'>"info"</span> = <span class='fl'>3</span>,
+                  <span class='st'>"warn"</span> = <span class='fl'>4</span>, <span class='st'>"error"</span> = <span class='fl'>5</span>, <span class='st'>"fatal"</span> = <span class='fl'>6</span>)
+</pre>
 
     <h2 class="hasAnchor" id="crayon"><a class="anchor" href="#crayon"></a>crayon</h2>
 
     
 
 <p>Glue lets you put cayon functions in <code>{}</code> to stylize output. For instance,
-you can make "bold and red" the color red and also bold, like so:</p><pre><span class='fu'>flog</span>(<span class='st'>"This is {red}{bold}bold and red{reset}, right?"</span>)</pre>
+you can make "bold and red" the color red and also bold, like so:</p><pre><span class='fu'>flog</span>(<span class='st'>"This is {red}{bold}bold and red{reset}, right?"</span>)
+</pre>
 
 <p>Nice! It might be more convenient if we could make it a bit more terse,
-as shown below, but that might happen at another time.</p><pre><span class='fu'>flog</span>(<span class='st'>"This is rb`bold and red`, right?"</span>)</pre>
+as shown below, but that might happen at another time.</p><pre><span class='fu'>flog</span>(<span class='st'>"This is rb`bold and red`, right?"</span>)
+</pre>
 
 <p>Colors:</p><ul>
 <li><p>b: blue</p></li>
@@ -254,7 +257,7 @@ as shown below, but that might happen at another time.</p><pre><span class='fu'>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>
