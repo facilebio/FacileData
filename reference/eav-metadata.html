@@ -155,11 +155,11 @@ list-of-list structure to represent the <code>sample_covariates</code> section o
 <code>meta.yaml</code> file.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>eav_metadata_create</span>(
-  <span class='kw'>x</span>,
-  ignore = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"dataset"</span>, <span class='st'>"sample_id"</span>),
-  covariate_def = <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
-)</pre>
+    <pre class="usage"><span class='fu'>eav_metadata_create</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  ignore <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"dataset"</span>, <span class='st'>"sample_id"</span><span class='op'>)</span>,
+  covariate_def <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -245,13 +245,13 @@ indicates its censoring status.</p>
 <p>Let's assume we have <code>tte_OS</code> and <code>event_OS</code> column that are used to encode
 a patient's overall survival (time and censor status). To store this as an
 "OS" covariate in the EAV table, a <code>covariate_def</code> list-of-list definition
-that captures this encoding would look like this:</p><pre><span class='kw'>covariate_def</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
-  OS=<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
-    class=<span class='st'>"right_censored"</span>,
-    arguments=<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(time=<span class='st'>"tte_OS"</span>, event=<span class='st'>"event_OS"</span>),
-    label=<span class='st'>"Overall Survival"</span>,
-    type=<span class='st'>"clinical"</span>,
-    description=<span class='st'>"Overall survival in days"</span>))
+that captures this encoding would look like this:</p><pre><span class='va'>covariate_def</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+  OS<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+    class<span class='op'>=</span><span class='st'>"right_censored"</span>,
+    arguments<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>time<span class='op'>=</span><span class='st'>"tte_OS"</span>, event<span class='op'>=</span><span class='st'>"event_OS"</span><span class='op'>)</span>,
+    label<span class='op'>=</span><span class='st'>"Overall Survival"</span>,
+    type<span class='op'>=</span><span class='st'>"clinical"</span>,
+    description<span class='op'>=</span><span class='st'>"Overall survival in days"</span><span class='op'>)</span><span class='op'>)</span>
 </pre>
 
 <p>Note how the name of the list-entry in <code>covariate_def</code> defines the name of
@@ -262,15 +262,15 @@ is only used when encoding a wide <code>pData</code> into the EAV value column.
 <code>[eav_encode_right_censored()]</code> function, and their values are the columns in
 the target <code>pData</code> that populate the respective parameters in the function
 call. The analagous <code>meta.yaml</code> entry in the <code>sample_covariates</code> section for
-the <code>"OS"</code> <code>covariate_def</code> entry looks like so:</p><pre><span class='kw'>sample_covariates</span><span class='op'>:</span>
-  <span class='kw'>OS</span><span class='op'>:</span>
-    <span class='kw'>class</span><span class='op'>:</span> <span class='kw'>right_censored</span>
-    <span class='kw'>arguments</span><span class='op'>:</span>
-      <span class='kw'>time</span><span class='op'>:</span> <span class='kw'>tte_OS</span>
-      <span class='kw'>event</span><span class='op'>:</span> <span class='kw'>event_OS</span>
-    <span class='kw'>label</span><span class='op'>:</span> <span class='st'>"Overall Survival"</span>
-    <span class='kw'>type</span><span class='op'>:</span> <span class='st'>"clinical"</span>
-    <span class='kw'>description</span><span class='op'>:</span> <span class='st'>"Overall survival in days"</span>
+the <code>"OS"</code> <code>covariate_def</code> entry looks like so:</p><pre><span class='va'>sample_covariates</span><span class='op'>:</span>
+  <span class='va'>OS</span><span class='op'>:</span>
+    <span class='va'>class</span><span class='op'>:</span> <span class='va'>right_censored</span>
+    <span class='va'>arguments</span><span class='op'>:</span>
+      <span class='va'>time</span><span class='op'>:</span> <span class='va'>tte_OS</span>
+      <span class='va'>event</span><span class='op'>:</span> <span class='va'>event_OS</span>
+    <span class='va'>label</span><span class='op'>:</span> <span class='st'>"Overall Survival"</span>
+    <span class='va'>type</span><span class='op'>:</span> <span class='st'>"clinical"</span>
+    <span class='va'>description</span><span class='op'>:</span> <span class='st'>"Overall survival in days"</span>
 </pre>
 
     <h2 class="hasAnchor" id="encoding-arbitrarily-complex-covariates"><a class="anchor" href="#encoding-arbitrarily-complex-covariates"></a>Encoding Arbitrarily Complex Covariates</h2>
@@ -299,13 +299,13 @@ vector(s).</p><ul>
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># covariate_def definition to take tte_OS and tte_event columns and turn</span>
 <span class='co'># into a facile "OS" right_censored survival covariate</span>
-<span class='kw'>cc</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
-  OS=<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
-    arguments=<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(time=<span class='st'>"tte_OS"</span>, event=<span class='st'>"event_OS"</span>),
-    label=<span class='st'>"Overall Survival"</span>,
-    class=<span class='st'>"right_censored"</span>,
-    type=<span class='st'>"clinical"</span>,
-    description=<span class='st'>"Overall survival in days"</span>))
+<span class='va'>cc</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+  OS<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>
+    arguments<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>time<span class='op'>=</span><span class='st'>"tte_OS"</span>, event<span class='op'>=</span><span class='st'>"event_OS"</span><span class='op'>)</span>,
+    label<span class='op'>=</span><span class='st'>"Overall Survival"</span>,
+    class<span class='op'>=</span><span class='st'>"right_censored"</span>,
+    type<span class='op'>=</span><span class='st'>"clinical"</span>,
+    description<span class='op'>=</span><span class='st'>"Overall survival in days"</span><span class='op'>)</span><span class='op'>)</span>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -153,13 +153,13 @@ data analysis if they're in the incoming dataset. If those columns aren't
 found, then we'll pick the feature_id and count column.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>spread_assay_data</span>(
-  <span class='kw'>x</span>,
-  <span class='kw'>assay_name</span>,
-  key = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"name"</span>, <span class='st'>"feature_id"</span>),
-  value = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"cpm"</span>, <span class='st'>"value"</span>, <span class='st'>"count"</span>),
-  .fds = <span class='fu'><a href='fds.html'>fds</a></span>(<span class='kw'>x</span>)
-)</pre>
+    <pre class="usage"><span class='fu'>spread_assay_data</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  <span class='va'>assay_name</span>,
+  key <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"name"</span>, <span class='st'>"feature_id"</span><span class='op'>)</span>,
+  value <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"cpm"</span>, <span class='st'>"value"</span>, <span class='st'>"count"</span><span class='op'>)</span>,
+  .fds <span class='op'>=</span> <span class='fu'><a href='fds.html'>fds</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">

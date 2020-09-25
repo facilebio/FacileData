@@ -151,7 +151,7 @@ the facile ecosystem so that you can benefit from the interactivity provided
 therein.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>facilitate</span>(<span class='kw'>x</span>, <span class='kw'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>facilitate</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -183,9 +183,9 @@ FacileBioc package.</p></li>
 standard limma pipeline, but you'll want to be able to drop this result
 into the facile ecosystem provided in the FacileAnalysis package.
 The particulars of this <code>faciltate()</code> implementation would be defined in
-the FacileAnalysis package, and migth look something like this:</p><pre><span class='kw'>fit</span> <span class='op'>&lt;-</span> <span class='fu'>eBayes</span>(<span class='fu'>lmFit</span>(<span class='kw'>elist</span>, <span class='kw'>design</span>))
-<span class='kw'>limma.res</span> <span class='op'>&lt;-</span> <span class='fu'>topTable</span>(<span class='kw'>fit</span>, coef = <span class='st'>"something"</span>, n = <span class='fl'>Inf</span>)
-<span class='kw'>facile.res</span> <span class='op'>&lt;-</span> <span class='fu'>facilitate</span>(<span class='kw'>elist</span>, <span class='kw'>fit</span>, <span class='kw'>limma.res</span>)
+the FacileAnalysis package, and migth look something like this:</p><pre><span class='va'>fit</span> <span class='op'>&lt;-</span> <span class='fu'>eBayes</span><span class='op'>(</span><span class='fu'>lmFit</span><span class='op'>(</span><span class='va'>elist</span>, <span class='va'>design</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>limma.res</span> <span class='op'>&lt;-</span> <span class='fu'>topTable</span><span class='op'>(</span><span class='va'>fit</span>, coef <span class='op'>=</span> <span class='st'>"something"</span>, n <span class='op'>=</span> <span class='cn'>Inf</span><span class='op'>)</span>
+<span class='va'>facile.res</span> <span class='op'>&lt;-</span> <span class='fu'>facilitate</span><span class='op'>(</span><span class='va'>elist</span>, <span class='va'>fit</span>, <span class='va'>limma.res</span><span class='op'>)</span>
 </pre></li>
 </ul>
 

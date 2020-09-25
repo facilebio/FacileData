@@ -153,14 +153,14 @@ interface to <code><a href='https://rdrr.io/pkg/limma/man/removeBatchEffect.html
 but refactored out here for general re-use.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>remove_batch_effect</span>(
-  <span class='kw'>x</span>,
-  <span class='kw'>sample_info</span>,
-  batch = <span class='kw'>NULL</span>,
-  main = <span class='kw'>NULL</span>,
-  maintain.rowmeans = <span class='fl'>FALSE</span>,
-  <span class='kw'>...</span>
-)</pre>
+    <pre class="usage"><span class='fu'>remove_batch_effect</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  <span class='va'>sample_info</span>,
+  batch <span class='op'>=</span> <span class='cn'>NULL</span>,
+  main <span class='op'>=</span> <span class='cn'>NULL</span>,
+  maintain.rowmeans <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -225,18 +225,18 @@ will be replaced with a dummy value using the logic from <code><a href='freplace
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># We'll materialize a data matrix and sample_info table from the</span>
 <span class='co'># exampleFacileDataSet, then correct the data matrix.</span>
-<span class='kw'>efds</span> <span class='op'>&lt;-</span> <span class='fu'><a href='exampleFacileDataSet.html'>exampleFacileDataSet</a></span>()
-<span class='kw'>sample.info</span> <span class='op'>&lt;-</span> <span class='kw'>efds</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>filter_samples</span>(<span class='kw'>indication</span> <span class='op'>==</span> <span class='st'>"CRC"</span>) <span class='op'>%&gt;%</span>
-  <span class='fu'><a href='fetch_sample_covariates.html'>with_sample_covariates</a></span>()
-<span class='kw'>m</span> <span class='op'>&lt;-</span> <span class='fu'><a href='fetch_assay_data.html'>fetch_assay_data</a></span>(<span class='kw'>sample.info</span>, normalized = <span class='fl'>TRUE</span>, as.matrix = <span class='fl'>TRUE</span>)
-<span class='kw'>m.rmsex</span> <span class='op'>&lt;-</span> <span class='fu'>remove_batch_effect</span>(<span class='kw'>m</span>, <span class='kw'>sample.info</span>, <span class='st'>"sex"</span>)
+<span class='va'>efds</span> <span class='op'>&lt;-</span> <span class='fu'><a href='exampleFacileDataSet.html'>exampleFacileDataSet</a></span><span class='op'>(</span><span class='op'>)</span>
+<span class='va'>sample.info</span> <span class='op'>&lt;-</span> <span class='va'>efds</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>filter_samples</span><span class='op'>(</span><span class='va'>indication</span> <span class='op'>==</span> <span class='st'>"CRC"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'><a href='fetch_sample_covariates.html'>with_sample_covariates</a></span><span class='op'>(</span><span class='op'>)</span>
+<span class='va'>m</span> <span class='op'>&lt;-</span> <span class='fu'><a href='fetch_assay_data.html'>fetch_assay_data</a></span><span class='op'>(</span><span class='va'>sample.info</span>, normalized <span class='op'>=</span> <span class='cn'>TRUE</span>, as.matrix <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='va'>m.rmsex</span> <span class='op'>&lt;-</span> <span class='fu'>remove_batch_effect</span><span class='op'>(</span><span class='va'>m</span>, <span class='va'>sample.info</span>, <span class='st'>"sex"</span><span class='op'>)</span>
 
 <span class='co'># this functionality is called internally from fetch_assay_data to make</span>
 <span class='co'># your life easy from within the facile ecosystem itself</span>
-<span class='kw'>m2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='fetch_assay_data.html'>fetch_assay_data</a></span>(<span class='kw'>sample.info</span>, normalized = <span class='fl'>TRUE</span>,
-                       batch = <span class='st'>"sex"</span>, as.matrix = <span class='fl'>TRUE</span>)
-<span class='fu'><a href='https://rdrr.io/r/base/all.equal.html'>all.equal</a></span>(<span class='kw'>m.rmsex</span>, <span class='kw'>m2</span>)
+<span class='va'>m2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='fetch_assay_data.html'>fetch_assay_data</a></span><span class='op'>(</span><span class='va'>sample.info</span>, normalized <span class='op'>=</span> <span class='cn'>TRUE</span>,
+                       batch <span class='op'>=</span> <span class='st'>"sex"</span>, as.matrix <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/all.equal.html'>all.equal</a></span><span class='op'>(</span><span class='va'>m.rmsex</span>, <span class='va'>m2</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; [1] TRUE</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
