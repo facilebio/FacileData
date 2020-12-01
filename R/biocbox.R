@@ -22,7 +22,7 @@ biocbox.FacileDataStore <- function(x, class = NULL, assay_name = NULL,
 #' DGEList lib.size calculated from the data that made its way into the DGEList)
 #'
 #' @export
-#'
+#' @rdname biocbox
 #' @param sample_covariates If `NULL` (default), all sample covariates will
 #'   be included over samples in x. If a data.frame, we will treat the
 #'   extra columns as custom covariates, and include them in the outgoing

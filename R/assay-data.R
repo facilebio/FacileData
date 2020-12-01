@@ -115,7 +115,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
 
 #' @export
 #' @noRd
-fetch_assay_data.facile_frame <- function(x, features, samples = NULL,
+fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
                                           assay_name = NULL,
                                           normalized = FALSE,
                                           batch = NULL, main = NULL,

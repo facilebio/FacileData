@@ -28,7 +28,7 @@ Useful links:
 Authors:
 \itemize{
   \item Vincent Rouilly \email{rouilly.vincent@gene.com}
-  \item Peter Haverty \email{haverty.peter@gene.com}
+  \item Peter Haverty (@phaverty on github)
 }
 
 Other contributors:

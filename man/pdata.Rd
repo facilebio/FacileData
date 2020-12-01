@@ -12,5 +12,6 @@ pdata(x, covariate_metadata = NULL, ...)
 \item{...}{additional args, ignored for now}
 }
 \description{
-not for export
+This is an internal function, but exported so it is registered and found
+post R 4.0
 }

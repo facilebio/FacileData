@@ -14,5 +14,5 @@ fdata(x, validate = FALSE, ...)
 \item{...}{additional args (ignored for now)}
 }
 \description{
-not for export
+BioC-container specific fData extraction functions
 }

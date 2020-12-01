@@ -22,3 +22,6 @@ no such slot, unfortunately, and thus gets the default. SE has a
 metadata slot and can provide url and description. eSet just has
 a character annotation and can provide a description.
 }
+\details{
+This is an internal helper function.
+}
