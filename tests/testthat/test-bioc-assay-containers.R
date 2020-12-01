@@ -1,16 +1,16 @@
-context("Testing conversion to Bioc Expression Containers")
+context("Exercise as.DGEList (deprecated in favor of biocbiox())")
 
 if (!exists("FDS")) FDS <- exampleFacileDataSet()
 
 samples <- sample_covariate_tbl(FDS) %>%
-  filter(variable == 'stage' & value == 'III') %>%
-  select(dataset, sample_id)
+  dplyr::filter(variable == 'stage' & value == 'III') %>%
+  dplyr::select(dataset, sample_id)
 genes <- local({
   out <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
   feature_info_tbl(FDS) %>%
-    filter(feature_id %in% out) %>%
-    collect() %>%
-    pull(feature_id)
+    dplyr::filter(feature_id %in% out) %>%
+    dplyr::collect() %>%
+    dplyr::pull(feature_id)
 })
 
 test_that("fetch_assay_data results converted to DGEList", {
