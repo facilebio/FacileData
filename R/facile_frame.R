@@ -255,7 +255,8 @@ full_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
 #' @noRd
 anti_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, ...,
                                    .facilitate = TRUE) {
-  res <- NextMethod()
+  # res <- NextMethod()
+  res <- NextMethod("anti_join", x, y, by, copy, ...)
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)
