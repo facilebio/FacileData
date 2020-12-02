@@ -30,5 +30,8 @@ set_fds(x, value)
 \item{value}{The \code{FacileDataStore} object}
 }
 \description{
-Get or set the FacileDataStore for an object
+FacileDataStores are passed along with most every object generated from
+functions in the facilebio universe. This makes it convenient to dig back
+into a large genomics objects to retrieve data from "slim" results, like
+a sample covariate data.frame.
 }

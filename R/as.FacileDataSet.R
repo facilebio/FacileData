@@ -302,6 +302,9 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
 #' no such slot, unfortunately, and thus gets the default. SE has a
 #' metadata slot and can provide url and description. eSet just has
 #' a character annotation and can provide a description.
+#'
+#' This is an internal helper function.
+#'
 #' @param x SummarizedExperiment, ExpressionSet or DGEList
 #' @param validate single logical, check results
 #' @param meta a list of description stuff for the dataset, this can act to
@@ -311,6 +314,8 @@ ds_annot <- function(x, meta = NULL, validate = FALSE, ...) {
   UseMethod("ds_annot")
 }
 
+#' @noRd
+#' @export
 ds_annot.SummarizedExperiment <- function(x, meta = NULL, validate = FALSE,
                                           ...) {
   ns4 <- tryCatch(loadNamespace("S4Vectors"), error = function(e) NULL)
@@ -321,12 +326,16 @@ ds_annot.SummarizedExperiment <- function(x, meta = NULL, validate = FALSE,
   out
 }
 
+#' @noRd
+#' @export
 ds_annot.ExpressionSet <- function(x, meta = NULL, validate = FALSE, ...) {
   out <- .merge_ds_annot(NULL, meta)
   if (validate) .ds_annot_validate(out)
   out
 }
 
+#' @noRd
+#' @export
 ds_annot.default <- function(x, meta = NULL, validate = FALSE, ...) {
   out <- .merge_ds_annot(NULL, meta)
   if (validate) .ds_annot_validate(out)
@@ -359,23 +368,27 @@ ds_annot.default <- function(x, meta = NULL, validate = FALSE, ...) {
 
 #' BioC-container specific fData extraction functions
 #'
-#' not for export
 #' @param x SummarizedExperiment, ExpressionSet or DGEList
 #' @param validate single logical, check results
 #' @param ... additional args (ignored for now)
 fdata <- function(x, validate = FALSE, ...) {
   UseMethod("fdata")
 }
+
+#' @noRd
+#' @export
 fdata.SummarizedExperiment <- function(x, validate = FALSE, ...) {
   ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
   if (is.null(ns)) stop("SummarizedExperiment required")
   ns4 <- tryCatch(loadNamespace("S4Vectors"), error = function(e) NULL)
   if (is.null(ns4)) stop("S4Vectors required")
 
-  # out <- ns$as.data.frame(ns$mcols(x))
-  out <- ns4$as.data.frame.DataTable(ns$rowData(x))
+  out <- ns4$.as.data.frame.DataFrame(ns$rowData(x))
   if (validate) validate.fdata(out, ...) else out
 }
+
+#' @noRd
+#' @export
 fdata.ExpressionSet <- function(x, validate = FALSE, ...) {
   ns <- tryCatch(loadNamespace("Biobase"), error = function(e) NULL)
   if (is.null(ns)) stop("Biobase required")
@@ -383,11 +396,17 @@ fdata.ExpressionSet <- function(x, validate = FALSE, ...) {
   out <- ns$fData(x)
   if (validate) validate.fdata(out, ...) else out
 }
+
+#' @noRd
+#' @export
 fdata.DGEList <- function(x, validate = FALSE, ...) {
   # stopifnot(requireNamespace("edgeR", quietly = TRUE))
   out <- x$genes
   if (validate) validate.fdata(out, ...) else out
 }
+
+#' @noRd
+#' @export
 fdata.EList <- function(x, validate = FALSE, ...) {
   out <- x$genes
   if (validate) validate.fdata(out, ...) else out
@@ -425,14 +444,16 @@ validate.fdata <- function(x, ...) {
 
 #' Bioc-container specific pData extraction functions
 #'
-#' not for export
+#' This is an internal function, but exported so it is registered and found
+#' post R 4.0
 #' @param x SummarizedExperiment, ExpressionSet or DGEList
 #' @param ... additional args, ignored for now
 pdata <- function(x, covariate_metadata = NULL, ...) {
-  UseMethod("pdata")
+  UseMethod("pdata", x)
 }
 
 #' @noRd
+#' @export
 pdata.SummarizedExperiment <- function(x, covariate_metadata = NULL,  ...) {
   ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
   if (is.null(ns)) stop("SummarizedExperiment required")
@@ -440,11 +461,12 @@ pdata.SummarizedExperiment <- function(x, covariate_metadata = NULL,  ...) {
   if (is.null(ns4)) stop("S4Vectors required")
 
   df <- ns$colData(x)
-  ds <- ns4$as.data.frame.DataTable(df)
+  ds <- ns4$.as.data.frame.DataFrame(df)
   validate.pdata(ds, ...)
 }
 
 #' @noRd
+#' @export
 pdata.ExpressionSet <- function(x, covariate_metadata = NULL,  ...) {
   ns <- tryCatch(loadNamespace("Biobase"), error = function(e) NULL)
   if (is.null(ns)) stop("Biobase required")
@@ -452,6 +474,7 @@ pdata.ExpressionSet <- function(x, covariate_metadata = NULL,  ...) {
 }
 
 #' @noRd
+#' @export
 pdata.DGEList <- function(x, covariate_metadata = NULL,  ...) {
   # stopifnot(requireNamespace("edgeR", quietly = TRUE))
   ignore.cols <- c("lib.size", "norm.factors")
@@ -463,10 +486,12 @@ pdata.DGEList <- function(x, covariate_metadata = NULL,  ...) {
 }
 
 #' @noRd
+#' @export
 pdata.EList <- function(x, covariate_metadata = NULL,  ...) {
   validate.pdata(x$targets, ...)
 }
 
+#' @noRd
 validate.pdata <- function(x, ...) {
   x
 }
@@ -530,13 +555,15 @@ pdata_metadata.EList <- function(x, ...) {
 #' Bioc-container specific assay data extraction functions
 #'
 #' Get assay matrix
+#'
 #' @param x SummarizedExperiment, ExpressionSet or DGEList
 #' @param ... additional args, ignored for now
 adata <- function(x, assay = NULL, ...) {
-  UseMethod("adata")
+  UseMethod("adata", x)
 }
 
 #' @noRd
+#' @export
 adata.SummarizedExperiment <- function(x, assay = NULL, ...) {
   ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
   if (is.null(ns)) stop("SummarizedExperiment required")
@@ -549,6 +576,7 @@ adata.SummarizedExperiment <- function(x, assay = NULL, ...) {
 }
 
 #' @noRd
+#' @export
 adata.ExpressionSet <- function(x, assay = NULL, ...) {
   ns <- tryCatch(loadNamespace("Biobase"), error = function(e) NULL)
   if (is.null(ns)) stop("Biobase required")
@@ -561,6 +589,7 @@ adata.ExpressionSet <- function(x, assay = NULL, ...) {
 }
 
 #' @noRd
+#' @export
 adata.DGEList <- function(x, assay = NULL, ...) {
   # stopifnot(requireNamespace("edgeR", quietly = TRUE))
   # DGEList only has one assay
@@ -568,6 +597,7 @@ adata.DGEList <- function(x, assay = NULL, ...) {
 }
 
 #' @noRd
+#' @export
 adata.EList <- function(x, assay = NULL, ...) {
   # EList only has one assay
   x[["E"]]

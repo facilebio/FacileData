@@ -70,6 +70,11 @@ facilitate <- function(x, ...) {
 
 #' Get or set the FacileDataStore for an object
 #'
+#' FacileDataStores are passed along with most every object generated from
+#' functions in the facilebio universe. This makes it convenient to dig back
+#' into a large genomics objects to retrieve data from "slim" results, like
+#' a sample covariate data.frame.
+#'
 #' @rdname fds
 #' @export
 #' @param x the object
@@ -404,6 +409,8 @@ fetch_feature_info <- function(x, feature_type, feature_ids = NULL, ...) {
   UseMethod("fetch_feature_info", x)
 }
 
+#' @noRd
+#' @export
 fetch_feature_info.default <- function(x, feature_type, feature_ids = NULL, ...) {
   stop("Implement fetch_feature_info for class: ", class(x)[1L])
 }
@@ -581,6 +588,8 @@ with_assay_data <- function(x, features, assay_name = NULL,
   UseMethod("with_assay_data", x)
 }
 
+#' @noRd
+#' @export
 with_assay_data.default <- function(x, features, assay_name = NULL,
                                     normalized = TRUE, aggregate = FALSE,
                                     aggregate.by = "ewm",

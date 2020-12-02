@@ -61,6 +61,7 @@ as.DGEList <- function(x, ...) {
 }
 
 #' @noRd
+#' @export
 #' @method as.DGEList matrix
 #' @rdname as.BiocContainer
 #' @importFrom edgeR DGEList calcNormFactors
@@ -164,8 +165,9 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
   is.neg <- which(x < 0, arr.ind = TRUE)
   if (nrow(is.neg)) x[is.neg] <- x[is.neg] * -1
 
-  y <- DGEList(x, genes = genes, lib.size = sample.stats[["libsize"]],
-               norm.factors = sample.stats[["normfactor"]])
+  y <- DGEList(x, genes = genes, lib.size = sample.stats[["libsize"]])
+  # This avoids the warning when norm factors don't multiply to 1
+  y$samples$norm.factors <- sample.stats[["normfactor"]]
 
   y$samples <- cbind(
     y$samples,

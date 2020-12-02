@@ -1,7 +1,7 @@
 Package: FacileData
 Type: Package
 Title: A fluent API for accessing multi-assay high-throughput genomics data
-Version: 0.11.7
+Version: 0.11.8
 Authors@R: c(
     person("Steve", "Lianoglou", , "lianoglou@dnli.com", c("aut", "cre"),
       comment = c(ORCID = "0000-0002-0924-1754")),
@@ -13,12 +13,12 @@ Authors@R: c(
   person("Genentech", role = c("cph", "fnd"),
          comment = "Coypright 2016 - 2018"))
 Description: Defines the "FacileData" API over multi-assay, high-throughput
-  genomics data. The FacileData API is a fluent grammar that facilitates
-  exploratory data analysis. This package also defines a "FacileDataSet" class,
-  which is a reference implementation of the "FacileData" API that uses SQLite
-  and HDF5 files to store arbitrarily large datasets and provide fast and
-  efficient access to arbitrary subsets of these data without loading it all
-  into memory.
+  genomics data. The FacileData API is a fluent tidy-like grammar that
+  facilitates exploratory data analysis. This package also defines a
+  "FacileDataSet" class, which is a reference implementation of the "FacileData"
+  API that uses SQLite and HDF5 files to store arbitrarily large datasets and
+  provide fast and efficient access to arbitrary subsets of these data without
+  loading it all into memory.
 URL: https://github.com/facilebio/FacileData
 BugReports: https://github.com/facilebio/FacileData/issues
 Depends:
