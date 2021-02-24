@@ -255,8 +255,19 @@ full_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
 #' @noRd
 anti_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, ...,
                                    .facilitate = TRUE) {
-  # res <- NextMethod()
-  res <- NextMethod("anti_join", x, y, by, copy, ...)
+  if (is(x, "tbl_lazy")) {
+    # Note dbplyr threw an error when there were more `...` args passed into
+    # inner add_op_* functions [add_op_semi_join] so using `NextMethod` as
+    # usual just doesn't work
+    # see: https://github.com/tidyverse/dbplyr/commit/37561751ce7ddaee0f3bf391a2bc10e7982f0081#diff-e17acee6ea41d52e9c4f034ff34330261bbb194c818b6f3c60b3afd00b1b9c0c
+    oclass <- class(x)[1L]
+    class(x) <- class(x)[-1]
+    res <- anti_join(x, y, by = by, copy = copy, ...)
+  } else {
+    res <- NextMethod()
+  }
+
+  # res <- NextMethod("anti_join", x, y, by, copy, ...)
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)
