@@ -76,7 +76,7 @@ purposes." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.9</span>
       </span>
     </div>
 
@@ -137,7 +137,7 @@ purposes." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Materialize a Bioconductor assay container from some facile object.</h1>
-    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/api.R'><code>R/api.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/api.R'><code>R/api.R</code></a>, <a href='https://github.com/facilebio/FacileData/blob/master/R/biocbox.R'><code>R/biocbox.R</code></a></small>
     <div class="hidden name"><code>biocbox.Rd</code></div>
     </div>
 
@@ -147,7 +147,21 @@ assay container object, but this function can be overloaded for other
 purposes.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>biocbox</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>biocbox</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span>
+
+<span class='co'># S3 method for facile_frame</span>
+<span class='fu'>biocbox</span><span class='op'>(</span>
+  <span class='va'>x</span>,
+  class <span class='op'>=</span> <span class='cn'>NULL</span>,
+  assay_name <span class='op'>=</span> <span class='cn'>NULL</span>,
+  features <span class='op'>=</span> <span class='cn'>NULL</span>,
+  sample_covariates <span class='op'>=</span> <span class='cn'>NULL</span>,
+  feature_covariates <span class='op'>=</span> <span class='cn'>NULL</span>,
+  normalized <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  with_fds <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  custom_key <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.getenv.html'>Sys.getenv</a></span><span class='op'>(</span><span class='st'>"USER"</span><span class='op'>)</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -156,6 +170,13 @@ purposes.</p>
       <th>x</th>
       <td><p>A facile object</p></td>
     </tr>
+    <tr>
+      <th>sample_covariates</th>
+      <td><p>If <code>NULL</code> (default), all sample covariates will
+be included over samples in x. If a data.frame, we will treat the
+extra columns as custom covariates, and include them in the outgoing
+box, along with the internal ones.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
@@ -163,6 +184,17 @@ purposes.</p>
     <p>The FacileAnalysis package, for example, uses this function to materialize
 bioconductor objects of different flavors from different analysis results,
 ie. a DGEList, or perhaps a limma fit object, etc.</p>
+    <h2 class="hasAnchor" id="facile-frame"><a class="anchor" href="#facile-frame"></a>facile_frame</h2>
+
+    
+
+<p>We can materialize a Bioconductor data container for a given assay over a set
+of samples.</p>
+<p>There is a default bioc class provided for different assay types, however
+the class type can be overrided by the <code>class</code> parameter. This function
+simply puts the assay data requested into the container. There is no
+sepcial functionality that happens downstream of that (for instance,
+DGEList lib.size calculated from the data that made its way into the DGEList)</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

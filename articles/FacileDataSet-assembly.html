@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.9</span>
       </span>
     </div>
 
@@ -135,8 +135,8 @@
 <div class="tip">
 <p>If you are looking for help wrangling raw RNA-seq data into something like a SummarizedExperiment object, we currently favor processing the reads using either <a href="https://combine-lab.github.io/salmon/">salmon</a> or <a href="https://pachterlab.github.io/kallisto/">kallisto</a>, then importing these results using the <a href="http://bioconductor.org/packages/tximport">tximport</a> package.</p>
 </div>
-<div class="sourceCode" id="cb1"><pre class="downlit">
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">SummarizedExperiment</span><span class="op">)</span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">SummarizedExperiment</span><span class="op">)</span>
 <span class="co"># Note that you will need the airway and parathyroidSE packages installed.</span>
 <span class="co"># If you don't have those, install them like so:</span>
 <span class="co"># </span>
@@ -149,7 +149,7 @@
 <span class="co"># in Biocbase, for instance.</span>
 
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/facilebio/FacileData">FacileData</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></code></pre></div>
 </div>
 <div id="well-groomed-datasets" class="section level2">
 <h2 class="hasAnchor">
@@ -169,8 +169,8 @@
 <h4 class="hasAnchor">
 <a href="#harmonization-put-to-practice" class="anchor"></a>Harmonization put to practice</h4>
 <p>Let’s take a look at the <code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData()</a></code> from our two datasets, and see how we might harmonize them:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">airway</span><span class="op">)</span><span class="op">)</span></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">airway</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>##            SampleName    cell   dex albut        Run avgLength Experiment
 ## SRR1039508 GSM1275862  N61311 untrt untrt SRR1039508       126  SRX384345
 ## SRR1039509 GSM1275863  N61311   trt untrt SRR1039509       126  SRX384346
@@ -189,8 +189,8 @@
 ## SRR1039517 SRS508576 SAMN02422673
 ## SRR1039520 SRS508579 SAMN02422683
 ## SRR1039521 SRS508580 SAMN02422677</code></pre>
-<div class="sourceCode" id="cb4"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">parathyroidGenesSE</span><span class="op">)</span><span class="op">)</span></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">parathyroidGenesSE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>##          run experiment patient treatment time submission     study    sample
 ## 1  SRR479052  SRX140503       1   Control  24h  SRA051611 SRP012167 SRS308865
 ## 2  SRR479053  SRX140504       1   Control  48h  SRA051611 SRP012167 SRS308866
@@ -229,8 +229,8 @@
 </ol>
 <p>With these things in mind, let’s create new SummarizedExperiment objects, with harmonized <code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData()</a></code>.</p>
 <p><strong>airway</strong></p>
-<div class="sourceCode" id="cb6"><pre class="downlit">
-<span class="va">se.airway</span> <span class="op">&lt;-</span> <span class="va">airway</span>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">se.airway</span> <span class="op">&lt;-</span> <span class="va">airway</span>
 <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">se.airway</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html">local</a></span><span class="op">(</span><span class="op">{</span>
   <span class="va">cd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">airway</span><span class="op">)</span> <span class="op">%&gt;%</span> 
     <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -241,10 +241,10 @@
     <span class="fu">DataFrame</span><span class="op">(</span><span class="op">)</span>
   <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">cd</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">se.airway</span><span class="op">)</span>
   <span class="va">cd</span>
-<span class="op">}</span><span class="op">)</span></pre></div>
+<span class="op">}</span><span class="op">)</span></code></pre></div>
 <p><strong>parathyroid</strong></p>
-<div class="sourceCode" id="cb7"><pre class="downlit">
-<span class="va">se.parathyroid</span> <span class="op">&lt;-</span> <span class="va">parathyroidGenesSE</span>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">se.parathyroid</span> <span class="op">&lt;-</span> <span class="va">parathyroidGenesSE</span>
 <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">se.parathyroid</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html">local</a></span><span class="op">(</span><span class="op">{</span>
   <span class="va">cd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">parathyroidGenesSE</span><span class="op">)</span> <span class="op">%&gt;%</span> 
     <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -256,7 +256,7 @@
     <span class="fu">DataFrame</span><span class="op">(</span><span class="op">)</span>
   <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">cd</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">se.parathyroid</span><span class="op">)</span>
   <span class="va">cd</span>
-<span class="op">}</span><span class="op">)</span></pre></div>
+<span class="op">}</span><span class="op">)</span></code></pre></div>
 </div>
 </div>
 <div id="assay-data-assembly" class="section level3">
@@ -266,8 +266,8 @@
 <p>You might decide to assemble these data together using two different assay types, one named <code>"gene_count_PE"</code> and the other <code>"gene_count_SE"</code>. There will be a disjoint set of samples that have assay data from one or the other. You then might decide to make a third assay type, <code>"gene_count_norm"</code> which somehow normalizes these data together and make that available for exploratory analysis.</p>
 <p>In this example, for the sake of simplicity we will assume that the <code>airway</code> and <code>parathyroid</code> experiments were run on the same assay, and load them up together. This also means that they must share the same <em>feature space</em> for the assay, and we need to ensure that the <code><a href="https://rdrr.io/r/base/colnames.html">rownames()</a></code> of the two objects are equal.</p>
 <p>Neither dataset provides gene information for its rows aside from the Ensembl identifiers. Because these were both quantitated against v75 (ish) of Ensembl’s gene annotations, we’ll iuse the <a href="http://bioconductor.org/packages/biomaRt">biomaRt</a> package to retrieve the information from the assembly close to that (<code><a href="https://rdrr.io/pkg/biomaRt/man/listEnsemblArchives.html">biomaRt::listEnsemblArchives()</a></code> points us to the URL we should query).</p>
-<div class="sourceCode" id="cb8"><pre class="downlit">
-<span class="va">bm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html">loadNamespace</a></span><span class="op">(</span><span class="st">"biomaRt"</span><span class="op">)</span>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">bm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-load.html">loadNamespace</a></span><span class="op">(</span><span class="st">"biomaRt"</span><span class="op">)</span>
 <span class="va">mart</span> <span class="op">&lt;-</span> <span class="va">bm</span><span class="op">$</span><span class="fu">useMart</span><span class="op">(</span>
   host <span class="op">=</span> <span class="st">"feb2014.archive.ensembl.org"</span>,
   biomart <span class="op">=</span> <span class="st">"ENSEMBL_MART_ENSEMBL"</span>,
@@ -276,20 +276,20 @@
   attributes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"ensembl_gene_id"</span>, <span class="st">"hgnc_symbol"</span>, <span class="st">"gene_biotype"</span><span class="op">)</span>,
   filters <span class="op">=</span> <span class="st">"ensembl_gene_id"</span>,
   values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">se</span><span class="op">)</span>,
-  mart <span class="op">=</span> <span class="va">mart</span><span class="op">)</span></pre></div>
+  mart <span class="op">=</span> <span class="va">mart</span><span class="op">)</span></code></pre></div>
 <p>The query above retrieves the data we need, but it can take a long time to run. To save time while compiling this vignette, we have serialized the result of the query, and will use that here.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit">
-<span class="va">mart.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html">local</a></span><span class="op">(</span><span class="op">{</span>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">mart.info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eval.html">local</a></span><span class="op">(</span><span class="op">{</span>
   <span class="va">fn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"ensembl-v75-gene-info.csv.gz"</span>,
                     package <span class="op">=</span> <span class="st">"FacileData"</span><span class="op">)</span>
   <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/connections.html">gzfile</a></span><span class="op">(</span><span class="va">fn</span>, <span class="st">"rt"</span><span class="op">)</span>, stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="op">}</span><span class="op">)</span></pre></div>
+<span class="op">}</span><span class="op">)</span></code></pre></div>
 <p>The column names of the <code>gene.info</code> table need to be tweaked, and we will only keep the rows (genes) that are shared between our two datasets.</p>
 <div class="note">
 <p>This mismatched gene matching wouldn’t be an issue if these data were from the same assay and processed in the same way. When you are assembling assay data into single assay of a FacileDataSet, the implicit assumption is that all of the data were processed in the same way.</p>
 </div>
-<div class="sourceCode" id="cb10"><pre class="downlit">
-<span class="va">shared.ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">intersect</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">se.airway</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">se.parathyroid</span><span class="op">)</span><span class="op">)</span>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">shared.ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">intersect</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">se.airway</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">se.parathyroid</span><span class="op">)</span><span class="op">)</span>
 <span class="va">gene.info</span> <span class="op">&lt;-</span> <span class="va">mart.info</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span><span class="op">(</span>feature_id <span class="op">=</span> <span class="va">ensembl_gene_id</span>,
             feature_type <span class="op">=</span> <span class="st">"ensgid"</span>,
@@ -299,14 +299,14 @@
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">feature_id</span> <span class="op">%in%</span> <span class="va">shared.ids</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html">distinct</a></span><span class="op">(</span><span class="va">feature_id</span>, .keep_all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">DataFrame</span><span class="op">(</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">gene.info</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">gene.info</span><span class="op">[[</span><span class="st">"feature_id"</span><span class="op">]</span><span class="op">]</span></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">gene.info</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">gene.info</span><span class="op">[[</span><span class="st">"feature_id"</span><span class="op">]</span><span class="op">]</span></code></pre></div>
 <p>Now we can cleanup the rowdata of our SummarizedExperiment and make them row-wise concordant.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit">
-<span class="va">se.airway</span> <span class="op">&lt;-</span> <span class="va">se.airway</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">gene.info</span><span class="op">)</span>,<span class="op">]</span>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">se.airway</span> <span class="op">&lt;-</span> <span class="va">se.airway</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">gene.info</span><span class="op">)</span>,<span class="op">]</span>
 <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">se.airway</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">gene.info</span>
 
 <span class="va">se.parathyroid</span> <span class="op">&lt;-</span> <span class="va">se.parathyroid</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">gene.info</span><span class="op">)</span>,<span class="op">]</span>
-<span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">se.parathyroid</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">gene.info</span></pre></div>
+<span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">se.parathyroid</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">gene.info</span></code></pre></div>
 </div>
 </div>
 <div id="faciledataset-creation" class="section level2">
@@ -314,8 +314,8 @@
 <a href="#faciledataset-creation" class="anchor"></a>FacileDataSet Creation</h2>
 <p>Like we’ve been saying all along … <em>all</em> you need is a named list of well-curated bioconductor experiments, and here we are!</p>
 <p>We initialize a new FacileDataSet with our list of SummarizedExperiments (you can even just have one SummarizedExperiment), and specify which assay you are dropping in first.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit">
-<span class="va">se.all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>airway <span class="op">=</span> <span class="va">se.airway</span>, parathyroid <span class="op">=</span> <span class="va">se.parathyroid</span><span class="op">)</span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">se.all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>airway <span class="op">=</span> <span class="va">se.airway</span>, parathyroid <span class="op">=</span> <span class="va">se.parathyroid</span><span class="op">)</span>
 <span class="va">xfds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as.FacileDataSet.html">as.FacileDataSet</a></span><span class="op">(</span>
   <span class="va">se.all</span>,
   path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempfile</a></span><span class="op">(</span><span class="op">)</span>,
@@ -323,14 +323,14 @@
   assay_name <span class="op">=</span> <span class="st">"gene_counts"</span>,
   assay_description <span class="op">=</span> <span class="st">"Gene counts from their respective Bioconductor packages"</span>,
   assay_type <span class="op">=</span> <span class="st">"rnaseq"</span>,
-  organism <span class="op">=</span> <span class="st">"Homo sapiens"</span><span class="op">)</span></pre></div>
+  organism <span class="op">=</span> <span class="st">"Homo sapiens"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="tidy-like-data-retrieval" class="section level2">
 <h2 class="hasAnchor">
 <a href="#tidy-like-data-retrieval" class="anchor"></a>Tidy-like data retrieval</h2>
 <p>Let’s look at how the correlation of TLN1 and ITGB1 change across datasets</p>
-<div class="sourceCode" id="cb13"><pre class="downlit">
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu">samples</span><span class="op">(</span><span class="va">xfds</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -339,17 +339,17 @@
 
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">dat</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">ITGB1</span>, <span class="va">TLN1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">treatment</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">dataset</span><span class="op">)</span></pre></div>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">dataset</span><span class="op">)</span></code></pre></div>
 <p><img src="FacileDataSet-assembly_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit">
-<span class="va">bdat</span> <span class="op">&lt;-</span> <span class="fu">samples</span><span class="op">(</span><span class="va">xfds</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">bdat</span> <span class="op">&lt;-</span> <span class="fu">samples</span><span class="op">(</span><span class="va">xfds</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="../reference/fetch_assay_data.html">fetch_assay_data</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"ENSG00000137076"</span>, <span class="st">"ENSG00000150093"</span><span class="op">)</span>,
                    normalized <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="../reference/fetch_sample_covariates.html">with_sample_covariates</a></span><span class="op">(</span><span class="st">"treatment"</span><span class="op">)</span>
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">bdat</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">feature_name</span>, y <span class="op">=</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html">geom_boxplot</a></span><span class="op">(</span>outlier.shape <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_jitter.html">geom_jitter</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">treatment</span><span class="op">)</span>, width <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">dataset</span><span class="op">)</span></pre></div>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">dataset</span><span class="op">)</span></code></pre></div>
 <p><img src="FacileDataSet-assembly_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
 </div>
   </div>

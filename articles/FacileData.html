@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.9</span>
       </span>
     </div>
 
@@ -96,7 +96,7 @@
       <h1 data-toc-skip>FacileData API Overview</h1>
                         <h4 class="author">Steve Lianoglou</h4>
             
-            <h4 class="date">2020-11-02</h4>
+            <h4 class="date">2021-02-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/facilebio/FacileData/blob/master/vignettes/FacileData.Rmd"><code>vignettes/FacileData.Rmd</code></a></small>
       <div class="hidden name"><code>FacileData.Rmd</code></div>
@@ -137,8 +137,8 @@
 <p>To provide illustrative examples of the utility of the <em>FacileData API</em>, we rely on the <code>FacileTCGADataSet</code> package, which provides the full RNA-seq expression, miRNA expresion, and copy number data across all 33 indications (11,000+ samples) from the TCGA. Please see the <code>FacileTCGADataSet</code> package for more information regarding how these data were put together, and how to extend it.</p>
 </div>
 <p>As a teaser, we provide code snippets that show how to plot HER2 copy number vs. expression across the TCGA “BLCA” and “BRCA” indications using the <code>FacileDataSet</code>. We’ll then compare that to how the same code might be written using more traditional bioconductor containers.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit">
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/facilebio/FacileData">FacileData</a></span><span class="op">)</span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/facilebio/FacileData">FacileData</a></span><span class="op">)</span>
 <span class="co"># library(FacileTCGADataSet)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
 <span class="co"># tcga &lt;- FacileTCGADataSet()</span>
@@ -154,13 +154,13 @@
 
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">fdat</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">cnv_score_ERBB2</span>, <span class="va">ERBB2</span>, color<span class="op">=</span><span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">indication</span><span class="op">)</span></pre></div>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">indication</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="example-analysis" class="section level1">
 <h1 class="hasAnchor">
 <a href="#example-analysis" class="anchor"></a>Example Analysis</h1>
-<div class="sourceCode" id="cb2"><pre class="downlit">
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/facilebio/FacileData">FacileData</a></span><span class="op">)</span>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/facilebio/FacileData">FacileData</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
 <span class="co"># library(FacileTCGADataSet)</span>
 <span class="co"># tcga &lt;- FacileTCGADataSet()</span>
@@ -169,7 +169,7 @@
   <span class="fu"><a href="../reference/fetch_sample_covariates.html">with_sample_covariates</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"indication"</span>, <span class="st">"sample_type"</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">distro</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">indication</span>, fill<span class="op">=</span><span class="va">sample_type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html">geom_bar</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>axis.text.x<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>angle<span class="op">=</span><span class="fl">90</span>, hjust<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></pre></div>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>axis.text.x<span class="op">=</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span>angle<span class="op">=</span><span class="fl">90</span>, hjust<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="FacileData_files/figure-html/tcga-sample-distribution-1.png" width="700"></p>
 </div>
 <div id="faciledata-access-api" class="section level1">
@@ -177,10 +177,10 @@
 <a href="#faciledata-access-api" class="anchor"></a>FacileData Access API</h1>
 <p>The base interface is the <code>FacileDataStore</code>. There are no objects of this class, it rather serves as an interface that should be implemented by a subclass, i.e. a <code>FacileDataSet</code>, or a <code>FacileSummarizedExperiment</code>. An object that <code>is(x, "FacileDataStore") == TRUE</code> is assumed to implement the entire <em>FacileData API</em>.</p>
 <p>Broadly speaking, there are two classes of functions that are used to pull data out of a <code>FacileDataSet</code>, the <code>fetch_*</code> and <code>with_*</code> functions. To a first approximation, we can consider the <code>fetch_*</code> functions to be the lowest level functions, and the <code>with_*</code> functions are higher-level accessors.</p>
-<p>The <code>with_*</code> functions were written so that they can naturally be combined in pipe (<code><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></code>) data-manipulation chains. They provide analysts with a fluent and succinct API with which to perform exploratory data analyses.</p>
+<p>The <code>with_*</code> functions were written so that they can naturally be combined in pipe (<code><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></code>) data-manipulation chains. They provide analysts with a fluent and succinct API with which to perform exploratory data analyses.</p>
 <p>For example, to retrieve normalized RNA-seq expression values for CXCL9 and GZMA along with survival and sex information for the samples inin the TCGA bladder (“BLCA”) indication, you can write:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit">
-<span class="va">features</span> <span class="op">&lt;-</span> <span class="fu">filter_features</span><span class="op">(</span><span class="va">tcga</span>, <span class="va">name</span> <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CXCL9"</span>, <span class="st">"GZMA"</span><span class="op">)</span><span class="op">)</span>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">features</span> <span class="op">&lt;-</span> <span class="fu">filter_features</span><span class="op">(</span><span class="va">tcga</span>, <span class="va">name</span> <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"CXCL9"</span>, <span class="st">"GZMA"</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">blca.dat</span> <span class="op">&lt;-</span> <span class="va">tcga</span> <span class="op">%&gt;%</span>
   <span class="fu">filter_samples</span><span class="op">(</span><span class="va">indication</span> <span class="op">==</span> <span class="st">"BLCA"</span><span class="op">)</span> <span class="op">%&gt;%</span>
@@ -188,7 +188,7 @@
   <span class="fu"><a href="../reference/fetch_sample_covariates.html">with_sample_covariates</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"OS"</span>, <span class="st">"sex"</span><span class="op">)</span><span class="op">)</span>
 
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">blca.dat</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">CXCL9</span>, <span class="va">GZMA</span>, color<span class="op">=</span><span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span></pre></div>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="FacileData_files/figure-html/quick-blca-example-1.png" width="700"></p>
 <div id="function-list" class="section level2">
 <h2 class="hasAnchor">
