@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">FacileData</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.12.0</span>
       </span>
     </div>
 
@@ -40,7 +40,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -75,7 +75,7 @@
 <ul class="nav navbar-nav navbar-right">
 <li>
   <a href="https://github.com/facilebio/FacileData/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -89,8 +89,7 @@
 
       
 
-      </header><script src="FacileDataSet-assembly_files/accessible-code-block-0.0.1/empty-anchor.js"></script><link href="FacileDataSet-assembly_files/anchor-sections-1.0/anchor-sections.css" rel="stylesheet">
-<script src="FacileDataSet-assembly_files/anchor-sections-1.0/anchor-sections.js"></script><div class="row">
+      </header><script src="FacileDataSet-assembly_files/header-attrs-2.7/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>FacileDataSet Assembly</h1>
@@ -136,7 +135,7 @@
 <p>If you are looking for help wrangling raw RNA-seq data into something like a SummarizedExperiment object, we currently favor processing the reads using either <a href="https://combine-lab.github.io/salmon/">salmon</a> or <a href="https://pachterlab.github.io/kallisto/">kallisto</a>, then importing these results using the <a href="http://bioconductor.org/packages/tximport">tximport</a> package.</p>
 </div>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">SummarizedExperiment</span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment">SummarizedExperiment</a></span><span class="op">)</span>
 <span class="co"># Note that you will need the airway and parathyroidSE packages installed.</span>
 <span class="co"># If you don't have those, install them like so:</span>
 <span class="co"># </span>
@@ -330,7 +329,7 @@
 <a href="#tidy-like-data-retrieval" class="anchor"></a>Tidy-like data retrieval</h2>
 <p>Let’s look at how the correlation of TLN1 and ITGB1 change across datasets</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu">samples</span><span class="op">(</span><span class="va">xfds</span><span class="op">)</span> <span class="op">%&gt;%</span> 
