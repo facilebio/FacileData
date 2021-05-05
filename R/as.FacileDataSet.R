@@ -139,6 +139,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
                                   dataset_name = "DEFAULT_NAME",
                                   dataset_meta = list(),
                                   organism = "unspecified",
+                                  prune_dataset_meta = TRUE,
                                   page_size=2**12, cache_size=2e5,
                                   chunk_rows=5000, chunk_cols="ncol",
                                   chunk_compression=5,
@@ -240,7 +241,8 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
 
 
   # Make YAML and Initialize FDS
-  ds_list <- sapply(names(x), function(dname) {
+  ds.meta.names <- if (prune_dataset_meta) names(x) else names(dataset_meta)
+  ds_list <- sapply(ds.meta.names, function(dname) {
     ds_annot(x[[dname]], dataset_meta[[dname]])
   }, simplify = FALSE)
 

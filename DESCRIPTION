@@ -49,6 +49,7 @@ Suggests:
   Biobase,
   knitr,
   parathyroidSE,
+  rmarkdown,
   roxygen2 (>= 6.1.0),
   stringr,
   S4Vectors,
