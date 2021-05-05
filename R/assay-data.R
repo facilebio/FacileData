@@ -145,7 +145,6 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
 
 #' @noRd
 #' @importFrom rhdf5 h5read
-#' @importFrom multiGSEA eigenWeightedMean
 #' @importFrom data.table setDF
 .fetch_assay_data <- function(x, assay_name, feature_ids, samples,
                               normalized = FALSE, batch = NULL, main = NULL,
@@ -245,7 +244,7 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
 
   if (isTRUE(aggregate)) {
     scores <- switch(aggregate.by,
-                     ewm = eigenWeightedMean(vals, ...)$score,
+                     ewm = sparrow::eigenWeightedMean(vals, ...)$score,
                      zscore = zScore(vals, ...)$score)
     vals <- matrix(scores, nrow=1, dimnames=list('score', names(scores)))
   }
