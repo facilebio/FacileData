@@ -34,6 +34,7 @@ as.FacileDataSet(
   dataset_name = "DEFAULT_NAME",
   dataset_meta = list(),
   organism = "unspecified",
+  prune_dataset_meta = TRUE,
   page_size = 2^12,
   cache_size = 2e+05,
   chunk_rows = 5000,

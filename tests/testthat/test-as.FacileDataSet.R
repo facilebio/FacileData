@@ -1,7 +1,7 @@
 context("as.FacileDataSet")
 
 test_that("We can get pdata metadata", {
-  stopifnot(requireNamespace("Biobase", quitely = TRUE))
+  stopifnot(requireNamespace("Biobase", quietly = TRUE))
   stopifnot(requireNamespace("survival", quietly = TRUE))
   sinfo = data.frame(a = 1:4,
                      b = survival::Surv(1:4, c(1,1,0,1)),

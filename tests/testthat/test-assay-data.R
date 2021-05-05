@@ -50,7 +50,7 @@ test_that("fetch_assay_data(..., aggregate = TRUE) provides scores", {
 
   dat <- FDS %>%
     fetch_assay_data(features, samples, normalized = TRUE, as.matrix = TRUE)
-  ewm <- multiGSEA::eigenWeightedMean(dat)$score[scores$samid]
+  ewm <- sparrow::eigenWeightedMean(dat)$score[scores$samid]
   expect_equal(scores$value, unname(ewm))
 
   # test with_assay_data
