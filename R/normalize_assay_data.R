@@ -32,14 +32,17 @@ normalize_assay_data <- function(x, features, samples, batch = NULL,
   normfn <- try(getFunction(norm.fn.name), silent = TRUE)
 
   if (is.function(normfn)) {
-    out <- normfn(x, features, samples, log = log, prior.count = prior.count, ...,
-                  .fds = .fds)
+    out <- normfn(x, features, samples, log = log, prior.count = prior.count,
+                  ..., .fds = .fds)
   } else {
     warning("No normalization function defined for assay type (", atype, "), ",
             "returning raw data", immediate. = TRUE, call. = FALSE)
     out <- x
   }
 
+  if (atype %in% c("lognorm", "qpcrct", "qpcrdct")) {
+    log <- TRUE
+  }
   # Now batch correct data if desired (and if explicitly log2-like)
   if (test_character(batch, min.len = 1L)) {
     if (!log) stop("Do not know how to batch correct un-logged data")
@@ -95,9 +98,10 @@ normalize_assay_matrix.isoseq <- normalize_assay_matrix.rnaseq
 normalize_assay_matrix.tpm <- function(x, features, samples,
                                        log = TRUE, prior.count = 0.1,
                                        verbose = FALSE, ..., .fds = NULL) {
-  out <- x + prior.count
+  out <- x
   if (log) {
-    out <- log2(out)
+    assert_number(prior.count, lower = 0.001)
+    out <- log2(out + prior.count)
   }
   out
 }
@@ -110,18 +114,20 @@ normalize_assay_matrix.lognorm <- function(x, features, samples, ...,
 }
 
 #' no internal normalization for `qpcrct` assay data yet, needs to be
-#' normalized externally and saved her -- essentialyl like `lognorm` data
+#' normalized externally and saved here -- essentially like `lognorm` data
 #' @noRd
 normalize_assay_matrix.qpcrct <- function(x, features, samples, ...,
                                           .fds = NULL) {
+  warning("Axe this assay type and just set normalized data as lognorm type")
   x
 }
 
 #' no internal normalization for `qpcrdct` assay data yet, needs to be
-#' normalized externally and saved her -- essentialyl like `lognorm` data
+#' normalized externally and saved her -- essentially like `lognorm` data
 #' @noRd
 normalize_assay_matrix.qpcrdct <- function(x, features, samples, ...,
                                            .fds = NULL) {
+  warning("Axe this assay type and just set normalized data as lognorm type")
   x
 }
 
