@@ -30,6 +30,7 @@ a \code{FacileDataStore}.
 Other FacileInterface: 
 \code{\link{fetch_assay_score}()},
 \code{\link{fetch_sample_covariates}()},
-\code{\link{fetch_sample_statistics}()}
+\code{\link{fetch_sample_statistics}()},
+\code{\link{samples}()}
 }
 \concept{FacileInterface}

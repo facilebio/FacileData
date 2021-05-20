@@ -72,7 +72,8 @@ Note that this function will force the collection of \code{x}
 Other FacileInterface: 
 \code{\link{facet_frame.FacileDataSet}()},
 \code{\link{fetch_assay_score}()},
-\code{\link{fetch_sample_statistics}()}
+\code{\link{fetch_sample_statistics}()},
+\code{\link{samples}()}
 
 Other API: 
 \code{\link{fetch_assay_score.FacileDataSet}()},
@@ -87,7 +88,8 @@ Other API:
 Other FacileInterface: 
 \code{\link{facet_frame.FacileDataSet}()},
 \code{\link{fetch_assay_score}()},
-\code{\link{fetch_sample_statistics}()}
+\code{\link{fetch_sample_statistics}()},
+\code{\link{samples}()}
 
 Other API: 
 \code{\link{fetch_assay_score.FacileDataSet}()},

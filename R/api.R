@@ -262,6 +262,12 @@ organism.default <- function(x, ...) {
   stop("The FacileAPI requires that a specific method be written for this type.")
 }
 
+#' Returns a facile_frame of samples from an object in the faciebio ecosystem.
+#'
+#' `samples` can be extracted from a FacileDataStore itself, or the result of
+#' an analysis initiated from a FacileDataStore (like you'll find in the
+#' FacileAnalysis package).
+#'
 #' @family FacileInterface
 #' @export
 samples <- function(x, ...) {
