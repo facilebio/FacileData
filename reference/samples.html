@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>NOTE: is fetch_assay_score really necessary? — fetch_assay_score • FacileData</title>
+<title>Returns a facile_frame of samples from an object in the faciebio ecosystem. — samples • FacileData</title>
 
 
 <!-- jquery -->
@@ -41,8 +41,10 @@
   <link href="../extra.css" rel="stylesheet">
   
 
-<meta property="og:title" content="NOTE: is fetch_assay_score really necessary? — fetch_assay_score" />
-<meta property="og:description" content="NOTE: is fetch_assay_score really necessary?" />
+<meta property="og:title" content="Returns a facile_frame of samples from an object in the faciebio ecosystem. — samples" />
+<meta property="og:description" content="samples can be extracted from a FacileDataStore itself, or the result of
+an analysis initiated from a FacileDataStore (like you'll find in the
+FacileAnalysis package)." />
 
 
 
@@ -134,33 +136,27 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>NOTE: is fetch_assay_score really necessary?</h1>
+    <h1>Returns a facile_frame of samples from an object in the faciebio ecosystem.</h1>
     <small class="dont-index">Source: <a href='https://github.com/facilebio/FacileData/blob/master/R/api.R'><code>R/api.R</code></a></small>
-    <div class="hidden name"><code>fetch_assay_score.Rd</code></div>
+    <div class="hidden name"><code>samples.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>NOTE: is fetch_assay_score really necessary?</p>
+    <p><code>samples</code> can be extracted from a FacileDataStore itself, or the result of
+an analysis initiated from a FacileDataStore (like you'll find in the
+FacileAnalysis package).</p>
     </div>
 
-    <pre class="usage"><span class='fu'>fetch_assay_score</span><span class='op'>(</span>
-  <span class='va'>x</span>,
-  <span class='va'>features</span>,
-  samples <span class='op'>=</span> <span class='cn'>NULL</span>,
-  assay_name <span class='op'>=</span> <span class='cn'>NULL</span>,
-  as.matrix <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  <span class='va'>...</span>,
-  subset.threshold <span class='op'>=</span> <span class='fl'>700</span>
-<span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>samples</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
 
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>Other FacileInterface: 
 <code><a href='facet_frame.FacileDataSet.html'>facet_frame.FacileDataSet</a>()</code>,
+<code><a href='fetch_assay_score.html'>fetch_assay_score</a>()</code>,
 <code><a href='fetch_sample_covariates.html'>fetch_sample_covariates</a>()</code>,
-<code><a href='fetch_sample_statistics.html'>fetch_sample_statistics</a>()</code>,
-<code><a href='samples.html'>samples</a>()</code></p></div>
+<code><a href='fetch_sample_statistics.html'>fetch_sample_statistics</a>()</code></p></div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
