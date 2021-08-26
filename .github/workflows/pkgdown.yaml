@@ -6,9 +6,9 @@ on:
       - 'man/**'
       - 'README.**'
   schedule:
-  # Rerun pkgdown after the (expected) time package is rebuilt on the daily.
-  # Let's give it 30 mins
-  - cron: '30 12 * * *'
+    # Rerun pkgdown after the (expected) time package is rebuilt on the daily.
+    # Let's give it 30 mins
+    - cron: '30 12 * * *'
   workflow_dispatch:
     inputs:
       dummy:
