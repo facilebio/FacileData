@@ -272,7 +272,7 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
   setnames(vals, 1L, 'feature_id')
 
   set(vals, NULL, "dataset", sub("__.*$", "", vals[["sample_id"]]))
-  set(vals, NULL, "sample_id", sub("^.*__", "", vals[["sample_id"]]))
+  set(vals, NULL, "sample_id", sub("^.*?__", "", vals[["sample_id"]]))
   set(vals, NULL, "assay", assay_name)
   set(vals, NULL, "assay_type", atype)
   set(vals, NULL, "feature_type", ftype)
@@ -338,7 +338,8 @@ assay_sample_info.FacileDataSet <- function(x, assay_name, samples = NULL, ...) 
   if (is.null(samples)) {
     samples <- asi
   } else {
-    samples <- left_join(samples, asi, by=c('dataset', 'sample_id'))
+    samples <- left_join(samples, asi, by = c("dataset", "sample_id"),
+                         suffix = c(".x", ""))
   }
 
   samples

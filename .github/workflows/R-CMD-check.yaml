@@ -25,10 +25,16 @@ on:
 
 name: R-CMD-check
 
+env:
+  has_testthat: 'true'
+
 jobs:
   R-CMD-check:
     runs-on: ubuntu-latest
-    container: facilebio/facilebio
+    strategy:
+      matrix:
+        image: ['facilebio/facilebio:release', 'facilebio/facilebio:devel']
+    container: ${{ matrix.image }}
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -49,5 +55,29 @@ jobs:
         shell: Rscript {0}
 
       - name: Check
-        run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
+        env:
+          _R_CHECK_CRAN_INCOMING_: false
+          DISPLAY: 99.0
+        run: |
+          options(crayon.enabled = TRUE)
+          rcmdcheck::rcmdcheck(
+            args = c("--no-manual", "--no-vignettes", "--timings"),
+            build_args = c("--no-manual", "--keep-empty-dirs", "--no-resave-data"),
+            # error_on = "warning",
+            check_dir = "check")
+        shell: Rscript {0}
+
+      - name: Reveal testthat details
+        run: find . -name testthat.Rout -exec cat '{}' ';'
+
+      - name: Run BiocCheck
+        env:
+          DISPLAY: 99.0
+        run: |
+          BiocCheck::BiocCheck(
+              dir('check', 'tar.gz$', full.names = TRUE),
+              `quit-with-status` = TRUE,
+              `no-check-R-ver` = TRUE,
+              `no-check-bioc-help` = TRUE,
+              `no-check-coding-practices` = TRUE)
         shell: Rscript {0}

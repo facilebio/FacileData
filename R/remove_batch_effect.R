@@ -108,7 +108,7 @@ remove_batch_effect <- function(x, sample_info, batch = NULL, main = NULL,
   }
 
   # Let's QC our batch covariates to make sure that our code can go smoothly
-  batch.df <- sample_info[, c(main, batch), drop = FALSE]
+  batch.df <- droplevels(sample_info[, c(main, batch), drop = FALSE])
 
   # Missing values in the batch correction code below will hose us with an
   # unhelpful error message.
