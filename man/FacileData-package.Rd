@@ -6,13 +6,7 @@
 \alias{FacileData-package}
 \title{FacileData: A fluent API for accessing multi-assay high-throughput genomics data}
 \description{
-Defines the "FacileData" API over multi-assay, high-throughput
-  genomics data. The FacileData API is a fluent tidy-like grammar that
-  facilitates exploratory data analysis. This package also defines a
-  "FacileDataSet" class, which is a reference implementation of the "FacileData"
-  API that uses SQLite and HDF5 files to store arbitrarily large datasets and
-  provide fast and efficient access to arbitrary subsets of these data without
-  loading it all into memory.
+Defines the "FacileData" API over multi-assay, high-throughput genomics data. The FacileData API is a fluent tidy-like grammar that facilitates exploratory data analysis. This package also defines a "FacileDataSet" class, which is a reference implementation of the "FacileData" API that uses SQLite and HDF5 files to store arbitrarily large datasets and provide fast and efficient access to arbitrary subsets of these data without loading it all into memory.
 }
 \seealso{
 Useful links:
@@ -33,7 +27,7 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item Jonathan Carrol \email{jono@jcarroll.com.au} [contributor]
+  \item Jonathan Carroll \email{rpkg@jcarroll.com.au} [contributor]
   \item Denali Therapeutics (Coypright 2019) [copyright holder, funder]
   \item Genentech (Coypright 2016 - 2018) [copyright holder, funder]
 }

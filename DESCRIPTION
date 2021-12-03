@@ -56,10 +56,8 @@ Suggests:
   SummarizedExperiment,
   testthat (>= 1.0.2),
   tidyr
-Remotes:
-  lianos/sparrow
 biocViews: Infrastructure, DataRepresentation
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Roxygen: list(markdown = TRUE)
 License: Apache License (>= 2.0)
 Encoding: UTF-8

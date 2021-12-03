@@ -12,6 +12,10 @@
 #' @param name A subdirectory within `directory` will be created using this
 #'   name.
 #' @return The FacileDataSet object itself.
+#' @examples
+#' \dontest{
+#' afds <- assemble_example_dataset()
+#' }
 assemble_example_dataset <- function(directory = tempdir(),
                                      name = "ExampleRnaFacileDataSet") {
   assert_directory_exists(directory, "w")
@@ -22,49 +26,32 @@ assemble_example_dataset <- function(directory = tempdir(),
   }
   message("Assembling dataset into: ", full.path)
 
-  ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
-  if (is.null(ns)) stop("SummarizedExperiment required")
-  ns4 <- tryCatch(loadNamespace("S4Vectors"), error = function(e) NULL)
-  if (is.null(ns4)) stop("S4Vectors required")
+  reqpkg("SummarizedExperiment")
 
   # Load Data ..................................................................
   dat.env <- new.env()
-  tryCatch({
-    data("airway", package = "airway", envir = dat.env)
-  }, error = function(e) stop("The airway package is required"))
-  tryCatch({
-    data("parathyroidGenesSE", package = "parathyroidSE", envir = dat.env)
-  }, error = function(e) stop("The parathyroidSE package is required"))
+  utils::data("airway", package = "airway", envir = dat.env)
+  utils::data("parathyroidGenesSE", package = "parathyroidSE", envir = dat.env)
 
   # Munge colData ..............................................................
   se.airway <- dat.env[["airway"]]
-  cd.airway <- local({
-    cd <- ns$colData(dat.env[["airway"]]) %>%
-      as.data.frame() %>%
-      transmute(
-        sample_type = "cell_line",
-        cell_line = cell,
-        treatment = ifelse(dex == "untrt", "control", "dex")) %>%
-      ns4$DataFrame()
-    rownames(cd) <- colnames(se.airway)
-    cd
-  })
-  se.airway <- ns$`colData<-`(se.airway, value = cd.airway)
+  cd.airway <- SummarizedExperiment::colData(se.airway) %>%
+    as.data.frame() %>%
+    transmute(
+      sample_type = "cell_line",
+      cell_line = cell,
+      treatment = ifelse(dex == "untrt", "control", "dex"))
+  rownames(cd.airway) <- colnames(se.airway)
 
   se.parathyroid <- dat.env[["parathyroidGenesSE"]]
-  cd.parathyroid <- local({
-    cd <- ns$colData(dat.env[["parathyroidGenesSE"]]) %>%
-      as.data.frame() %>%
-      transmute(
-        sample_type = "primary",
-        subject_id = paste0("patient_", patient),
-        treatment = tolower(as.character(treatment)),
-        time = paste0("hrs", sub("h$", "", time))) %>%
-      ns4$DataFrame()
-    rownames(cd) <- colnames(se.parathyroid)
-    cd
-  })
-  se.parathyroid <- ns$`colData<-`(se.parathyroid, value = cd.parathyroid)
+  cd.parathyroid <- SummarizedExperiment::colData(se.parathyroid) %>%
+    as.data.frame() %>%
+    transmute(
+      sample_type = "primary",
+      subject_id = paste0("patient_", patient),
+      treatment = tolower(as.character(treatment)),
+      time = paste0("hrs", sub("h$", "", time)))
+  rownames(cd.parathyroid) <- colnames(se.parathyroid)
 
   # Munge rowData ..............................................................
   mart.info <- local({
@@ -84,37 +71,16 @@ assemble_example_dataset <- function(directory = tempdir(),
               source = "Ensembl_v75") %>%
     filter(feature_id %in% shared.ids) %>%
     distinct(feature_id, .keep_all = TRUE)
-    # ns4$DataFrame()
   rownames(gene.info) <- gene.info[["feature_id"]]
 
-  # I assemble these into DGELists because I can't figure out how to get
-  # SummarizedExperiment subsetting working without using the loadedNamespace
-  # mojo ... I'm dying on the inside here.
-  #
-  # Obviously I'm doing something wrong, but ... damn, y0 ... damn.
-
-  # se.subfn <- selectMethod("[", c("SummarizedExperiment", "ANY", "ANY"))
-
-  # se.airway <- se.airway[rownames(gene.info),]
-  # se.airway <- se.subfn(se.airway, rownames(gene.info))
-  # se.airway <- ns$`rowData<-`(se.airway, value = gene.info)
-  #
-  # # se.parathyroid <- se.parathyroid[rownames(gene.info),]
-  # se.parathyroid <- se.subfn(se.parathyroid, rownames(gene.info))
-  # se.parathyroid <- ns$`rowData<-`(se.parathyroid, value = gene.info)
-  #
-  # dat.all <- list(airway = se.airway, parathyroid = se.parathyroid)
-
-  # gene.info <- ns4$as.data.frame(gene.info)
-
   y.airway <- edgeR::DGEList(
-    counts = ns$assay(se.airway)[rownames(gene.info), ],
-    samples = ns4$as.data.frame.DataTable(ns$colData(se.airway)),
+    counts = SummarizedExperiment::assay(se.airway)[rownames(gene.info), ],
+    samples = cd.airway,
     genes = gene.info)
 
   y.para <- edgeR::DGEList(
-    counts = ns$assay(se.parathyroid)[rownames(gene.info), ],
-    samples = ns4$as.data.frame.DataTable(ns$colData(se.parathyroid)),
+    counts = SummarizedExperiment::assay(se.parathyroid)[rownames(gene.info), ],
+    samples = cd.parathyroid,
     genes = gene.info)
 
   dat.all <- list(airway = y.airway, parathyroid = y.para)

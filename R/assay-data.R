@@ -811,7 +811,7 @@ fetch_assay_score.FacileDataSet <- function(x, features, samples = NULL,
                           as.matrix = TRUE, normalized = TRUE, ...,
                           subset.threshold = subset.threshold)
   if (nrow(dat) > 1) {
-    dat <- matrix(eigenWeightedMean(dat)$score, nrow = 1)
+    dat <- matrix(sparrow::eigenWeightedMean(dat)$score, nrow = 1)
   }
 
 }

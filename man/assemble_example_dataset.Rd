@@ -27,3 +27,6 @@ The code here is extracted from the \code{FacileDataSet-assembly} vignette. Plea
 read that for some of the why's and how's of the decisions made here when
 assembling datasets.
 }
+\examples{
+afds <- assemble_example_dataset()
+}

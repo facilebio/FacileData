@@ -73,7 +73,7 @@ print.facile_frame <- function(x, ..., n = NULL, width = NULL, n_extra = NULL) {
 .extra_classes <- function(x, ..., .root = "facile_frame") {
   classes <- class(x)
   root.idx <- match(.root, classes)
-  if (is.na(root.idx)) character() else head(classes, root.idx - 1L)
+  if (is.na(root.idx)) character() else utils::head(classes, root.idx - 1L)
 }
 
 #' @export
