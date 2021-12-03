@@ -1,15 +1,14 @@
 ---
 title: "FacileDataSet Assembly"
 author: "Steve Lianoglou"
-date: "5/17/2019"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('FacileData')`"
 output:
-  rmarkdown::html_document:
-    css: "custom.css"
+  BiocStyle::html_document:
     highlight: pygments
     toc: true
-    toc_float: true
-    fig_width: 6
-    df_print: paged
+    fig_width: 5
+    css: custom.css
 vignette: >
   %\VignetteIndexEntry{FacileDataSet Assembly}
   %\VignetteEngine{knitr::rmarkdown}

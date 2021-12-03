@@ -1,22 +1,14 @@
 ---
 title: "FacileData API Overview"
 author: "Steve Lianoglou"
-date: "`r Sys.Date()`"
+date: "`r BiocStyle::doc_date()`"
 package: "`r BiocStyle::pkg_ver('FacileData')`"
 output:
-  html_document:
-    code_folding: show
-    fig_caption: yes
-    self_contained: yes
+  BiocStyle::html_document:
     highlight: pygments
+    toc: true
     fig_width: 5
-    toc: yes
-    toc_float:
-      collapsed: no
-      smooth_scroll: yes
-    css: mystyles.css
-  rmarkdown::html_vignette:
-    css: mystyles.css
+    css: custom.css
 vignette: >
   %\VignetteIndexEntry{FacileData API Overview}
   %\VignetteEngine{knitr::rmarkdown}

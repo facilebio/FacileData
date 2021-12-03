@@ -1,19 +1,14 @@
 ---
 title: "FacileDataSet Overview"
 author: "Steve Lianoglou"
-date: "`r Sys.Date()`"
+date: "`r BiocStyle::doc_date()`"
 package: "`r BiocStyle::pkg_ver('FacileData')`"
 output:
-  html_document:
-    code_folding: show
-    fig_caption: yes
-    self_contained: yes
+  BiocStyle::html_document:
     highlight: pygments
+    toc: true
     fig_width: 5
-    toc: yes
-    toc_float:
-      collapsed: no
-      smooth_scroll: yes
+    css: custom.css
 vignette: >
   %\VignetteIndexEntry{FacileDataSet Overview}
   %\VignetteEngine{knitr::rmarkdown}
