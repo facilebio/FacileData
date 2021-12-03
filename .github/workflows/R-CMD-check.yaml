@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image: ['facilebio/facilebio:latest', 'facilebio/facilebio:devel']
+        image: ['facilebio/facilebio', 'facilebio/facilebio:devel']
     container: ${{ matrix.image }}
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
