@@ -349,7 +349,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
     ## Error in UseMethod("h5write") (from construction.R#296) :
     ##   no applicable method for 'h5write' applied to an object of class
     ##   "c('matrix', 'integer', 'numeric')"
-    rhdf5::h5write.default(dat, file=hdf5fn(x), dname)
+    rhdf5::h5write(dat, file = hdf5fn(x), name = dname)
     tibble(assay=facile_assay_name, dataset=ds, sample_id=colnames(dat),
            hdf5_index=seq(ncol(dat)))
   })
