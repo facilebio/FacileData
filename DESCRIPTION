@@ -19,6 +19,7 @@ Description: Defines the "FacileData" API over multi-assay, high-throughput
   API that uses SQLite and HDF5 files to store arbitrarily large datasets and
   provide fast and efficient access to arbitrary subsets of these data without
   loading it all into memory.
+License: Apache License (>= 2.0)
 URL: https://github.com/facilebio/FacileData
 BugReports: https://github.com/facilebio/FacileData/issues
 Depends:
@@ -57,7 +58,7 @@ Suggests:
   testthat (>= 1.0.2),
   tidyr
 biocViews: Infrastructure, DataRepresentation
+VignetteBuilder: knitr
 RoxygenNote: 7.1.2
 Roxygen: list(markdown = TRUE)
-License: Apache License (>= 2.0)
 Encoding: UTF-8
