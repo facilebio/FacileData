@@ -23,13 +23,13 @@ on:
         required: false
         default: 'gitty up'
 
-name: R-CMD-check
+name: BiocCheck
 
 env:
   has_testthat: 'true'
 
 jobs:
-  R-CMD-check:
+  BiocCheck:
     runs-on: ubuntu-latest
     # strategy:
     #   matrix:
