@@ -245,16 +245,19 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
   if (isTRUE(aggregate)) {
     scores <- switch(aggregate.by,
                      ewm = sparrow::eigenWeightedMean(vals, ...)$score,
-                     zscore = zScore(vals, ...)$score)
+                     zscore = sparrow::zScore(vals, ...)$score)
     vals <- matrix(scores, nrow=1, dimnames=list('score', names(scores)))
   }
 
   if (!as.matrix) {
     vals <- .melt.assay.matrix(vals, assay_name, atype, ftype, finfo)
     if (isTRUE(aggregate)) {
-      vals[, feature_type := 'aggregated']
-      vals[, feature_id := 'aggregated']
-      vals[, feature_name := 'aggregated']
+      # vals[, feature_type := 'aggregated']
+      # vals[, feature_id := 'aggregated']
+      # vals[, feature_name := 'aggregated']
+      data.table::set(vals, j = "feature_type", value = "aggregated")
+      data.table::set(vals, j = "feature_id", value = "aggregated")
+      data.table::set(vals, j = "feature_name", value = "aggregated")
     }
     vals <- as_tibble(setDF(vals))
     vals <- left_join(samples, vals, by = c("dataset", "sample_id"))

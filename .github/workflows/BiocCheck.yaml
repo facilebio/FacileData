@@ -55,18 +55,14 @@ jobs:
         run: remotes::install_deps(dependencies = TRUE, upgrade = FALSE)
         shell: Rscript {0}
 
-      - name: Check
+      - name: Run BiocCheck
         env:
-          _R_CHECK_CRAN_INCOMING_: false
           DISPLAY: 99.0
         run: |
-          options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(
-            args = c("--no-manual", "--no-vignettes", "--timings"),
-            build_args = c("--no-manual", "--keep-empty-dirs", "--no-resave-data"),
-            # error_on = "warning",
-            check_dir = "check")
+          BiocCheck::BiocCheck(
+              dir('check', 'tar.gz$', full.names = TRUE),
+              `quit-with-status` = TRUE,
+              `no-check-R-ver` = TRUE,
+              `no-check-bioc-help` = TRUE,
+              `no-check-coding-practices` = TRUE)
         shell: Rscript {0}
-
-      - name: Reveal testthat details
-        run: find . -name testthat.Rout -exec cat '{}' ';'

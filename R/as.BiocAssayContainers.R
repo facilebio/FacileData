@@ -257,15 +257,16 @@ as.DGEList.data.frame <- function(x, covariates = TRUE, feature_ids = NULL,
     counts <- fetch_assay_data(.fds, feature_ids, x, assay_name = assay_name,
                                normalized = FALSE, as.matrix = TRUE)
   } else {
-    counts.dt <- assert_expression_result(x) %>%
+    cdt <- assert_expression_result(x) %>%
       collect(n = Inf) %>%
       setDT %>%
       unique(by = c('dataset', 'sample_id', 'feature_id'))
-    # counts.dt[, samid := paste(dataset, sample_id, sep='__')]
-    set(counts.dt, i = NULL, j = "samid",
-        paste(counts.dt[["dataset"]], counts.dt[["sample_id"]], sep = "__"))
+    data.table::set(
+      cdt,
+      j = "samid",
+      value = paste(cdt[["dataset"]], cdt[["sample_id"]], sep = "__"))
     counts <- local({
-      wide <- dcast(counts.dt, feature_id ~ samid, value.var = "value")
+      wide <- data.table::dcast(cdt, feature_id ~ samid, value.var = "value")
       out <- as.matrix(wide[, -1L, with=FALSE])
       rownames(out) <- wide[[1L]]
       class(out) <- c('FacileExpression', class(out))
