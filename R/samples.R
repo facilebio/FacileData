@@ -71,7 +71,8 @@ fetch_samples.FacileDataSet <- function(x, samples = NULL,
 #'   otherwise does an inner_join between \code{x} and \code{samples}
 #'   (default \code{FALSE}).
 #' @return joined result between \code{x} and \code{samples}
-join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
+join_samples <- function(x, samples = NULL, semi = FALSE, 
+                         distinct.samples = FALSE) {
   if (is.null(samples)) {
     return(x)
   }
@@ -88,11 +89,16 @@ join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
   if (semi && length(extra.cols) > 0L) {
     samples <- distinct(samples, dataset, sample_id)
   }
-
-  # inner_join(x, samples, by=c('dataset', 'sample_id'),
-  #            copy=internalize, auto_index=internalize)
-  left_join(x, samples, by=c('dataset', 'sample_id'),
-            copy=internalize, auto_index=internalize)
+  
+  if (is(x, "tbl_lazy")) {
+    out <- left_join(x, samples, by = c("dataset", "sample_id"),
+                     copy = internalize, auto_index = internalize)
+  } else {
+    out <- left_join(x, samples, by = c("dataset", "sample_id"),
+                     copy = internalize)
+  }
+  
+  out
 }
 
 ## Filter x down to specific samples

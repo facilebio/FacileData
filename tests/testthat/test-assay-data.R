@@ -37,7 +37,6 @@ test_that("spreading data works with_assay_data", {
   result <- samples %>%
     with_assay_data(genes, normalized = TRUE, .fds = FDS) %>%
     collect
-
   expect_equal(result, expected, check.attributes = FALSE)
 })
 
