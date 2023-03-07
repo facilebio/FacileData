@@ -202,6 +202,10 @@ ungroup.facile_frame <- function(x, ..., .facilitate = TRUE) {
 # Around December 2022 (prep for dplyr 1.1?), dplyr was enforcing empty `...`
 # in the *_join.data.frame functions via a call to check_dots_empty0(...).
 # 
+# Take a look at these references to get an idea of what I mean:
+#   Issue: https://github.com/tidyverse/dplyr/issues/6599
+#   PR: https://github.com/tidyverse/dplyr/pull/6605
+# 
 # This complicates the implementation of the .facile_frame joins because we
 # can't simply call `NextMethod()` since our functions accept a .facilitate
 # parameter, which gets passed down to the "next" function in the stack, and
@@ -223,12 +227,15 @@ downcast_ff <- function(x, ...) {
 }
 
 #' @noRd
-upcast_ff <- function(x, downcasted, ...) {
+upcast_ff <- function(x, downcasted, .facilitate = FALSE, ...) {
   cast_info <- attr(downcasted, "cast_info")
   assert_list(cast_info, min.len = 2L)
+  assert_flag(.facilitate)
+
   original_class <- assert_string(cast_info[["original_class"]])
   down_class <- assert_string(cast_info[["down_class"]])
-  if (isTRUE(class(x)[1L] == down_class)) {
+  if (isTRUE(class(x)[1L] == down_class) && 
+      !(.facilitate && original_class == "facile_frame")) {
     class(x) <- c(original_class, class(x))
   }
   x
