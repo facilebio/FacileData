@@ -96,14 +96,16 @@ indicates its censoring status.
 Let's assume we have \code{tte_OS} and \code{event_OS} column that are used to encode
 a patient's overall survival (time and censor status). To store this as an
 "OS" covariate in the EAV table, a \code{covariate_def} list-of-list definition
-that captures this encoding would look like this:\preformatted{covariate_def <- list(
+that captures this encoding would look like this:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{covariate_def <- list(
   OS=list(
     class="right_censored",
     arguments=list(time="tte_OS", event="event_OS"),
     label="Overall Survival",
     type="clinical",
     description="Overall survival in days"))
-}
+}\if{html}{\out{</div>}}
 
 Note how the name of the list-entry in \code{covariate_def} defines the name of
 the covariate in the \code{FacileDataSet}. The \code{class} entry for the \code{OS}
@@ -113,7 +115,9 @@ is only used when encoding a wide \code{pData} into the EAV value column.
 \verb{[eav_encode_right_censored()]} function, and their values are the columns in
 the target \code{pData} that populate the respective parameters in the function
 call. The analagous \code{meta.yaml} entry in the \code{sample_covariates} section for
-the \code{"OS"} \code{covariate_def} entry looks like so:\preformatted{sample_covariates:
+the \code{"OS"} \code{covariate_def} entry looks like so:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{sample_covariates:
   OS:
     class: right_censored
     arguments:
@@ -122,7 +126,7 @@ the \code{"OS"} \code{covariate_def} entry looks like so:\preformatted{sample_co
     label: "Overall Survival"
     type: "clinical"
     description: "Overall survival in days"
-}
+}\if{html}{\out{</div>}}
 }
 
 \section{Encoding Arbitrarily Complex Covariates}{

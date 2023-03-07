@@ -26,6 +26,6 @@ below to see their documentation.
 \describe{
   \item{broom}{\code{\link[broom:reexports]{tidy}}}
 
-  \item{dplyr}{\code{\link[dplyr:reexports]{\%>\%}}, \code{\link[dplyr]{arrange}}, \code{\link[dplyr:compute]{collect}}, \code{\link[dplyr]{distinct}}, \code{\link[dplyr]{filter}}, \code{\link[dplyr]{group_by}}, \code{\link[dplyr:mutate-joins]{inner_join}}, \code{\link[dplyr:mutate-joins]{left_join}}, \code{\link[dplyr]{mutate}}, \code{\link[dplyr]{select}}, \code{\link[dplyr:filter-joins]{semi_join}}, \code{\link[dplyr:mutate]{transmute}}, \code{\link[dplyr:group_by]{ungroup}}}
+  \item{dplyr}{\code{\link[dplyr:reexports]{\%>\%}}, \code{\link[dplyr]{arrange}}, \code{\link[dplyr:compute]{collect}}, \code{\link[dplyr]{distinct}}, \code{\link[dplyr]{filter}}, \code{\link[dplyr]{group_by}}, \code{\link[dplyr:mutate-joins]{inner_join}}, \code{\link[dplyr:mutate-joins]{left_join}}, \code{\link[dplyr]{mutate}}, \code{\link[dplyr]{select}}, \code{\link[dplyr:filter-joins]{semi_join}}, \code{\link[dplyr]{transmute}}, \code{\link[dplyr:group_by]{ungroup}}}
 }}
 

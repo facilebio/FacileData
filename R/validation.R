@@ -145,7 +145,7 @@ check_sample_subset <- function(x, fds = NULL, ...) {
     bad.samples <- anti_join(x, .samples, by = c("dataset", "sample_id"),
                              copy = !same_src(.samples, x),
                              .facilitate = FALSE)
-    bad.samples <- collect(bad.samples, n = Inf, .facilitate = FALSE)
+    bad.samples <- collect(bad.samples, n = Inf)
     nbad <- nrow(bad.samples)
     if (nbad > 0L) {
       e <- c(e, paste(nbad, "samples not found in FacileDataStore"))
