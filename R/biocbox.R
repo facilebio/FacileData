@@ -135,7 +135,7 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
 
 #' Map assay_types to default bioc containers
 #' @noRd
-.biocboxes <- tribble(
+.biocboxes <- tibble::tribble(
   ~assay_type,     ~class,                   ~package,
   "rnaseq",        "DGEList",                "edgeR",
   "rnaseq",        "SummarizedExperiment",   "SummarizedExperiment",
@@ -212,11 +212,11 @@ bb.SummarizedExperiment <- function(amatrix, fdat, pdat, fds., ...) {
 bb.DGEList <- function(amatrix, fdat, pdat, fds., ...) {
   # Issue #2
   # https://github.com/denalitherapeutics/FacileData/issues/2
-  # sample.stats <- samples %>%
+  # sample.stats <- samples |>
   #   with_assay_covariates(c("libsize", "normfactor"), assay_name,
-  #                         .fds = .fds) %>%
-  #   collect(n = Inf) %>%
-  #   mutate(samid=paste(dataset, sample_id, sep='__')) %>%
+  #                         .fds = .fds) |>
+  #   collect(n = Inf) |>
+  #   mutate(samid=paste(dataset, sample_id, sep='__')) |>
   #   as.data.frame()
   # rownames(sample.stats) <- sample.stats[["samid"]]
   # sample.stats <- sample.stats[colnames(x),,drop=FALSE]

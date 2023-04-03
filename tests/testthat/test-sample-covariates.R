@@ -2,8 +2,8 @@ context("Sample Covariates")
 
 FDS <- exampleFacileDataSet()
 COV.DEF <- covariate_definitions(FDS)
-samples <- sample_covariate_tbl(FDS) %>%
-  filter(variable == 'stage' & value == 'III') %>%
+samples <- sample_covariate_tbl(FDS) |>
+  filter(variable == 'stage' & value == 'III') |>
   distinct(dataset, sample_id)
 genes <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
 
@@ -13,22 +13,22 @@ test_that("fetch_sample_covariates queries all samples if not specified", {
 })
 
 test_that("fetch_sample_covariates retrieves all covariates if not specified", {
-  covs <- fetch_sample_covariates(FDS, samples, custom_key='lianogls') %>%
-    collect(n=Inf) %>%
+  covs <- fetch_sample_covariates(FDS, samples, custom_key = 'lianogls') |>
+    collect(n = Inf) |>
     arrange(dataset, sample_id, variable, value)
-  ecovs <- samples %>%
-    inner_join(sample_covariate_tbl(FDS), by=c('dataset', 'sample_id')) %>%
-    collect(n=Inf) %>%
+  ecovs <- samples |>
+    inner_join(sample_covariate_tbl(FDS), by = c('dataset', 'sample_id')) |>
+    collect(n = Inf) |>
     arrange(dataset, sample_id, variable, value)
   expect_equal(covs, ecovs, check.attributes = FALSE)
 })
 
 test_that("fetch_sample_covariates::samples arg limits samples correctly", {
   vars <- c('stage', 'sex', 'OS')
-  covs <- fetch_sample_covariates(FDS, samples, vars) %>% collect(n=Inf)
+  covs <- fetch_sample_covariates(FDS, samples, vars) |> collect(n = Inf)
   s.df <- collect(samples, n=Inf)
-  expected.samples <- with(s.df, paste(dataset, sample_id, sep='_')) %>% unique
-  returned.samples <- with(covs, paste(dataset, sample_id, sep='_')) %>% unique
+  expected.samples <- with(s.df, paste(dataset, sample_id, sep='_')) |> unique()
+  returned.samples <- with(covs, paste(dataset, sample_id, sep='_')) |> unique()
   expect_true(all(returned.samples %in% expected.samples))
 })
 
@@ -43,7 +43,7 @@ test_that("cast_covariate converts simple variables to correct type", {
   for (name in names(simple.vars)) {
     eclass <- simple.vars[[name]]
     info <- sprintf('%s (%s)', name, eclass)
-    vals <- fetch_sample_covariates(FDS, samples, name) %>% collect(n=Inf)
+    vals <- fetch_sample_covariates(FDS, samples, name) |> collect(n = Inf)
     casted <- cast_covariate(name, vals$value, .fds = FDS)
     len <- if (eclass == "data.frame") nrow(casted) else length(casted)
     expect_true(len == nrow(vals), info = info)
@@ -57,10 +57,10 @@ test_that("cast_covariate converts right_censored data correctly", {
   vars <- c('OS', 'PFS')
   for (name in vars) {
     ex.names <- paste(c('tte', 'event'), name, sep='_')
-    vals <- fetch_sample_covariates(FDS, samples, name) %>% collect(n=Inf)
-    casted <- cast_covariate(name, vals$value, .fds=FDS)
-    expect_is(casted, 'data.frame', info=name)
-    expect_true(setequal(names(casted), ex.names), info=name)
+    vals <- fetch_sample_covariates(FDS, samples, name) |> collect(n = Inf)
+    casted <- cast_covariate(name, vals$value, .fds = FDS)
+    expect_is(casted, 'data.frame', info = name)
+    expect_true(setequal(names(casted), ex.names), info = name)
     expect_is(casted[[ex.names[1]]], "numeric", info = ex.names[1])
     expect_is(casted[[ex.names[2]]], "integer", info = ex.names[2])
   }
@@ -73,17 +73,17 @@ test_that("spread_covariates casts simple covariates to correct class", {
     stage ="factor", sample_type = "factor",
     subtype_tcga = "character")
 
-  wide <- FDS %>%
-    fetch_sample_covariates(samples, names(vars)) %>%
-    spread_covariates
+  wide <- FDS |>
+    fetch_sample_covariates(samples, names(vars)) |>
+    spread_covariates()
 
   ## Test presence of columns and class converted correctly
   for (cov in names(vars)) {
-    expect_is(wide[[cov]], vars[cov], info=paste("Covariate:", cov))
+    expect_is(wide[[cov]], vars[cov], info = paste("Covariate:", cov))
   }
 
   ## Ensure that all samples asked for are in wide result
-  missed <- anti_join(wide, collect(samples), by=c('dataset', 'sample_id'))
+  missed <- anti_join(wide, collect(samples), by = c('dataset', 'sample_id'))
   expect_true(nrow(missed) == 0)
 })
 
@@ -93,18 +93,18 @@ test_that("spread_covariates works with both simple and complex types", {
 
   ## Check values retrieved in uber result with individual results from simple
   ## and cmoplex covariates separately
-  mixed <- FDS %>%
-    fetch_sample_covariates(samples, c(simple, complex)) %>%
-    spread_covariates
+  mixed <- FDS |>
+    fetch_sample_covariates(samples, c(simple, complex)) |>
+    spread_covariates()
 
-  sc <- fetch_sample_covariates(FDS, samples, simple) %>%
-    spread_covariates
+  sc <- fetch_sample_covariates(FDS, samples, simple) |>
+    spread_covariates()
   ## check values in same (named) columns are the same
   cols <- intersect(names(mixed), names(sc))
   expect_equal(mixed[, cols], sc[, cols], check.attributes=FALSE)
 
-  cc <- fetch_sample_covariates(FDS, samples, complex) %>%
-    spread_covariates
+  cc <- fetch_sample_covariates(FDS, samples, complex) |>
+    spread_covariates()
   ## Some samples don't have complex covariates -- we need to fix this so that
   ## we get NA's for samples that don't have them from fetch_sample_covariates
 
@@ -114,7 +114,7 @@ test_that("spread_covariates works with both simple and complex types", {
 
   mcheck <- arrange(mcheck, dataset, sample_id)
   cc <- arrange(cc, dataset, sample_id)
-  expect_equal(mcheck[, cols], cc[, cols], check.attributes=FALSE)
+  expect_equal(mcheck[, cols], cc[, cols], check.attributes = FALSE)
 })
 
 
@@ -123,43 +123,43 @@ test_that('with_sample_covariates returns long input with wide covariates', {
 
   ## Setup the individual expression and covariate table to merge into the
   ## expected result
-  exprs <- fetch_assay_data(FDS, genes, samples) %>%
-    collect(n=Inf)
-  wcovs <- fetch_sample_covariates(FDS, samples, covs) %>%
-    spread_covariates
+  exprs <- fetch_assay_data(FDS, genes, samples) |>
+    collect(n = Inf)
+  wcovs <- fetch_sample_covariates(FDS, samples, covs) |>
+    spread_covariates()
 
-  expected <- exprs %>%
-    left_join(wcovs, by=c('dataset', 'sample_id')) %>%
+  expected <- exprs |>
+    left_join(wcovs, by=c('dataset', 'sample_id')) |>
     arrange(dataset, sample_id, feature_id)
 
-  ecovs <- fetch_assay_data(FDS, genes, samples) %>%
-    with_sample_covariates(covs) %>%
+  ecovs <- fetch_assay_data(FDS, genes, samples) |>
+    with_sample_covariates(covs) |>
     arrange(dataset, sample_id, feature_id)
 
   expect_equal(ecovs, expected, check.attributes = FALSE)
 })
 
 test_that("successive with_sample_covariate calls build correct frame", {
-  expected <- FDS %>%
-    fetch_sample_covariates(samples, c('sex', 'stage')) %>%
-    spread_covariates %>%
+  expected <- FDS |>
+    fetch_sample_covariates(samples, c('sex', 'stage')) |>
+    spread_covariates() |>
     arrange(dataset, sample_id)
 
-  res <- samples %>%
-    with_sample_covariates("sex") %>%
-    with_sample_covariates("stage") %>%
+  res <- samples |>
+    with_sample_covariates("sex") |>
+    with_sample_covariates("stage") |>
     arrange(dataset, sample_id)
   expect_equal(res, expected)
 })
 
 test_that("with_sample_covariates can support renaming covariates", {
-  expected <- FDS %>%
-    fetch_sample_covariates(samples, c('sample_type', 'stage')) %>%
-    spread_covariates %>%
-    arrange(dataset, sample_id) %>%
+  expected <- FDS |>
+    fetch_sample_covariates(samples, c('sample_type', 'stage')) |>
+    spread_covariates() |>
+    arrange(dataset, sample_id) |>
     rename(tumor_stage = "stage")
-  res <- samples %>%
-    with_sample_covariates(c("sample_type", tumor_stage = "stage")) %>%
+  res <- samples |>
+    with_sample_covariates(c("sample_type", tumor_stage = "stage")) |>
     arrange(dataset, sample_id)
   expect_equal(res, expected)
 })

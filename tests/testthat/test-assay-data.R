@@ -2,8 +2,8 @@ context("Fetching assay level data")
 
 if (!exists("FDS")) FDS <- exampleFacileDataSet()
 
-samples <- FDS %>%
-  filter_samples(stage == "III") %>%
+samples <- FDS |>
+  filter_samples(stage == "III") |>
   select(dataset, sample_id)
 
 genes <- c(
@@ -15,10 +15,10 @@ genes <- c(
 features <- tibble(assay='rnaseq', feature_id=genes)
 
 test_that("fetch_assay_data limits samples correctly", {
-  s.df <- collect(samples, n=Inf)
-
-  e.sqlite <- fetch_assay_data(FDS, genes, samples) %>% collect(n=Inf)
-  e.df <- fetch_assay_data(FDS, genes, s.df) %>% collect(n=Inf)
+  s.df <- collect(samples, n = Inf)
+  
+  e.sqlite <- fetch_assay_data(FDS, genes, samples) |> collect(n=Inf)
+  e.df <- fetch_assay_data(FDS, genes, s.df) |> collect(n=Inf)
 
   ## results are same from tbl_df and tbl_sqlite `samples` parameter
   expect_equal(e.sqlite, e.df)
@@ -30,31 +30,31 @@ test_that("fetch_assay_data limits samples correctly", {
 })
 
 test_that("spreading data works with_assay_data", {
-  expected <- FDS %>%
-    fetch_assay_data(genes, samples, normalized = TRUE) %>%
-    select(dataset, sample_id, feature_name, value) %>%
+  expected <- FDS |>
+    fetch_assay_data(genes, samples, normalized = TRUE) |>
+    select(dataset, sample_id, feature_name, value) |>
     tidyr::spread(feature_name, value)
-  result <- samples %>%
-    with_assay_data(genes, normalized = TRUE, .fds = FDS) %>%
-    collect
+  result <- samples |>
+    with_assay_data(genes, normalized = TRUE, .fds = FDS) |>
+    collect()
   expect_equal(result, expected, check.attributes = FALSE)
 })
 
 test_that("fetch_assay_data(..., aggregate = TRUE) provides scores", {
-  scores <- FDS %>%
-    fetch_assay_data(features, samples, normalized = TRUE, aggregate = TRUE) %>%
-    arrange(sample_id, feature_name) %>%
-    select(dataset, sample_id, feature_id, symbol=feature_name, value) %>%
+  scores <- FDS |>
+    fetch_assay_data(features, samples, normalized = TRUE, aggregate = TRUE) |>
+    arrange(sample_id, feature_name) |>
+    select(dataset, sample_id, feature_id, symbol=feature_name, value) |>
     mutate(samid=paste(dataset, sample_id, sep="__"))
 
-  dat <- FDS %>%
+  dat <- FDS |>
     fetch_assay_data(features, samples, normalized = TRUE, as.matrix = TRUE)
   ewm <- sparrow::eigenWeightedMean(dat)$score[scores$samid]
   expect_equal(scores$value, unname(ewm))
 
   # test with_assay_data
-  with.scores <- scores %>%
-    distinct(dataset, sample_id) %>%
+  with.scores <- scores |>
+    distinct(dataset, sample_id) |>
     with_assay_data(features, aggregate = TRUE)
 
   expect_equal(with.scores$aggregated, scores$value)
@@ -69,16 +69,16 @@ test_that("fetch_assay_data(..., aggregate = TRUE) provides scores", {
 #   tcga <- FacileDataSet('~/workspace/data/facile/FacileDataSets/FacileTCGADataSet-2017-03-25')
 #
 #   library(reshape2)
-#   samples <- sample_info_tbl(tcga) %>%
-#     filter(dataset == 'BRCA') %>%
+#   samples <- sample_info_tbl(tcga) |>
+#     filter(dataset == 'BRCA') |>
 #     collect
 #
 #   genes <- c(TIGIT='201633', CD274='29126')
-#   rnaseq <- tcga %>%
+#   rnaseq <- tcga |>
 #     fetch_assay_data(genes, samples, 'rnaseq', normalized=TRUE)
 #
 #   ## don't have agilent data for all brca samples
-#   agilent <- tcga %>%
+#   agilent <- tcga |>
 #     fetch_assay_data(genes, samples, 'agilent', normalized=TRUE)
 #
 # })

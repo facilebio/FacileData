@@ -1,35 +1,41 @@
 context("EAV Manipulation")
 
-efds. <- exampleFacileDataSet()
-pdata. <- efds. %>%
-  # sex and stage are factors
-  fetch_sample_covariates(covariates = c("sex", "stage")) %>%
-  spread_covariates() %>%
-  # add some other data types: numeric and character
-  mutate(age = sample(20:70, nrow(.)),
-         category = sample(letters, nrow(.), replace = TRUE))
-emeta. <- local({
-  fn <- system.file("extdata", "exampleFacileDataSet", "meta.yaml",
-                    package = "FacileData", mustWork = TRUE)
-  defined <- yaml::yaml.load_file(fn)$sample_covariates
-  defined <- defined[names(defined) %in% colnames(pdata.)]
-  c(defined, list(
-    age = list(type = "atype", class = "real", description = "happy bday"),
-    category = list(type = "atype", class = "categorical", description = "x")))
-})
+example_metadata <- function() {
+  efds <- exampleFacileDataSet()
+  pdata <- efds |>
+    # sex and stage are factors
+    fetch_sample_covariates(covariates = c("sex", "stage")) |>
+    spread_covariates()
+  pdata <- mutate(pdata, age = sample(20:70, nrow(pdata)),
+                  category = sample(letters, nrow(pdata), replace = TRUE))
+  meta <- local({
+    fn <- system.file("extdata", "exampleFacileDataSet", "meta.yaml",
+                      package = "FacileData", mustWork = TRUE)
+    defined <- yaml::yaml.load_file(fn)$sample_covariates
+    defined <- defined[names(defined) %in% colnames(pdata)]
+    c(defined, list(
+      age = list(type = "atype", class = "real", description = "happy bday"),
+      category = list(type = "atype", class = "categorical", description = "x")))
+  })
+  
+  list(
+    pdata = pdata,
+    meta = meta)
+}
 
 test_that("deafult metadata creation from data.frame", {
   ignore.cols <- c("dataset", "sample_id")
-
-  covdefs <- eav_metadata_create(pdata., ignore = ignore.cols)
-  expected.cols <- setdiff(names(pdata.), ignore.cols)
+  edata <- example_metadata()
+  
+  covdefs <- eav_metadata_create(edata$pdata, ignore = ignore.cols)
+  expected.cols <- setdiff(names(edata$pdata), ignore.cols)
   expect_setequal(names(covdefs), expected.cols)
 
   # check that inferred covariate definitions have the required "slots", ie.
   # arguments, label, class, type
   for (cname in expected.cols) {
-    vals <- pdata.[[cname]]
-    expected <- emeta.[[cname]]
+    vals <- edata$pdata[[cname]]
+    expected <- edata$meta[[cname]]
     inferred <- covdefs[[cname]]
     if (is.character(vals) || is.factor(vals)) {
       expect_equal(inferred[["class"]], "categorical", info = cname)
@@ -43,17 +49,19 @@ test_that("deafult metadata creation from data.frame", {
 })
 
 test_that("custom definition supersede inferred EAV defs from data.frame", {
+  edata <- example_metadata()
+  
   covariate_def <- list(
     # Change order of levels and description in sex factor covariate
     sex = list(
-      levels = rev(levels(pdata.[["sex"]])),
+      levels = rev(levels(edata$pdata[["sex"]])),
       description = "x:y chromosome ratio"),
     age = list(
       description = "years of life",
       type = "random"))
 
-  defaults <- eav_metadata_create(pdata.)
-  custom <-  eav_metadata_create(pdata., covariate_def = covariate_def)
+  defaults <- eav_metadata_create(edata$pdata)
+  custom <-  eav_metadata_create(edata$pdata, covariate_def = covariate_def)
 
   # Check reversed levels of `sex` covariate
   expect_character(custom$sex$levels)

@@ -2,8 +2,8 @@ context("Normalizaiton of assay data")
 
 if (!exists("FDS")) FDS <- exampleFacileDataSet()
 
-samples <- FDS %>%
-  filter_samples(stage == "III") %>%
+samples <- FDS |>
+  filter_samples(stage == "III") |>
   select(dataset, sample_id)
 
 genes <- c(
@@ -19,7 +19,7 @@ test_that("Normalization of rnaseq data is equivalent to edgeR::cpm", {
   cpms <- edgeR::cpm(y, log = TRUE, prior.count = 0.25)[genes,]
 
   # use the lib.size and norm.factors from this subset of data
-  samples. <- samples %>%
+  samples. <- samples |>
     left_join(select(y$samples, sample_id, lib.size, norm.factors),
               by = "sample_id")
 

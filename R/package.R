@@ -12,9 +12,6 @@ broom::tidy
 # Should we just but dplyr in Depends?
 
 #' @export
-dplyr::`%>%`
-
-#' @export
 dplyr::arrange
 
 #' @export
@@ -24,13 +21,13 @@ dplyr::collect
 dplyr::distinct
 
 #' @export
-dplyr::filter
-
-#' @export
 dplyr::group_by
 
 #' @export
 dplyr::mutate
+
+#' @export
+dplyr::rename
 
 #' @export
 dplyr::select
@@ -49,3 +46,9 @@ dplyr::inner_join
 
 #' @export
 dplyr::semi_join
+
+#' @export
+dplyr::anti_join
+
+#' @export
+dplyr::nest_join

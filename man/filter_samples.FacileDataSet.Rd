@@ -38,9 +38,9 @@ fds <- exampleFacileDataSet()
 # To identify all samples that are of "CMS3" or "CMS4" subtype(
 # stored in the "subtype_crc_cms" covariate:
 crc.34 <- filter_samples(fds, subtype_crc_cms \%in\% c("CMS3", "CMS4"))
-eav.query <- fds \%>\%
-  fetch_sample_covariates(covariates = "subtype_crc_cms") \%>\%
-  filter(value \%in\% c("CMS3", "CMS4")) \%>\%
+eav.query <- fds |>
+  fetch_sample_covariates(covariates = "subtype_crc_cms") |>
+  filter(value \%in\% c("CMS3", "CMS4")) |>
   collect()
 setequal(crc.34$sample_id, eav.query$sample_id)
 

@@ -38,8 +38,8 @@ with_feature_info.tbl <- function(x, covariates = NULL, ..., .fds = NULL) {
 #' @method with_feature_info data.frame
 #' @examples
 #' efds <- exampleFacileDataSet()
-#' some <- fetch_feature_info(efds, "entrez") %>%
-#'   select(feature_id, feature_type) %>%
+#' some <- fetch_feature_info(efds, "entrez") |>
+#'   select(feature_id, feature_type) |>
 #'   collect(n = 5)
 #' with_feature_info(some, c("name", "meta"))
 #' with_feature_info(some, c(symbol = "name", biotype = "meta"))
@@ -77,9 +77,9 @@ with_feature_info.data.frame <- function(x, covariates = NULL, ...,
 feature_types <- function(x) {
   stopifnot(is.FacileDataSet(x))
   ## Damn, can't do distinct on sqlite
-  feature_info_tbl(x) %>%
-    distinct(feature_type) %>%
-    collect(n=Inf) %>%
+  feature_info_tbl(x) |>
+    distinct(feature_type) |>
+    collect(n=Inf) |>
     pull(feature_type)
 }
 
@@ -110,17 +110,17 @@ feature_name_map <- function(x, feature_type) {
   stopifnot(has_feature_type(x, feature_type))
   ## http://jira.gene.com/jira/browse/FACILEDATA-64 will put this in database
   ## but for now we have flat files.
-  finfo <- feature_info_tbl(x) %>%
-    filter(feature_type == feature_type) %>%
-    select(feature_id, name) %>%
-    collect(n=Inf) %>%
+  finfo <- feature_info_tbl(x) |>
+    filter(feature_type == feature_type) |>
+    select(feature_id, name) |>
+    collect(n=Inf) |>
     mutate(type='primary')
   if (organism(x) == 'Homo sapiens') {
     if (FALSE) {
       requireNamespace("org.Hs.eg.db") || stop("Failed to require org.Hs.eg.db")
-      alias <- org.Hs.eg.db %>%
-        AnnotationDbi::select(finfo$feature_id, c('ENTREZID', 'ALIAS')) %>%
-        transmute(feature_id=ENTREZID, name=ALIAS, type='alias') %>%
+      alias <- org.Hs.eg.db |>
+        AnnotationDbi::select(finfo$feature_id, c('ENTREZID', 'ALIAS')) |>
+        transmute(feature_id=ENTREZID, name=ALIAS, type='alias') |>
         anti_join(finfo, by=c('feature_id', 'name'))
       write.csv(alias, 'inst/extdata/feature-alias-map.human.csv', row.names=FALSE)
     }
@@ -129,10 +129,10 @@ feature_name_map <- function(x, feature_type) {
   } else if (organism(x) == 'Mus musculus') {
       if (FALSE) {
           requireNamespace("org.Mm.eg.db") || stop("Failed to require org.Mm.eg.db")
-      alias <- org.Mm.eg.db %>%
-        AnnotationDbi::select(finfo$feature_id, c('ENTREZID', 'ALIAS')) %>%
-        transmute(feature_id=ENTREZID, name=ALIAS, type='alias') %>%
-        anti_join(finfo, by=c('feature_id', 'name')) %>%
+      alias <- org.Mm.eg.db |>
+        AnnotationDbi::select(finfo$feature_id, c('ENTREZID', 'ALIAS')) |>
+        transmute(feature_id=ENTREZID, name=ALIAS, type='alias') |>
+        anti_join(finfo, by=c('feature_id', 'name')) |>
         filter(!is.na(name))
       write.csv(alias, 'inst/extdata/feature-alias-map.mouse.csv', row.names=FALSE)
     }
@@ -142,8 +142,8 @@ feature_name_map <- function(x, feature_type) {
     stop("Unsupported organism for now")
   }
 
-  finfo %>%
-    bind_rows(alias) %>%
-    filter(!is.na(name)) %>%
+  finfo |>
+    bind_rows(alias) |>
+    filter(!is.na(name)) |>
     arrange(feature_id, name)
 }

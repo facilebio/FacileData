@@ -304,15 +304,15 @@ name.FacileDataSet <- function(x, ...) {
 #' @return tibble of sample attributes
 samples.FacileDataSet <- function(x, ...) {
   assert_facile_data_set(x)
-  sample_info_tbl(x) %>%
+  sample_info_tbl(x) |>
     select(dataset, sample_id)
 }
 
 #' @export
 #' @rdname facet_frame
 facet_frame.FacileDataSet <- function(x, name = "default", ...) {
-  samples(x) %>%
-    mutate(facet = dataset) %>%
+  samples(x) |>
+    mutate(facet = dataset) |>
     select(facet, dataset, sample_id)
 }
 

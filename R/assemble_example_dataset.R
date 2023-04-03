@@ -35,8 +35,8 @@ assemble_example_dataset <- function(directory = tempdir(),
 
   # Munge colData ..............................................................
   se.airway <- dat.env[["airway"]]
-  cd.airway <- SummarizedExperiment::colData(se.airway) %>%
-    as.data.frame() %>%
+  cd.airway <- SummarizedExperiment::colData(se.airway) |>
+    as.data.frame() |>
     transmute(
       sample_type = "cell_line",
       cell_line = cell,
@@ -44,8 +44,8 @@ assemble_example_dataset <- function(directory = tempdir(),
   rownames(cd.airway) <- colnames(se.airway)
 
   se.parathyroid <- dat.env[["parathyroidGenesSE"]]
-  cd.parathyroid <- SummarizedExperiment::colData(se.parathyroid) %>%
-    as.data.frame() %>%
+  cd.parathyroid <- SummarizedExperiment::colData(se.parathyroid) |>
+    as.data.frame() |>
     transmute(
       sample_type = "primary",
       subject_id = paste0("patient_", patient),
@@ -63,13 +63,13 @@ assemble_example_dataset <- function(directory = tempdir(),
   })
 
   shared.ids <- intersect(rownames(se.airway), rownames(se.parathyroid))
-  gene.info <- mart.info %>%
+  gene.info <- mart.info |>
     transmute(feature_id = ensembl_gene_id,
               feature_type = "ensgid",
               name = hgnc_symbol,
               meta = gene_biotype,
-              source = "Ensembl_v75") %>%
-    filter(feature_id %in% shared.ids) %>%
+              source = "Ensembl_v75") |>
+    filter(feature_id %in% shared.ids) |>
     distinct(feature_id, .keep_all = TRUE)
   rownames(gene.info) <- gene.info[["feature_id"]]
 

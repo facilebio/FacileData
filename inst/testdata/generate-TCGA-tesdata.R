@@ -5,22 +5,22 @@ tcga <- FacileTCGADataSet()
 
 ## let's get some 20 samples
 set.seed(0xBEEF)
-bsamples.all <- tcga %>%
-  filter_samples(indication %in% c("BLCA", "BRCA")) %>%
-  with_sample_covariates %>%
+bsamples.all <- tcga |>
+  filter_samples(indication %in% c("BLCA", "BRCA")) |>
+  with_sample_covariates |>
   filter(sample_type != 'tumor_metastatic')
 
-bsamples <- bsamples.all %>%
-  group_by(dataset, sample_type) %>%
-  sample_n(5) %>%
-  ungroup %>%
+bsamples <- bsamples.all |>
+  group_by(dataset, sample_type) |>
+  sample_n(5) |>
+  ungroup |>
   set_fds(tcga)
 
 # pData for testing entity-attribute-value encodings
 # Create a covariate pData object with non-default factor levels to test
-scovs <- bsamples %>%
+scovs <- bsamples |>
   mutate(stage = factor(stage),
-         sex = factor(sex, c("male", "female"))) %>%
+         sex = factor(sex, c("male", "female"))) |>
   select(dataset, sample_id, stage, sex, age, sample_type,
          subtype_molecular_bladder, subtype_receptor_breast,
          tte_OS, event_OS)

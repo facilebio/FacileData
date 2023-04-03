@@ -67,11 +67,11 @@ test_that("Successful EAV creation of data.frame with a Surv object column", {
     y = 4:6,
     stringsAsFactors = FALSE)
 
-  expected <- df %>%
-    mutate(x = as.character(x)) %>%
-    tidyr::gather("variable", "value", -dataset, -sample_id) %>%
+  expected <- df |>
+    mutate(x = as.character(x)) |>
+    tidyr::gather("variable", "value", -dataset, -sample_id) |>
     mutate(class = ifelse(variable == "x", "cSurv", "real"),
-           type = "general") %>%
+           type = "general") |>
     as_tibble()
 
   long <- as.EAVtable(df)

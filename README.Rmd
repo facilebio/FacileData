@@ -68,10 +68,10 @@ tcga <- FacileTCGADataSet()
 
 features <- filter_features(tcga, name == "ERBB2")
 
-fdat <- tcga %>%
-  filter_samples(indication %in% c("BLCA", "BRCA")) %>%
-  with_assay_data(features, assay_name = "rnaseq", normalized = TRUE) %>%
-  with_assay_data(features, assay_name = "cnv_score") %>%
+fdat <- tcga |>
+  filter_samples(indication %in% c("BLCA", "BRCA")) |>
+  with_assay_data(features, assay_name = "rnaseq", normalized = TRUE) |>
+  with_assay_data(features, assay_name = "cnv_score") |>
   with_sample_covariates(c("indication", "sex"))
 
 ggplot(fdat, aes(cnv_score_ERBB2, ERBB2, color = sex)) +

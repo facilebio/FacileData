@@ -280,7 +280,7 @@ is_covariate_definitions <- function(x, required = NULL) {
     # required <- c('type', 'class', 'description', 'label')
     kosher <- sapply(x, function(y) {
       sapply(required, function(z) is.character(y[[z]]))
-    }) %>% t
+    }) |> t()
     if (!all(kosher)) return(FALSE)
   }
 

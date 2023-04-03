@@ -2,26 +2,26 @@ context("biocbox")
 
 if (!exists("FDS")) FDS <- exampleFacileDataSet()
 
-samples <- sample_covariate_tbl(FDS) %>%
-  filter(variable == 'stage' & value == 'III') %>%
-  select(dataset, sample_id) %>%
+samples <- sample_covariate_tbl(FDS) |>
+  filter(variable == 'stage' & value == 'III') |>
+  select(dataset, sample_id) |>
   collect()
 genes <- local({
   out <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
-  feature_info_tbl(FDS) %>%
-    filter(feature_id %in% out) %>%
-    collect() %>%
+  feature_info_tbl(FDS) |>
+    filter(feature_id %in% out) |>
+    collect() |>
     pull(feature_id)
 })
 
 # boxes and their associated packages
-box.info <- FacileData:::.biocboxes %>%
-  select(class, package) %>%
+box.info <- FacileData:::.biocboxes |>
+  select(class, package) |>
   distinct()
 
 test_that("fetch_assay_data results converted to biocboxes", {
-  scovs <- samples %>%
-    with_sample_covariates() %>%
+  scovs <- samples |>
+    with_sample_covariates() |>
     as.data.frame()
   rownames(scovs) <- paste(scovs$dataset, scovs$sample_id, sep = "__")
 
@@ -63,7 +63,7 @@ test_that("fetch_assay_data results converted to biocboxes", {
 })
 
 test_that("biocbox appends custom covariates from input sample table", {
-  custom.covs <- samples %>%
+  custom.covs <- samples |>
     mutate(var1 = rnorm(nrow(samples)), var2 = sample(letters, nrow(samples)))
 
   bb <- biocbox(custom.covs, features = genes)
@@ -76,7 +76,7 @@ test_that("biocbox appends custom covariates from input sample table", {
 
 
 test_that("biocbox appends custom covariates from sample_covariates param", {
-  custom.covs <- samples %>%
+  custom.covs <- samples |>
     mutate(var1 = rnorm(nrow(samples)), var2 = sample(letters, nrow(samples)))
 
   bb <- biocbox(select(custom.covs, dataset, sample_id),

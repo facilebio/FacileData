@@ -73,8 +73,8 @@ If numeric covariates are missing, then this will throw an error.
 # We'll materialize a data matrix and sample_info table from the
 # exampleFacileDataSet, then correct the data matrix.
 efds <- exampleFacileDataSet()
-sample.info <- efds \%>\%
-  filter_samples(indication == "CRC") \%>\%
+sample.info <- efds |>
+  filter_samples(indication == "CRC") |>
   with_sample_covariates()
 m <- fetch_assay_data(sample.info, normalized = TRUE, as.matrix = TRUE)
 m.rmsex <- remove_batch_effect(m, sample.info, "sex")

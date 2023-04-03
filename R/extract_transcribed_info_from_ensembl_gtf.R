@@ -89,13 +89,13 @@ extract_transcribed_info_from_ensembl_gtf <- function(
   requireNamespace("GenomicRanges", quietly = TRUE)
   dfa <- GenomicRanges::as.data.frame(gr)
 
-  tx.length <- dfa %>%
-    filter(type == "exon") %>%
-    group_by(transcript_id) %>%
+  tx.length <- dfa |>
+    filter(type == "exon") |>
+    group_by(transcript_id) |>
     summarize(length = sum(width))
 
-  tx.meta <- dfa %>%
-    filter(type == "transcript") %>%
+  tx.meta <- dfa |>
+    filter(type == "transcript") |>
     select(transcript_id, transcript_name, {{transcript_type}},
            gene_name, gene_id, source, seqnames, start, end, strand)
   if (any(duplicated(tx.meta$transcript_id))) {
@@ -128,20 +128,20 @@ extract_transcribed_info_from_ensembl_gtf <- function(
 
   # Arrange genes by gene_id,gene_type,seqnames to take the "most useful guess"
   # for its metadata
-  g.info <- dfa %>%
-    filter(type == "gene") %>%
-    arrange(gene_id, source, gene_type, seqnames) %>%
-    distinct(gene_id, .keep_all = TRUE) %>%
+  g.info <- dfa |>
+    filter(type == "gene") |>
+    arrange(gene_id, source, gene_type, seqnames) |>
+    distinct(gene_id, .keep_all = TRUE) |>
     select(gene_id, symbol = gene_name, {{gene_type}}, seqnames, start, end,
            strand, source)
 
-  ntx <- tx_info %>%
-    group_by(gene_id) %>%
+  ntx <- tx_info |>
+    group_by(gene_id) |>
     summarize(ntxs = n())
 
-  out <- g.info %>%
-    left_join(gwidths, by = "gene_id") %>%
-    left_join(ntx, by = "gene_id") %>%
+  out <- g.info |>
+    left_join(gwidths, by = "gene_id") |>
+    left_join(ntx, by = "gene_id") |>
     select(gene_id:gene_type, ntxs, length, everything())
 
   out

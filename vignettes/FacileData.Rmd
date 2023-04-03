@@ -125,9 +125,9 @@ tcga <- exampleFacileDataSet()
 samples <- filter_samples(tcga, indication %in% c("BLCA", "BRCA"))
 features <- filter_features(tcga, name == "ERBB2")
 
-fdat <- samples %>%
-  with_assay_data(features, assay_name = "rnaseq", normalized = TRUE) %>%
-  with_assay_data(features, assay_name = "cnv_score") %>%
+fdat <- samples |>
+  with_assay_data(features, assay_name = "rnaseq", normalized = TRUE) |>
+  with_assay_data(features, assay_name = "cnv_score") |>
   with_sample_covariates(c("indication", "sex"))
 
 ggplot(fdat, aes(cnv_score_ERBB2, ERBB2, color=sex)) +
@@ -143,7 +143,7 @@ library(dplyr)
 # library(FacileTCGADataSet)
 # tcga <- FacileTCGADataSet()
 tcga <- exampleFacileDataSet()
-distro <- samples(tcga) %>%
+distro <- samples(tcga) |>
   with_sample_covariates(c("indication", "sample_type"))
 ggplot(distro, aes(indication, fill=sample_type)) +
   geom_bar() +
@@ -164,7 +164,7 @@ approximation, we can consider the `fetch_*` functions to be the lowest level
 functions, and the `with_*` functions are higher-level accessors.
 
 The `with_*` functions were written so that they can naturally be combined in
-pipe (`%>%`) data-manipulation chains. They provide analysts with a fluent and
+pipe (`|>`) data-manipulation chains. They provide analysts with a fluent and
 succinct API with which to perform exploratory data analyses.
 
 For example, to retrieve normalized RNA-seq expression values for CXCL9 and GZMA
@@ -174,9 +174,9 @@ along with survival and sex information for the samples inin the TCGA bladder
 ```{r quick-blca-example}
 features <- filter_features(tcga, name %in% c("CXCL9", "GZMA"))
 
-blca.dat <- tcga %>%
-  filter_samples(indication == "BLCA") %>%
-  with_assay_data(features, assay_name="rnaseq") %>%
+blca.dat <- tcga |>
+  filter_samples(indication == "BLCA") |>
+  with_assay_data(features, assay_name="rnaseq") |>
   with_sample_covariates(c("OS", "sex"))
 
 ggplot(blca.dat, aes(CXCL9, GZMA, color=sex)) +

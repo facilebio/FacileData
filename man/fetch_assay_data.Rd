@@ -105,7 +105,7 @@ have the option to regress out batch effects using our
 }
 
 \examples{
-samples <- exampleFacileDataSet() \%>\%
+samples <- exampleFacileDataSet() |>
   filter_samples(indication == "BLCA", sample_type == "tumor")
 features <- c(PRF1='5551', GZMA='3001', CD274='29126')
 dat <- with_assay_data(samples, features, normalized = TRUE, batch = "sex")

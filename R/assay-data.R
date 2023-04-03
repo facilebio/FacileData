@@ -29,7 +29,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
 
   if (missing(features) || is.null(features)) {
     assert_string(assay_name)
-    features <- FacileData::features(x, assay_name) %>% collect(n=Inf)
+    features <- FacileData::features(x, assay_name) |> collect(n=Inf)
   } else {
     if (is.factor(features)) features <- as.character(features)
     if (is.character(features)) {
@@ -62,7 +62,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     assert_sample_subset(samples)
   }
 
-  samples <- collect(samples)
+  samples <- collect(samples, n = Inf)
   # you might think that you want to refactor this and put it before the
   # `collect()` call, but the SQLite back end can't handle
   # `distinct(..., .keep_all = TRUE)`
@@ -164,12 +164,12 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
     aggregate.by <- assert_choice(tolower(aggregate.by), c('ewm', 'zscore'))
   }
 
-  finfo <- features(x, assay_name, feature_ids = feature_ids) %>%
-    collect(n = Inf) %>%
+  finfo <- features(x, assay_name, feature_ids = feature_ids) |>
+    collect(n = Inf) |>
     arrange(hdf5_index)
   atype <- finfo$assay_type[1L]
   ftype <- finfo$feature_type[1L]
-  sinfo <- assay_sample_info(x, assay_name, samples) %>%
+  sinfo <- assay_sample_info(x, assay_name, samples) |>
     mutate(samid = paste(dataset, sample_id, sep = "__"))
 
   bad.samples <- is.na(sinfo$hdf5_index)
@@ -205,8 +205,8 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
   fetch.some <- nrow(finfo) < subset.threshold
   ridx <- if (fetch.some) finfo$hdf5_index else NULL
 
-  dat <- sinfo %>%
-    group_by(dataset) %>%
+  dat <- sinfo |>
+    group_by(dataset) |>
     do(res = {
       ds <- .$dataset[1L]
       hd5.name <- paste('assay', assay_name, ds, sep='/')
@@ -216,8 +216,8 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
       }
       dimnames(vals) <- list(finfo$feature_id, .$samid)
       vals
-    }) %>%
-    ungroup
+    }) |>
+    ungroup()
 
   # NOTE: We can avoid the monster matrix creation if we only want !as.matrix
   # returns, but this makes the code easier to reason about.
@@ -291,7 +291,7 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
 #' @noRd
 #' @export
 assay_names.FacileDataSet <- function(x, default_first = TRUE, ...) {
-  anames <- assay_info_tbl(x) %>% collect(n = Inf) %>% pull(assay)
+  anames <- assay_info_tbl(x) |> collect(n = Inf) |> pull(assay)
   if (default_first && length(anames) > 1L) {
     dassay <- default_assay(x)
     anames <- intersect(c(dassay, setdiff(anames, dassay)), anames)
@@ -303,7 +303,7 @@ assay_names.FacileDataSet <- function(x, default_first = TRUE, ...) {
 #' @noRd
 assay_info.FacileDataSet <- function(x, assay_name = NULL, ...) {
   stopifnot(is.FacileDataSet(x))
-  ainfo <- assay_info_tbl(x) %>% collect(n = Inf)
+  ainfo <- assay_info_tbl(x) |> collect(n = Inf)
   if (!is.null(assay_name)) {
     assert_string(assay_name)
     assert_choice(assay_name, ainfo$assay)
@@ -334,8 +334,8 @@ assay_sample_info.FacileDataSet <- function(x, assay_name, samples = NULL, ...) 
 
   feature.type <- assay_feature_type(x, assay_name)
 
-  asi <- assay_sample_info_tbl(x) %>%
-    filter(assay == assay_name) %>%
+  asi <- assay_sample_info_tbl(x) |>
+    filter(assay == assay_name) |>
     collect(n=Inf)
 
   if (is.null(samples)) {
@@ -361,9 +361,9 @@ assay_feature_type <- function(x, assay_name) {
   stopifnot(is.FacileDataSet(x))
   assert_string(assay_name)
   assert_choice(assay_name, assay_names(x))
-  assay_info_tbl(x) %>%
-    filter(assay == assay_name) %>%
-    collect(n = Inf) %>%
+  assay_info_tbl(x) |>
+    filter(assay == assay_name) |>
+    collect(n = Inf) |>
     pull(feature_type)
 }
 
@@ -430,7 +430,7 @@ features.FacileDataSet <- function(x, assay_name = NULL, feature_type = NULL,
   } else {
     ftype <- assay_feature_type(x, assay_name)
 
-    afinfo <- assay_feature_info_tbl(x) %>%
+    afinfo <- assay_feature_info_tbl(x) |>
       filter(assay == assay_name)
 
     if (!is.null(feature_ids) && length(feature_ids) > 0) {
@@ -438,9 +438,9 @@ features.FacileDataSet <- function(x, assay_name = NULL, feature_type = NULL,
     }
     afinfo <- collect(afinfo, n=Inf)
 
-    assay.info <- assay_info_tbl(x) %>%
-      select(assay, assay_type, feature_type) %>%
-      filter(assay == assay_name) %>%
+    assay.info <- assay_info_tbl(x) |>
+      select(assay, assay_type, feature_type) |>
+      filter(assay == assay_name) |>
       collect(n = Inf)
 
     ## FIXME: consider materialized view for this
@@ -501,10 +501,10 @@ assay_info_over_samples <- function(x, samples = NULL) {
   assays <- inner_join(asi, samples, by = c("dataset","sample_id"))
 
   # Count number of samples across dataset count for each assay type
-  out <- assays %>%
-    group_by(assay) %>%
-    summarize(ndatasets = n_distinct(dataset), nsamples = n()) %>%
-    ungroup() %>%
+  out <- assays |>
+    group_by(assay) |>
+    summarize(ndatasets = n_distinct(dataset), nsamples = n()) |>
+    ungroup() |>
     collect(n = Inf)
 
   # default assay first
@@ -657,7 +657,7 @@ with_assay_data.data.frame <- function(x, features, assay_name = NULL,
     }
     # adata <- select_(adata, .dots=c('dataset', 'sample_id', spread, 'value'))
     adata <- select(adata, dataset, sample_id, !!spread, value)
-    adata <- tidyr::spread_(adata, spread, 'value')
+    adata <- tidyr::spread(adata, spread, 'value')
     spread.idx <- which(colnames(adata) %in% spread.vals)
     if (with_assay_name || spread == 'id') {
       newname <- paste0(assay_name, '_', colnames(adata)[spread.idx])
@@ -739,7 +739,8 @@ spread_assay_data <- function(x, assay_name, key=c('name', 'feature_id'),
     x <- select(x, -cpm)
   }
 
-  out <- spread_(x, key, value) %>% set_fds(.fds)
+  out <- tidyr::spread(x, key, value)
+  out <- set_fds(out, .fds)
   if (nrow(out) >= nrow(x)) {
     ## You might be tempted to test the width of the outgoing object, too, but
     ## if you only had to features in this object, then it wouldn't have changed
@@ -789,9 +790,9 @@ with_assay_covariates.data.frame <- function(x, covariates = NULL,
   x <- collect(x, n = Inf)
   assert_sample_subset(x, .fds)
 
-  ss <- assay_sample_info_tbl(.fds) %>%
-    filter(assay == assay_name) %>%
-    select(dataset, sample_id, !!covariates) %>%
+  ss <- assay_sample_info_tbl(.fds) |>
+    filter(assay == assay_name) |>
+    select(dataset, sample_id, !!covariates) |>
     collect(n = Inf)
 
   out <- left_join(x, ss, by = c("dataset", "sample_id"))

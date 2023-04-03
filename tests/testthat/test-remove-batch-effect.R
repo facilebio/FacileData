@@ -6,8 +6,8 @@ context("batch effect removal")
 
 if (!exists("FDS")) FDS <- exampleFacileDataSet()
 
-samples <- FDS %>%
-  filter_samples(stage == "III") %>%
+samples <- FDS |>
+  filter_samples(stage == "III") |>
   select(dataset, sample_id)
 
 genes <- c(
@@ -19,9 +19,9 @@ genes <- c(
 features <- tibble(assay='rnaseq', feature_id=genes)
 
 test_that("batch effect correction mimics limma::removeBatchEffect", {
-  smpls <- FDS %>%
-    filter_samples(indication == "BLCA") %>%
-    with_sample_covariates() %>%
+  smpls <- FDS |>
+    filter_samples(indication == "BLCA") |>
+    with_sample_covariates() |>
     mutate(sample_key = paste(dataset, sample_id, sep = "__"))
 
   dat <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
@@ -85,9 +85,9 @@ test_that("batch effect correction mimics limma::removeBatchEffect", {
 })
 
 test_that("batch correction using 'facile' covariate works", {
-  smpls <- FDS %>%
-    filter_samples(indication == "BLCA") %>%
-    with_sample_covariates() %>%
+  smpls <- FDS |>
+    filter_samples(indication == "BLCA") |>
+    with_sample_covariates() |>
     mutate(sample_key = paste(dataset, sample_id, sep = "__"))
 
   # Unnormalized
@@ -97,32 +97,44 @@ test_that("batch correction using 'facile' covariate works", {
   # Normalize by 'sex' when 'sex' is in the sample frame
   dat.norm1 <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
                                 as.matrix = TRUE, batch = "sex")
+  
+  # Check that all attributes (dimensions, colnames, rownames) of corrected and
+  # uncorrected data are the same ...
   expect_matrix(dat.norm1, nrows = nrow(unnorm), ncols = ncol(unnorm))
   expect_equal(rownames(dat.norm1), rownames(unnorm))
   expect_equal(colnames(dat.norm1), colnames(unnorm))
-
+  # ... but the actual values should be different
+  expect_string(all.equal(unnorm, dat.norm1), pattern = "relative difference")
+  
   # Normalize by 'sex' when it's not in the sample frame
   dat.norm2 <- fetch_assay_data(FDS, features, select(smpls, -sex),
                                 normalized = TRUE, as.matrix = TRUE,
                                 batch = "sex")
-
-  expect_true(!isTRUE(all.equal(dat.norm1, unnorm)))
   expect_true(all.equal(dat.norm1, dat.norm2))
 })
 
 test_that("batch effect correction will handle missing covariate levels", {
   set.seed(122)
-  s <- samples %>%
+  s <- samples |>
     mutate(bcov = sample(c("a", "b", NA), nrow(samples), replace = TRUE))
+  raw <- fetch_assay_data(s, genes, normalize = TRUE, as.matrix = TRUE) 
   bc <- fetch_assay_data(s, genes, batch = "bcov", normalize = TRUE,
                          as.matrix = TRUE)
+  
+  # this should not be equal
+  expect_string(all.equal(raw, bc), pattern = "relative difference")
+  
+  # manually setting NA batch variables to an outgroup should match `bc`
+  s <- mutate(s, bcov2 = ifelse(is.na(bcov), "outgroup", bcov))
+  bc.man <- remove_batch_effect(raw, s, batch = "bcov2")
+  expect_equal(bc.man, bc)
 })
 
 test_that("single-gene batch correction is equivalent to all data correction", {
   set.seed(0xBEEF)
-  smpls <- filter_samples(FDS, indication == "BLCA") %>%
-    collect() %>%
-    mutate(real.batch = rnorm(nrow(.)))
+  smpls <- filter_samples(FDS, indication == "BLCA") |>
+    collect(n = INF) |>
+    mutate(real.batch = rnorm(n()))
 
   bc.all <- fetch_assay_data(smpls, normalized = TRUE, as.matrix = TRUE,
                              batch = c("sex", "real.batch"))
@@ -136,14 +148,4 @@ test_that("single-gene batch correction is equivalent to all data correction", {
                              as.matrix = TRUE)
   expect_equal(colnames(bc.1), colnames(orig.1))
   expect_true(!isTRUE(all.equal(bc.1[1,], orig.1[1,])))
-})
-
-test_that("including `main` with `batch` works as expected", {
-  # TODO: compare batch correction using airway dataset. It seems like including
-  # `main = "cell"` doesn't have any effect, as it is being performed in the
-  # FacileAnalysis,FacileAnalysis-RNAseq.Rmd vignette
-  #
-  # Shouldn't these two be different?
-  # bc.1 <- remove_batch_effect(airway, batch = "cell")
-  # bc.2 <- remove_batch_effect(airway, batch = "cell", main = "dex")
 })

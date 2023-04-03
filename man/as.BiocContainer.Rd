@@ -161,7 +161,7 @@ y.all <- as.DGEList(fds) # gene expression of all samples
 
 # Retrieve data for only 3 genes
 # Suppose we only wanted female samples in our DGEList
-y.fem <- fds \%>\%
-  filter_samples(sex == "f") \%>\%
-  as.DGEList() # or `as.ExpressionSet()`
+y.fem <- fds |>
+  filter_samples(sex == "f") |>
+  as.DGEList() # or as.ExpressionSet()
 }

@@ -158,6 +158,17 @@ mutate.facile_frame <- function(.data, ..., .facilitate = TRUE) {
 
 #' @export
 #' @noRd
+rename.facile_frame <- function(.data, ..., .facilitate = TRUE) {
+  res <- NextMethod()
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
+                           .valid_sample_check = FALSE)
+  }
+  res
+}
+
+#' @export
+#' @noRd
 select.facile_frame <- function(.data, ..., .facilitate = TRUE) {
   res <- NextMethod()
   if (.facilitate) {
@@ -238,6 +249,7 @@ upcast_ff <- function(x, downcasted, .facilitate = FALSE, ...) {
       !(.facilitate && original_class == "facile_frame")) {
     class(x) <- c(original_class, class(x))
   }
+  attr(x, "cast_info") <- NULL
   x
 }
 

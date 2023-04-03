@@ -222,12 +222,12 @@ harmonized `colData()`.
 ```{r}
 se.airway <- airway
 colData(se.airway) <- local({
-  cd <- colData(airway) %>% 
-    as.data.frame() %>% 
+  cd <- colData(airway) |> 
+    as.data.frame() |> 
     transmute(
       sample_type = "cell_line",
       cell_line = cell,
-      treatment = ifelse(dex == "untrt", "control", "dex")) %>% 
+      treatment = ifelse(dex == "untrt", "control", "dex")) |> 
     DataFrame()
   rownames(cd) <- colnames(se.airway)
   cd
@@ -239,13 +239,13 @@ colData(se.airway) <- local({
 ```{r}
 se.parathyroid <- parathyroidGenesSE
 colData(se.parathyroid) <- local({
-  cd <- colData(parathyroidGenesSE) %>% 
-    as.data.frame() %>% 
+  cd <- colData(parathyroidGenesSE) |> 
+    as.data.frame() |> 
     transmute(
       sample_type = "primary",
       subject_id = paste0("patient_", patient),
       treatment = tolower(as.character(treatment)),
-      time = paste0("hrs", sub("h$", "", time))) %>% 
+      time = paste0("hrs", sub("h$", "", time))) |> 
     DataFrame()
   rownames(cd) <- colnames(se.parathyroid)
   cd
@@ -316,14 +316,14 @@ data were processed in the same way.
 
 ```{r massage-rows}
 shared.ids <- intersect(rownames(se.airway), rownames(se.parathyroid))
-gene.info <- mart.info %>% 
+gene.info <- mart.info |> 
   transmute(feature_id = ensembl_gene_id,
             feature_type = "ensgid",
             name = hgnc_symbol, 
             meta = gene_biotype,
-            source = "Ensembl_v75") %>% 
-  filter(feature_id %in% shared.ids) %>% 
-  distinct(feature_id, .keep_all = TRUE) %>% 
+            source = "Ensembl_v75") |> 
+  filter(feature_id %in% shared.ids) |> 
+  distinct(feature_id, .keep_all = TRUE) |> 
   DataFrame()
 rownames(gene.info) <- gene.info[["feature_id"]]
 ```
@@ -368,8 +368,8 @@ Let's look at how the correlation of TLN1 and ITGB1 change across datasets
 library(ggplot2)
 theme_set(theme_bw())
 
-dat <- samples(xfds) %>% 
-  with_assay_data(c("ENSG00000137076", "ENSG00000150093")) %>% 
+dat <- samples(xfds) |> 
+  with_assay_data(c("ENSG00000137076", "ENSG00000150093")) |> 
   with_sample_covariates("treatment")
 
 ggplot(dat, aes(ITGB1, TLN1)) +
@@ -378,9 +378,9 @@ ggplot(dat, aes(ITGB1, TLN1)) +
 ```
 
 ```{r}
-bdat <- samples(xfds) %>% 
+bdat <- samples(xfds) |> 
   fetch_assay_data(c("ENSG00000137076", "ENSG00000150093"),
-                   normalized = TRUE) %>% 
+                   normalized = TRUE) |> 
   with_sample_covariates("treatment")
 ggplot(bdat, aes(x = feature_name, y =value)) +
   geom_boxplot(outlier.shape = NA) +

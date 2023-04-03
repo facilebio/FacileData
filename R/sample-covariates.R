@@ -24,8 +24,8 @@
 #' covs <- fetch_sample_covariates(fds)
 #' smry <- summary(covs)
 #' details <- summary(covs, expanded = TRUE)
-#' catdeetz <- covs %>%
-#'   filter(class == "categorical") %>%
+#' catdeetz <- covs |>
+#'   filter(class == "categorical") |>
 #'   summary(expanded = TRUE)
 summary.eav_covariates <- function(object, expanded = FALSE,
                                    droplevels = TRUE, ...) {
@@ -38,8 +38,8 @@ summary.eav_covariates <- function(object, expanded = FALSE,
 
   if (expanded) {
     covdef <- covariate_definitions(.fds)
-    res <- dat %>%
-      group_by(variable, class) %>%
+    res <- dat |>
+      group_by(variable, class) |>
       do({
         value <- cast_covariate(.$variable[1L], .$value, covdef, .fds)
         clz <- .$class[1L]
@@ -62,8 +62,8 @@ summary.eav_covariates <- function(object, expanded = FALSE,
         }
       })
   } else {
-    res <- dat %>%
-      group_by(variable, class) %>%
+    res <- dat |>
+      group_by(variable, class) |>
       summarize(ndatasets = length(unique(dataset)),
                 nsamples = n(),
                 nlevels = {
@@ -191,10 +191,10 @@ fetch_custom_sample_covariates.FacileDataSet <- function(
 
   if (length(annot.files)) {
     annos <- lapply(annot.files, function(fn) stream_in(file(fn), verbose=FALSE))
-    out <- bind_rows(annos) %>%
-      # select_(.dots=out.cols) %>%
-      select(!!out.cols) %>%
-      set_fds(x) %>%
+    out <- bind_rows(annos) |>
+      # select_(.dots=out.cols) |>
+      select(!!out.cols) |>
+      set_fds(x) |>
       join_samples(samples, semi=TRUE)
     ## We weren't saving the type == 'categorical' column earlier. So if this
     ## column is.na, then we force it to 'categorical', because that's all it
@@ -206,7 +206,7 @@ fetch_custom_sample_covariates.FacileDataSet <- function(
     ## Make a dummy, 0 row tibble to send back
     out <- sapply(out.cols, function(x) character(), simplify=FALSE)
     out$date_entered <- integer()
-    out <- as.data.frame(out, stringsAsFactors=FALSE) %>% as_tibble()
+    out <- as.data.frame(out, stringsAsFactors=FALSE) |> as_tibble()
   }
 
   if (!is.null(covariates)) {
@@ -248,7 +248,7 @@ save_custom_sample_covariates <- function(x, annotation, name=NULL,
   if (!test_string(name)) stop("No name given/inferred for custom annotation")
 
   if (is.null(custom_key)) custom_key <- 'anonymous'
-  custom_key <- assert_string(custom_key) %>% make.names
+  custom_key <- assert_string(custom_key) |> make.names()
 
   annotation[['variable']] <- make.names(name)
   annotation <- annotation[, c('dataset', 'sample_id', 'variable', 'value')]
@@ -298,7 +298,7 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
                                               custom_key = Sys.getenv("USER"),
                                               .fds = NULL, ...) {
   assert_facile_data_store(.fds)
-  x <- assert_sample_subset(x) %>% collect(n=Inf)
+  x <- assert_sample_subset(x) |> collect(n=Inf)
   stopifnot(is.character(covariates) || is.null(covariates))
   if (is.character(covariates)) {
     if (length(covariates) == 0L) return(x)
@@ -306,8 +306,8 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
     covariates <- nameit(covariates)
   }
 
-  samples <- x %>%
-    select(dataset, sample_id) %>%
+  samples <- x |>
+    select(dataset, sample_id) |>
     distinct(.keep_all=TRUE)
 
   covs <- fetch_sample_covariates(.fds, samples, covariates,
@@ -340,21 +340,21 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
 #' @return a wide \code{tbl_df}-like object
 spread_covariates <- function(x, .fds = fds(x), cov.def = NULL, ...) {
   assert_facile_data_store(.fds)
-  x <- assert_sample_covariates(x) %>%
+  x <- assert_sample_covariates(x) |>
     collect(n=Inf)
 
   ## Ensures we get a row for every sample in x, even if it is missing a value
   ## for the covariate
-  dummy <- select(x, dataset, sample_id) %>%
-    collect(n=Inf) %>%
-    distinct(.keep_all=TRUE) %>%
+  dummy <- select(x, dataset, sample_id) |>
+    collect(n=Inf) |>
+    distinct(.keep_all=TRUE) |>
     mutate(variable='.dummy.', value=NA)
 
-  out <- bind_rows(x, dummy) %>%
-    setDT() %>%
-    dcast(dataset + sample_id ~ variable, value.var = "value") %>%
-    setDF() %>%
-    mutate(.dummy. = NULL) %>%
+  out <- bind_rows(x, dummy) |>
+    setDT() |>
+    dcast(dataset + sample_id ~ variable, value.var = "value") |>
+    setDF() |>
+    mutate(.dummy. = NULL) |>
     as_tibble()
 
   # sample-covariates -------------------------------------------------------
