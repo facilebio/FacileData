@@ -39,9 +39,9 @@ append_facile_table <- function(dat, x, table_name, warn_existing = FALSE) {
   # Ensure that we don't try to add existing rows into the database
   pk <- primary_key(x, table_name)
   if (length(pk)) {
-    skip <- target %>%
-      semi_join(dat, by=pk, copy=TRUE, auto_index=TRUE) %>%
-      collect(n=Inf) %>%
+    skip <- target |>
+      semi_join(dat, by=pk, copy=TRUE, auto_index=TRUE) |>
+      collect(n=Inf) |>
       mutate(added=FALSE)
     if (nrow(skip) && warn_existing) {
       warning(nrow(skip), "/", nrow(dat), " features already in database",
@@ -94,13 +94,13 @@ feature_info_tbl <- function(x, assay_name=NULL) {
   out <- tbl(x$con, 'feature_info')
   if (!is.null(assay_name)) {
     assert_string(assay_name)
-    assay.info <- assay_info_tbl(x) %>%
-      filter(assay == assay_name) %>%
+    assay.info <- assay_info_tbl(x) |>
+      filter(assay == assay_name) |>
       collect()
     if (nrow(assay.info) == 0) {
       stop("Unknown assay: ", assay_name)
     }
-    afi <- assay_feature_info_tbl(x) %>%
+    afi <- assay_feature_info_tbl(x) |>
       filter(assay == assay_name)
     out <- semi_join(out, afi, by=c('feature_type', 'feature_id'))
   }
@@ -116,15 +116,15 @@ gene_info_tbl <- function(x) {
   stopifnot(is.FacileDataSet(x))
   ## Columns:
   ## feature_id|feature_type|symbol|n_exons|length|source|hdf5_index
-  hdf5.info <- assay_feature_info_tbl(x) %>%
+  hdf5.info <- assay_feature_info_tbl(x) |>
     filter(assay == default_assay(x))
 
-  gi <- feature_info_tbl(x) %>%
-    filter(feature_type == 'entrez') %>%
+  gi <- feature_info_tbl(x) |>
+    filter(feature_type == 'entrez') |>
     select(feature_id, feature_type, symbol=name, n_exons=-1,
            # length=effective_length,
-           source) %>%
-    inner_join(hdf5.info, by='feature_id') %>%
+           source) |>
+    inner_join(hdf5.info, by='feature_id') |>
     as_facile_frame(x, .valid_sample_check = FALSE)
 }
 
@@ -134,8 +134,8 @@ gene_info_tbl <- function(x) {
 #' sample_stats_tbl be updated.
 #' @export
 sample_stats_tbl <- function(x) {
-  assay_sample_info_tbl(x) %>%
-    select(dataset, sample_id, libsize, normfactor) %>%
+  assay_sample_info_tbl(x) |>
+    select(dataset, sample_id, libsize, normfactor) |>
     as_facile_frame(x, .valid_sample_check = FALSE)
 }
 
@@ -187,7 +187,7 @@ validate.facile.dirs <- function(path, data.fn, sqlite.fn, hdf5.fn, meta.fn,
       warning("HDF5 file is not under parent directory", immediate.=TRUE)
     }
   }
-  meta.fn <- assert_valid_meta_file(meta.fn) %>% normalizePath
+  meta.fn <- assert_valid_meta_file(meta.fn) |> normalizePath()
   if (!dir.exists(anno.dir)) {
     stop("Directory for custom annotations does not exist: ", anno.dir)
   } else {

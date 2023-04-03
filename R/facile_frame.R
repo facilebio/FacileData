@@ -158,6 +158,17 @@ mutate.facile_frame <- function(.data, ..., .facilitate = TRUE) {
 
 #' @export
 #' @noRd
+rename.facile_frame <- function(.data, ..., .facilitate = TRUE) {
+  res <- NextMethod()
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
+                           .valid_sample_check = FALSE)
+  }
+  res
+}
+
+#' @export
+#' @noRd
 select.facile_frame <- function(.data, ..., .facilitate = TRUE) {
   res <- NextMethod()
   if (.facilitate) {
@@ -198,13 +209,61 @@ ungroup.facile_frame <- function(x, ..., .facilitate = TRUE) {
 }
 
 # Joins ========================================================================
+#
+# Around December 2022 (prep for dplyr 1.1?), dplyr was enforcing empty `...`
+# in the *_join.data.frame functions via a call to check_dots_empty0(...).
+# 
+# Take a look at these references to get an idea of what I mean:
+#   Issue: https://github.com/tidyverse/dplyr/issues/6599
+#   PR: https://github.com/tidyverse/dplyr/pull/6605
+# 
+# This complicates the implementation of the .facile_frame joins because we
+# can't simply call `NextMethod()` since our functions accept a .facilitate
+# parameter, which gets passed down to the "next" function in the stack, and
+# eventually it will fail the check_dots_empty0() check in
+# the dplyr::*_join.data.frame() funcitons.
+#
+# To get around this we temporarily downcast the facile_frame `x` and use some
+# heuristics to try and upcast again after the fact. I fear this is going to
+# cause all sorts of problems, but let's see ...
+
+#' @noRd
+downcast_ff <- function(x, ...) {
+  oclass <- class(x)[1L]
+  class(x) <- class(x)[-1]
+  attr(x, "cast_info") <- list(
+    original_class = oclass,
+    down_class = class(x)[1L])
+  x
+}
+
+#' @noRd
+upcast_ff <- function(x, downcasted, .facilitate = FALSE, ...) {
+  cast_info <- attr(downcasted, "cast_info")
+  assert_list(cast_info, min.len = 2L)
+  assert_flag(.facilitate)
+
+  original_class <- assert_string(cast_info[["original_class"]])
+  down_class <- assert_string(cast_info[["down_class"]])
+  if (isTRUE(class(x)[1L] == down_class) && 
+      !(.facilitate && original_class == "facile_frame")) {
+    class(x) <- c(original_class, class(x))
+  }
+  attr(x, "cast_info") <- NULL
+  x
+}
 
 #' @export
 #' @noRd
 inner_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
                                     suffix = c(".x", ".y"), ...,
-                                    .facilitate = TRUE) {
-  res <- NextMethod()
+                                    .facilitate = TRUE,
+                                    keep = NULL) {
+  # dplyr::inner_join.data.frame calls check_dots_empty0(...)
+  xx <- downcast_ff(x)
+  res <- inner_join(xx, y, by = by, copy = copy, suffix = suffix, ...,
+                    keep = keep)
+  res <- upcast_ff(res, xx)
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)
@@ -216,8 +275,13 @@ inner_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
 #' @noRd
 left_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
                                    suffix = c(".x", ".y"), ...,
-                                   .facilitate = TRUE) {
-  res <- NextMethod()
+                                   .facilitate = TRUE, 
+                                   keep = NULL) {
+  # dplyr::left_join.data.frame calls check_dots_empty0(...)
+  xx <- downcast_ff(x)
+  res <- left_join(xx, y, by = by, copy = copy, suffix = suffix, ...,
+                   keep = keep)
+  res <- upcast_ff(res, xx)
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)
@@ -229,8 +293,13 @@ left_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
 #' @noRd
 right_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
                                     suffix = c(".x", ".y"), ...,
-                                    .facilitate = TRUE) {
-  res <- NextMethod()
+                                    .facilitate = TRUE,
+                                    keep = NULL) {
+  # dplyr::right_join.data.frame calls check_dots_empty0(...)
+  xx <- downcast_ff(x)
+  res <- right_join(xx, y, by = by, copy = copy, suffix = suffix, ...,
+                   keep = keep)
+  res <- upcast_ff(res, xx)
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)
@@ -242,8 +311,27 @@ right_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
 #' @noRd
 full_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
                                    suffix = c(".x", ".y"), ...,
-                                   .facilitate = TRUE) {
-  res <- NextMethod()
+                                   .facilitate = TRUE, keep = TRUE) {
+  # dplyr::full_join.data.frame calls check_dots_empty0(...)
+  xx <- downcast_ff(x)
+  res <- full_join(xx, y, by = by, copy = copy, suffix = suffix, ...,
+                    keep = keep)
+  res <- upcast_ff(res, xx)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(x), .extra_classes(x),
+                           .valid_sample_check = FALSE)
+  }
+  res
+}
+
+#' @export
+#' @noRd
+semi_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, ...,
+                                   .facilitate = TRUE) { 
+  # dplyr::semi_join.data.frame calls check_dots_empty0(...)
+  xx <- downcast_ff(x)
+  res <- semi_join(xx, y, by = by, copy = copy, ...)
+  res <- upcast_ff(res, xx)
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)
@@ -254,20 +342,26 @@ full_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
 #' @export
 #' @noRd
 anti_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, ...,
-                                   .facilitate = TRUE) {
-  if (is(x, "tbl_lazy")) {
-    # Note dbplyr threw an error when there were more `...` args passed into
-    # inner add_op_* functions [add_op_semi_join] so using `NextMethod` as
-    # usual just doesn't work
-    # see: https://github.com/tidyverse/dbplyr/commit/37561751ce7ddaee0f3bf391a2bc10e7982f0081#diff-e17acee6ea41d52e9c4f034ff34330261bbb194c818b6f3c60b3afd00b1b9c0c
-    oclass <- class(x)[1L]
-    class(x) <- class(x)[-1]
-    res <- anti_join(x, y, by = by, copy = copy, ...)
-  } else {
-    res <- NextMethod()
+                                   .facilitate = TRUE) { 
+  # dplyr::anti_join.data.frame calls check_dots_empty0(...)
+  xx <- downcast_ff(x)
+  res <- anti_join(xx, y, by = by, copy = copy, ...)
+  res <- upcast_ff(res, xx)
+  if (.facilitate) {
+    res <- as_facile_frame(res, fds(x), .extra_classes(x),
+                           .valid_sample_check = FALSE)
   }
+  res
+}
 
-  # res <- NextMethod("anti_join", x, y, by, copy, ...)
+#' @export
+#' @noRd
+nest_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, keep = NULL,
+                                   name = NULL, ..., .facilitate = TRUE) {
+  # dplyr::nest_join.data.frame calls check_dots_empty0(...)
+  xx <- downcast_ff(x)
+  res <- nest_join(xx, y, by = by, copy = copy, keep = keep, name = name, ...)
+  res <- upcast_ff(res, xx)
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)

@@ -26,8 +26,8 @@ fetch_sample_statistics.FacileDataSet <- function(x, samples = NULL,
   assert_string(assay_name)
   stopifnot(assay_name %in% assay_names(x))
 
-  ss <- assay_sample_info_tbl(x) %>%
-    filter(assay == assay_name) %>%
+  ss <- assay_sample_info_tbl(x) |>
+    filter(assay == assay_name) |>
     set_fds(x)
 
   if (is.null(samples)) {

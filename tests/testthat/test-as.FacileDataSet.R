@@ -21,12 +21,12 @@ test_that("We can get pdata metadata", {
 
 test_that("exampleFacileDataSet -> DGELists -> as.FacileDataSet", {
   efds <- exampleFacileDataSet()
-  dsets <- sample_info_tbl(efds) %>%
-    distinct(dataset) %>%
+  dsets <- sample_info_tbl(efds) |>
+    distinct(dataset) |>
     pull(dataset)
   dlists <- sapply(dsets, function(dset) {
-    y <- sample_info_tbl(efds) %>%
-      filter(dataset == dset) %>%
+    y <- sample_info_tbl(efds) |>
+      filter(dataset == dset) |>
       as.DGEList()
     y$samples <- transform(y$samples, group = NULL, samid = NULL)
     y$genes <- rename(y$genes, name = "symbol")

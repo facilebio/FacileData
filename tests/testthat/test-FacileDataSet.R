@@ -14,17 +14,17 @@ test_that("Fetching various database tables from FacileDataSet", {
 })
 
 test_that("compound filter criteria == method chaining with filter_samples()", {
-  s1 <- FDS %>%
+  s1 <- FDS |>
     filter_samples(indication == "CRC", sex == "f")
-  s2 <- FDS %>%
-    filter_samples(indication == "CRC") %>%
+  s2 <- FDS |>
+    filter_samples(indication == "CRC") |>
     filter_samples(sex == "f")
   expect_setequal(s2$sample_id, s1$sample_id)
 })
 
 test_that("filter_samples filters against dataset and sample_id columns", {
-  all.samples <- FDS %>%
-    samples() %>%
+  all.samples <- FDS |>
+    samples() |>
     with_sample_covariates()
 
   blca.f <- filter_samples(FDS, dataset == "BLCA", sex == "f")

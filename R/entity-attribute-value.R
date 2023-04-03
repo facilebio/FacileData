@@ -627,8 +627,8 @@ as.EAVtable <- function(x, ignore = c("dataset", "sample_id"),
   }
   assert_subset(ignore, colnames(x))
 
-  meta <- as.data.frame(select(x, ignore), stringsAsFactors = FALSE)
-  dat <- as.data.frame(select(x, -!!ignore), stringsAsFactors = FALSE)
+  meta <- as.data.frame(select(x, any_of(ignore)), stringsAsFactors = FALSE)
+  dat <- as.data.frame(select(x, !any_of(ignore)), stringsAsFactors = FALSE)
 
   # special casing "Surv" object play, for now
   for (cname in colnames(dat)) {

@@ -50,20 +50,26 @@ can control logging at the different package level.
 \section{Logging Levels}{
 
 
-Logging levels are\preformatted{.flog_levels <- c("all"  = 0, "trace" = 1, "debug" = 2, "info" = 3,
+Logging levels are
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{.flog_levels <- c("all"  = 0, "trace" = 1, "debug" = 2, "info" = 3,
                   "warn" = 4, "error" = 5, "fatal" = 6)
-}
+}\if{html}{\out{</div>}}
 }
 
 \section{crayon}{
 
 Glue lets you put cayon functions in \code{{}} to stylize output. For instance,
-you can make "bold and red" the color red and also bold, like so:\preformatted{flog("This is \{red\}\{bold\}bold and red\{reset\}, right?")
-}
+you can make "bold and red" the color red and also bold, like so:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{flog("This is \{red\}\{bold\}bold and red\{reset\}, right?")
+}\if{html}{\out{</div>}}
 
 Nice! It might be more convenient if we could make it a bit more terse,
-as shown below, but that might happen at another time.\preformatted{flog("This is rb`bold and red`, right?")
-}
+as shown below, but that might happen at another time.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{flog("This is rb`bold and red`, right?")
+}\if{html}{\out{</div>}}
 
 Colors:
 \itemize{

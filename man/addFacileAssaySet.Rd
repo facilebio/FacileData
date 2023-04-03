@@ -40,16 +40,16 @@ columns that describe the features in this assay. Please refer to the
 description.}
 
 \item{storage_mode}{either \code{"integer"} or \code{"numeric"}, maps to the
-\code{storage.mode} parameter in \code{\link[rhdf5:h5createDataset]{rhdf5::h5createDataset()}}}
+\code{storage.mode} parameter in \code{\link[rhdf5:h5_createDataset]{rhdf5::h5createDataset()}}}
 
 \item{chunk_rows}{the first entry in the \code{chunk} parameter in
-\code{\link[rhdf5:h5createDataset]{rhdf5::h5createDataset()}} (\code{integer})}
+\code{\link[rhdf5:h5_createDataset]{rhdf5::h5createDataset()}} (\code{integer})}
 
 \item{chunk_cols}{the second entry in the \code{chunk} parameter in
-\code{\link[rhdf5:h5createDataset]{rhdf5::h5createDataset()}}. If this is \code{"ncol"}, it is set to the number
+\code{\link[rhdf5:h5_createDataset]{rhdf5::h5createDataset()}}. If this is \code{"ncol"}, it is set to the number
 of columns in each of the internal dataset matrices being added.}
 
-\item{chunk_compression}{the \code{level} parameter in \code{\link[rhdf5:h5createDataset]{rhdf5::h5createDataset()}}}
+\item{chunk_compression}{the \code{level} parameter in \code{\link[rhdf5:h5_createDataset]{rhdf5::h5createDataset()}}}
 
 \item{assay_name}{the assay name in the data containers provided in the
 \code{datasets} list.}

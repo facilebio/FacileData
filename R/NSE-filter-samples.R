@@ -23,9 +23,9 @@
 #' # To identify all samples that are of "CMS3" or "CMS4" subtype(
 #' # stored in the "subtype_crc_cms" covariate:
 #' crc.34 <- filter_samples(fds, subtype_crc_cms %in% c("CMS3", "CMS4"))
-#' eav.query <- fds %>%
-#'   fetch_sample_covariates(covariates = "subtype_crc_cms") %>%
-#'   filter(value %in% c("CMS3", "CMS4")) %>%
+#' eav.query <- fds |>
+#'   fetch_sample_covariates(covariates = "subtype_crc_cms") |>
+#'   filter(value %in% c("CMS3", "CMS4")) |>
 #'   collect()
 #' setequal(crc.34$sample_id, eav.query$sample_id)
 #'
@@ -86,8 +86,8 @@ filter_samples.facile_frame <- function(x, ...,
   if (length(sc.vars)) {
     out <- filter(out, variable %in% !!qvars)
   }
-  out %>%
-    spread_covariates() %>%
+  out |>
+    spread_covariates() |>
     distinct(dataset, sample_id, .keep_all = TRUE)
 }
 
@@ -97,8 +97,8 @@ filter_samples.facile_frame <- function(x, ...,
   assert_facile_data_store(x)
   stopifnot(is(dots, 'lazy_dots'))
 
-  all.vars <- sample_covariate_tbl(x) %>%
-    distinct(variable) %>%
+  all.vars <- sample_covariate_tbl(x) |>
+    distinct(variable) |>
     collect(n=Inf)
   all.vars <- c(all.vars$variable, "dataset", "sample_id")
 

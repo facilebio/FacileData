@@ -119,7 +119,7 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
   supported <- sapply(datasets, supported.assay.container)
   if (any(!supported)) {
     idxs <- which(!supported)
-    bad <- sapply(datasets[idxs], function(d) class(d)[1L]) %>% unique
+    bad <- sapply(datasets[idxs], function(d) class(d)[1L]) |> unique()
     stop("Unsupported assay container(s):", paste(bad, collapse=","))
   }
   dnames <- names(datasets)
@@ -247,7 +247,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   assert_valid_assay_datasets(datasets, facile_feature_info, storage_mode)
 
   ## Ensure no redunancy in facile_feature_info
-  nf <- facile_feature_info %>% distinct(feature_type, feature_id) %>% nrow
+  nf <- facile_feature_info |> distinct(feature_type, feature_id) |> nrow()
   if (nrow(facile_feature_info) != nf) {
     stop("Redunant features in facile_feature_info")
   }
@@ -258,27 +258,27 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
                feature_type=facile_feature_type,
                description=facile_assay_description,
                nfeatures=nrow(datasets[[1]]),
-               storage_mode=storage_mode) %>%
+               storage_mode=storage_mode) |>
     append_facile_table(x, "assay_info", warn_existing = warn_existing)
 
   ## Insert Feature Information into FacileDataSet -----------------------------
   ## Insert new features into global feature_info table
-  features <- x %>%
+  features <- x |>
     append_facile_feature_info(facile_feature_info,
                                type = facile_feature_type,
-                               warn_existing = warn_existing) %>%
+                               warn_existing = warn_existing) |>
     select(feature_type, feature_id, added)
 
   ## Create entries in `assay_feature_info` table to track hdf5 indices for
   ## the features in this assay
-  afi <- feature_info_tbl(x) %>%
+  afi <- feature_info_tbl(x) |>
     semi_join(select(features, -added),
-              by=c('feature_type', 'feature_id'),
-              copy=TRUE, auto_index=TRUE) %>%
-    collect(n=Inf) %>%
-    transmute(., assay=facile_assay_name, feature_id,
-              hdf5_index=seq(nrow(.))) %>%
-    append_facile_table(x, "assay_feature_info", warn_existing) %>%
+              by = c('feature_type', 'feature_id'),
+              copy = TRUE, auto_index = TRUE) |>
+    collect(n=Inf)
+  afi <- transmute(afi, assay = facile_assay_name, feature_id,
+                   hdf5_index = seq(nrow(afi))) |>
+    append_facile_table(x, "assay_feature_info", warn_existing) |>
     arrange(hdf5_index)
   stopifnot(nf == nrow(afi), all(afi$hdf5_index == seq(nf)))
 
@@ -307,7 +307,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
       assay=facile_assay_name,
       dataset=rep(names(datasets), sapply(dats, ncol)),
       sample_id=colnames(cnts),
-      hdf5_index=lapply(dats, function(d) seq(ncol(d))) %>% unlist,
+      hdf5_index=lapply(dats, function(d) seq(ncol(d))) |> unlist(),
       libsize=colSums(cnts),
       normfactor=normfactors)
     rm(cnts)
@@ -320,7 +320,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
         sample_id=colnames(mtrx),
         hdf5_index=seq(ncol(mtrx)),
         libsize=-1, normfactor=-1)
-    }) %>% bind_rows
+    }) |> bind_rows()
   }
 
   asi <- append_facile_table(asi, x, 'assay_sample_info', warn_existing)
@@ -360,8 +360,8 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   stopifnot(nrow(chk) == nrow(asi), all(chk$hdf5_index.x == chk$hdf5_index.y))
 
   ## add samples to sample_info table if they're not there.
-  samples <- asi %>%
-    mutate(parent_id=NA_character_) %>%
+  samples <- asi |>
+    mutate(parent_id=NA_character_) |>
     append_facile_table(x, 'sample_info', warn_existing)
   invisible(list(samples=samples, assay_sample_info=asi))
 }
@@ -397,8 +397,8 @@ append_facile_feature_info <- function(x, feature_info,
             immediate.=TRUE)
   }
   stopifnot(all(ftypes %in% .feature.types))
-  added <- feature_info %>%
-    distinct(feature_type, feature_id, .keep_all=TRUE) %>%
+  added <- feature_info |>
+    distinct(feature_type, feature_id, .keep_all=TRUE) |>
     append_facile_table(x, 'feature_info', warn_existing = warn_existing)
   invisible(added)
 }

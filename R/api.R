@@ -506,7 +506,7 @@ with_assay_covariates <- function(x, covariates = NULL,
 #'   scores? Use 'ewm' for eigenWeightedMean, and that's all.
 #' @return A `tibble` (lazy or not) with assay data.
 #' @examples
-#' samples <- exampleFacileDataSet() %>%
+#' samples <- exampleFacileDataSet() |>
 #'   filter_samples(indication == "BLCA", sample_type == "tumor")
 #' features <- c(PRF1='5551', GZMA='3001', CD274='29126')
 #' dat <- with_assay_data(samples, features, normalized = TRUE, batch = "sex")

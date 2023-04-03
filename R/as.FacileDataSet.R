@@ -112,7 +112,7 @@ as.FacileDataSet <- function(x, path, assay_name, assay_type, source_assay,
 ## These are the containers we can extract data from
 ## package=class
 
-legit.as.classes <- tribble(
+legit.as.classes <- tibble::tribble(
   ~package,               ~class,
   "SummarizedExperiment", "SummarizedExperiment",
   "SummarizedExperiment", "RangedSummarizedExperiment",
@@ -206,8 +206,8 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
       vals <- pdat[[cname]]
       if (is(vals, "Surv")) pdat[[cname]] <- as_cSurv(vals)
     }
-    pdat %>%
-      mutate(dataset = dname, sample_id = colnames(obj)) %>%
+    pdat |>
+      mutate(dataset = dname, sample_id = colnames(obj)) |>
       select(dataset, sample_id, everything())
   })
 
@@ -261,14 +261,14 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   fds <- FacileDataSet(path)
 
   # add sample covariates to table
-  sample.covs <- eav %>%
-    mutate(date_entered = as.integer(Sys.time())) %>%
+  sample.covs <- eav |>
+    mutate(date_entered = as.integer(Sys.time())) |>
     append_facile_table(fds, "sample_covariate")
 
   # Add samples to sample_info table
-  sample.info <- eav %>%
-    distinct(dataset, sample_id) %>%
-    mutate(parent_id = "") %>%
+  sample.info <- eav |>
+    distinct(dataset, sample_id) |>
+    mutate(parent_id = "") |>
     append_facile_table(fds, "sample_info")
 
   # insert the first assay

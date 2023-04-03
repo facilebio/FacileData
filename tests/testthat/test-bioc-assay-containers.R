@@ -2,14 +2,14 @@ context("Exercise as.DGEList (deprecated in favor of biocbiox())")
 
 if (!exists("FDS")) FDS <- exampleFacileDataSet()
 
-samples <- sample_covariate_tbl(FDS) %>%
-  dplyr::filter(variable == 'stage' & value == 'III') %>%
+samples <- sample_covariate_tbl(FDS) |>
+  dplyr::filter(variable == 'stage' & value == 'III') |>
   dplyr::select(dataset, sample_id)
 genes <- local({
   out <- c("800", "1009", "1289", "50509", "2191", "2335", "5159")
-  feature_info_tbl(FDS) %>%
-    dplyr::filter(feature_id %in% out) %>%
-    dplyr::collect() %>%
+  feature_info_tbl(FDS) |>
+    dplyr::filter(feature_id %in% out) |>
+    dplyr::collect() |>
     dplyr::pull(feature_id)
 })
 
@@ -75,8 +75,8 @@ test_that("as.DGEList with custom lib.size and norm.factors works", {
                                 prior.count = 2)
 
   # Add custom lib.size and norm.factors to sample facie_frame
-  samples. <- samples %>%
-    collect() %>%
+  samples. <- samples |>
+    collect() |>
     left_join(select(y.some$samples, sample_id, lib.size, norm.factors),
               by = "sample_id")
 

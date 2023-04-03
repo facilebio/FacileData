@@ -52,9 +52,9 @@
 #'
 #' # Retrieve data for only 3 genes
 #' # Suppose we only wanted female samples in our DGEList
-#' y.fem <- fds %>%
-#'   filter_samples(sex == "f") %>%
-#'   as.DGEList() # or `as.ExpressionSet()`
+#' y.fem <- fds |>
+#'   filter_samples(sex == "f") |>
+#'   as.DGEList() # or as.ExpressionSet()
 #' @export
 as.DGEList <- function(x, ...) {
   UseMethod("as.DGEList", x)
@@ -93,9 +93,9 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
   #     with_assay_covariates, because we get a wide table, maybe adding
   #     the libsize and normfactors would look like:
   #     assay_info <- with_assay_covariates(samples, assay_name)
-  bad.samples <- samples %>%
+  bad.samples <- samples |>
     anti_join(collect(samples(.fds), n = Inf),
-              by=c("dataset", "sample_id")) %>%
+              by=c("dataset", "sample_id")) |>
     collect(n = Inf)
   if (nrow(bad.samples)) {
     stop("Bad sample columns specified in the count matrix")
@@ -133,8 +133,8 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
     feature_ids <- rownames(x)
   }
   feature_ids <- unique(feature_ids)
-  genes <- .fds %>%
-    features(assay_name = assay_name, feature_ids = feature_ids) %>%
+  genes <- .fds |>
+    features(assay_name = assay_name, feature_ids = feature_ids) |>
     as.data.frame()
   rownames(genes) <- genes[["feature_id"]]
   if (genes[["feature_type"]][1L] %in% c("entrez", "ensgid") || TRUE) {
@@ -149,11 +149,12 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
 
   # Issue #2
   # https://github.com/denalitherapeutics/FacileData/issues/2
-  sample.stats <- samples %>%
-    with_assay_covariates(c("libsize", "normfactor"), assay_name,
-                          .fds = .fds) %>%
-    collect(n = Inf) %>%
-    mutate(samid=paste(dataset, sample_id, sep='__')) %>%
+  sample.stats <- samples |>
+    with_assay_covariates(c("libsize", "normfactor"),
+                          assay_name,
+                          .fds = .fds) |>
+    collect(n = Inf) |>
+    mutate(samid=paste(dataset, sample_id, sep='__')) |>
     as.data.frame()
   rownames(sample.stats) <- sample.stats[["samid"]]
   sample.stats <- sample.stats[colnames(x),,drop=FALSE]
@@ -257,9 +258,9 @@ as.DGEList.data.frame <- function(x, covariates = TRUE, feature_ids = NULL,
     counts <- fetch_assay_data(.fds, feature_ids, x, assay_name = assay_name,
                                normalized = FALSE, as.matrix = TRUE)
   } else {
-    cdt <- assert_expression_result(x) %>%
-      collect(n = Inf) %>%
-      setDT %>%
+    cdt <- assert_expression_result(x) |>
+      collect(n = Inf) |>
+      setDT() |>
       unique(by = c('dataset', 'sample_id', 'feature_id'))
     data.table::set(
       cdt,
@@ -384,7 +385,7 @@ as.ExpressionSet.FacileDataSet <- function(x, covariates=TRUE, feature_ids=NULL,
                                            .fds=fds(x),
                                            custom_key=Sys.getenv("USER"), ...) {
   force(.fds)
-  x <- samples(x) %>% collect(n=Inf) %>% set_fds(.fds)
+  x <- samples(x) |> collect(n=Inf) |> set_fds(.fds)
   as.ExpressionSet(x, covariates, feature_ids, assay_name, x,
                    custom_key, ...)
 }
@@ -428,7 +429,7 @@ as.SummarizedExperiment.FacileDataSet <- function(x, covariates=TRUE, feature_id
                                                   .fds=fds(x), custom_key=Sys.getenv("USER"),
                                                   ...) {
   force(.fds)
-  x <- samples(x) %>% collect(n=Inf) %>% set_fds(.fds)
+  x <- samples(x) |> collect(n=Inf) |> set_fds(.fds)
   as.SummarizedExperiment(x, covariates, feature_ids, assay_name, x,
                            custom_key, ...)
 }

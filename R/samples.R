@@ -31,7 +31,7 @@ fetch_samples.FacileDataSet <- function(x, samples = NULL,
          "see fetch_samples.old")
   }
   # if (is.null(samples)) samples <- sample_info_tbl(x)
-  samples <- assert_sample_subset(samples) %>% collect(n=Inf)
+  samples <- assert_sample_subset(samples) |> collect(n=Inf)
 
   if (!missing(assay)) {
     assert_string(assay)
@@ -49,8 +49,8 @@ fetch_samples.FacileDataSet <- function(x, samples = NULL,
   copy <- !is(samples, 'tbl_dbi')
   pk <- primary_key(x, fds.tbl)
 
-  tbl(x$con, fds.tbl) %>%
-    semi_join(samples, by=pk, copy=copy, auto_index=copy) %>%
+  tbl(x$con, fds.tbl) |>
+    semi_join(samples, by=pk, copy=copy, auto_index=copy) |>
     as_facile_frame(x)
 }
 
@@ -71,7 +71,8 @@ fetch_samples.FacileDataSet <- function(x, samples = NULL,
 #'   otherwise does an inner_join between \code{x} and \code{samples}
 #'   (default \code{FALSE}).
 #' @return joined result between \code{x} and \code{samples}
-join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
+join_samples <- function(x, samples = NULL, semi = FALSE, 
+                         distinct.samples = FALSE) {
   if (is.null(samples)) {
     return(x)
   }
@@ -88,11 +89,16 @@ join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
   if (semi && length(extra.cols) > 0L) {
     samples <- distinct(samples, dataset, sample_id)
   }
-
-  # inner_join(x, samples, by=c('dataset', 'sample_id'),
-  #            copy=internalize, auto_index=internalize)
-  left_join(x, samples, by=c('dataset', 'sample_id'),
-            copy=internalize, auto_index=internalize)
+  
+  if (is(x, "tbl_lazy")) {
+    out <- left_join(x, samples, by = c("dataset", "sample_id"),
+                     copy = internalize, auto_index = internalize)
+  } else {
+    out <- left_join(x, samples, by = c("dataset", "sample_id"),
+                     copy = internalize)
+  }
+  
+  out
 }
 
 ## Filter x down to specific samples
@@ -111,17 +117,17 @@ join_samples <- function(x, samples=NULL, semi=FALSE, distinct.samples=FALSE) {
 retrieve_samples_in_memory <- function(criteria, cov.table=NULL) {
   if(length(criteria)==0){
     # case where no filters have been defined
-    indiv.results <- list(cov.table %>%
-                            select(dataset, sample_id) %>%
-                            collect)
+    indiv.results <- list(cov.table |>
+                            select(dataset, sample_id) |>
+                            collect(n = Inf))
   } else {
     indiv.results <- lapply(criteria, function(crit) {
       if (!is.null(crit)) {
         dots <- parse_sample_criterion(variable=crit$variable, value=crit$value)
-        cov.table %>%
-          filter_(.dots=dots) %>%
-          select(dataset, sample_id) %>%
-          collect
+        cov.table |>
+          filter_(.dots=dots) |>
+          select(dataset, sample_id) |>
+          collect(n = Inf)
       }
     })
   }
@@ -135,8 +141,8 @@ retrieve_samples_in_memory <- function(criteria, cov.table=NULL) {
     out <- Reduce(rf, indiv.results[-1], init=indiv.results[[1]])
   }
 
-  out %>%
-    distinct(dataset, sample_id) %>%
+  out |>
+    distinct(dataset, sample_id) |>
     arrange(dataset, sample_id)
 }
 

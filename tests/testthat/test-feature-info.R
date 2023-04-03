@@ -17,11 +17,11 @@ test_that("with_feature_info grabs the right goods", {
 })
 
 test_that("with_feature_info can rename feature covariates", {
-  expected <- genes %>%
-    with_feature_info(c("name", "meta"), .fds = FDS) %>%
+  expected <- genes |>
+    with_feature_info(c("name", "meta"), .fds = FDS) |>
     rename(symbol = "name")
 
-  res <- genes %>%
+  res <- genes |>
     with_feature_info(c(symbol = "name", "meta"), .fds = FDS)
 
   expect_equal(res, expected)

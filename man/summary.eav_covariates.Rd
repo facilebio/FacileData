@@ -35,7 +35,7 @@ fds <- exampleFacileDataSet()
 covs <- fetch_sample_covariates(fds)
 smry <- summary(covs)
 details <- summary(covs, expanded = TRUE)
-catdeetz <- covs \%>\%
-  filter(class == "categorical") \%>\%
+catdeetz <- covs |>
+  filter(class == "categorical") |>
   summary(expanded = TRUE)
 }
