@@ -157,7 +157,7 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
   fids <- rownames(datasets[[1]])
   if (any(duplicated(fids))) stop("Duplicated rownames exist")
   features.consistent <- sapply(datasets, function(d) {
-    nrow(d) == length(fids) & setequal(rownames(d), fids)
+    nrow(d) == length(fids) && setequal(rownames(d), fids)
   })
   stopifnot(all(features.consistent))
 

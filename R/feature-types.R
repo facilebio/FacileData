@@ -20,8 +20,10 @@
 #' infer_feature_type(fids)
 infer_feature_type <- function(x, with_organism = FALSE, ...) {
   regex <- list(
-    ens_gene = "^ENS[A-Z]*G\\d+(\\.\\d+)?$",
-    ens_tx   = "^ENS[A-Z]*?T\\d+(\\.\\d+)?$",
+    # ens_gene = "^ENS[A-Z]*G\\d+(\\.\\d+)?$",
+    # ens_tx   = "^ENS[A-Z]*?T\\d+(\\.\\d+)?$",
+    ensgid   = "^ENS[A-Z]*G\\d+(\\.\\d+)?$",
+    enstid   = "^ENS[A-Z]*?T\\d+(\\.\\d+)?$",
     refseq   = "^[NXW][CGMRP]_\\d+(\\.\\d+)?$",
     entrez   = "^\\d+$")
 
