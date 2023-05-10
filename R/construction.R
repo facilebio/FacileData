@@ -299,7 +299,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   })
 
   ## If rnaseq, do calcnormfactors
-  if (facile_assay_type %in% c('rnaseq', 'isoseq')) {
+  if (facile_assay_type %in% c('rnaseq', 'isoseq', 'pseudobulk')) {
     ## Can create assay_sample_info_table
     cnts <- do.call(cbind, dats)
     normfactors <- calcNormFactors(cnts)
