@@ -13,7 +13,7 @@
 #'   name.
 #' @return The FacileDataSet object itself.
 #' @examples
-#' \dontest{
+#' \donttest{
 #' afds <- assemble_example_dataset()
 #' }
 assemble_example_dataset <- function(directory = tempdir(),

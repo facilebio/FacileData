@@ -363,6 +363,8 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   samples <- asi |>
     mutate(parent_id=NA_character_) |>
     append_facile_table(x, 'sample_info', warn_existing)
+  
+  # TODO: Add sample covariates for samples that aren't yet loaded -------------
   invisible(list(samples=samples, assay_sample_info=asi))
 }
 

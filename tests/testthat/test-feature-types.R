@@ -9,12 +9,12 @@ test_that("Different classes of identifiers guessed correctly", {
     "refseq",      "NP_001293135.1",                "unknown",
     "refseq",      "NC_000023",                     "unknown",
     "refseq",      "NM_001306206",                  "unknown",
-    "ens_gene",    "ENSG00000101811",               "Homo sapiens",
-    "ens_gene",    "ENSMUSG00000030088",            "Mus musculus",
-    "ens_gene",    "ENSMUSG00000030088.2",          "Mus musculus",
-    "ens_tx",      "ENST00000415585.6",             "Homo sapiens",
-    "ens_tx",      "ENSMUST00000113287.7",          "Mus musculus",
-    "ens_tx",      "ENSMUST00000113287",            "Mus musculus",
+    "ensgid",      "ENSG00000101811",               "Homo sapiens",
+    "ensgid",      "ENSMUSG00000030088",            "Mus musculus",
+    "ensgid",      "ENSMUSG00000030088.2",          "Mus musculus",
+    "enstid",      "ENST00000415585.6",             "Homo sapiens",
+    "enstid",      "ENSMUST00000113287.7",          "Mus musculus",
+    "enstid",      "ENSMUST00000113287",            "Mus musculus",
     "entrez",      "85007",                         "unknown")
 
   res <- infer_feature_type(expected$id)

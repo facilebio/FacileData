@@ -198,40 +198,11 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     }
     xdat
   })
+  
+  sample_covariates <- .prepare_sample_covariates(
+    x, covariate_def = covariate_def, ...)
 
-  pdats <- lapply(names(x), function(dname) {
-    obj <- x[[dname]]
-    pdat <- pdata(obj)
-    for (cname in colnames(pdat)) {
-      vals <- pdat[[cname]]
-      if (is(vals, "Surv")) pdat[[cname]] <- as_cSurv(vals)
-    }
-    pdat |>
-      mutate(dataset = dname, sample_id = colnames(obj)) |>
-      select(dataset, sample_id, everything())
-  })
-
-  pdat <- bind_rows(pdats)
-  # __ has as special meaning for Facile
-  pdat$sample_id = gsub("__", "",  pdat$sample_id)
-
-  # col_descs_list = lapply(x, pdata_metadata, covariate_metadata)
-  # col_descs = unlist(col_descs_list, FALSE, FALSE)
-  # names(col_descs) = unlist(sapply(col_descs_list, names, simplify = FALSE),
-  #                           recursive = FALSE, use.names = FALSE)
-  # col_descs = col_descs[!duplicated(names(col_descs))]
-  #
-  # eav.meta <- eav_metadata_merge(pdat, col_descs)
-
-  eav = as.EAVtable(pdat, covariate_def = covariate_def)
-  eav_meta <- attr(eav, "covariate_def")
-
-  # Check for duplicates entries in the eav table here, otherwise injecting it
-  # into the database will raise an error
-  stopifnot(
-    nrow(distinct(eav, dataset, sample_id, variable)) == nrow(eav))
-
-  # list of assay matricess
+  # list of assay matrices
   adat <- sapply(names(x), function(dname) {
     ds = adata(x[[dname]], assay = source_assay)
     # __ has as special meaning for Facile
@@ -251,7 +222,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     organism = organism,
     default_assay = assay_name,
     datasets = ds_list,
-    sample_covariates = eav_meta)
+    sample_covariates = sample_covariates$eav_meta)
 
   meta_yaml <- paste0(tempfile(), ".yaml")
   yaml::write_yaml(meta, meta_yaml)
@@ -261,14 +232,12 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   fds <- FacileDataSet(path)
 
   # add sample covariates to table
-  sample.covs <- eav |>
+  sample.covs <- sample_covariates$eav |>
     mutate(date_entered = as.integer(Sys.time())) |>
     append_facile_table(fds, "sample_covariate")
 
   # Add samples to sample_info table
-  sample.info <- eav |>
-    distinct(dataset, sample_id) |>
-    mutate(parent_id = "") |>
+  sample.info <- sample_covariates$samples |>
     append_facile_table(fds, "sample_info")
 
   # insert the first assay
@@ -296,6 +265,70 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   message("Time taken: ", tend - tstart) ## ~ 30 seconds
 
   fds
+}
+
+#' Helper function when creating or appending to a faciledatsets
+#' 
+#' Preapres the EAV table and stuff for the sample-level covariates (pData) of
+#' the assay objects in the named list `x`
+#' 
+#' TODO: Handle and optional parameter that provides new or existing mappings
+#' mappings of covariate names to the attribute-value definitions that
+#' eventually get serialized to the meta.yaml file
+#'
+#' @param x a named list of assay containers (names are the `dataset` values)
+#' @param covariate_def precanned covariate definitions
+#' @param fds (optional) a `FacileDataSet` object that you are adding these
+#'   sample level covariates to.
+#' @param parents not used now, but a two-column data.frame that encodes which
+#'   sample is a parent of another
+.prepare_sample_covariates <- function(x, covariate_def = NULL,
+                                       fds = NULL, parents = NULL, ...) {
+  pdats <- lapply(names(x), function(dname) {
+    obj <- x[[dname]]
+    pdat <- pdata(obj)
+    for (cname in colnames(pdat)) {
+      vals <- pdat[[cname]]
+      if (is(vals, "Surv")) pdat[[cname]] <- as_cSurv(vals)
+    }
+    pdat |>
+      mutate(dataset = dname, sample_id = colnames(obj)) |>
+      select(dataset, sample_id, everything())
+  })
+  
+  pdat <- bind_rows(pdats)
+  # __ has as special meaning for Facile
+  pdat$sample_id = gsub("__", "",  pdat$sample_id)
+  
+  # col_descs_list = lapply(x, pdata_metadata, covariate_metadata)
+  # col_descs = unlist(col_descs_list, FALSE, FALSE)
+  # names(col_descs) = unlist(sapply(col_descs_list, names, simplify = FALSE),
+  #                           recursive = FALSE, use.names = FALSE)
+  # col_descs = col_descs[!duplicated(names(col_descs))]
+  #
+  # eav.meta <- eav_metadata_merge(pdat, col_descs)
+  
+  eav = as.EAVtable(pdat, covariate_def = covariate_def)
+  eav_meta <- attr(eav, "covariate_def")
+  
+  # Check for duplicates entries in the eav table here, otherwise injecting it
+  # into the database will raise an error
+  stopifnot(
+    nrow(distinct(eav, dataset, sample_id, variable)) == nrow(eav))
+  
+  if (!is.null(parents)) {
+    warning("we don't manage sample hierarchy yet")
+  }
+  
+  samples <- eav |>
+    distinct(dataset, sample_id) |>
+    mutate(parent_id = "")
+  
+  list(
+    pdat = pdat,
+    samples = samples,
+    eav = eav,
+    eav_meta = eav_meta)
 }
 
 #' Bioc-container specific data set annotation extraction functions
