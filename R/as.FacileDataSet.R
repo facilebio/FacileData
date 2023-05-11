@@ -140,9 +140,9 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
                                   dataset_meta = list(),
                                   organism = "unspecified",
                                   prune_dataset_meta = TRUE,
-                                  page_size=2**12, cache_size=2e5,
-                                  chunk_rows=5000, chunk_cols="ncol",
-                                  chunk_compression=5,
+                                  page_size = 2**12, cache_size = 2e5,
+                                  chunk_rows = 5000, chunk_cols = "ncol",
+                                  chunk_compression = 5,
                                   covariate_def = NULL, ...) {
   stopifnot(is.list(x))
   stopifnot(length(x) >= 1L)
@@ -251,16 +251,17 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
   samples <- addFacileAssaySet(
     fds,
     adat,
-    facile_assay_name=meta$default_assay,
-    facile_assay_type=assay_type,
-    facile_feature_type=finfo$feature_type[1],
-    facile_feature_info=finfo,
-    facile_assay_description=assay_description,
-    storage_mode=storage_mode,
-    chunk_rows=chunk_rows,
-    chunk_cols=chunk_cols,
-    chunk_compression=chunk_compression
-  )
+    facile_assay_name = meta$default_assay,
+    facile_assay_type = assay_type,
+    facile_feature_type = finfo$feature_type[1],
+    facile_feature_info = finfo,
+    facile_assay_description = assay_description,
+    storage_mode = storage_mode,
+    chunk_rows = chunk_rows,
+    chunk_cols = chunk_cols,
+    chunk_compression = chunk_compression,
+    add_sample_covariates = FALSE)
+  
   tend <- Sys.time()
   message("Time taken: ", tend - tstart) ## ~ 30 seconds
 

@@ -224,7 +224,9 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
                               storage_mode=.storage.modes,
                               chunk_rows=5000, chunk_cols='ncol',
                               chunk_compression=4,
-                              assay_name=NULL, warn_existing = FALSE) {
+                              assay_name=NULL, warn_existing = FALSE,
+                              add_sample_covariates = TRUE,
+                              covariate_def = NULL) {
   ## Parameter Checking --------------------------------------------------------
   stopifnot(is.FacileDataSet(x))
   assert_string(facile_assay_name)
@@ -247,7 +249,9 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   assert_valid_assay_datasets(datasets, facile_feature_info, storage_mode)
 
   ## Ensure no redunancy in facile_feature_info
-  nf <- facile_feature_info |> distinct(feature_type, feature_id) |> nrow()
+  nf <- facile_feature_info |> 
+    distinct(feature_type, feature_id) |> 
+    nrow()
   if (nrow(facile_feature_info) != nf) {
     stop("Redunant features in facile_feature_info")
   }
@@ -359,10 +363,20 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   chk <- inner_join(asi, assay.dat, by=c('assay', 'dataset', 'sample_id'))
   stopifnot(nrow(chk) == nrow(asi), all(chk$hdf5_index.x == chk$hdf5_index.y))
 
-  ## add samples to sample_info table if they're not there.
+  # add samples to sample_info table if they're not there.
   samples <- asi |>
     mutate(parent_id=NA_character_) |>
     append_facile_table(x, 'sample_info', warn_existing)
+  
+  if (add_sample_covariates) {
+    sample_covariates <- .prepare_sample_covariates(
+      datasets, covariate_def = covariate_def)
+    # add sample covariates to table
+    sample.covs <- sample_covariates$eav |>
+      mutate(date_entered = as.integer(Sys.time())) |>
+      append_facile_table(x, "sample_covariate", 
+                          warn_existing = warn_existing)
+  }
   
   # TODO: Add sample covariates for samples that aren't yet loaded -------------
   invisible(list(samples=samples, assay_sample_info=asi))
