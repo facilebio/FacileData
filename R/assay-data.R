@@ -169,7 +169,7 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
     arrange(hdf5_index)
   atype <- finfo$assay_type[1L]
   ftype <- finfo$feature_type[1L]
-  sinfo <- assay_sample_info(x, assay_name, samples) |>
+  sinfo <- assay_sample_info(samples, assay_name) |>
     mutate(samid = paste(dataset, sample_id, sep = "__"))
 
   bad.samples <- is.na(sinfo$hdf5_index)
@@ -321,33 +321,27 @@ has_assay <- function(x, assay_name) {
 
 #' @noRd
 #' @export
-assay_sample_info.FacileDataSet <- function(x, assay_name, samples = NULL, ...) {
+assay_sample_info.FacileDataSet <- function(x, assay_name, ...) {
   assert_facile_data_store(x)
-
-  if (is.null(samples)) {
-    samples <- samples(x)
-  } else {
-    assert_sample_subset(samples, x)
-    samples <- distinct(samples, dataset, sample_id, .keep_all = TRUE)
-  }
-  samples <- collect(samples, n = Inf)
-
-  feature.type <- assay_feature_type(x, assay_name)
-
-  asi <- assay_sample_info_tbl(x) |>
-    filter(assay == assay_name) |>
-    collect(n=Inf)
-
-  if (is.null(samples)) {
-    samples <- asi
-  } else {
-    samples <- left_join(samples, asi, by = c("dataset", "sample_id"),
-                         suffix = c(".x", ""))
-  }
-
-  samples
+  assert_choice(assay_name, assay_names(x))
+  x <- collect(samples(x), n = Inf)
+  assay_sample_info(x, assay_name, ..., .asserted = TRUE)  
 }
 
+#' @noRd
+#' @export
+assay_sample_info.facile_frame <- function(x, assay_name, ..., 
+                                           .asserted = FALSE) {
+  x <- collect(x, n = Inf)
+  fds. <- fds(x)
+  if (!isTRUE(.asserted)) {
+    assert_choice(assay_name, assay_names(fds.))
+  }
+  asi <- assay_sample_info_tbl(fds.) |>
+    filter(.data$assay == .env$assay_name) |>
+    collect(n = Inf)
+  left_join(x, asi, by = c("dataset", "sample_id"), suffix = c(".x", ""))
+}
 
 #' Returns the feature_type for a given assay
 #'

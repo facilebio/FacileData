@@ -61,36 +61,64 @@ append_facile_table <- function(dat, x, table_name, warn_existing = FALSE) {
   invisible(dat)
 }
 
-## Database Table Accessors ====================================================
+# Database Table Accessors =====================================================
 
 #' @export
+#' @noRd
 assay_info_tbl <- function(x) {
-  stopifnot(is.FacileDataSet(x))
+  UseMethod("assay_info_tbl", x)
+}
+
+#' @export
+assay_info_tbl.FacileDataSet <- function(x) {
   out <- tbl(x$con, 'assay_info')
   as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' @export
+#' @noRd
 assay_feature_info_tbl <- function(x) {
-  stopifnot(is.FacileDataSet(x))
+  UseMethod("assay_feature_info_tbl", x)
+}
+
+#' @export
+#' @noRd
+assay_feature_info_tbl.FacileDataSet <- function(x) {
   out <- tbl(x$con, 'assay_feature_info')
   as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' @export
+#' @noRd
 assay_sample_info_tbl <- function(x) {
-  # multi_class because of the collision between
-  # FacileShine::ReactiveFacileDataSet (boxd) objects and Issue #2
+  UseMethod("assay_sample_info_tbl", x)
+}
+
+#' @export
+#' @noRd
+assay_sample_info_tbl.default <- function(x) {
   # Currently we are accessing directly the assay_sample_info tbl to get
-  # assay_sample covariates, which needs to change.
-  assert_multi_class(x, c("FacileDataSet", "BoxedFacileDataStore"))
+  # assay_sample covariates, which needs to change. See issue #2:
+  # https://github.com/facilebio/FacileData/issues/2
+  stop("assay_sample_info_tbl not implemented for: ", class(x))
+}
+
+#' @export
+#' @noRd
+assay_sample_info_tbl.FacileDataSet <- function(x) {
   out <- tbl(x$con, 'assay_sample_info')
   as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' @export
-feature_info_tbl <- function(x, assay_name=NULL) {
-  stopifnot(is.FacileDataSet(x))
+#' @noRd
+feature_info_tbl <- function(x, assay_name = NULL) {
+  UseMethod("feature_info_tbl", x)
+}
+
+#' @export
+#' @noRd
+feature_info_tbl.FacileDataSet <- function(x, assay_name = NULL) {
   out <- tbl(x$con, 'feature_info')
   if (!is.null(assay_name)) {
     assert_string(assay_name)
@@ -107,13 +135,18 @@ feature_info_tbl <- function(x, assay_name=NULL) {
   as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
+#' @export
+#' @noRd
+gene_info_tbl <- function(x) {
+  UseMethod("gene_info_tbl", x)
+}
+
 #' Mimics the old `gene_info` table.
 #'
 #' @export
-gene_info_tbl <- function(x) {
-  # TODO: This function needs to be removed and the code that relies on gene_info_tbl
-  # should be updated.
-  stopifnot(is.FacileDataSet(x))
+gene_info_tbl.FacileDataSet <- function(x) {
+  # TODO: This function needs to be removed and the code that relies on
+  # gene_info_tbl should be updated.
   ## Columns:
   ## feature_id|feature_type|symbol|n_exons|length|source|hdf5_index
   hdf5.info <- assay_feature_info_tbl(x) |>
@@ -133,22 +166,41 @@ gene_info_tbl <- function(x) {
 #' This function needs to be removed and the code that relies on
 #' sample_stats_tbl be updated.
 #' @export
+#' @noRd
 sample_stats_tbl <- function(x) {
+  UseMethod("sample_stats_tbl")
+}
+
+#' @export
+#' @noRd
+sample_stats_tbl.FacileDataSet <- function(x) {
   assay_sample_info_tbl(x) |>
     select(dataset, sample_id, libsize, normfactor) |>
     as_facile_frame(x, .valid_sample_check = FALSE)
 }
 
 #' @export
+#' @noRd
 sample_covariate_tbl <- function(x) {
-  stopifnot(is.FacileDataSet(x))
+  UseMethod("sample_covariate_tbl", x)
+}
+
+#' @export
+#' @noRd
+sample_covariate_tbl.FacileDataSet <- function(x) {
   out <- tbl(x$con, 'sample_covariate')
   as_facile_frame(out, x, .valid_sample_check = FALSE)
 }
 
 #' @export
+#' @noRd
 sample_info_tbl <- function(x) {
-  stopifnot(is.FacileDataSet(x))
+  UseMethod("sample_info_tbl", x)
+}
+
+#' @export
+#' @noRd
+sample_info_tbl.FacileDataSet <- function(x) {
   out <- tbl(x$con, 'sample_info')
   as_facile_frame(out, x, .valid_sample_check = FALSE)
 }

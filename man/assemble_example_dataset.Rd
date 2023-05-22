@@ -28,7 +28,7 @@ read that for some of the why's and how's of the decisions made here when
 assembling datasets.
 }
 \examples{
-\dontest{
+\donttest{
 afds <- assemble_example_dataset()
 }
 }

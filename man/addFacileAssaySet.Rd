@@ -17,7 +17,9 @@ addFacileAssaySet(
   chunk_cols = "ncol",
   chunk_compression = 4,
   assay_name = NULL,
-  warn_existing = FALSE
+  warn_existing = FALSE,
+  add_sample_covariates = TRUE,
+  covariate_def = NULL
 )
 }
 \arguments{
