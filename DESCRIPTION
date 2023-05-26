@@ -42,6 +42,7 @@ Imports:
   reshape2,
   rhdf5,
   RSQLite,
+  qs,
   survival,
   utils,
   yaml
@@ -52,6 +53,9 @@ Suggests:
   parathyroidSE,
   rmarkdown,
   roxygen2 (>= 6.1.0),
+  scuttle,
+  Seurat,
+  SingleCellExperiment,
   stringr,
   S4Vectors,
   SummarizedExperiment,

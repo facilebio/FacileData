@@ -1,0 +1,433 @@
+---
+title: "Building a FacileDataSet from raw assay data"
+author: "Steve Lianoglou"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('FacileData')`"
+output:
+  BiocStyle::html_document:
+    highlight: pygments
+    toc: true
+    fig_width: 5
+    css: custom.css
+vignette: >
+  %\VignetteIndexEntry{FacileData API Overview}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding[utf8]{inputenc}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+Having a true multi-modal dataset is required to really test the functionality
+of this FacileDataSet implementation. This vignette creates a set of
+well-groomed DGEList objects that can be used to assemble a multi-modal
+FacileDataSet from pseudobulked single-cell and single-nucleus data..
+
+## Dataset Background
+
+We will pseudobulk a subset of the scRNAseq and snRNAseq data made available
+by the KPMP consortium through the cellxgene poortal. You will need to first
+download this dataset locally to your computer.
+
+Navigate to this page:
+
+ An atlas of healthy and injured cell states and niches in the human kidney
+ https://cellxgene.cziscience.com/collections/bcb61471-2a44-4d00-a0af-ff08551267
+ 
+And download the "Integrated Single-nucleus and Single-cell RNA-seq of the
+Adult Human Kidney" Seurat object available there. Store the path of this
+file in the `cxg.fn` variable below.
+
+```{r}
+cxg.fn <- "~/tmp/local.rds"
+```
+
+```{r, message=FALSE, warning=FALSE}
+devtools::load_all(".")
+library(Seurat)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+theme_set(theme_bw(base_size = 14))
+```
+
+```{r}
+if (!exists("x.all")) {
+  x.all <- readRDS(cxg.fn)
+}
+x.all$sample_id <- paste(
+  as.character(x.all$subclass.l1),
+  sub("-", "_", as.character(x.all$donor_id)),
+  sep = ".")
+```
+
+## Data Selection
+
+We'll pseudobulk cells at the most macro-level cell type specification,
+which is stored in the `x$sublcass.l1` column. We also want to ensure we get
+some distribution of "conditions"
+
+### Conditions
+
+```{r}
+condition.count <- x.all@meta.data |> 
+  dplyr::count(donor_id, condition.l2) |>
+  dplyr::arrange(donor_id, condition.l2)
+```
+
+Each donor is onnly assigned one condition:
+
+```{r}
+any(duplicated(condition.count$donor_id))
+```
+
+These are them:
+
+```{r}
+condition.count
+```
+
+### Assay <> Cell Types
+
+```{r}
+assay.tally <- x.all@meta.data |> 
+  summarize(
+    sample_id = sample_id[1L],
+    count = n(),
+    ceiling = min(1000, count),
+    .by = c("donor_id", "condition.l2", "suspension_type", "subclass.l1")) |> 
+  as_tibble() |> 
+  dplyr::rename(cell_type = subclass.l1)
+```
+
+The `x.all$suspension_type` column (`"cell"` or `"nucleus"`) indicates the
+assay the counts are from. Let's limit the samples we use to be from donors
+who have both scRNAseq and snRNAseq assays.
+
+Sparsity in samples across the assays will come at the donor<>cell_type level.
+
+```{r}
+d.both <- intersect(
+  filter(assay.tally, suspension_type == "cell")$donor_id,
+  filter(assay.tally, suspension_type != "cell")$donor_id) |> 
+  tibble(donor_id = _) |> 
+  left_join(distinct(assay.tally, donor_id, condition.l2), by = "donor_id")
+d.both
+```
+
+The tables below indicate the number of cells per celltype we will be
+aggregating by assay.
+
+We want to only consider cell types with a minimun and maximum count
+
+```{r}
+cell.min <- 100
+cell.max <- 2500
+```
+
+
+**scRNAseq**
+
+```{r}
+cell.tally.long <- assay.tally |> 
+  semi_join(d.both, by = "donor_id") |> 
+  filter(
+    suspension_type == "cell",
+    count >= cell.min, count <= cell.max) |> 
+  select(donor_id, sample_id, condition.l2, cell_type, count) |> 
+  mutate(
+    assay_type = "scRNAseq")
+cell.tally.wide <- cell.tally.long|> 
+  pivot_wider(
+    id_cols = c("donor_id", "condition.l2"),
+    names_from = "cell_type",
+    values_from = "count")
+cell.tally.wide
+```
+
+**snRNAseq**
+
+```{r}
+nuc.tally.long <- assay.tally |> 
+  semi_join(d.both, by = "donor_id") |> 
+  filter(
+    suspension_type != "cell",
+    count >= cell.min, count <= cell.max) |> 
+  select(donor_id, condition.l2, cell_type, count) |> 
+  mutate(assay_type = "snRNAseq")
+nuc.tally.wide <- nuc.tally.long |> 
+  pivot_wider(
+    id_cols = c("donor_id", "condition.l2"),
+    names_from = "cell_type",
+    values_from = "count")
+nuc.tally.wide
+```
+
+### Assay Data Sparsity
+
+Lots of sparsity here -- we don't even have full count matrices per assay
+at the donor <> cell_type level.
+
+```{r, fig.asp=1.4}
+assay.counts.all <- bind_rows(cell.tally.long, nuc.tally.long) |> droplevels()
+ggplot(assay.counts.all, aes(x = count, y = donor_id, fill = assay_type)) +
+  geom_col(position = position_dodge()) +
+  facet_wrap(~ cell_type)
+```
+Let's drop the ATL, PEC, and POD celltypes as they are *quite sparse*
+
+```{r}
+assay.counts <- filter(assay.counts.all, !cell_type %in% c("ATL", "PEC", "POD"))
+ggplot(assay.counts, aes(x = count, y = donor_id, fill = assay_type)) +
+  geom_col(position = position_dodge()) +
+  facet_wrap(~ cell_type)
+```
+
+## Data Trimming
+
+We now know which donors and celltypes to keep, let's start getting down to
+business.
+
+```{r}
+keep <- list(
+  scRNAseq = local({
+    xassay <- filter(assay.counts, assay_type == "scRNAseq")
+    with(x.all@meta.data, {
+      suspension_type == "cell" &
+        donor_id %in% xassay$donor_id &
+        subclass.l1 %in% xassay$cell_type
+    })
+  }),
+  snRNAseq = local({
+    xassay <- filter(assay.counts, assay_type == "snRNAseq")
+    with(x.all@meta.data, {
+      suspension_type == "nucleus" &
+        donor_id %in% xassay$donor_id &
+        subclass.l1 %in% xassay$cell_type
+    })
+  }))
+sapply(keep, sum)
+```
+
+Let's trim the dataset to just these cells, munge the sample-level covariates,
+then split into individual DGEList datasets for dataset creation.
+
+```{r}
+x.sub <- x.all[, keep$scRNAseq | keep$snRNAseq]
+rm(x.all); gc()
+```
+
+## Metadata Simplification
+
+We don't need factor levels for some covariates, like donor_id
+
+```{r}
+x.sub$donor_id <- as.character(x.sub$donor_id)
+x.sub$subclass.l1 <- as.character(x.sub$subclass.l1)
+x.sub@meta.data <- droplevels(x.sub@meta.data)
+```
+
+### Cell Abbreviation to Name Mapping
+
+The subclass.l1 abbreviation are hard to grok, let's give them real names:
+
+```{r}
+unique(x.sub$subclass.l1) |> sort()
+```
+
+What are these? Manual inspection of the table below allows us to create a
+reasonable abbreviation -> cell label map.
+
+```{r}
+cell.names <- x.sub@meta.data |> 
+  distinct(subclass.l1, subclass.l2, subclass.full) |> 
+  arrange(subclass.l1, subclass.l2)
+rownames(cell.names) <- NULL
+cell.names
+```
+
+```{r}
+cell.map <- tibble::tribble(
+  ~subclass.l1,  ~cell_label,
+  "CNT",         "Connecting Tubule Cell",
+  "DCT",         "Distal Convoluted Tubule Cell",
+  "DTL",         "Descending Thin Limb Cell",
+  "EC",          "Endothelial Cell",
+  "FIB",         "Medullary Fibroblast",
+  "IC",          "Intercalated Cell",
+  "IMM",         "Immune Cell",
+  "PC",          "Principal Cell (Collecting Duct)",
+  "PT",          "Proximal Tubule Epithelial Cell",
+  "TAL",         "Thick Ascending Limb Cell",
+  "VSM/P",       "Vascular Smooth Muscle Cell / Pericyte")
+stopifnot(setequal(cell.map$subclass.l1, x.sub$subclass.l1))
+```
+
+```{r}
+xref <- match(x.sub$subclass.l1, cell.map$subclass.l1)
+stopifnot(!any(is.na(xref)))
+x.sub$cell_label <- cell.map$cell_label[xref]
+x.sub@meta.data |> 
+  select(subclass.l1, cell_label) |> 
+  sample_n(10)
+```
+
+These are the covariates we will keep. The values are the names of the columns,
+and their names are what we will rename them to.
+
+```{r}
+meta.keep <- c(
+  donor_id = "donor_id",
+  sample_id = "sample_id",
+  cell_abbrev = "subclass.l1",
+  sex = "sex",
+  cell_type = "cell_label",
+  condition = "condition.long",
+  # there is duplication of celltype : structure at this level of granularity,
+  # but this could have been nice.
+  # structure = "structure",
+  eGFR = "eGFR", # factor = nice
+  diabetes_history = "diabetes_history", # no NA's here
+  hypertension = "hypertension", # no NA's here
+  suspension_type = "suspension_type") # we will nuke this later
+```
+
+```{r}
+x.sub@meta.data <- cbind(
+  x.sub@meta.data[, c("nCount_RNA", "nFeature_RNA")],
+  select(x.sub@meta.data, all_of(meta.keep)))
+```
+
+## Cleanup Data into a SingleCellExperiment
+
+```{r, message=FALSE, warning=FALSE}
+library(SingleCellExperiment)
+sce.all <- SingleCellExperiment(
+  list(counts = x.sub@assays$RNA@counts),
+  colData = select(x.sub@meta.data, -nCount_RNA, -nFeature_RNA),
+  rowData = x.sub[["RNA"]]@meta.features)
+rm(x.sub); gc()
+
+sce.all$cond <- sub(".*?\\(", "", sce.all$condition)
+sce.all$cond <- sub("\\)", "", sce.all$cond)
+sce.all$cond <- sub("-", "", sce.all$cond)
+sce.all$group <- paste0(sce.all$cond, "__", sce.all$cell_abbrev)
+
+split.by <- sce.all$sample_id
+is.cell <- sce.all$suspension_type == "cell"
+sce.all$suspension_type <- NULL
+```
+
+### Get Better Gene Metadata
+
+```{r}
+g.attribs <- c(
+  feature_id = "ensembl_gene_id", 
+  name = "hgnc_symbol",
+  meta = "gene_biotype", 
+  # we don't really need these, but ...
+  seqnames = "chromosome_name",
+  start = "start_position",
+  end = "end_position",
+  strand = "strand")
+mart <- biomaRt::useMart("ENSEMBL_MART_ENSEMBL", "hsapiens_gene_ensembl")
+
+gi.all <- biomaRt::getBM(
+  attributes = g.attribs,
+  mart = mart)
+gi.use <- filter(gi.all, !grepl("_", chromosome_name))
+
+gi.out <- data.frame(
+  feature_id = rownames(sce.all),
+  feature_type = rep("ensgid", nrow(sce.all))) |> 
+  inner_join(gi.use, by = c("feature_id"= "ensembl_gene_id")) |> 
+  dplyr::rename(any_of(g.attribs)) |> 
+  distinct(feature_id, .keep_all = TRUE)
+rownames(gi.out) <- gi.out$feature_id
+
+sce.all <- sce.all[rownames(gi.out),]
+rowData(sce.all) <- DataFrame(gi.out)
+```
+
+
+## Pseudobulk It
+
+We'll use the `scuttle::aggregateAcrossCells()` to pseudbulk and keep track of
+how many cells we brought along in the process
+
+```{r}
+pb.cells <- scuttle::aggregateAcrossCells(
+  sce.all[, is.cell], ids = split.by[is.cell])
+pb.cells$ids <- NULL
+pb.cells <- pb.cells[, pb.cells$ncells >= cell.min & pb.cells$ncells <= cell.max]
+
+pb.nuc <- scuttle::aggregateAcrossCells(
+  sce.all[, !is.cell], ids = split.by[!is.cell])
+pb.nuc$ids <- NULL
+pb.nuc <- pb.nuc[, pb.nuc$ncells >= cell.min & pb.nuc$ncells <= cell.max]
+```
+
+```{r}
+data.distro <- bind_rows(
+  colData(pb.cells) |> 
+    as.data.frame() |> 
+    transmute(donor_id, cell_abbrev, ncells, assay_type = "scRNAseq"),
+  colData(pb.nuc) |> 
+    as.data.frame() |> 
+    transmute(donor_id, cell_abbrev, ncells, assay_type = "snRNAseq"))
+ggplot(data.distro, aes(x = ncells, y = donor_id, fill = assay_type)) +
+  geom_col(position = position_dodge()) +
+  facet_wrap(~ cell_abbrev)
+```
+The FacileDataSet has a concept of groups of samples belonging to different
+`"dataset"`(s). When it was original built -- for the TCGA -- this mapped to
+"indication" -- somehow in my mind that was a useful construct.
+
+When we use a FacileDataSet to group samples by "experiments" that were run
+in house, "dataset" can "naturally" map to individual experiment identifiers,
+or when amassing a GEO dataset, they can line up with "GSE" identifiers.
+
+## Preparation for FacileDataSet Ingjestion
+
+In the dataset we have here, we don't have a natural breakdown. There is a
+concept of "site" in the KPMP, which would work, but I don't have that
+annotation. Just to exercise the data creation, query, and retrieval, we'll
+use the `"cond"`-ition column to split the samples.
+
+Lastly, we will filter out each "assay set" (the list of DGEList objects per
+assay type) down to remove lowly expressed genes.
+
+```{r, message=FALSE, warning=FALSE}
+y.nuc <- FacileData:::build_pb_split(pb.nuc, "cond")
+y.cell <- FacileData:::build_pb_split(pb.cells, "cond")
+```
+
+:::note
+For now, all of the assay matrices/objects that you add per assay type must
+have the same featurespace, even if in some of the individual datasets within
+the list of objects have 0 counts within that context.
+
+Practically speaking, this means that may be some DGELists in the `y.nuc` list
+that have 0-count genes in there. In the future, you might imagine that
+ingestion should be able to handle individual DGELists of the `y.nuc` list to
+have different genes represented.
+:::
+
+And that's a wrap
+
+## Save Assay Lists
+
+```{r}
+fn.nuc <- FacileData:::build_assay_list_file_path("snRNAseq")
+qs::qsave(y.nuc, fn.nuc)
+
+fn.cell <- FacileData:::build_assay_list_file_path("scRNAseq")
+qs::qsave(y.cell, fn.cell)
+```
+

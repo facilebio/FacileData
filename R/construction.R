@@ -413,6 +413,15 @@ append_facile_feature_info <- function(x, feature_info,
             immediate.=TRUE)
   }
   stopifnot(all(ftypes %in% .feature.types))
+  
+  # "source" may not be defined. If not, let's add it as "unspecified" and warn
+  # the user
+  if (is.null(feature_info[["source"]])) {
+    warning('`"source"` column not specified in feature info, filling in with ',
+            '"unspecified"', immediate. = TRUE)
+    feature_info[["source"]] <- rep("unspecifed", nrow(feature_info))
+  }
+  
   added <- feature_info |>
     distinct(feature_type, feature_id, .keep_all=TRUE) |>
     append_facile_table(x, 'feature_info', warn_existing = warn_existing)

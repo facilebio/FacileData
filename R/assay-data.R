@@ -58,8 +58,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     ignore.tbl <- ignore.tbl[grepl("^tbl", ignore.tbl)]
     ignore <- c("data.frame", ignore.tbl)
     extra_classes <- setdiff(class(samples), ignore)
-
-    assert_sample_subset(samples)
+    samples <- as_facile_frame(samples, x) # does validity checks too
   }
 
   samples <- collect(samples, n = Inf)
