@@ -1,0 +1,139 @@
+name: testFacileDataSet
+organism: Homo sapiens
+default_assay: scrnaseq
+datasets:
+  DKD:
+    description: No Description Provided
+    url: http://example.com
+  HCKD:
+    description: No Description Provided
+    url: http://example.com
+  AKI:
+    description: No Description Provided
+    url: http://example.com
+sample_covariates:
+  group:
+    arguments:
+      x: group
+    class: categorical
+    label: group
+    description: group
+    type: general
+    levels:
+    - DKD__CNT
+    - DKD__DCT
+    - DKD__DTL
+    - DKD__EC
+    - DKD__IC
+    - DKD__IMM
+    - DKD__PC
+    - DKD__PT
+    - DKD__TAL
+    - DKD__VSM/P
+    - HCKD__CNT
+    - HCKD__DCT
+    - HCKD__DTL
+    - HCKD__EC
+    - HCKD__IC
+    - HCKD__IMM
+    - HCKD__PC
+    - HCKD__PT
+    - HCKD__TAL
+    - AKI__CNT
+    - AKI__DCT
+    - AKI__DTL
+    - AKI__EC
+    - AKI__IC
+    - AKI__IMM
+    - AKI__PC
+    - AKI__PT
+    - AKI__TAL
+    - AKI__VSM/P
+  donor_id:
+    arguments:
+      x: donor_id
+    class: categorical
+    label: donor_id
+    description: donor_id
+    type: general
+  cell_abbrev:
+    arguments:
+      x: cell_abbrev
+    class: categorical
+    label: cell_abbrev
+    description: cell_abbrev
+    type: general
+  sex:
+    arguments:
+      x: sex
+    class: categorical
+    label: sex
+    description: sex
+    type: general
+    levels:
+    - female
+    - male
+  cell_type:
+    arguments:
+      x: cell_type
+    class: categorical
+    label: cell_type
+    description: cell_type
+    type: general
+  condition:
+    arguments:
+      x: condition
+    class: categorical
+    label: condition
+    description: condition
+    type: general
+    levels:
+    - Acute Kidney Injury (AKI)
+    - Diabetic Kidney Disease (DKD)
+    - Hypertensive CKD (H-CKD)
+  eGFR:
+    arguments:
+      x: eGFR
+    class: categorical
+    label: eGFR
+    description: eGFR
+    type: general
+    levels:
+    - 20-29
+    - 40-49
+    - 50-59
+    - '>60'
+  diabetes_history:
+    arguments:
+      x: diabetes_history
+    class: categorical
+    label: diabetes_history
+    description: diabetes_history
+    type: general
+    levels:
+    - 'No'
+    - 'Yes'
+  hypertension:
+    arguments:
+      x: hypertension
+    class: categorical
+    label: hypertension
+    description: hypertension
+    type: general
+    levels:
+    - 'No'
+    - 'Yes'
+  cond:
+    arguments:
+      x: cond
+    class: categorical
+    label: cond
+    description: cond
+    type: general
+  ncells:
+    arguments:
+      x: ncells
+    class: real
+    label: ncells
+    description: ncells
+    type: general

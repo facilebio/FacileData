@@ -450,8 +450,9 @@ features.FacileDataSet <- function(x, assay_name = NULL, feature_type = NULL,
   }
 
   if (onull.aname) {
-    out <- select(out, -assay, -hdf5_index, -assay_type)
+    out <- select(out, -any_of(c("assay", "hdf5_index", "assay_type")))
   }
+  
   as_facile_frame(out, x)
 }
 

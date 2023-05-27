@@ -431,3 +431,25 @@ fn.cell <- FacileData:::build_assay_list_file_path("scRNAseq")
 qs::qsave(y.cell, fn.cell)
 ```
 
+## Generation of Internal testFacileDataSet
+
+These separate assays are used to assemble the internal FacileDataSet that is
+used for examples and testing via the `assembleFacileDataSet()` function.
+The result of that function is stored in the internal
+`inst/extdata/testFacileDataSet` directory by running this code in a
+fresh R sesion:
+
+```r
+devtools::load_all(".")
+FacileData::assembleFacileDataSet(
+  name = "testFacileDataSet",
+  path = file.path(
+    system.file("extdata", package = "FacileData"),
+    "testFacileDataSet"))
+```
+
+And the functionality downstream of that assembly is tested in the
+`tests/testthat/test-faciledataset-assembly.R` file.
+
+
+
