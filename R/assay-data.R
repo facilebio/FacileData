@@ -5,6 +5,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
                                            normalized = FALSE,
                                            batch = NULL, main = NULL,
                                            as.matrix = FALSE,
+                                           drop_samples = TRUE,
                                            ...,
                                            subset.threshold = 700,
                                            aggregate = FALSE,
@@ -89,9 +90,9 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
   }
 
   out <- lapply(assays, function(a) {
-    f <- filter(features, assay == a)
+    f <- filter(features, .data$assay == .env$a)
     .fetch_assay_data(x, a, f$feature_id, samples, normalized,
-                      batch, main, as.matrix,
+                      batch, main, as.matrix, drop_samples,
                       subset.threshold, aggregate, aggregate.by, ...,
                       verbose = verbose)
   })
@@ -119,6 +120,7 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
                                           normalized = FALSE,
                                           batch = NULL, main = NULL,
                                           as.matrix = FALSE,
+                                          drop_samples = TRUE,
                                           ...,
                                           subset.threshold = 700,
                                           aggregate = FALSE,
@@ -135,7 +137,7 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
   fetch_assay_data(fds., features = features, samples = samples.,
                    assay_name = assay_name, normalized = normalized,
                    batch = batch, main = main,
-                   as.matrix = as.matrix, ...,
+                   as.matrix = as.matrix, drop_samples = drop_samples, ...,
                    subset.threshold = subset.threshold,
                    aggregate = aggregate, aggregate.by = aggregate.by,
                    verbose = verbose)
@@ -147,7 +149,7 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
 #' @importFrom data.table setDF
 .fetch_assay_data <- function(x, assay_name, feature_ids, samples,
                               normalized = FALSE, batch = NULL, main = NULL,
-                              as.matrix = FALSE,
+                              as.matrix = FALSE, drop_samples = TRUE,
                               subset.threshold = 700, aggregate = FALSE,
                               aggregate.by = "ewm", ...,
                               verbose=FALSE) {
@@ -259,7 +261,11 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
       data.table::set(vals, j = "feature_name", value = "aggregated")
     }
     vals <- as_tibble(setDF(vals))
-    vals <- left_join(samples, vals, by = c("dataset", "sample_id"))
+    if (drop_samples) {
+      vals <- inner_join(samples, vals, by = c("dataset", "sample_id"))
+    } else {
+      vals <- left_join(samples, vals, by = c("dataset", "sample_id"))
+    }
   }
 
   set_fds(vals, x)

@@ -1,24 +1,40 @@
-context("Fetching assay level data")
+# if (!exists("FDS")) FDS <- exampleFacileDataSet()
+if (!exists("FDS")) FDS <- testFacileDataSet()
 
-if (!exists("FDS")) FDS <- exampleFacileDataSet()
+# These were identified because they score highly on an ANOVA across celltype
+features <- tibble::tribble(
+  ~feature_id,        ~name,
+  "ENSG00000119888",  "EPCAM",
+  "ENSG00000149564",  "ESAM",
+  "ENSG00000147676",  "MAL2",
+  "ENSG00000128567",  "PODXL") |> 
+  mutate(assay = "scrnaseq")
 
-samples <- FDS |>
-  filter_samples(stage == "III") |>
-  select(dataset, sample_id)
+# These genes have strong/variable expression across these celltypes
+ctypes <- c(
+  "B", "C-PC", "CNT", "DCT", "PT", "TAL",
+  "EC",
+  "MPC",
+  "POD")
 
-genes <- c(
-  PRF1='5551',
-  GZMA='3001',
-  CD274='29126',
-  TIGIT='201633')
+# A subset of these samples will not have assay data from the scRNAseq assay,
+# and we need to handle this gracefully.
+samples.sparse <- FDS |> 
+  filter_samples(cell_abbrev %in% ctypes)
 
-features <- tibble(assay='rnaseq', feature_id=genes)
+# Manual inspection shows that the selection criteria below provides a list
+# of samples that all have data from the scrnaseq assay
+samples.full <- FDS |> 
+  filter_samples(cell_abbrev %in% c("PT", "IMM")) |> 
+  with_sample_covariates(c("cell_abbrev", "donor_id")) |> 
+  filter(!donor_id %in% c("29-10008"))
+
 
 test_that("fetch_assay_data limits samples correctly", {
   s.df <- collect(samples, n = Inf)
   
-  e.sqlite <- fetch_assay_data(FDS, genes, samples) |> collect(n=Inf)
-  e.df <- fetch_assay_data(FDS, genes, s.df) |> collect(n=Inf)
+  e.sqlite <- fetch_assay_data(FDS, features, samples) |> collect(n=Inf)
+  e.df <- fetch_assay_data(FDS, features, s.df) |> collect(n=Inf)
 
   ## results are same from tbl_df and tbl_sqlite `samples` parameter
   expect_equal(e.sqlite, e.df)
@@ -29,13 +45,37 @@ test_that("fetch_assay_data limits samples correctly", {
 
 })
 
+test_that("sparse sample<>assay: retention of samples without assay support", {
+  # This is exercising the .fetch_assay_data function.
+  # When we ask for assay data from a sample that doesn't have any data from
+  # that assay, we got a long data.frame with NA values in things like
+  # feature_id, ie. the first row below shouldn't happen:
+  #   adata <- fetch_assay_data(samples.sparse, features)
+  # dataset sample_id    assay    assay_type feature_type feature_id      feature_name value
+  # <chr>   <chr>        <chr>    <chr>      <chr>        <chr>           <chr>        <int>
+  # AKI     CNT.30_10034 NA       NA         NA           NA              NA              NA
+  # AKI     CNT.32_10003 scrnaseq pseudobulk ensgid       ENSG00000119888 EPCAM         2736
+  
+  adata.drop <- expect_warning({
+    fetch_assay_data(samples.sparse, features, drop_samples = TRUE, verbose = TRUE)
+  }, sprintf("samples not found.*%s", features$assay[1]))
+  expect_equal(sum(is.na(adata.drop$feature_id)), 0)
+  
+  adata.keep <- expect_warning({
+    fetch_assay_data(samples.sparse, features, drop_samples = FALSE, verbose = TRUE)
+  }, sprintf("samples not found.*%s", features$assay[1]))
+  expect_gt(sum(is.na(adata.keep$feature_id)), 0)
+  
+})
+
+
 test_that("spreading data works with_assay_data", {
   expected <- FDS |>
-    fetch_assay_data(genes, samples, normalized = TRUE) |>
+    fetch_assay_data(features, samples, normalized = TRUE) |>
     select(dataset, sample_id, feature_name, value) |>
     tidyr::spread(feature_name, value)
   result <- samples |>
-    with_assay_data(genes, normalized = TRUE, .fds = FDS) |>
+    with_assay_data(features, normalized = TRUE, .fds = FDS) |>
     collect()
   expect_equal(result, expected, check.attributes = FALSE)
 })
