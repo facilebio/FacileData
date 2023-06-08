@@ -321,27 +321,29 @@ has_assay <- function(x, assay_name) {
 
 #' @noRd
 #' @export
-assay_sample_info.FacileDataSet <- function(x, assay_name, ...) {
+assay_sample_info.FacileDataSet <- function(x, assay_name, samples = NULL, ...) {
   assert_facile_data_store(x)
   assert_choice(assay_name, assay_names(x))
-  x <- collect(samples(x), n = Inf)
-  assay_sample_info(x, assay_name, ..., .asserted = TRUE)  
+  if (is.null(samples)) {
+    samples <- samples(x)
+  } else {
+    assert_sample_subset(samples, x)
+  }
+  samples <- collect(samples, n = Inf)
+
+  asi <- assay_sample_info_tbl(x) |>
+    filter(.data$assay == .env$assay_name) |>
+    collect(n = Inf)
+  left_join(samples, asi, by = c("dataset", "sample_id"), suffix = c(".x", ""))
 }
 
 #' @noRd
 #' @export
 assay_sample_info.facile_frame <- function(x, assay_name, ..., 
                                            .asserted = FALSE) {
-  x <- collect(x, n = Inf)
-  fds. <- fds(x)
-  if (!isTRUE(.asserted)) {
-    assert_choice(assay_name, assay_names(fds.))
-  }
-  asi <- assay_sample_info_tbl(fds.) |>
-    filter(.data$assay == .env$assay_name) |>
-    collect(n = Inf)
-  left_join(x, asi, by = c("dataset", "sample_id"), suffix = c(".x", ""))
+  assay_sample_info(fds(x), assay_name, x, ...)
 }
+
 
 #' Returns the feature_type for a given assay
 #'
