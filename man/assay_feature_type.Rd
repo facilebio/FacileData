@@ -7,7 +7,7 @@
 assay_feature_type(x, assay_name)
 }
 \arguments{
-\item{x}{\code{FacileDataSet}}
+\item{x}{A \code{FacileDataStore}}
 
 \item{assay_name}{the name of the assay}
 }

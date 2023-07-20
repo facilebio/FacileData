@@ -1,16 +1,19 @@
 #' @export
 #' @noRd
-fetch_feature_info.FacileDataSet <- function(x, feature_type,
-                                             feature_ids = NULL, ...) {
-  ftype <- assert_choice(feature_type, feature_types(x))
-  out <- filter(feature_info_tbl(x), feature_type == ftype)
+fetch_feature_info.FacileDataStore <- function(x, feature_type,
+                                               feature_ids = NULL, ...) {
+  stopifnot(has_feature_type(x, feature_type))
+  out <- features(x) |> 
+    filter(.data$feature_type == .env$feature_type) |> 
+    collect(n = Inf)
+  
   if (!is.null(feature_ids)) {
-    assert_character(feature_ids, min.len = 1)
-    if (length(feature_ids) == 1L) {
-      out <- filter(out, feature_id == feature_ids)
-    } else {
-      out <- filter(out, feature_id %in% feature_ids)
+    if (is.character(feature_ids)) {
+      feature_ids <- dplyr::tibble(feature_id = feature_ids)
     }
+    assert_multi_class(feature_ids, c("data.frame", "tbl"))
+    assert_choice("feature_id", names(feature_ids))
+    out <- semi_join(out, feature_ids, by = "feature_id")
   }
   out
 }
@@ -75,11 +78,9 @@ with_feature_info.data.frame <- function(x, covariates = NULL, ...,
 #' @export
 #' @param x A \code{FacileDataSet}
 feature_types <- function(x) {
-  stopifnot(is.FacileDataSet(x))
-  ## Damn, can't do distinct on sqlite
-  feature_info_tbl(x) |>
-    distinct(feature_type) |>
-    collect(n=Inf) |>
+  assert_class(x, "FacileDataStore")
+  assay_info(FDS) |> 
+    distinct(feature_type) |> 
     pull(feature_type)
 }
 
@@ -91,9 +92,9 @@ feature_types <- function(x) {
 #' @return logical vector indicating whether or not a given \code{feature_type}
 #'   is stored in \code{x}
 has_feature_type <- function(x, feature_type) {
-  stopifnot(is.FacileDataSet(x))
+  assert_class(x, "FacileDataStore")
   assert_character(feature_type)
-  feature_type %in% feature_types(x)
+  is.element(feature_type, feature_types(x))
 }
 
 #' Returns table of names and aliases for features.
@@ -106,15 +107,16 @@ has_feature_type <- function(x, feature_type) {
 #' @return a tibble with \code{feature_id, name, type} columns, where type
 #'   is "primary" or "alias"
 feature_name_map <- function(x, feature_type) {
-  requireNamespace("AnnotationDbi") || stop("Failed to require AnnotationDbi.")
+  .Defunct(paste(
+    "your own symbol <> alias <> id mapping function,",
+    "you might take a look at {babelgene}"))
+  reqpkg("AnnotationDbi")
   stopifnot(has_feature_type(x, feature_type))
-  ## http://jira.gene.com/jira/browse/FACILEDATA-64 will put this in database
-  ## but for now we have flat files.
-  finfo <- feature_info_tbl(x) |>
-    filter(feature_type == feature_type) |>
+  finfo <- features(x) |>
+    filter(.data$feature_type == .env$feature_type) |>
     select(feature_id, name) |>
-    collect(n=Inf) |>
-    mutate(type='primary')
+    collect(n = Inf) |>
+    mutate(type = "primary")
   if (organism(x) == 'Homo sapiens') {
     if (FALSE) {
       requireNamespace("org.Hs.eg.db") || stop("Failed to require org.Hs.eg.db")
@@ -146,4 +148,45 @@ feature_name_map <- function(x, feature_type) {
     bind_rows(alias) |>
     filter(!is.na(name)) |>
     arrange(feature_id, name)
+}
+
+#' Creates a feature descriptor for interactive ease
+#'
+#' Creates a data.frame of features and assays they come from
+#' 
+#' @export
+#' @param x FacileDataSet
+#' @param features a character string of fearture ids (requires assay_name)
+#'   or a data.frame with feature_id column.
+#' @param assay_name the assay to get the featurespace from. if this is provided,
+#'   it will trump an already existing assay_name column in \code{features}
+#' @return a feature descriptor with feature_id and assay_name, which can be
+#'   used to absolutely find features
+create_assay_feature_descriptor <- function(x, features = NULL,
+                                            assay_name = NULL) {
+  # TODO: Refactor the code inside `fetch_assay_data` to use this.
+  assert_facile_data_store(x)
+  if (is.null(assay_name)) assay_name <- default_assay(x)
+  if (is.factor(features)) features <- as.character(features)
+  
+  if (is.character(features) || is.null(features) || is(features, 'tbl_sql')) {
+    assert_string(assay_name)
+    assert_choice(assay_name, assay_names(x))
+  }
+  
+  if (is.null(features)) {
+    features <- collect(features(x, assay_name), n = Inf)
+  } else if (is.character(features)) {
+    features <- tibble(feature_id = features, assay = assay_name)
+  } else if (is(features, 'tbl_sql')) {
+    features <- mutate(collect(features, n = Inf))
+    if (is.null(features[["assay"]])) {
+      features[["assay"]] <- assay_name
+    }
+  } else if (is.data.frame(features) && is.null(features[["assay"]])) {
+    features[["assay"]] <- assay_name
+  }
+  
+  assert_assay_feature_descriptor(features, x)
+  features
 }
