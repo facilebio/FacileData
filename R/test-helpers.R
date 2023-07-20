@@ -1,3 +1,80 @@
+# multimodal faciledataset functions ===========================================
+# 
+# The multimodal faciledataset was assembled by pseudo-bulking the scRNAseq
+# and snRNAseq data from teh KPMP into their own assays.
+# 
+# The dataset,sample_id pairs look like:
+#    dataset sample_id     
+#    <chr>   <chr>         
+#  1 HCKD    PT.31_10000   
+#  2 HCKD    DCT.31_10000  
+#  3 DKD     PT.31_10001   
+#  4 DKD     DCT.29_10012  
+#
+# dataset = "condition" (healthy or otherwise)
+# sample_id = celltype<>donor_id
+
+#' Retrieves a multi-modal FacileDataSet based on KPMP data.
+#' 
+#' We use this dataset for examples and unit testing purposes.
+#' 
+#' @export
+#' @return a FacileDataSet
+an_fds <- function() {
+  fn <- system.file("extdata", "testFacileDataSet", package = "FacileData")
+  FacileDataSet(fn)
+}
+
+#' A set of features that show variable expression across some_celltypes()
+#' 
+#' These features had strong ANOVA hits across [some_celltypes()]
+#' 
+#' @export
+some_features <- function() {
+  out <- tibble::tribble(
+    ~feature_id,        ~name,
+    "ENSG00000119888",  "EPCAM",
+    "ENSG00000149564",  "ESAM",
+    "ENSG00000147676",  "MAL2",
+    "ENSG00000128567",  "PODXL")
+  mutate(out, assay = "scrnaseq")
+}
+
+#' A set of cell types that exhibit strong expression variability.
+#' 
+#' The [testing_features()] show cell type expression patterns across these
+#' celltypes
+#' 
+#' @export
+some_celltypes <- function() {
+  c("B", "C-PC", "CNT", "DCT", "PT", "TAL", "EC", "MPC", "POD")
+}
+
+#' Retrieve a set of samples for testing
+#' 
+#' @export
+#' @param sparse If `FALSE` (default), a set of samples are returned that have
+#'   assay data from both assays in the dataset, otherwise some samples will
+#'   be missing scRNAseq data.
+some_samples <- function(sparse = FALSE) {
+  fds. <- an_fds()
+  if (sparse) {
+    # Manual inspection of the samples an an_fds() shows that the selection
+    # criteria below provides a list of samples that all have data from the
+    # scrnaseq assay
+    out <- filter_samples(fds., cell_abbrev %in% some_celltypes())
+  } else {
+    # If we exclude donor 29-10008, the PT and IMM celltypes have assay data
+    # for all samples from the scRNAseq and snRNAseq assay
+    out <- filter_samples(fds.,
+                          cell_abbrev %in% c("PT", "IMM"),
+                          donor_id != "29-10008")
+  }
+  out
+}
+
+# ------------------------------------------------------------------------------
+
 #' Creata a FacileDataSet from the individual assay lists
 #' 
 #' @export
@@ -68,15 +145,6 @@ assembleFacileDataSet <- function(name = "TestMultiModalFacileDataSet",
   }
   
   fds
-}
-
-#' Retrieves a multi-modal FacileDataSet based on KPMP data
-#' 
-#' @export
-#' @return a FacileDataSet
-testFacileDataSet <- function() {
-  fn <- system.file("extdata", "testFacileDataSet", package = "FacileData")
-  FacileDataSet(fn)
 }
 
 # Old Helpers ==================================================================

@@ -211,6 +211,35 @@ assay_units.FacileDataStore <- function(x, assay_name = default_assay(x),
   out
 }
 
+#' Checks facile objects to see if they have a particular assay name.
+#' 
+#' If `x` a FacileDataStore, return TRUE/FALSE if the assay is stored inside
+#' If `x` is a facile_frame, it will append a `has_<assay_name>` with
+#' `TRUE`/`FALSE` indicating wether or not a particular sample has assay data.
+#' 
+#' @export
+has_assay <- function(x, assay_name, ...) {
+  UseMethod("has_assay", x)
+}
+
+#' @noRd
+#' @export
+has_assay.FacileDataStore <- function(x, assay_name, ...) {
+  assert_facile_data_store(x)
+  assert_character(assay_name)
+  is.element(assay_name, assay_names(x))
+}
+
+#' @noRd
+#' @export
+has_assay.facile_frame <- function(x, assay_name, prefix = "has_", ...) {
+  colname <- paste0(prefix, assay_name)
+  asi <- assay_sample_info(x, assay_name, drop_samples = FALSE)
+  asi[[colname]] <- !is.na(asi$assay) & asi$assay == assay_name
+  res <- select(asi, dataset, sample_id, {{colname}})
+  left_join(x, res, by = c("dataset", "sample_id"))
+}
+
 #' Fetches assay meta information for the assays stored in a FacileDataStore
 #'
 #' @export
@@ -231,11 +260,30 @@ assay_info <- function(x, assay_name = NULL, ...) {
   UseMethod("assay_info", x)
 }
 
-#' Utility functions to get row and column indices of rnaseq hdf5 files.
+#' Retrieve assay-specific metadata for a set of samples
 #'
-#' This is called to get things like hdf5_index and scaling factors for
-#' the samples in a given assay.
-#'
+#' This will retrieve assay-specific metadata for samples. For RNAseq assay,
+#' for instance, this would retrieve things like the library size and
+#' normalization factor for the given sample.
+#' 
+#' Depending on the type of FacileDataStore is used, we can also return things
+#' like the `hdf5_index` for a FacileDataSet.
+#' 
+#' ```
+#' FacileData::testFacileDataSet() |> 
+#'   assay_sample_info("scrnaseq") |>
+#'   head()
+#' # A tibble: 6 × 6
+#'   dataset sample_id    assay    hdf5_index libsize normfactor
+#'   <chr>   <chr>        <chr>         <int>   <dbl>      <dbl>
+#' 1 AKI     CNT.32_10003 scrnaseq          1 2837314       1.15
+#' 2 AKI     DCT.32_10003 scrnaseq          2 2262345       1.14
+#' 3 AKI     DTL.33_10005 scrnaseq          3  684162       1.19
+#' 4 AKI     EC.30_10034  scrnaseq          4  414073       1.33
+#' 5 AKI     EC.32_10003  scrnaseq          5  457168       1.20
+#' 6 AKI     EC.32_10034  scrnaseq          6  549429       1.09
+#' ```
+#' 
 #' @export
 #' @param x \code{FacileDataStore}
 #' @param assay_name the name of the assay
@@ -244,7 +292,10 @@ assay_info <- function(x, assay_name = NULL, ...) {
 #'   scaling factors, etc. Note that rows in \code{samples} that do not appear
 #'   in \code{assay_name} will be returnd here with NA values for hd5_index and
 #'   such.
-assay_sample_info <- function(x, assay_name, samples = NULL, ...) {
+#' @examples
+#' efds <- FacileData::testFacileDataSet()
+#' assay_sample_info(efds, "scrnaseq") |> head()
+assay_sample_info <- function(x, assay_name, drop_samples = TRUE, ...) {
   UseMethod("assay_sample_info", x)
 }
 
@@ -276,7 +327,15 @@ samples <- function(x, ...) {
 
 #' @export
 samples.default <- function(x, ...) {
-  stop("The FacileAPI requires that a specific method be written for this type.")
+  attrnames <- names(attributes(x))
+  if (!"samples" %in% attrnames) {
+    warning("no `samples` attribute defined in this object")
+    out <- tibble(dataset = character(), sample_id = character())
+  } else {
+    out <- attr(x, "samples")
+    assert_sample_subset(out)
+  }
+  set_fds(out, fds(x))
 }
 
 #' Get description of sample metadata columns
@@ -401,12 +460,6 @@ assay_names <- function(x, default_first = TRUE, ...) {
 #' @export
 assay_names.default <- function(x, default_first = TRUE) {
   stop("The FacileAPI requires that a specific method be written for this type.")
-}
-
-#' @family FacileInterface
-#' @export
-assay_feature_info <- function(x, assay_name, feature_ids = NULL, ...) {
-  UseMethod("assay_feature_info", x)
 }
 
 #' @family FacileInterface

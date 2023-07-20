@@ -1,120 +1,5 @@
 #' @export
 #' @noRd
-fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
-                                           assay_name = default_assay(x),
-                                           normalized = FALSE,
-                                           batch = NULL, main = NULL,
-                                           as.matrix = FALSE,
-                                           drop_samples = TRUE,
-                                           ...,
-                                           subset.threshold = 700,
-                                           aggregate = FALSE,
-                                           aggregate.by= "ewm",
-                                           verbose = FALSE) {
-  assert_flag(as.matrix)
-  assert_flag(normalized)
-  assert_number(subset.threshold)
-  if (!is.null(batch)) {
-    normalize <- TRUE
-    assert_character(batch, min.len = 1L)
-    if (!is.null(main)) {
-      assert_character(main)
-      if (length(main) == 0L) main <- NULL
-    }
-  }
-
-  if (!is.null(assay_name) || is.character(assay_name)) {
-    assert_string(assay_name)
-    assert_choice(assay_name, assay_names(x))
-  }
-
-  if (missing(features) || is.null(features)) {
-    assert_string(assay_name)
-    features <- FacileData::features(x, assay_name) |> collect(n=Inf)
-  } else {
-    if (is.factor(features)) features <- as.character(features)
-    if (is.character(features)) {
-      features <- tibble(feature_id=features, assay=assay_name)
-    }
-    stopifnot(is(features, 'tbl') || is(features, 'data.frame'))
-    if (!'assay' %in% colnames(features) || !is.character(features$assay)) {
-      features <- collect(features, n = Inf)
-      features[["assay"]] <- assay_name
-    }
-    assert_assay_feature_descriptor(features)
-  }
-  features <- distinct(features, feature_id, .keep_all = TRUE)
-
-  # I had originally add tests for 0-row datasets returning data from all
-  # samples (as if it were NULL) but this was throwing me for a loop in analysis
-  # code. If sampels is a 0-row sample-descriptor, the user (like me, ugh) may
-  # have inadvertently filtered away all the samples without realizing and query
-  # for data and not realize you are getting data from samples you weren't
-  # expecting. (what's up with the diary entry?)
-  if (is.null(samples)) {
-    samples <- samples(x)
-    extra_classes <- NULL
-  } else {
-    ignore.tbl <- class(samples)
-    ignore.tbl <- ignore.tbl[grepl("^tbl", ignore.tbl)]
-    ignore <- c("data.frame", ignore.tbl)
-    extra_classes <- setdiff(class(samples), ignore)
-    samples <- as_facile_frame(samples, x) # does validity checks too
-  }
-
-  samples <- collect(samples, n = Inf)
-  # you might think that you want to refactor this and put it before the
-  # `collect()` call, but the SQLite back end can't handle
-  # `distinct(..., .keep_all = TRUE)`
-  samples <- distinct(samples, dataset, sample_id, .keep_all = TRUE)
-
-  if (nrow(samples) == 0) {
-    warning("Empty sample descriptor provided", immediate. = TRUE)
-    return(samples)
-  }
-
-  assays <- unique(features$assay)
-  n.assays <- length(assays)
-  if (n.assays > 1L && as.matrix) {
-    stop("Fetching from multiple assays requires return in melted form")
-  }
-
-  if (isTRUE(aggregate)) {
-    assert_string(aggregate.by)
-    aggregate.by <- assert_choice(tolower(aggregate.by), c('ewm', 'zscore'))
-    stopifnot(n.assays == 1L)
-    if (!normalized) {
-      warning("You probably don't want to aggregate.by on unnormalized data",
-              immediate.=TRUE)
-    }
-  }
-
-  out <- lapply(assays, function(a) {
-    f <- filter(features, .data$assay == .env$a)
-    .fetch_assay_data(x, a, f$feature_id, samples, normalized,
-                      batch, main, as.matrix, drop_samples,
-                      subset.threshold, aggregate, aggregate.by, ...,
-                      verbose = verbose)
-  })
-
-  if (length(out) == 1L) {
-    out <- out[[1L]]
-  } else {
-    # We alredy stop()ped if we were asked for a matrix across multiple assays,
-    # so `out`` must be populated with tibbles
-    out <- bind_rows(out)
-  }
-
-  if (!as.matrix) {
-    out <- as_facile_frame(out, x, classes = extra_classes,
-                           .valid_sample_check = FALSE)
-  }
-
-  out
-}
-
-#' @export
-#' @noRd
 fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
                                           assay_name = NULL,
                                           normalized = FALSE,
@@ -131,10 +16,11 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
     warning("`samples` ignored when fetching covariates from a facile_frame",
             immediate. = TRUE)
   }
-  samples. <- assert_sample_subset(x)
-  if (is.null(assay_name)) assay_name <- default_assay(fds.)
+  if (is.null(assay_name)) {
+    assay_name <- default_assay(fds.)
+  }
 
-  fetch_assay_data(fds., features = features, samples = samples.,
+  fetch_assay_data(fds., features = features, samples = samples,
                    assay_name = assay_name, normalized = normalized,
                    batch = batch, main = main,
                    as.matrix = as.matrix, drop_samples = drop_samples, ...,
@@ -143,209 +29,21 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
                    verbose = verbose)
 }
 
-
-#' @noRd
-#' @importFrom rhdf5 h5read
-#' @importFrom data.table setDF
-.fetch_assay_data <- function(x, assay_name, feature_ids, samples,
-                              normalized = FALSE, batch = NULL, main = NULL,
-                              as.matrix = FALSE, drop_samples = TRUE,
-                              subset.threshold = 700, aggregate = FALSE,
-                              aggregate.by = "ewm", ...,
-                              verbose=FALSE) {
-  stopifnot(is.FacileDataSet(x))
-  assert_string(assay_name)
-  assert_character(feature_ids, min.len=1L)
-  samples <- assert_sample_subset(samples)
-  assert_flag(normalized)
-  assert_flag(as.matrix)
-  assert_number(subset.threshold)
-  if (isTRUE(aggregate)) {
-    assert_string(aggregate.by)
-    aggregate.by <- assert_choice(tolower(aggregate.by), c('ewm', 'zscore'))
-  }
-
-  finfo <- features(x, assay_name, feature_ids = feature_ids) |>
-    collect(n = Inf) |>
-    arrange(hdf5_index)
-  atype <- finfo$assay_type[1L]
-  ftype <- finfo$feature_type[1L]
-  sinfo <- assay_sample_info(samples, assay_name) |>
-    mutate(samid = paste(dataset, sample_id, sep = "__"))
-
-  bad.samples <- is.na(sinfo$hdf5_index)
-  if (any(bad.samples)) {
-    if (verbose) {
-      warning(sum(bad.samples), " samples not found in `",
-              assay_name, "`assay.", immediate.=TRUE)
-    }
-    sinfo <- sinfo[!bad.samples,,drop=FALSE]
-  }
-
-  # DEBUG: Tune chunk size?
-  # As the number of genes you are fetching increases, only subsetting
-  # out a few of them intead of first loading the whole matrix gives you little
-  # value, for instance, over all BRCA tumors (994) these are some timings for
-  # different numbers of genes:
-  #
-  #     Ngenes                   Time (seconds)
-  #     10                       0.5s
-  #     100                      0.8s
-  #     250                      1.2s
-  #     500                      2.6s
-  #     750                      6s seconds
-  #     3000                     112 seconds!
-  #     unpspecified (all 26.5k) 7 seconds!
-  #
-  # I'm using `ridx` as a hack downstream to run around the issue of slowing
-  # down the data by trying to subset many rows via hdf5 instead of loading
-  # then subsetting after (this is so weird)
-  #
-  # TODO: setup unit tests to ensure that ridx subsetting and remapping back
-  # to original genes works
-  fetch.some <- nrow(finfo) < subset.threshold
-  ridx <- if (fetch.some) finfo$hdf5_index else NULL
-
-  dat <- sinfo |>
-    group_by(dataset) |>
-    do(res = {
-      ds <- .$dataset[1L]
-      hd5.name <- paste('assay', assay_name, ds, sep='/')
-      vals <- h5read(hdf5fn(x), hd5.name, list(ridx, .$hdf5_index))
-      if (is.null(ridx)) {
-        vals <- vals[finfo$hdf5_index,,drop=FALSE]
-      }
-      dimnames(vals) <- list(finfo$feature_id, .$samid)
-      vals
-    }) |>
-    ungroup()
-
-  # NOTE: We can avoid the monster matrix creation if we only want !as.matrix
-  # returns, but this makes the code easier to reason about.
-  # We can come back to this to optimize for speed later. The problem is
-  # introduced when the aggregate.by parameter was introduced
-  vals <- do.call(cbind, dat$res)
-
-  if (normalized) {
-    xref <- match(colnames(vals), sinfo[["samid"]])
-    if (!isTRUE(all.equal(xref, seq(nrow(xref))))) {
-      sinfo <- sinfo[xref,,drop = FALSE]
-    }
-    vals <- normalize_assay_data(vals, finfo, sinfo, batch = batch, main = main,
-                                 verbose = verbose, ..., .fds = x)
-  }
-
-  if (nrow(vals) == 1L) {
-    if (isTRUE(aggregate) && verbose) {
-      warning("No assay feature aggregation performed over single feature",
-              immediate.=TRUE)
-    }
-    aggregate <- FALSE
-  }
-
-  if (isTRUE(aggregate)) {
-    scores <- switch(aggregate.by,
-                     ewm = sparrow::eigenWeightedMean(vals, ...)$score,
-                     zscore = sparrow::zScore(vals, ...)$score)
-    vals <- matrix(scores, nrow=1, dimnames=list('score', names(scores)))
-  }
-
-  if (!as.matrix) {
-    vals <- .melt.assay.matrix(vals, assay_name, atype, ftype, finfo)
-    if (isTRUE(aggregate)) {
-      # vals[, feature_type := 'aggregated']
-      # vals[, feature_id := 'aggregated']
-      # vals[, feature_name := 'aggregated']
-      data.table::set(vals, j = "feature_type", value = "aggregated")
-      data.table::set(vals, j = "feature_id", value = "aggregated")
-      data.table::set(vals, j = "feature_name", value = "aggregated")
-    }
-    vals <- as_tibble(setDF(vals))
-    if (drop_samples) {
-      vals <- inner_join(samples, vals, by = c("dataset", "sample_id"))
-    } else {
-      vals <- left_join(samples, vals, by = c("dataset", "sample_id"))
-    }
-  }
-
-  set_fds(vals, x)
-}
-
-#' @noRd
-#' @importFrom data.table as.data.table melt.data.table set setcolorder setnames
-.melt.assay.matrix <- function(vals, assay_name, atype, ftype, finfo) {
-  vals <- as.data.table(vals, keep.rownames=TRUE)
-  vals <- melt.data.table(vals, id.vars='rn', variable.factor=FALSE,
-                          variable.name='sample_id')
-  setnames(vals, 1L, 'feature_id')
-
-  set(vals, NULL, "dataset", sub("__.*$", "", vals[["sample_id"]]))
-  set(vals, NULL, "sample_id", sub("^.*?__", "", vals[["sample_id"]]))
-  set(vals, NULL, "assay", assay_name)
-  set(vals, NULL, "assay_type", atype)
-  set(vals, NULL, "feature_type", ftype)
-  xref <- match(vals[["feature_id"]], finfo[["feature_id"]])
-  set(vals, NULL, "feature_name", finfo[["name"]][xref])
-
-  corder <- c("dataset", "sample_id", "assay", "assay_type",
-              "feature_type", "feature_id", "feature_name", "value")
-  setcolorder(vals, corder)
-  vals
-}
-
 #' @noRd
 #' @export
-assay_names.FacileDataSet <- function(x, default_first = TRUE, ...) {
-  anames <- assay_info_tbl(x) |> collect(n = Inf) |> pull(assay)
-  if (default_first && length(anames) > 1L) {
-    dassay <- default_assay(x)
-    anames <- intersect(c(dassay, setdiff(anames, dassay)), anames)
-  }
-  anames
-}
-
-#' @export
-#' @noRd
-assay_info.FacileDataSet <- function(x, assay_name = NULL, ...) {
-  stopifnot(is.FacileDataSet(x))
-  ainfo <- assay_info_tbl(x) |> collect(n = Inf)
-  if (!is.null(assay_name)) {
-    assert_string(assay_name)
-    assert_choice(assay_name, ainfo$assay)
-    ainfo <- filter(ainfo, assay == assay_name)
-  }
-  as_facile_frame(ainfo, x)
-}
-
-#' @export
-has_assay <- function(x, assay_name) {
-  assert_facile_data_store(x)
-  assert_character(assay_name)
-  assay_name %in% assay_names(x)
-}
-
-#' @noRd
-#' @export
-assay_sample_info.FacileDataSet <- function(x, assay_name, ...) {
-  assert_facile_data_store(x)
-  assert_choice(assay_name, assay_names(x))
-  x <- collect(samples(x), n = Inf)
-  assay_sample_info(x, assay_name, ..., .asserted = TRUE)  
-}
-
-#' @noRd
-#' @export
-assay_sample_info.facile_frame <- function(x, assay_name, ..., 
-                                           .asserted = FALSE) {
-  x <- collect(x, n = Inf)
+assay_names.facile_frame <- function(x, default_first = TRUE, ...) {
   fds. <- fds(x)
-  if (!isTRUE(.asserted)) {
-    assert_choice(assay_name, assay_names(fds.))
-  }
-  asi <- assay_sample_info_tbl(fds.) |>
-    filter(.data$assay == .env$assay_name) |>
-    collect(n = Inf)
-  left_join(x, asi, by = c("dataset", "sample_id"), suffix = c(".x", ""))
+  anames <- assay_names(fds., default_first = TRUE, ...)
+  
+}
+
+
+#' @noRd
+#' @export
+assay_sample_info.facile_frame <- function(x, assay_name, drop_samples = TRUE,
+                                           ...) {
+  assay_sample_info(fds(x), assay_name, drop_samples = drop_samples,
+                    samples = collect(x, n = Inf), ...)
 }
 
 #' Returns the feature_type for a given assay
@@ -360,8 +58,8 @@ assay_feature_type <- function(x, assay_name) {
   stopifnot(is.FacileDataSet(x))
   assert_string(assay_name)
   assert_choice(assay_name, assay_names(x))
-  assay_info_tbl(x) |>
-    filter(assay == assay_name) |>
+  assay_info(x) |>
+    filter(.data$assay == .env$assay_name) |>
     collect(n = Inf) |>
     pull(feature_type)
 }
@@ -374,19 +72,7 @@ assay_feature_type <- function(x, assay_name) {
 #' name collisions on some of the temporary tables. We get errors like:
 #'     Warning: Error in : Table pkdtpohpsu already exists.
 #'
-#' This fetches the hdf5_index for the assays as well
-#'
-#' @export
-#' @inheritParams assay_feature_type
-#' @param feature_ids a character vector of feature_ids
-#' @return a \code{tbl_sqlite} result with the feature information for the
-#'   features in a specified assay
-assay_feature_info.FacileDataSet <- function(x, assay_name, feature_ids = NULL,
-                                             ...) {
-  .Deprecated("features()")
-  features(x, assay_name, feature_ids, ...)
-}
-
+#' 
 #' Retrieves feature information from the FacileDataStore for *either* a
 #' particular `assay_name` or `feature_type`. By default this method returns
 #' feature information for the features measured on the `default_assay()` of
@@ -472,9 +158,18 @@ assay_feature_name_map <- function(x, assay_name) {
   feature_name_map(x, ftype)
 }
 
+
 #' Identify the number of each assay run across specific samples.
 #'
 #' The default assay is listed first, the rest of the order is undetermined.
+#'
+#' ```
+#' A tibble: 2 × 3
+#' assay    ndatasets nsamples
+#' <chr>        <int>    <int>
+#' scrnaseq         3       26
+#' snrnaseq         3       20
+#' ```
 #'
 #' @export
 #' @param x FacileDataSet
@@ -484,36 +179,34 @@ assay_feature_name_map <- function(x, assay_name) {
 #' @return rows from assay_info_tbl that correspond to the assays defined
 #'   over the given samples. If no assays are defined over these samples,
 #'   you're going to get an empty tibble.
-assay_info_over_samples <- function(x, samples = NULL) {
-  assert_facile_data_store(x)
-  if (is.null(samples)) {
-    samples <- samples(x)
-  } else {
+assay_summary <- function(x, ...) {
+  UseMethod("assay_summary", x)
+}
+
+#' @noRd
+#' @export
+assay_summary.FacileDataStore <- function(x, samples = NULL, ...) {
+  if (!is.null(samples)) {
     assert_sample_subset(samples, x)
     samples <- distinct(samples, dataset, sample_id)
+  } else {
+    samples <- collect(samples(x), n = Inf)
   }
+  assay_summary(samples, ...)
+}  
 
-  asi <- select(assay_sample_info_tbl(x), dataset, assay, sample_id)
-  if (!same_src(asi, samples)) {
-      asi <- collect(asi, n = Inf)
-      samples <- collect(samples, n = Inf)
-  }
-  assays <- inner_join(asi, samples, by = c("dataset","sample_id"))
-
-  # Count number of samples across dataset count for each assay type
-  out <- assays |>
-    group_by(assay) |>
-    summarize(ndatasets = n_distinct(dataset), nsamples = n()) |>
-    ungroup() |>
-    collect(n = Inf)
-
-  # default assay first
-  def.idx <- which(out[["assay"]] == default_assay(x))
-  if (length(def.idx)) {
-    out <- bind_rows(out[def.idx,,drop = FALSE], out[-def.idx,,drop = FALSE])
-  }
-
-  as_facile_frame(out, x)
+#' @noRd
+#' @export
+assay_summary.facile_frame <- function(x, ...) {
+  fds. <- fds(x)
+  anames <- assay_names(fds.)
+  info <- lapply(anames, function(aname) {
+    x |> 
+      assay_sample_info(aname, drop_samples = TRUE) |> 
+      summarize(ndatasets = n_distinct(dataset), nsamples = n()) |> 
+      mutate(assay = aname, .before = 1L)
+  })
+  bind_rows(info)
 }
 
 #' Check if character vector of sample ids in `ids` can plausably be the
