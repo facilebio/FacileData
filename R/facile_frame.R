@@ -35,12 +35,21 @@ as_facile_frame <- function(x, datastore = fds(x), classes = NULL, ...,
 
 #' @noRd
 #' @export
-samples.facile_frame <- function(x, ...) {
+samples.facile_frame <- function(x, ..., dropped = FALSE, .keep_all = TRUE) {
   reqd <- setdiff(c("dataset", "sample_id"), colnames(x))
   if (length(reqd)) {
     stop("Missing required columns: ", paste(reqd, sep = ","))
   }
-  distinct(x, dataset, sample_id, .keep_all = TRUE)
+  if (dropped) {
+    out <- attr(x, "samples_dropped")
+    if (is.null(out)) {
+      out <- dplyr::tibble(dataset = character(), sample_id = character())
+      out <- set_fds(fds(x))
+    }
+  } else {
+    out <- distinct(x, dataset, sample_id, .keep_all = .keep_all)
+  }
+  out
 }
 
 #' @noRd

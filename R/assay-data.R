@@ -20,7 +20,7 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
     assay_name <- default_assay(fds.)
   }
 
-  fetch_assay_data(fds., features = features, samples = samples,
+  fetch_assay_data(fds., features = features, samples = x,
                    assay_name = assay_name, normalized = normalized,
                    batch = batch, main = main,
                    as.matrix = as.matrix, drop_samples = drop_samples, ...,
