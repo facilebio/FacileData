@@ -79,7 +79,7 @@ with_feature_info.data.frame <- function(x, covariates = NULL, ...,
 #' @param x A \code{FacileDataSet}
 feature_types <- function(x) {
   assert_class(x, "FacileDataStore")
-  assay_info(FDS) |> 
+  assay_info(x) |> 
     distinct(feature_type) |> 
     pull(feature_type)
 }

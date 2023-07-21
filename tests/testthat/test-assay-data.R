@@ -20,7 +20,7 @@ test_that("fetch_assay_data limits samples correctly", {
   asamples.fds <- adata.fds |> 
     distinct(dataset, sample_id) |> 
     arrange(dataset, sample_id)
-  expect_equal(asamples, s.df, check.attributes = FALSE)
+  expect_equal(asamples.fds, s.df, check.attributes = FALSE)
 
   # fetch_assay_data from a facile_frame ---------------------------------------
   adata.ff <- fetch_assay_data(s.df, features)
