@@ -41,6 +41,10 @@ res.facile <- fdge(model.facile, method = "voom")
 
 
 ```{r}
-iFacileAnalysis::fdgeGadget(blca)
+res <- iFacileAnalysis::fdgeGadget(blca)
+```
+
+```{r}
+res2 <- iFacileAnalysis::fdgeGadget(tcga)
 ```
 
