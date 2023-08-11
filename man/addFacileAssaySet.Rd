@@ -9,7 +9,7 @@ addFacileAssaySet(
   datasets,
   facile_assay_name,
   facile_assay_type = .assay.types,
-  facile_feature_type = .feature.types,
+  facile_feature_type = NULL,
   facile_assay_description = NULL,
   facile_feature_info,
   storage_mode = .storage.modes,
@@ -34,7 +34,8 @@ addFacileAssaySet(
 'affymetrix', etc.)}
 
 \item{facile_feature_type}{a string indicating the universe the features in
-this assay refer to, i.e. "entrez", "ensgid", "enstid", etc.}
+this can be anything, but certain identifiers are special like \code{"entrez"},
+\code{"ensgid"}, \code{"enstid"}, etc.}
 
 \item{facile_feature_info}{a \code{data.frame} with the required \code{feature_info}
 columns that describe the features in this assay. Please refer to the

@@ -222,8 +222,9 @@ assay_units.FacileDataStore <- function(x, assay_name = default_assay(x),
 #'   * `assay <chr>`: Name of the assay
 #'   * `assay_type <chr>`: `"rnaseq"`, `"lognorm"`, etc. Look at
 #'     `FacileData:::.assay.types` vector
-#'   * `feature_type <chr>`: A string from `FacileData:::.feature.types`, ie.
-#'      `"ensgid"`, `"entrez"`, `"custom"`, etc.
+#'   * `feature_type <chr>`: A string indicating the feature type to retrieve.
+#'      we can use any name for a feature type, but `"ensgid"`, `"enstid"`,
+#'      `"entrez"`, have special meaning.
 #'   * `description <chr>`: string description
 #'   * `nfeatures <int>`: number of features we have info for
 #'   * `storage_mode <chr>`: `"integer"`, `"numeric"`
