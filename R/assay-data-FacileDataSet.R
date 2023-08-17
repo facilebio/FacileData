@@ -100,7 +100,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
                       subset.threshold, aggregate, aggregate.by, ...,
                       verbose = verbose)
   })
-  dropped.samples <- bind_rows(lapply(out, attr, "dropped"))
+  dropped.samples <- bind_rows(lapply(out, attr, "samples_dropped"))
   
   if (length(out) == 1L) {
     out <- out[[1L]]
@@ -252,7 +252,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     }
   }
   
-  attr(vals, "dropped") <- dropped.samples
+  attr(vals, "samples_dropped") <- dropped.samples
   set_fds(vals, x)
 }
 
@@ -319,12 +319,16 @@ assay_sample_info.FacileDataSet <- function(x, assay_name, drop_samples = TRUE,
     filter(.data$assay == .env$assay_name) |>
     collect(n = Inf)
   
+  dropped_samples <- NULL
   if (drop_samples) {
+    dropped_samples <- anti_join(samples, asi, by = c("dataset", "sample_id"))
     out <- inner_join(samples, asi, by = c("dataset", "sample_id"), 
                       suffix = c(".x", ""))
   } else {
     out <- left_join(samples, asi, by = c("dataset", "sample_id"), 
                      suffix = c(".x", ""))  
   }
+  
+  attr(out, "samples_dropped") <- dropped_samples
   out
 }

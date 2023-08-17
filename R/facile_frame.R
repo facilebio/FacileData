@@ -44,8 +44,10 @@ samples.facile_frame <- function(x, ..., dropped = FALSE, .keep_all = TRUE) {
     out <- attr(x, "samples_dropped")
     if (is.null(out)) {
       out <- dplyr::tibble(dataset = character(), sample_id = character())
-      out <- set_fds(fds(x))
+    } else {
+      out <- distinct(out, dataset, sample_id, .keep_all = .keep_all)
     }
+    out <- set_fds(out, fds(x))
   } else {
     out <- distinct(x, dataset, sample_id, .keep_all = .keep_all)
   }
