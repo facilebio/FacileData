@@ -59,8 +59,9 @@
 #' `data.frame` from **the first** given bioc-container in the list.
 #' This `data.frame` must define the following columns:
 #'
-#' * "feature_type": `string`, one of: `"entrez"`, `"ensgid"`, `"enstid"`,
-#'     `"genomic"`, `"custom"`.
+#' * "feature_type": `string` that defines the feature space, it can be anything
+#'   but historical accident may have given special meaning to `"entrez"`, 
+#'   `"ensgid"`, `"enstid"`, and `"genomic"`.
 #' * "feature_id": `string`
 #' * "name": `string`
 #' * "meta": `string`
@@ -455,12 +456,12 @@ validate.fdata <- function(x, ...) {
   }
 
   req.cols <- c(
-    feature_type="character",
-    feature_id="character",
-    name="character",
-    meta="character",
+    feature_type = "character",
+    feature_id = "character",
+    name = "character",
+    meta = "character",
     # effective_length="numeric",
-    source="character"
+    source = "character"
   )
 
   # Ensure required columns are there, and that they are of the right type

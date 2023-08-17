@@ -33,11 +33,25 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
 #' @export
 assay_names.facile_frame <- function(x, default_first = TRUE, ...) {
   fds. <- fds(x)
-  anames <- lapply(assay_names(fds., default_first = TRUE, ...), \(aname) {
+  all_names <- assay_names(fds., default_first = default_first, ...)
+  anames <- lapply(all_names, \(aname) {
     asi <- assay_sample_info(x, aname, drop_samples = TRUE)
     if (nrow(asi)) aname else character()
   })
   unlist(anames, use.names = FALSE)
+}
+
+#' @export
+#' @noRd
+assay_info.FacileDataSet <- function(x, assay_name = NULL, ...) {
+  stopifnot(is.FacileDataSet(x))
+  ainfo <- assay_info_tbl(x) |> collect(n = Inf)
+  if (!is.null(assay_name)) {
+    assert_string(assay_name)
+    assert_choice(assay_name, ainfo$assay)
+    ainfo <- filter(ainfo, assay == assay_name)
+  }
+  as_facile_frame(ainfo, x)
 }
 
 #' @noRd

@@ -196,7 +196,8 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
 #' @param facile_assay_type string indicating the assay_type ('rnaseq',
 #'   'affymetrix', etc.)
 #' @param facile_feature_type a string indicating the universe the features in
-#'   this assay refer to, i.e. "entrez", "ensgid", "enstid", etc.
+#'   this can be anything, but certain identifiers are special like `"entrez"`,
+#'   `"ensgid"`, `"enstid"`, etc.
 #' @param facie_assay_description a string that allows the caller to provide
 #'   a "freeform" description of the assay (platform, protocol, whatever).
 #' @param facile_feature_info a `data.frame` with the required `feature_info`
@@ -217,14 +218,14 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
 #'   features that were added to the internal `feature_info_tbl`.
 #' @importFrom edgeR calcNormFactors
 addFacileAssaySet <- function(x, datasets, facile_assay_name,
-                              facile_assay_type=.assay.types,
-                              facile_feature_type=.feature.types,
-                              facile_assay_description=NULL,
+                              facile_assay_type = .assay.types,
+                              facile_feature_type = NULL,
+                              facile_assay_description = NULL,
                               facile_feature_info,
-                              storage_mode=.storage.modes,
-                              chunk_rows=5000, chunk_cols='ncol',
-                              chunk_compression=4,
-                              assay_name=NULL, warn_existing = FALSE,
+                              storage_mode = .storage.modes,
+                              chunk_rows = 5000, chunk_cols = "ncol",
+                              chunk_compression = 4,
+                              assay_name = NULL, warn_existing = FALSE,
                               add_sample_covariates = TRUE,
                               covariate_def = NULL) {
   ## Parameter Checking --------------------------------------------------------
@@ -240,7 +241,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
     warning("assay exists of this type already: ", facile_assay_type,
             immediate.=TRUE)
   }
-  facile_feature_type <- match.arg(facile_feature_type, .feature.types)
+  facile_feature_type <- assert_string(facile_feature_type)
   if (is.null(facile_assay_description)) {
     facile_assay_description <- facile_assay_type
   }
@@ -398,7 +399,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
 #'   features that were new (and added) to the repository or \code{FALSE} to
 #'   indicate that they were already in the database.
 append_facile_feature_info <- function(x, feature_info,
-                                       type=feature_info$feature_type,
+                                       type = feature_info$feature_type,
                                        warn_existing = FALSE) {
   ## Argument Checking
   stopifnot(is.FacileDataSet(x))
@@ -412,8 +413,7 @@ append_facile_feature_info <- function(x, feature_info,
     warning("Adding more than one feature_type to feature_info table",
             immediate.=TRUE)
   }
-  stopifnot(all(ftypes %in% .feature.types))
-  
+
   # "source" may not be defined. If not, let's add it as "unspecified" and warn
   # the user
   if (is.null(feature_info[["source"]])) {
