@@ -27,8 +27,8 @@
 #' catdeetz <- covs |>
 #'   filter(class == "categorical") |>
 #'   summary(expanded = TRUE)
-summary.eav_covariates <- function(object, expanded = FALSE,
-                                   droplevels = TRUE, ...) {
+summary.eav_covariates <- function(object, ..., expanded = FALSE,
+                                   droplevels = TRUE) {
   object <- assert_sample_covariates(object)
   .fds <- assert_facile_data_store(fds(object))
   with.source <- is.character(object[["source"]])
@@ -88,9 +88,65 @@ summary.eav_covariates <- function(object, expanded = FALSE,
   as_facile_frame(res, .fds, .valid_sample_check = FALSE)
 }
 
+#' Summaries of long covariates look like this:
+#' expanded = FALSE
+#' variable         class       ndatasets nsamples nlevels   IQR
+#' <chr>            <chr>           <int>    <int>   <int> <dbl>
+#' 1 cell_abbrev      categorical         3      130      11   NA 
+#' 2 cell_type        categorical         3      130      11   NA 
+#' 3 cond             categorical         3      130       3   NA 
+#' 4 condition        categorical         3      130       3   NA 
+#' 5 diabetes_history categorical         3      130       2   NA 
+#' 6 donor_id         categorical         3      130      14   NA 
+#' 7 eGFR             categorical         3      130       4   NA 
+#' 8 group            categorical         3      130      33   NA 
+#' 9 hypertension     categorical         3      130       2   NA 
+#' 10 ncells           real                3      130      NA  360.
+#' 11 sex              categorical         3      130       2   NA 
+#' 
+#' @export
+#' @noRd
+summary.wide_covariates <- function(object, ..., expanded = FALSE,
+                                    droplevels = TRUE) {
+  if (FALSE) {
+    object <- an_fds() |> 
+      samples() |> 
+      with_sample_covariates()
+  }
+  cols <- setdiff(colnames(object), c("dataset", "sample_id"))
+  nvars <- length(cols)
+  out <- list(
+    variable = cols,
+    class = character(nvars),
+    ndatasets = integer(nvars),
+    nsamples = integer(nvars),
+    nlevels = rep(NA_integer_, nvars),
+    IQR = rep(NA_real_, nvars))
+  
+  for (idx in seq_along(cols)) {
+    cname <- cols[idx]
+    vals.all <- object[[cname]]
+    notna <- !is.na(vals.all)
+    vals <- vals.all[notna]
+    
+    eavdef <- eavdef_for_column(vals.all, cname)
+    out$variable[idx] <- cname
+    out$class[idx] <- eavdef$class
+    out$ndatasets[idx] <- length(unique(object$dataset[notna]))
+    out$nsamples[idx] <- sum(notna)
+    if (eavdef$class == "categorical") {
+      out$nlevels[idx] <- length(unique(vals))
+    } else if (eavdef$class == "real") {
+      out$IQR[idx] <- IQR(vals)
+    }
+  }
+  out <- dplyr::as_tibble(out)
+  as_facile_frame(out, fds(object), .valid_sample_check = FALSE)
+}
+
 sample_covariates.facile_frame <- function(x, ...){
+  stop("what is this for")
   .fds <- fds(x)
-  sample_covariates(.fds, x)
 }
 
 #' Fetch rows from sample_covariate table for specified samples and covariates

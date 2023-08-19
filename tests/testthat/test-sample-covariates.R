@@ -163,3 +163,16 @@ test_that("with_sample_covariates can support renaming covariates", {
     arrange(dataset, sample_id)
   expect_equal(res, expected)
 })
+
+test_that("summary.[eav_covariates|wide_covariates] make congruent results", {
+  FDS <- an_fds()
+  asamples <- samples(FDS)
+  long <- fetch_sample_covariates(asamples)
+  wide <- with_sample_covariates(asamples)  
+  
+  lres <- summary(long)
+  wres <- summary(wide)
+  expect_equal(lres, wres)  
+  
+  lres.exp <- summary(long, expanded = TRUE)
+})
