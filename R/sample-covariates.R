@@ -53,10 +53,11 @@ summary.eav_covariates <- function(object, ..., expanded = FALSE,
         } else {
           levels <- c(all = length(value))
         }
-        out <- tibble(nsamples = length(value),
-                      source = .$source[1L],
-                      level = names(levels),
-                      ninlevel = as.integer(levels))
+        out <- tibble(
+          nsamples = length(value),
+          source = .$source[1L],
+          level = names(levels),
+          ninlevel = as.integer(levels))
         if (droplevels) {
           out <- filter(out, ninlevel > 0L)
         }
@@ -64,20 +65,21 @@ summary.eav_covariates <- function(object, ..., expanded = FALSE,
   } else {
     res <- dat |>
       group_by(variable, class) |>
-      summarize(ndatasets = length(unique(dataset)),
-                nsamples = n(),
-                nlevels = {
-                  if (class[1L] %in% c("categorical", "logical"))
-                    length(unique(value))
-                  else
-                    NA_integer_
-                },
-                IQR = {
-                  if (class[1L] == "real")
-                    IQR(as.numeric(value))
-                  else
-                    NA_real_
-                  })
+      summarize(
+        ndatasets = length(unique(dataset)),
+        nsamples = n(),
+        nlevels = {
+          if (class[1L] %in% c("categorical", "logical"))
+            length(unique(value))
+          else
+            NA_integer_
+        },
+        IQR = {
+          if (class[1L] == "real")
+            IQR(as.numeric(value))
+          else
+            NA_real_
+        })
   }
 
   res <- ungroup(res)
@@ -115,32 +117,48 @@ summary.wide_covariates <- function(object, ..., expanded = FALSE,
   }
   cols <- setdiff(colnames(object), c("dataset", "sample_id"))
   nvars <- length(cols)
-  out <- list(
-    variable = cols,
-    class = character(nvars),
-    ndatasets = integer(nvars),
-    nsamples = integer(nvars),
-    nlevels = rep(NA_integer_, nvars),
-    IQR = rep(NA_real_, nvars))
-  
-  for (idx in seq_along(cols)) {
-    cname <- cols[idx]
-    vals.all <- object[[cname]]
+
+  out <- lapply(seq_along(cols), function(idx) {
+    vname <- cols[idx]
+    vals.all <- object[[vname]]
     notna <- !is.na(vals.all)
     vals <- vals.all[notna]
+    eavdef <- eavdef_for_column(vals.all, vname)
+    vclass <- eavdef$class
+    ndatasets <- length(unique(object[["dataset"]][notna]))
+    nsamples <- sum(notna)
     
-    eavdef <- eavdef_for_column(vals.all, cname)
-    out$variable[idx] <- cname
-    out$class[idx] <- eavdef$class
-    out$ndatasets[idx] <- length(unique(object$dataset[notna]))
-    out$nsamples[idx] <- sum(notna)
-    if (eavdef$class == "categorical") {
-      out$nlevels[idx] <- length(unique(vals))
-    } else if (eavdef$class == "real") {
-      out$IQR[idx] <- IQR(vals)
+    if (vclass == "categorical") {
+      vtally <- table(vals)
+      iqr <- NA_real_
+      nlevels <- length(vtally)
+    } else if (vclass == "real") {
+      iqr <- IQR(vals)
+      qtl <- quantile(vals)
+      bins <- cut(vals, qtl)
+      vtally <- table(bins)
+      nlevels <- NA_integer_
     }
-  }
-  out <- dplyr::as_tibble(out)
+  
+    if (expanded) {
+      res <- dplyr::tibble(
+        variable = vname,
+        class = vclass,
+        nsamples = nsamples,
+        level = names(vtally),
+        ninlevel = as.numeric(vtally))
+    } else {
+      res <- dplyr::tibble(
+        variable = vname,
+        class = vclass,
+        ndatasets = ndatasets,
+        nsamples = nsamples,
+        nlevels = nlevels,
+        IQR = iqr)
+    }
+    res
+  })
+  out <- dplyr::bind_rows(out)
   as_facile_frame(out, fds(object), .valid_sample_check = FALSE)
 }
 

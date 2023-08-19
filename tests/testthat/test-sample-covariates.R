@@ -170,9 +170,15 @@ test_that("summary.[eav_covariates|wide_covariates] make congruent results", {
   long <- fetch_sample_covariates(asamples)
   wide <- with_sample_covariates(asamples)  
   
-  lres <- summary(long)
-  wres <- summary(wide)
+  lres <- summary(long, expanded = FALSE) |>
+    arrange(variable)
+  wres <- summary(wide, expanded = FALSE) |> 
+    arrange(variable)
   expect_equal(lres, wres)  
   
-  lres.exp <- summary(long, expanded = TRUE)
+  lres.exp <- summary(long, expanded = TRUE) |> 
+    arrange(variable, level)
+  wres.exp <- summary(wide, expanded = TRUE) |> 
+    arrange(variable, level)
+  expect_equal(lres.exp, wres.exp)
 })
