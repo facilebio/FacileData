@@ -138,7 +138,12 @@ assay_summary.facile_frame <- function(x, ...) {
       summarize(ndatasets = n_distinct(dataset), nsamples = n()) |> 
       mutate(assay = aname, .before = 1L)
   })
-  bind_rows(info)
+  
+  bind_rows(info) |> 
+    filter(.data$nsamples > 0L) |> 
+    left_join(
+      select(assay_info(fds.), -description, -storage_mode),
+      by = "assay")
 }
 
 #' Check if character vector of sample ids in `ids` can plausably be the

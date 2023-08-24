@@ -80,7 +80,7 @@ flog <- function(..., level = "info", ns = NULL, session = NULL,
     session <- try(get("session", envir = parent.frame()), silent = TRUE)
   }
   if (is(session, "session_proxy")) {
-    txt <- glue("{bold}[{smod}]:{reset} ", smod = session$ns(NULL))
+    txt <- glue("{reset}{bold}[{smod}]:{reset} ", smod = session$ns(NULL))
   } else {
     txt <- ""
   }
@@ -88,7 +88,7 @@ flog <- function(..., level = "info", ns = NULL, session = NULL,
   # charcter vectors. If we find something that doens't fit that
   # in `...` we try to coerce to length-1 character, or dump it.
   dot.text <- lapply(list(...), function(.txt) {
-    if (!is.character(.txt)) return(NULL)
+    # if (!is.character(.txt)) return(NULL)
     paste(.txt, collapse = ",")
   })
   txt <- glue(txt, do.call(glue, dot.text))

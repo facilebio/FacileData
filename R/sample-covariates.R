@@ -47,8 +47,13 @@ summary.eav_covariates <- function(object, ..., expanded = FALSE,
         if (clz %in% c("categorical", "logical") && is.atomic(value)) {
           levels <- table(value)
         } else if (clz == "real" && is.atomic(value)) {
-          qtl <- quantile(value)
-          bins <- cut(value, qtl)
+          # small vectors, or those with a lot of NAs produce quantiles that
+          # are not unique, and throw errors
+          qtl <- unique(quantile(value))
+          if (length(qtl) == 1L) {
+            qtl <- sort(c(qtl  -1, qtl))
+          }
+          bins <- cut(value, qtl, include.lowest = TRUE)
           levels <- table(bins)
         } else {
           levels <- c(all = length(value))
@@ -128,14 +133,19 @@ summary.wide_covariates <- function(object, ..., expanded = FALSE,
     ndatasets <- length(unique(object[["dataset"]][notna]))
     nsamples <- sum(notna)
     
-    if (vclass == "categorical") {
+    if (vclass %in% c("categorical", "logical")) {
       vtally <- table(vals)
       iqr <- NA_real_
       nlevels <- length(vtally)
     } else if (vclass == "real") {
       iqr <- IQR(vals)
-      qtl <- quantile(vals)
-      bins <- cut(vals, qtl)
+      # small vectors, or those with a lot of NAs produce quantiles that
+      # are not unique, and throw errors
+      qtl <- unique(quantile(vals))
+      if (length(qtl) == 1L) {
+        qtl <- sort(c(qtl - 1, qtl))
+      }
+      bins <- cut(vals, qtl, include.lowest = TRUE)
       vtally <- table(bins)
       nlevels <- NA_integer_
     }
