@@ -4,7 +4,7 @@
 \alias{has_assay}
 \title{Checks facile objects to see if they have a particular assay name.}
 \usage{
-has_assay(x, assay_name, ...)
+has_assay(x, assay_name = NULL, ...)
 }
 \description{
 If \code{x} a FacileDataStore, return TRUE/FALSE if the assay is stored inside

@@ -89,8 +89,11 @@ print.facile_frame <- function(x, ..., n = NULL, width = NULL, n_extra = NULL) {
 
 #' @export
 #' @noRd
-arrange.facile_frame <- function(.data, ..., .facilitate = TRUE) {
+arrange.facile_frame <- function(.data, ..., .facilitate = NULL) {
   res <- NextMethod()
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(.data), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
                            .valid_sample_check = FALSE)
@@ -100,8 +103,11 @@ arrange.facile_frame <- function(.data, ..., .facilitate = TRUE) {
 
 #' @export
 #' @noRd
-collect.facile_frame <- function(x, ..., .facilitate = TRUE) {
+collect.facile_frame <- function(x, ..., .facilitate = NULL) {
   res <- NextMethod()
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(x), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)
@@ -112,8 +118,11 @@ collect.facile_frame <- function(x, ..., .facilitate = TRUE) {
 #' @export
 #' @noRd
 distinct.facile_frame <- function(.data, ..., .keep_all = FALSE,
-                                  .facilitate = TRUE) {
+                                  .facilitate = NULL) {
   res <- NextMethod()
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(.data), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
                            .valid_sample_check = FALSE)
@@ -123,8 +132,11 @@ distinct.facile_frame <- function(.data, ..., .keep_all = FALSE,
 
 #' @export
 #' @noRd
-filter.facile_frame <- function(.data, ..., .facilitate = TRUE) {
+filter.facile_frame <- function(.data, ..., .facilitate = NULL) {
   res <- NextMethod()
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(.data), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
                            .valid_sample_check = FALSE)
@@ -137,7 +149,7 @@ filter.facile_frame <- function(.data, ..., .facilitate = TRUE) {
 group_by.facile_frame <- function(.data, ..., add = FALSE,
                                   # .drop = group_by_drop_default(.data),
                                   .drop = TRUE,
-                                  .facilitate = TRUE) {
+                                  .facilitate = NULL) {
   # fds. <- fds(.data)
   # groups <- group_by_prepare(.data, ..., add = add)
   # groups[["data"]] <- lapply(groups[["data"]], set_fds, fds.)
@@ -158,8 +170,11 @@ group_by.facile_frame <- function(.data, ..., add = FALSE,
 
 #' @export
 #' @noRd
-mutate.facile_frame <- function(.data, ..., .facilitate = TRUE) {
+mutate.facile_frame <- function(.data, ..., .facilitate = NULL) {
   res <- NextMethod()
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(.data), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
                            .valid_sample_check = FALSE)
@@ -169,8 +184,11 @@ mutate.facile_frame <- function(.data, ..., .facilitate = TRUE) {
 
 #' @export
 #' @noRd
-rename.facile_frame <- function(.data, ..., .facilitate = TRUE) {
+rename.facile_frame <- function(.data, ..., .facilitate = NULL) {
   res <- NextMethod()
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(.data), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
                            .valid_sample_check = FALSE)
@@ -180,8 +198,11 @@ rename.facile_frame <- function(.data, ..., .facilitate = TRUE) {
 
 #' @export
 #' @noRd
-select.facile_frame <- function(.data, ..., .facilitate = TRUE) {
+select.facile_frame <- function(.data, ..., .facilitate = NULL) {
   res <- NextMethod()
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(.data), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
                            .valid_sample_check = FALSE)
@@ -191,8 +212,11 @@ select.facile_frame <- function(.data, ..., .facilitate = TRUE) {
 
 #' @export
 #' @noRd
-subset.facile_frame <- function(x, ..., .facilitate = TRUE) {
+subset.facile_frame <- function(x, ..., .facilitate = NULL) {
   res <- NextMethod()
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(.data), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)
@@ -202,8 +226,11 @@ subset.facile_frame <- function(x, ..., .facilitate = TRUE) {
 
 #' @export
 #' @noRd
-transmute.facile_frame <- function(.data, ..., .facilitate = TRUE) {
+transmute.facile_frame <- function(.data, ..., .facilitate = NULL) {
   res <- NextMethod()
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(.data), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
                            .valid_sample_check = FALSE)
@@ -213,7 +240,7 @@ transmute.facile_frame <- function(.data, ..., .facilitate = TRUE) {
 
 #' @export
 #' @noRd
-ungroup.facile_frame <- function(x, ..., .facilitate = TRUE) {
+ungroup.facile_frame <- function(x, ..., .facilitate = NULL) {
   res <- NextMethod()
   # as_facile_frame(res, fds(x), .valid_sample_check = FALSE)
   res
@@ -268,13 +295,16 @@ upcast_ff <- function(x, downcasted, .facilitate = FALSE, ...) {
 #' @noRd
 inner_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
                                     suffix = c(".x", ".y"), ...,
-                                    .facilitate = TRUE,
+                                    .facilitate = NULL,
                                     keep = NULL) {
   # dplyr::inner_join.data.frame calls check_dots_empty0(...)
   xx <- downcast_ff(x)
   res <- inner_join(xx, y, by = by, copy = copy, suffix = suffix, ...,
                     keep = keep)
   res <- upcast_ff(res, xx)
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(x), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)
@@ -286,13 +316,16 @@ inner_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
 #' @noRd
 left_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
                                    suffix = c(".x", ".y"), ...,
-                                   .facilitate = TRUE, 
+                                   .facilitate = NULL, 
                                    keep = NULL) {
   # dplyr::left_join.data.frame calls check_dots_empty0(...)
   xx <- downcast_ff(x)
   res <- left_join(xx, y, by = by, copy = copy, suffix = suffix, ...,
                    keep = keep)
   res <- upcast_ff(res, xx)
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(x), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)
@@ -304,13 +337,16 @@ left_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
 #' @noRd
 right_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
                                     suffix = c(".x", ".y"), ...,
-                                    .facilitate = TRUE,
+                                    .facilitate = NULL,
                                     keep = NULL) {
   # dplyr::right_join.data.frame calls check_dots_empty0(...)
   xx <- downcast_ff(x)
   res <- right_join(xx, y, by = by, copy = copy, suffix = suffix, ...,
                    keep = keep)
   res <- upcast_ff(res, xx)
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(x), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)
@@ -322,12 +358,15 @@ right_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
 #' @noRd
 full_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
                                    suffix = c(".x", ".y"), ...,
-                                   .facilitate = TRUE, keep = TRUE) {
+                                   .facilitate = NULL, keep = TRUE) {
   # dplyr::full_join.data.frame calls check_dots_empty0(...)
   xx <- downcast_ff(x)
   res <- full_join(xx, y, by = by, copy = copy, suffix = suffix, ...,
                     keep = keep)
   res <- upcast_ff(res, xx)
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(x), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)
@@ -338,11 +377,14 @@ full_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
 #' @export
 #' @noRd
 semi_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, ...,
-                                   .facilitate = TRUE) { 
+                                   .facilitate = NULL) { 
   # dplyr::semi_join.data.frame calls check_dots_empty0(...)
   xx <- downcast_ff(x)
   res <- semi_join(xx, y, by = by, copy = copy, ...)
   res <- upcast_ff(res, xx)
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(x), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)
@@ -353,11 +395,14 @@ semi_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, ...,
 #' @export
 #' @noRd
 anti_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, ...,
-                                   .facilitate = TRUE) { 
+                                   .facilitate = NULL) { 
   # dplyr::anti_join.data.frame calls check_dots_empty0(...)
   xx <- downcast_ff(x)
   res <- anti_join(xx, y, by = by, copy = copy, ...)
   res <- upcast_ff(res, xx)
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(x), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)
@@ -368,11 +413,14 @@ anti_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, ...,
 #' @export
 #' @noRd
 nest_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, keep = NULL,
-                                   name = NULL, ..., .facilitate = TRUE) {
+                                   name = NULL, ..., .facilitate = NULL) {
   # dplyr::nest_join.data.frame calls check_dots_empty0(...)
   xx <- downcast_ff(x)
   res <- nest_join(xx, y, by = by, copy = copy, keep = keep, name = name, ...)
   res <- upcast_ff(res, xx)
+  if (is.null(.facilitate)) {
+    .facilitate <- suppressWarnings(is(fds(x), "FacileDataStore"))
+  }
   if (.facilitate) {
     res <- as_facile_frame(res, fds(x), .extra_classes(x),
                            .valid_sample_check = FALSE)

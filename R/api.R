@@ -218,26 +218,8 @@ assay_units.FacileDataStore <- function(x, assay_name = default_assay(x),
 #' `TRUE`/`FALSE` indicating wether or not a particular sample has assay data.
 #' 
 #' @export
-has_assay <- function(x, assay_name, ...) {
+has_assay <- function(x, assay_name = NULL, ...) {
   UseMethod("has_assay", x)
-}
-
-#' @noRd
-#' @export
-has_assay.FacileDataStore <- function(x, assay_name, ...) {
-  assert_facile_data_store(x)
-  assert_character(assay_name)
-  is.element(assay_name, assay_names(x))
-}
-
-#' @noRd
-#' @export
-has_assay.facile_frame <- function(x, assay_name, prefix = "has_", ...) {
-  colname <- paste0(prefix, assay_name)
-  asi <- assay_sample_info(x, assay_name, drop_samples = FALSE)
-  asi[[colname]] <- !is.na(asi$assay) & asi$assay == assay_name
-  res <- select(asi, dataset, sample_id, {{colname}})
-  left_join(x, res, by = c("dataset", "sample_id"))
 }
 
 #' Fetches assay meta information for the assays stored in a FacileDataStore
