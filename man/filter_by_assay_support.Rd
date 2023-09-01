@@ -7,7 +7,7 @@
 filter_by_assay_support(x, assay_name, ...)
 }
 \arguments{
-\item{x}{a facile_frame}
+\item{x}{a facile_frame with the same columns it was sent in with}
 
 \item{assay_name}{the name of the assay}
 }
