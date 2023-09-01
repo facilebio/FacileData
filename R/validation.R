@@ -14,17 +14,16 @@
 check_categorical <- function(x, any.missing = TRUE, all.missing = TRUE,
                               len = NULL, min.len = NULL, max.len = NULL, ...) {
   e <- character()
-  if (is.character(x)) {
-    e <- check_character(x, any.missing = any.missing, all.missing = all.missing,
-                         len = len, min.len = min.len, max.len = max.len)
+  check_fn <- if (is.character(x)) {
+    check_character
   } else if (is.factor(x)) {
-    e <- check_factor(x, any.missing = any.missing, all.missing = all.missing,
-                      len = len, min.len = min.len, max.len = max.len)
+    check_factor
+  } else if (is.logical(x)) {
+    check_logical
   } else {
-    e <- "x is not a character or factor vector"
+    function(x) "x is not a character, factor, or logical"
   }
-
-  if (length(e)) e else TRUE
+  check_fn(x)
 }
 
 #' @rdname check_categorical

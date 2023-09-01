@@ -27,8 +27,8 @@
 #' catdeetz <- covs |>
 #'   filter(class == "categorical") |>
 #'   summary(expanded = TRUE)
-summary.eav_covariates <- function(object, expanded = FALSE,
-                                   droplevels = TRUE, ...) {
+summary.eav_covariates <- function(object, ..., expanded = FALSE,
+                                   droplevels = TRUE) {
   object <- assert_sample_covariates(object)
   .fds <- assert_facile_data_store(fds(object))
   with.source <- is.character(object[["source"]])
@@ -47,16 +47,22 @@ summary.eav_covariates <- function(object, expanded = FALSE,
         if (clz %in% c("categorical", "logical") && is.atomic(value)) {
           levels <- table(value)
         } else if (clz == "real" && is.atomic(value)) {
-          qtl <- quantile(value)
-          bins <- cut(value, qtl)
+          # small vectors, or those with a lot of NAs produce quantiles that
+          # are not unique, and throw errors
+          qtl <- unique(quantile(value))
+          if (length(qtl) == 1L) {
+            qtl <- sort(c(qtl  -1, qtl))
+          }
+          bins <- cut(value, qtl, include.lowest = TRUE)
           levels <- table(bins)
         } else {
           levels <- c(all = length(value))
         }
-        out <- tibble(nsamples = length(value),
-                      source = .$source[1L],
-                      level = names(levels),
-                      ninlevel = as.integer(levels))
+        out <- tibble(
+          nsamples = length(value),
+          source = .$source[1L],
+          level = names(levels),
+          ninlevel = as.integer(levels))
         if (droplevels) {
           out <- filter(out, ninlevel > 0L)
         }
@@ -64,20 +70,21 @@ summary.eav_covariates <- function(object, expanded = FALSE,
   } else {
     res <- dat |>
       group_by(variable, class) |>
-      summarize(ndatasets = length(unique(dataset)),
-                nsamples = n(),
-                nlevels = {
-                  if (class[1L] %in% c("categorical", "logical"))
-                    length(unique(value))
-                  else
-                    NA_integer_
-                },
-                IQR = {
-                  if (class[1L] == "real")
-                    IQR(as.numeric(value))
-                  else
-                    NA_real_
-                  })
+      summarize(
+        ndatasets = length(unique(dataset)),
+        nsamples = n(),
+        nlevels = {
+          if (class[1L] %in% c("categorical", "logical"))
+            length(unique(value))
+          else
+            NA_integer_
+        },
+        IQR = {
+          if (class[1L] == "real")
+            IQR(as.numeric(value))
+          else
+            NA_real_
+        })
   }
 
   res <- ungroup(res)
@@ -88,9 +95,86 @@ summary.eav_covariates <- function(object, expanded = FALSE,
   as_facile_frame(res, .fds, .valid_sample_check = FALSE)
 }
 
+#' Summaries of long covariates look like this:
+#' expanded = FALSE
+#' variable         class       ndatasets nsamples nlevels   IQR
+#' <chr>            <chr>           <int>    <int>   <int> <dbl>
+#' 1 cell_abbrev      categorical         3      130      11   NA 
+#' 2 cell_type        categorical         3      130      11   NA 
+#' 3 cond             categorical         3      130       3   NA 
+#' 4 condition        categorical         3      130       3   NA 
+#' 5 diabetes_history categorical         3      130       2   NA 
+#' 6 donor_id         categorical         3      130      14   NA 
+#' 7 eGFR             categorical         3      130       4   NA 
+#' 8 group            categorical         3      130      33   NA 
+#' 9 hypertension     categorical         3      130       2   NA 
+#' 10 ncells           real                3      130      NA  360.
+#' 11 sex              categorical         3      130       2   NA 
+#' 
+#' @export
+#' @noRd
+summary.wide_covariates <- function(object, ..., expanded = FALSE,
+                                    droplevels = TRUE) {
+  if (FALSE) {
+    object <- an_fds() |> 
+      samples() |> 
+      with_sample_covariates()
+  }
+  cols <- setdiff(colnames(object), c("dataset", "sample_id"))
+  nvars <- length(cols)
+
+  out <- lapply(seq_along(cols), function(idx) {
+    vname <- cols[idx]
+    vals.all <- object[[vname]]
+    notna <- !is.na(vals.all)
+    vals <- vals.all[notna]
+    eavdef <- eavdef_for_column(vals.all, vname)
+    vclass <- eavdef$class
+    ndatasets <- length(unique(object[["dataset"]][notna]))
+    nsamples <- sum(notna)
+    
+    if (vclass %in% c("categorical", "logical")) {
+      vtally <- table(vals)
+      iqr <- NA_real_
+      nlevels <- length(vtally)
+    } else if (vclass == "real") {
+      iqr <- IQR(vals)
+      # small vectors, or those with a lot of NAs produce quantiles that
+      # are not unique, and throw errors
+      qtl <- unique(quantile(vals))
+      if (length(qtl) == 1L) {
+        qtl <- sort(c(qtl - 1, qtl))
+      }
+      bins <- cut(vals, qtl, include.lowest = TRUE)
+      vtally <- table(bins)
+      nlevels <- NA_integer_
+    }
+  
+    if (expanded) {
+      res <- dplyr::tibble(
+        variable = vname,
+        class = vclass,
+        nsamples = nsamples,
+        level = names(vtally),
+        ninlevel = as.numeric(vtally))
+    } else {
+      res <- dplyr::tibble(
+        variable = vname,
+        class = vclass,
+        ndatasets = ndatasets,
+        nsamples = nsamples,
+        nlevels = nlevels,
+        IQR = iqr)
+    }
+    res
+  })
+  out <- dplyr::bind_rows(out)
+  as_facile_frame(out, fds(object), .valid_sample_check = FALSE)
+}
+
 sample_covariates.facile_frame <- function(x, ...){
+  stop("what is this for")
   .fds <- fds(x)
-  sample_covariates(.fds, x)
 }
 
 #' Fetch rows from sample_covariate table for specified samples and covariates

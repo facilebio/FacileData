@@ -17,7 +17,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Steve Lianoglou \email{lianoglou@dnli.com} (\href{https://orcid.org/0000-0002-0924-1754}{ORCID})
+\strong{Maintainer}: Steve Lianoglou \email{slianoglou@gmail.com} (\href{https://orcid.org/0000-0002-0924-1754}{ORCID})
 
 Authors:
 \itemize{

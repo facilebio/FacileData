@@ -14,6 +14,7 @@ fetch_assay_data(
   batch = NULL,
   main = NULL,
   as.matrix = FALSE,
+  drop_samples = TRUE,
   ...,
   subset.threshold = 700,
   aggregate = FALSE,

@@ -137,6 +137,7 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
     features(assay_name = assay_name, feature_ids = feature_ids) |>
     as.data.frame()
   rownames(genes) <- genes[["feature_id"]]
+  
   if (genes[["feature_type"]][1L] %in% c("entrez", "ensgid") || TRUE) {
     # After adding fluidigm/qPCR support, I wish I never renamed `name` to
     # `symbol`

@@ -148,8 +148,9 @@ populate this table will be retrieved from the corresponding \code{fData}-like
 \code{data.frame} from \strong{the first} given bioc-container in the list.
 This \code{data.frame} must define the following columns:
 \itemize{
-\item "feature_type": \code{string}, one of: \code{"entrez"}, \code{"ensgid"}, \code{"enstid"},
-\code{"genomic"}, \code{"custom"}.
+\item "feature_type": \code{string} that defines the feature space, it can be anything
+but historical accident may have given special meaning to \code{"entrez"},
+\code{"ensgid"}, \code{"enstid"}, and \code{"genomic"}.
 \item "feature_id": \code{string}
 \item "name": \code{string}
 \item "meta": \code{string}

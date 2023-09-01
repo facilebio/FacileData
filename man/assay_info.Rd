@@ -18,8 +18,9 @@ columns:
 \item \verb{assay <chr>}: Name of the assay
 \item \verb{assay_type <chr>}: \code{"rnaseq"}, \code{"lognorm"}, etc. Look at
 \code{FacileData:::.assay.types} vector
-\item \verb{feature_type <chr>}: A string from \code{FacileData:::.feature.types}, ie.
-\code{"ensgid"}, \code{"entrez"}, \code{"custom"}, etc.
+\item \verb{feature_type <chr>}: A string indicating the feature type to retrieve.
+we can use any name for a feature type, but \code{"ensgid"}, \code{"enstid"},
+\code{"entrez"}, have special meaning.
 \item \verb{description <chr>}: string description
 \item \verb{nfeatures <int>}: number of features we have info for
 \item \verb{storage_mode <chr>}: \code{"integer"}, \code{"numeric"}

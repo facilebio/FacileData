@@ -163,3 +163,49 @@ test_that("with_sample_covariates can support renaming covariates", {
     arrange(dataset, sample_id)
   expect_equal(res, expected)
 })
+
+test_that("summary.[eav_covariates|wide_covariates] make congruent results", {
+  FDS <- an_fds()
+  asamples <- samples(FDS)
+  long <- fetch_sample_covariates(asamples)
+  wide <- with_sample_covariates(asamples)  
+  
+  lres <- summary(long, expanded = FALSE) |>
+    arrange(variable)
+  wres <- summary(wide, expanded = FALSE) |> 
+    arrange(variable)
+  expect_equal(lres, wres)  
+  
+  lres.exp <- summary(long, expanded = TRUE) |> 
+    arrange(variable, level)
+  wres.exp <- summary(wide, expanded = TRUE) |> 
+    arrange(variable, level)
+  expect_equal(lres.exp, wres.exp)
+})
+
+test_that("covariate summary is robust to sparse numeric vectors", {
+  # when a numeric vector is short or has many NA's, the quantile & cut mojo
+  # fails due to insufficient number of intervals, and what have you.
+  #   
+  #    Error in cut.default(vals, qtl, include.lowest = TRUE) :
+  #      invalid number of intervals
+  efds <- exampleFacileDataSet()
+  wide <- samples(efds) |> with_sample_covariates()
+  long <- samples(efds) |> fetch_sample_covariates()
+  
+  wpdat <- samples(efds) |>
+    with_sample_covariates() |> 
+    summary(expanded = TRUE) |> 
+    arrange(variable, level)
+  lpdat <- samples(efds) |> 
+    fetch_sample_covariates() |> 
+    summary(expanded = TRUE) |> 
+    arrange(variable, level)
+  # Note that these won't be equal because the wide format converts the 
+  # "event" (response) covariates into two columns in "a smart way", but
+  # the long format doesn't do jack on that.
+  # 
+  # This test for now just checks that no error was thrown
+  expect_s3_class(wpdat, "facile_frame")
+  expect_s3_class(lpdat, "facile_frame")
+})

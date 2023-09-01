@@ -1,9 +1,9 @@
 Package: FacileData
 Type: Package
 Title: A fluent API for accessing multi-assay high-throughput genomics data
-Version: 0.98.9
+Version: 0.98.97
 Authors@R: c(
-    person("Steve", "Lianoglou", , "lianoglou@dnli.com", c("aut", "cre"),
+    person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre"),
       comment = c(ORCID = "0000-0002-0924-1754")),
   person("Vincent", "Rouilly", , "rouilly.vincent@gene.com", role = "aut"),
   person("Peter", "Haverty", , comment = "@phaverty on github", role = "aut"),
@@ -61,7 +61,6 @@ Suggests:
   SummarizedExperiment,
   testthat (>= 1.0.2),
   tidyr
-biocViews: Infrastructure, DataRepresentation
 VignetteBuilder: knitr
 RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)

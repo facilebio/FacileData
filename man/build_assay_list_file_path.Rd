@@ -14,5 +14,7 @@ build_assay_list_file_path(assay_name)
 file path to the serialized assaylist
 }
 \description{
-Returns the filepath for the raw assay data for a given assay(name)
+TODO: Should we move these data into tests/testthat/testdata folder so that
+it doesn't come along with the installed package and is only included in
+development environments?
 }

@@ -91,16 +91,16 @@ test_that("Supports addition of second assay to original feature new features", 
   expect_set_equal(f.original$feature_id, fids1)
   
   # Now add the second assay ...
+  ai2 <- assays[2,]
   ad2 <- build_assay_lists_load(ai2$assay_name)
   # ... which is also over the `"ensgid"` feature space.
-  ai2 <- assays[2,]
   expect_equal(ai1$feature_type, ai2$feature_type)
 
   # ... but the overlap of feature_id's from first dataset to this one
   # is not perfect.
   fids2 <- lapply(ad2, \(x) rownames(x)) |> unlist() |> unique()
   
-  # 1. There is a large number of features that are shaerd:
+  # 1. There is a large number of features that are shared:
   expect_gt(length(intersect(fids1, fids2)), 15000)
   
   # 2. There are some features in the new assay that aren't in the old one
@@ -111,16 +111,18 @@ test_that("Supports addition of second assay to original feature new features", 
 
   # Now we add the assay data, and the new features should be added to the
   # database
-  addFacileAssaySet(
-    fds,
-    ad2,
-    facile_assay_name = ai2$assay_name,
-    facile_assay_type = ai2$assay_type,
-    facile_feature_type = ai2$feature_type,
-    facile_assay_description = ai2$description,
-    facile_feature_info = ad2[[1]]$genes,
-    storage_mode = ai2$storage_mode,
-    assay_name = ai2$assay_name)
+  expect_warning({
+    addFacileAssaySet(
+      fds,
+      ad2,
+      facile_assay_name = ai2$assay_name,
+      facile_assay_type = ai2$assay_type,
+      facile_feature_type = ai2$feature_type,
+      facile_assay_description = ai2$description,
+      facile_feature_info = ad2[[1]]$genes,
+      storage_mode = ai2$storage_mode,
+      assay_name = ai2$assay_name)
+  }, regexp = "source.*column.*unspecified")
   
   f.universe <- features(fds, feature_type = "ensgid")
   

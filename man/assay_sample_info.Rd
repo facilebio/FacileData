@@ -2,9 +2,9 @@
 % Please edit documentation in R/api.R
 \name{assay_sample_info}
 \alias{assay_sample_info}
-\title{Utility functions to get row and column indices of rnaseq hdf5 files.}
+\title{Retrieve assay-specific metadata for a set of samples}
 \usage{
-assay_sample_info(x, assay_name, samples = NULL, ...)
+assay_sample_info(x, assay_name, drop_samples = TRUE, ...)
 }
 \arguments{
 \item{x}{\code{FacileDataStore}}
@@ -20,6 +20,29 @@ in \code{assay_name} will be returnd here with NA values for hd5_index and
 such.
 }
 \description{
-This is called to get things like hdf5_index and scaling factors for
-the samples in a given assay.
+This will retrieve assay-specific metadata for samples. For RNAseq assay,
+for instance, this would retrieve things like the library size and
+normalization factor for the given sample.
+}
+\details{
+Depending on the type of FacileDataStore is used, we can also return things
+like the \code{hdf5_index} for a FacileDataSet.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{FacileData::testFacileDataSet() |> 
+  assay_sample_info("scrnaseq") |>
+  head()
+# A tibble: 6 × 6
+  dataset sample_id    assay    hdf5_index libsize normfactor
+  <chr>   <chr>        <chr>         <int>   <dbl>      <dbl>
+1 AKI     CNT.32_10003 scrnaseq          1 2837314       1.15
+2 AKI     DCT.32_10003 scrnaseq          2 2262345       1.14
+3 AKI     DTL.33_10005 scrnaseq          3  684162       1.19
+4 AKI     EC.30_10034  scrnaseq          4  414073       1.33
+5 AKI     EC.32_10003  scrnaseq          5  457168       1.20
+6 AKI     EC.32_10034  scrnaseq          6  549429       1.09
+}\if{html}{\out{</div>}}
+}
+\examples{
+efds <- FacileData::testFacileDataSet()
+assay_sample_info(efds, "scrnaseq") |> head()
 }

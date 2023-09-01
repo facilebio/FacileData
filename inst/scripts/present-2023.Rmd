@@ -1,0 +1,50 @@
+---
+title: "FacileDataSet Architecture"
+author: "Steve Lianoglou"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('FacileData')`"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(FacileData)
+library(FacileAnalysis)
+tcga <- exampleFacileDataSet()
+
+blca <- tcga |> 
+  filter_samples(indication == "BLCA") |> 
+  with_sample_covariates(c("sample_type", "sex"))
+
+y.blca <- biocbox(blca, class = "DGEList")
+```
+
+## DGE
+
+bioc
+
+```{r}
+model <- model.matrix(~ sample_type + sex, data = y.blca$samples)
+y <- y.blca[edgeR::filterByExpr(y.blca, model),,keep.lib.sizes = FALSE]
+y <- edgeR::calcNormFactors(y)
+vm <- limma::voom(y, model)
+fit <- limma::lmFit(vm, model)
+fit <- limma::eBayes(fit)
+res.bioc <- limma::topTable(fit, "sample_typetumor", n = Inf)
+```
+
+```{r}
+model.facile <- blca |> 
+  flm_def(covariate = "sample_type", numer = "tumor",
+          denom = "normal", batch = "sex")
+res.facile <- fdge(model.facile, method = "voom")
+```
+
+
+```{r}
+res <- iFacileAnalysis::fdgeGadget(blca)
+```
+
+```{r}
+res2 <- iFacileAnalysis::fdgeGadget(tcga)
+```
+
