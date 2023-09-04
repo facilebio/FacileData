@@ -348,8 +348,13 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
     xchunk.rows <- min(chunk_rows=5000, nrow(dat))
     chunk <- c(xchunk.rows, xchunk.cols)
     dname <- sprintf('%s/%s', aname, ds)
-    h5createDataset(hdf5fn(x), dname, dim(dat), storage.mode=storage_mode,
-                    chunk=chunk, level=chunk_compression)
+    if (chunk_compression == 0) {
+      h5createDataset(hdf5fn(x), dname, dim(dat), storage.mode = storage_mode,
+                      level = 0, filter = "NONE")
+    } else {
+      h5createDataset(hdf5fn(x), dname, dim(dat), storage.mode=storage_mode,
+                      chunk = chunk, level = chunk_compression)
+    }
     ## For some reason dispatching on this keeps messing up:
     ## Error in UseMethod("h5write") (from construction.R#296) :
     ##   no applicable method for 'h5write' applied to an object of class

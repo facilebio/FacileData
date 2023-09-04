@@ -178,9 +178,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
     info <- filter(legit.as.classes, class == fclass)
     info[["package"]]
   })
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    stop(pkg, " package required to convert these objects to a FacileDataSet")
-  }
+  reqpkg(pkg)
 
   # feature-space of assay containers must be identical
   same.fspace <- vapply(x, function(xx) {
@@ -405,6 +403,7 @@ ds_annot.default <- function(x, meta = NULL, validate = FALSE, ...) {
 
 #' BioC-container specific fData extraction functions
 #'
+#' @export
 #' @param x SummarizedExperiment, ExpressionSet or DGEList
 #' @param validate single logical, check results
 #' @param ... additional args (ignored for now)
@@ -460,7 +459,6 @@ validate.fdata <- function(x, ...) {
     feature_id = "character",
     name = "character",
     meta = "character",
-    # effective_length="numeric",
     source = "character"
   )
 
@@ -483,6 +481,7 @@ validate.fdata <- function(x, ...) {
 #'
 #' This is an internal function, but exported so it is registered and found
 #' post R 4.0
+#' @export
 #' @param x SummarizedExperiment, ExpressionSet or DGEList
 #' @param ... additional args, ignored for now
 pdata <- function(x, covariate_metadata = NULL, ...) {
@@ -592,7 +591,7 @@ pdata_metadata.EList <- function(x, ...) {
 #' Bioc-container specific assay data extraction functions
 #'
 #' Get assay matrix
-#'
+#' @export
 #' @param x SummarizedExperiment, ExpressionSet or DGEList
 #' @param ... additional args, ignored for now
 adata <- function(x, assay = NULL, ...) {
