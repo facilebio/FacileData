@@ -65,9 +65,12 @@
 #' * "feature_id": `string`
 #' * "name": `string`
 #' * "meta": `string`
-#' * "effective_length": `integer`
 #' * "source": `string`
 #'
+#' If more columns exist, they will be added to the sql table on the fly.
+#' Note that indexing of the extra columns is currently not handled and you
+#' will need to do that manually.
+#' 
 #' @md
 #' @rdname as.FacileDataSet
 #' @export
@@ -134,17 +137,18 @@ as.FacileDataSet.default <- function(x, ...) {
 #' @method as.FacileDataSet list
 #' @export
 #' @rdname as.FacileDataSet
-as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
-                                  source_assay = NULL,
-                                  assay_description = paste("Description for ", assay_name),
-                                  dataset_name = "DEFAULT_NAME",
-                                  dataset_meta = list(),
-                                  organism = "unspecified",
-                                  prune_dataset_meta = TRUE,
-                                  page_size = 2**12, cache_size = 2e5,
-                                  chunk_rows = 5000, chunk_cols = "ncol",
-                                  chunk_compression = 5,
-                                  covariate_def = NULL, ...) {
+as.FacileDataSet.list <- function(
+    x, path, assay_name, assay_type,
+    source_assay = NULL,
+    assay_description = paste("Description for ", assay_name),
+    dataset_name = "DEFAULT_NAME",
+    dataset_meta = list(),
+    organism = "unspecified",
+    prune_dataset_meta = TRUE,
+    page_size = 2**12, cache_size = 2e5,
+    chunk_rows = 5000, chunk_cols = "ncol",
+    chunk_compression = 5,
+    covariate_def = NULL, ...) {
   stopifnot(is.list(x))
   stopifnot(length(x) >= 1L)
   if (file.exists(path)) {
@@ -153,16 +157,12 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
 
   # names(x) defines the name of the `dataset` value for each internal dataset
   if (length(x) > 1L) {
-    # ensure that names of datasets are specified and unique
-    stopifnot(
-      is.character(names(x)),
-      sum(duplicated(names(x))) == 0L)
+    assert_list(x, names = "unique")
   } else if (!is.character(names(x))) {
     # there's only one dataset here and no name is provided, so we use a
     # default dataset name if the list is unnamed
     names(x) <- "dataset"
   }
-
 
   # All elements in list must be the same class, and a legit class at that!
   first <- x[[1L]]
@@ -225,7 +225,7 @@ as.FacileDataSet.list <- function(x, path, assay_name, assay_type,
 
   meta_yaml <- paste0(tempfile(), ".yaml")
   yaml::write_yaml(meta, meta_yaml)
-  path <- initializeFacileDataSet(path, meta_yaml)
+  path <- initializeFacileDataSet(path, meta_yaml) # creates sql database
 
   assert_directory_exists(path, access = "w")
   fds <- FacileDataSet(path)

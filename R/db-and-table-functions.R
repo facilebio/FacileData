@@ -15,19 +15,19 @@ primary_key <- function(x, table_name) {
 
 #' Adds rows to a table in a FacileDataSet
 #'
-#' This function first checks the data in the target table \code{table_name}
-#' to ensure that rows in \code{dat} that exist in \code{table_name} (by
+#' This function first checks the data in the target table `table_name`
+#' to ensure that rows in `dat` that exist in `table_name` (by
 #' checking the primary key) are not added.
 #'
 #' @export
 #' @importFrom DBI dbWriteTable
-#' @param dat the \code{data.frame} of rows to add to the table, which must
-#'   have a superset of columns present in the \code{table_name} that is being
+#' @param dat the `data.frame` of rows to add to the table, which must
+#'   have a superset of columns present in the `table_name` that is being
 #'   appended to
-#' @param x the \code{FacileDataSet}
-#' @param table_name the name of the table in \code{x} to add the rows of
-#'   \code{dat} to.
-#' @return invisibly returns the conformed version of \code{dat}.
+#' @param x the `FacileDataSet`
+#' @param table_name the name of the table in `x` to add the rows of
+#'   `dat` to.
+#' @return invisibly returns the conformed version of `dat`.
 append_facile_table <- function(dat, x, table_name, warn_existing = FALSE) {
   stopifnot(is.FacileDataSet(x))
   target <- try(tbl(x$con, table_name), silent=TRUE)

@@ -235,7 +235,6 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
     stop("`", facile_assay_name, "` assay already stored in FacileDataSet")
   }
 
-  # facile_assay_type <- match.arg(facile_assay_type, .assay.types)
   ainfo <- assay_info(x)
   if (facile_assay_type %in% ainfo$assay_type) {
     warning("assay exists of this type already: ", facile_assay_type,
@@ -388,20 +387,20 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   invisible(list(samples=samples, assay_sample_info=asi))
 }
 
-#' Appends new features to \code{feature_info} table
+#' Appends new features to `feature_info` table
 #'
 #' This function only adds features (feature_type, feature_id) that are not
-#' in the \code{feature_info} table already
+#' in the `feature_info` table already
 #'
 #' @export
-#' @param x The \code{FacileDataSet}
+#' @param x The `FacileDataSet`
 #' @param feature_info a table of new features that provides all columns
-#'   in \code{feature_info_tbl(x)}
-#' @param type A way to override (or set) the \code{feature_type} column of the
-#'   \code{feature_info} table
-#' @return invisible returns an annotated version of the \code{feature_info}
-#'   table with an \code{$added} column with \code{TRUE/FALSE} values for the
-#'   features that were new (and added) to the repository or \code{FALSE} to
+#'   in `feature_info_tbl(x)`
+#' @param type A way to override (or set) the `feature_type` column of the
+#'   `feature_info` table
+#' @return invisible returns an annotated version of the `feature_info`
+#'   table with an `$added` column with `TRUE/FALSE` values for the
+#'   features that were new (and added) to the repository or `FALSE` to
 #'   indicate that they were already in the database.
 append_facile_feature_info <- function(x, feature_info,
                                        type = feature_info$feature_type,
@@ -428,7 +427,7 @@ append_facile_feature_info <- function(x, feature_info,
   }
   
   added <- feature_info |>
-    distinct(feature_type, feature_id, .keep_all=TRUE) |>
+    distinct(feature_type, feature_id, .keep_all = TRUE) |>
     append_facile_table(x, 'feature_info', warn_existing = warn_existing)
   invisible(added)
 }
