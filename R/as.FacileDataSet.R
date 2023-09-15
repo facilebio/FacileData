@@ -148,7 +148,8 @@ as.FacileDataSet.list <- function(
     page_size = 2**12, cache_size = 2e5,
     chunk_rows = 5000, chunk_cols = "ncol",
     chunk_compression = 5,
-    covariate_def = NULL, ...) {
+    covariate_def = NULL, 
+    sample_filters = NULL, ...) {
   stopifnot(is.list(x))
   stopifnot(length(x) >= 1L)
   if (file.exists(path)) {
@@ -219,12 +220,15 @@ as.FacileDataSet.list <- function(
   meta <- list(
     name = dataset_name,
     organism = organism,
-    default_assay = assay_name,
-    datasets = ds_list,
-    sample_covariates = sample_covariates$eav_meta)
-
+    default_assay = assay_name)
+  if (test_character(sample_filters, min.len = 1)) {
+    meta$sample_filters <- sample_filters
+  }
+  meta$datasets <- ds_list
+  meta$sample_covariates <- sample_covariates$eav_meta
   meta_yaml <- paste0(tempfile(), ".yaml")
   yaml::write_yaml(meta, meta_yaml)
+  
   path <- initializeFacileDataSet(path, meta_yaml) # creates sql database
 
   assert_directory_exists(path, access = "w")

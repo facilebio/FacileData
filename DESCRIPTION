@@ -1,7 +1,7 @@
 Package: FacileData
 Type: Package
 Title: A fluent API for accessing multi-assay high-throughput genomics data
-Version: 0.98.97
+Version: 0.98.98
 Authors@R: c(
     person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre"),
       comment = c(ORCID = "0000-0002-0924-1754")),
