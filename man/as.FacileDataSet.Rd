@@ -41,6 +41,7 @@ as.FacileDataSet(
   chunk_cols = "ncol",
   chunk_compression = 5,
   covariate_def = NULL,
+  sample_filters = NULL,
   ...
 )
 }
@@ -154,8 +155,11 @@ but historical accident may have given special meaning to \code{"entrez"},
 \item "feature_id": \code{string}
 \item "name": \code{string}
 \item "meta": \code{string}
-\item "effective_length": \code{integer}
 \item "source": \code{string}
 }
+
+If more columns exist, they will be added to the sql table on the fly.
+Note that indexing of the extra columns is currently not handled and you
+will need to do that manually.
 }
 

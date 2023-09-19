@@ -22,7 +22,7 @@ in \code{feature_info_tbl(x)}}
 }
 \value{
 invisible returns an annotated version of the \code{feature_info}
-table with an \code{$added} column with \code{TRUE/FALSE} values for the
+table with an \verb{$added} column with \code{TRUE/FALSE} values for the
 features that were new (and added) to the repository or \code{FALSE} to
 indicate that they were already in the database.
 }
