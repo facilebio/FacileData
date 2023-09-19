@@ -566,7 +566,7 @@ fetch_assay_data.default <- function(x, features, samples=NULL,
                              as.matrix=FALSE, drop_samples = TRUE, ...,
                              subset.threshold=700, aggregate.by=NULL,
                              verbose=FALSE) {
-  stop("The FacileAPI requires that a specific method be written for this type.")
+  stop("fetch_assay_data not defined for class: ", class(x)[1])
 }
 
 #' NOTE: is fetch_assay_score really necessary?
@@ -580,44 +580,47 @@ fetch_assay_score <- function(x, features, samples=NULL, assay_name=NULL,
 #' @export
 fetch_assay_score.default <- function(x, features, samples=NULL, assay_name=NULL,
                               as.matrix=FALSE, ..., subset.threshold=700) {
-
-  stop("The FacileAPI requires that a specific method be written for this type.")
+  stop("fetch_assay_score not defined for class: ", class(x)[1])
 }
 
 #' @family FacileInterface
 #' @export
 #' @rdname sample-covariates
 #' @family API
-fetch_sample_covariates <- function(x, samples=NULL, covariates=NULL,
-                                    custom_key=Sys.getenv("USER"),
+fetch_sample_covariates <- function(x, covariates = NULL, samples = NULL,
+                                    custom_key = Sys.getenv("USER"),
                                     with_source = FALSE, ...) {
   UseMethod("fetch_sample_covariates")
 }
 
 #' @export
 #' @noRd
-fetch_sample_covariates.default <- function(x, samples=NULL, covariates=NULL,
-                                    custom_key=Sys.getenv("USER"), ...) {
-  stop("The FacileAPI requires that a specific method be written for this type.")
+fetch_sample_covariates.default <- function(x, covariates = NULL,
+                                            samples = NULL,
+                                            custom_key = Sys.getenv("USER"), 
+                                            ...) {
+  stop("fetch_sample_covariates not defined for class: ", class(x)[1])
 }
 
 #' @noRd
 #' @rdname sample-covariates
 #' @export
 #' @family FacileInterface
-fetch_custom_sample_covariates <- function(x, samples=NULL, covariates=NULL,
-                                           custom_key=Sys.getenv("USER"),
-                                           file.prefix="facile", ...) {
+fetch_custom_sample_covariates <- function(x, covariates = NULL, samples = NULL,
+                                           custom_key = Sys.getenv("USER"),
+                                           file.prefix = "facile", ...) {
   UseMethod("fetch_custom_sample_covariates")
 }
 
 #' @noRd
 #' @rdname sample-covariates
 #' @export
-fetch_custom_sample_covariates.default <- function(x, samples=NULL, covariates=NULL,
-                                           custom_key=Sys.getenv("USER"),
-                                           file.prefix="facile", ...) {
-  stop("The FacileAPI requires that a specific method be written for this type.")
+fetch_custom_sample_covariates.default <- function(x, covariates = NULL, 
+                                                   samples = NULL,
+                                                   custom_key = Sys.getenv("USER"),
+                                                   file.prefix = "facile", 
+                                                   ...) {
+  stop("fetch_custom_sample_covariates not defined for class: ", class(x)[1])
 }
 
 #' @export
@@ -637,7 +640,7 @@ with_assay_data.default <- function(x, features, assay_name = NULL,
                                     aggregate.by = "ewm",
                                     spread = TRUE, with_assay_name = FALSE, ...,
                                     verbose = FALSE, .fds = NULL) {
-  stop("The FacileAPI requires a specific method be written for this type.")
+  stop("with_assay_data not defined for class: ", class(x)[1])
 }
 
 #' Appends covariate columns to a query result
@@ -674,6 +677,6 @@ with_sample_covariates <- function(x, covariates = NULL, na.rm = FALSE,
 with_sample_covariates.default <- function(x, covariates = NULL, na.rm = FALSE,
                                            custom_key = Sys.getenv("USER"),
                                            .fds = NULL, ...) {
-  stop("The FacileAPI requires a specific method be written for this type.")
+  stop("with_sample_covariates not defined for class: ", class(x)[1])
 }
 

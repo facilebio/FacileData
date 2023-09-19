@@ -9,8 +9,8 @@
 \usage{
 fetch_sample_covariates(
   x,
-  samples = NULL,
   covariates = NULL,
+  samples = NULL,
   custom_key = Sys.getenv("USER"),
   with_source = FALSE,
   ...
@@ -27,8 +27,8 @@ with_sample_covariates(
 
 \method{fetch_sample_covariates}{FacileDataSet}(
   x,
-  samples = NULL,
   covariates = NULL,
+  samples = NULL,
   custom_key = Sys.getenv("USER"),
   with_source = FALSE,
   ...
@@ -36,8 +36,8 @@ with_sample_covariates(
 
 \method{fetch_sample_covariates}{facile_frame}(
   x,
-  samples = NULL,
   covariates = NULL,
+  samples = NULL,
   custom_key = Sys.getenv("USER"),
   with_source = FALSE,
   ...
@@ -46,9 +46,9 @@ with_sample_covariates(
 \arguments{
 \item{x}{a \code{FacileDataSet} connection}
 
-\item{samples}{a samples descriptor \code{tbl_*}}
-
 \item{covariates}{character vector of covariate names}
+
+\item{samples}{a samples descriptor \code{tbl_*}}
 
 \item{custom_key}{The key to use to fetch more custom annotations over
 the given samples}
@@ -67,6 +67,15 @@ rows from the \code{sample_covariate} table
 }
 \description{
 Note that this function will force the collection of \code{x}
+}
+\examples{
+# Retrieves a long EAV table of covariates
+long_covs <- an_fds() |> 
+  fetch_sample_covariates(c("cell_abbrev", "sex", "condition"))
+lc2 <- some_samples() |> 
+  fetch_sample_covariates(c("cell_abbrev", "sex", "condition"))
+wide_covs <- some_samples() |> 
+  with_sample_covariates(c("cell_abbrev", "sex", "condition"))
 }
 \seealso{
 Other FacileInterface: 

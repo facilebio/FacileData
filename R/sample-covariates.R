@@ -172,7 +172,7 @@ summary.wide_covariates <- function(object, ..., expanded = FALSE,
   as_facile_frame(out, fds(object), .valid_sample_check = FALSE)
 }
 
-sample_covariates.facile_frame <- function(x, ...){
+sample_covariates.facile_frame <- function(x, ...) {
   stop("what is this for")
   .fds <- fds(x)
 }
@@ -189,9 +189,17 @@ sample_covariates.facile_frame <- function(x, ...){
 #' @param custom_key The key to use to fetch more custom annotations over
 #'   the given samples
 #' @return rows from the \code{sample_covariate} table
+#' @examples
+#' # Retrieves a long EAV table of covariates
+#' long_covs <- an_fds() |> 
+#'   fetch_sample_covariates(c("cell_abbrev", "sex", "condition"))
+#' lc2 <- some_samples() |> 
+#'   fetch_sample_covariates(c("cell_abbrev", "sex", "condition"))
+#' wide_covs <- some_samples() |> 
+#'   with_sample_covariates(c("cell_abbrev", "sex", "condition"))
 fetch_sample_covariates.FacileDataSet <- function(
-    x, samples = NULL, covariates = NULL,
-    custom_key = Sys.getenv("USER"), with_source = FALSE, ...) {
+    x, covariates = NULL, samples = NULL, custom_key = Sys.getenv("USER"),
+    with_source = FALSE, ...) {
   if (is.null(samples)) {
     samples <- samples(x)
   } else {
@@ -219,9 +227,9 @@ fetch_sample_covariates.FacileDataSet <- function(
   }
 
   if (!is.null(custom_key)) {
-    custom <- fetch_custom_sample_covariates(x, samples,
-                                             covariates = covariates,
-                                             custom_key,
+    custom <- fetch_custom_sample_covariates(x, covariates = covariates,
+                                             samples = samples,
+                                             custom_key = custom_key,
                                              with_source = with_source)
     out <- bind_rows(collect(out, n=Inf), custom)
   }
@@ -233,7 +241,7 @@ fetch_sample_covariates.FacileDataSet <- function(
 #' @rdname sample-covariates
 #' @family API
 fetch_sample_covariates.facile_frame <- function(
-    x, samples = NULL, covariates = NULL,
+    x, covariates = NULL, samples = NULL,
     custom_key = Sys.getenv("USER"), with_source = FALSE, ...) {
   if (!is.null(samples)) {
     warning("`samples` ignored when fetching covariates from a facile_frame",
@@ -243,7 +251,7 @@ fetch_sample_covariates.facile_frame <- function(
   samples. <- assert_sample_subset(x)
   samples. <- distinct(samples., dataset, sample_id)
 
-  fetch_sample_covariates(fds(x), samples = samples., covariates = covariates,
+  fetch_sample_covariates(fds(x), covariates = covariates, samples = samples.,
                           custom_key = custom_key, with_source = with_source,
                           ...)
 }
@@ -258,7 +266,7 @@ fetch_sample_covariates.facile_frame <- function(
 #' @return covariate tbl
 #' @family API
 fetch_custom_sample_covariates.FacileDataSet <- function(
-    x, samples = NULL, covariates = NULL, custom_key = Sys.getenv("USER"),
+    x, covariates = NULL, samples = NULL, custom_key = Sys.getenv("USER"),
     with_source = FALSE, file.prefix = "facile", ...) {
   if (is.null(samples)) {
     samples <- samples(x)
@@ -318,11 +326,11 @@ fetch_custom_sample_covariates.FacileDataSet <- function(
 #' @param sample_filter_criteria optional list of filtering criteria that were
 #'   used to drill down into the samples we have the \code{annotatino}
 #'   data.frame for
-save_custom_sample_covariates <- function(x, annotation, name=NULL,
-                                          class='categorical',
-                                          custom_key=Sys.getenv("USER"),
-                                          file.prefix="facile",
-                                          sample_filter_critera=NULL) {
+save_custom_sample_covariates <- function(x, annotation, name = NULL,
+                                          class = "categorical",
+                                          custom_key = Sys.getenv("USER"),
+                                          file.prefix = "facile",
+                                          sample_filter_critera = NULL) {
   #' TODO: Figure out how to encode sample_filter_criteria into serialized
   #' (JSON) annotation file
   stopifnot(is.FacileDataSet(x))
@@ -394,8 +402,9 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
     select(dataset, sample_id) |>
     distinct(.keep_all=TRUE)
 
-  covs <- fetch_sample_covariates(.fds, samples, covariates,
-                                  custom_key=custom_key, ...)
+  covs <- fetch_sample_covariates(.fds, covariates = covariates,
+                                  samples = samples,
+                                  custom_key = custom_key, ...)
   covs <- spread_covariates(covs, .fds, ...)
   if (!is.null(covariates) && !is.null(names(covariates))) {
     covs <- rename(covs, !!covariates)

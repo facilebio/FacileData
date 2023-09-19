@@ -104,10 +104,11 @@ as.DGEList.matrix <- function(x, covariates = TRUE, feature_ids = NULL,
   ## Fetch appropriate covariate
   if (!is.null(covariates)) {
     if (isTRUE(covariates)) {
-      covariates <- fetch_sample_covariates(.fds, samples)
+      covariates <- fetch_sample_covariates(.fds, samples = samples)
       covariates <- spread_covariates(covariates)
     } else if (is.character(covariates)) {
-      covariates <- fetch_sample_covariates(.fds, samples, covariates)
+      covariates <- fetch_sample_covariates(.fds, covariates = covariates,
+                                            samples = samples)
       covariates <- spread_covariates(covariates)
     }
     assert_subset(c("dataset", "sample_id"), colnames(covariates))

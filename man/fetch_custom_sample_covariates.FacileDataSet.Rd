@@ -6,8 +6,8 @@
 \usage{
 \method{fetch_custom_sample_covariates}{FacileDataSet}(
   x,
-  samples = NULL,
   covariates = NULL,
+  samples = NULL,
   custom_key = Sys.getenv("USER"),
   with_source = FALSE,
   file.prefix = "facile",
