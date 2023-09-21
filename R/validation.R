@@ -43,6 +43,43 @@ test_categorical <- function(x, ...) {
   identical(check_categorical(x, ...), TRUE)
 }
 
+#' Check that a directory is a legit FacileDataSet directory
+#' 
+#' TODO: The FacileDataSet constructor allows users to specify where the
+#'   internal hdf5, sqlite, and meta.yaml assets are. We should update this
+#'   function to accept those arguments, and then replace the
+#'   [validate.facile.dirs()] with this checkmate-like validation stack.
+#'   
+#' @export
+#' @noRd
+check_facile_dataset_directory <- function(x, ...) {
+  if (!test_directory(x, "r")) {
+    return(sprintf("`%s` is not a readable directory", x))
+  }
+  e <- character()  
+  reqfiles <- c("meta.yaml", "data.h5", "data.sqlite")
+  for (rf in reqfiles) {
+    if (!file.exists(file.path(x, rf))) {
+      e <- c(e, paste(rf, "does not exist in directory"))
+    }
+  }
+  
+  if (length(e)) paste(e, collapse = "\n") else TRUE
+}
+
+#' @noRd
+#' @export
+test_facile_dataset_directory <- function(x, ...) {
+  identical(check_facile_dataset_directory(x, ...), TRUE)
+}
+
+#' @noRd
+#' @export
+assert_facile_dataset_directory <- function(x, ..., .var.name = vname(x), 
+                                            add = NULL) {
+  res <- check_facile_dataset_directory(x, ...)
+  makeAssertion(x, res, .var.name, add)
+}
 
 #' Check if argument is a FacileDataStore
 #'
@@ -111,7 +148,7 @@ test_facile_data_set <- function(x, ...) {
   identical(check_facile_data_set(x, ...), TRUE)
 }
 
-# checkmate-like validation functios -------------------------------------------
+# checkmate-like validation functions -------------------------------------------
 
 #' Check to see that samples are referenced correctly
 #'
