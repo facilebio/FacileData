@@ -13,7 +13,7 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
                                           verbose = FALSE) {
   fds. <- assert_facile_data_store(fds(x))
   if (!is.null(samples)) {
-    warning("`samples` ignored when fetching covariates from a facile_frame",
+    warning("`samples` ignored when fetching assay_data from a facile_frame",
             immediate. = TRUE)
   }
   if (is.null(assay_name)) {

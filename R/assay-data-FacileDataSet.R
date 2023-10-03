@@ -5,7 +5,7 @@
 #' @export
 #' @noRd
 fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
-                                           assay_name = default_assay(x),
+                                           assay_name = NULL,
                                            normalized = FALSE,
                                            batch = NULL, main = NULL,
                                            as.matrix = FALSE,
@@ -27,7 +27,9 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     }
   }
   
-  if (!is.null(assay_name) || is.character(assay_name)) {
+  if (is.null(assay_name)) {
+    assay_name <- default_assay(x)
+  } else {
     assert_string(assay_name)
     assert_choice(assay_name, assay_names(x))
   }
