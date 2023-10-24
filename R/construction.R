@@ -218,7 +218,7 @@ assert_valid_assay_datasets <- function(datasets, facile_feature_info,
 #'   features that were added to the internal `feature_info_tbl`.
 #' @importFrom edgeR calcNormFactors
 addFacileAssaySet <- function(x, datasets, facile_assay_name,
-                              facile_assay_type = .assay.types,
+                              facile_assay_type,
                               facile_feature_type = NULL,
                               facile_assay_description = NULL,
                               facile_feature_info,
@@ -231,6 +231,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   ## Parameter Checking --------------------------------------------------------
   stopifnot(is.FacileDataSet(x))
   assert_string(facile_assay_name)
+  assert_string(facile_assay_type)
   if (facile_assay_name %in% assay_names(x)) {
     stop("`", facile_assay_name, "` assay already stored in FacileDataSet")
   }
@@ -246,7 +247,7 @@ addFacileAssaySet <- function(x, datasets, facile_assay_name,
   }
   assert_string(facile_assay_description)
   storage_mode <- match.arg(storage_mode, .storage.modes)
-  assert_valid_assay_datasets(datasets, facile_feature_info, storage_mode)
+  assert_valid_assay_datasets(datasets, facile_feature_info, storage_mode, assay_name)
 
   ## Ensure no redunancy in facile_feature_info
   nf <- facile_feature_info |> 
