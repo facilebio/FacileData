@@ -146,6 +146,10 @@ filter.facile_frame <- function(.data, ..., .facilitate = NULL) {
 
 #' @export
 #' @noRd
+#' xx <- samples(an_fds()) |> with_sample_covariates()
+#' xx |> 
+#'   group_by(cell_type) |> 
+#'   summarize(avg = mean(ncells))
 group_by.facile_frame <- function(.data, ..., add = FALSE,
                                   # .drop = group_by_drop_default(.data),
                                   .drop = TRUE,
