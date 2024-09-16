@@ -418,22 +418,26 @@ fdata <- function(x, validate = FALSE, ...) {
 #' @noRd
 #' @export
 fdata.SummarizedExperiment <- function(x, validate = FALSE, ...) {
-  ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
-  if (is.null(ns)) stop("SummarizedExperiment required")
-  ns4 <- tryCatch(loadNamespace("S4Vectors"), error = function(e) NULL)
-  if (is.null(ns4)) stop("S4Vectors required")
-
-  out <- ns4$.as.data.frame.DataFrame(ns$rowData(x))
+  # ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
+  # if (is.null(ns)) stop("SummarizedExperiment required")
+  # ns4 <- tryCatch(loadNamespace("S4Vectors"), error = function(e) NULL)
+  # if (is.null(ns4)) stop("S4Vectors required")
+  #
+  # out <- ns4$.as.data.frame.DataFrame(ns$rowData(x))
+  reqpkg("SummarizedExperiment")
+  out <- SummarizedExperiment::as.data.frame(SummarizedExperiment::rowData(x))
   if (validate) validate.fdata(out, ...) else out
 }
 
 #' @noRd
 #' @export
 fdata.ExpressionSet <- function(x, validate = FALSE, ...) {
-  ns <- tryCatch(loadNamespace("Biobase"), error = function(e) NULL)
-  if (is.null(ns)) stop("Biobase required")
-
-  out <- ns$fData(x)
+  # ns <- tryCatch(loadNamespace("Biobase"), error = function(e) NULL)
+  # if (is.null(ns)) stop("Biobase required")
+  # 
+  # out <- ns$fData(x)
+  reqpkg("Biobase")
+  out <- Biobase::fData(x)
   if (validate) validate.fdata(out, ...) else out
 }
 
@@ -495,13 +499,16 @@ pdata <- function(x, covariate_metadata = NULL, ...) {
 #' @noRd
 #' @export
 pdata.SummarizedExperiment <- function(x, covariate_metadata = NULL,  ...) {
-  ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
-  if (is.null(ns)) stop("SummarizedExperiment required")
-  ns4 <- tryCatch(loadNamespace("S4Vectors"), error = function(e) NULL)
-  if (is.null(ns4)) stop("S4Vectors required")
-
-  df <- ns$colData(x)
-  ds <- ns4$.as.data.frame.DataFrame(df)
+  # ns <- tryCatch(loadNamespace("SummarizedExperiment"), error = function(e) NULL)
+  # if (is.null(ns)) stop("SummarizedExperiment required")
+  # ns4 <- tryCatch(loadNamespace("S4Vectors"), error = function(e) NULL)
+  # if (is.null(ns4)) stop("S4Vectors required")
+  # 
+  # df <- ns$colData(x)
+  # ds <- ns4$.as.data.frame.DataFrame(df)
+  reqpkg("SummarizedExperiment")
+  ds <- SummarizedExperiment::as.data.frame(SummarizedExperiment::colData(x))
+  
   validate.pdata(ds, ...)
 }
 

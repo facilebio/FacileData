@@ -127,7 +127,8 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
   if (!with_fds) {
     out <- set_fds(out, NULL)
   }
-
+  
+  attr(out, "samples_dropped") <- attr(A, "samples_dropped")
   out
 }
 
