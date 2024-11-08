@@ -244,10 +244,30 @@ transmute.facile_frame <- function(.data, ..., .facilitate = NULL) {
 
 #' @export
 #' @noRd
-ungroup.facile_frame <- function(x, ..., .facilitate = NULL) {
+#' @examples
+#' afds <- an_fds()
+#' ssa <- samples(afds) |> with_sample_covariates()
+#' ssg <- ssa |> 
+#'   group_by(cell_abbrev) |> 
+#'   mutate(n = n(), .before = 1L) |> 
+#'   ungroup()
+group_by.facile_frame <- function(
+    .data,
+    ...,
+    .add = FALSE,
+    .drop = group_by_drop_default(.data)) {
+  fds. <- fds(.data)
   res <- NextMethod()
-  # as_facile_frame(res, fds(x), .valid_sample_check = FALSE)
-  res
+  as_facile_frame(res, fds., .extra_classes(res), .valid_sample_check = FALSE)
+}
+
+#' 
+#' @export
+#' @noRd
+ungroup.facile_frame <- function(x, ..., .facilitate = NULL) {
+  fds. <- fds(x)
+  res <- NextMethod()
+  as_facile_frame(res, fds., .extra_classes(res), .valid_sample_check = FALSE)
 }
 
 # Joins ========================================================================

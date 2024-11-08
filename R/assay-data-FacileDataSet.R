@@ -151,6 +151,18 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
   finfo <- features(x, assay_name, feature_ids = feature_ids) |>
     collect(n = Inf) |>
     arrange(hdf5_index)
+  missed <- setdiff(feature_ids, finfo$feature_id)
+  if (nrow(finfo) == 0L) {
+    stop("No requested features were found")
+  }
+  if (length(missed) > 0L) {
+    msg <- sprintf(
+      "%d/%d features not found in assay: ",
+      length(missed),
+      length(feature_ids))
+    warning(msg, immediate. = TRUE)
+  }
+  
   atype <- finfo$assay_type[1L]
   ftype <- finfo$feature_type[1L]
   sinfo <- assay_sample_info(samples, assay_name, drop_samples = FALSE)
@@ -229,11 +241,24 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     aggregate <- FALSE
   }
   
+  aggregated <- NULL
   if (isTRUE(aggregate)) {
-    scores <- switch(aggregate.by,
-                     ewm = sparrow::eigenWeightedMean(vals, ...)$score,
-                     zscore = sparrow::zScore(vals, ...)$score)
-    vals <- matrix(scores, nrow=1, dimnames=list('score', names(scores)))
+    if (aggregate.by == "ewm") {
+      aggregated <- sparrow::eigenWeightedMean(vals, ...)
+    } else if (aggregate.by == "zscore") {
+      aggregated <- sparrow::zScore(vals, ...)
+    } else {
+      stop("Unknown aggregation method: ", aggregate.by)
+    }
+    
+    # scores <- switch(aggregate.by,
+    #                  ewm = sparrow::eigenWeightedMean(vals, ...)$score,
+    #                  zscore = sparrow::zScore(vals, ...)$score)
+    # vals <- matrix(scores, nrow=1, dimnames=list('score', names(scores)))
+    vals <- matrix(
+      aggregated$score,
+      nrow = 1L,
+      dimnames = list("score", names(aggregated$score)))
   }
   
   if (!as.matrix) {
@@ -255,6 +280,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
   }
   
   attr(vals, "samples_dropped") <- dropped.samples
+  attr(vals, "aggregated") <- aggregated
   set_fds(vals, x)
 }
 
