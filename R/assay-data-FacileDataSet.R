@@ -51,6 +51,17 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
   }
   features <- distinct(features, feature_id, .keep_all = TRUE)
   
+  # This was added in 2024-11-22, because I don't know why I thought we'd ask
+  # for multiple assay retrieval. These should be different calls to fetch_*
+  all.assays <- unique(features$assay)
+  if (length(all.assays) != 1L) {
+    stop("We should only allow 1 assay per fetch here")
+  }
+  if (all.assays != assay_name) {
+    stop("assay_name is different from features()$assay: ",
+         "assay_name: ", assay_name, " <> features()$assay: ", all.assays)
+  }
+
   # I had originally add tests for 0-row datasets returning data from all
   # samples (as if it were NULL) but this was throwing me for a loop in analysis
   # code. If sampels is a 0-row sample-descriptor, the user (like me, ugh) may
@@ -95,14 +106,27 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     }
   }
   
-  out <- lapply(assays, function(a) {
+  out <- sapply(assays, function(a) {
     f <- filter(features, .data$assay == .env$a)
     .fetch_assay_data(x, a, f$feature_id, samples, normalized,
                       batch, main, as.matrix, drop_samples,
                       subset.threshold, aggregate, aggregate.by, ...,
                       verbose = verbose)
+  }, simplify = FALSE)
+  
+  aggregated.stats <- lapply(out, function(xx) {
+    agg <- attr(xx, "aggregated")
+    if (is.list(agg)) {
+      agg$method <- aggregate.by
+      agg$weights <- dplyr::tibble(
+        feature_id = names(agg$weights),
+        weight = unname(agg$weights)) |> 
+        dplyr::arrange(dplyr::desc(weight))
+    }
+    agg
   })
-  dropped.samples <- bind_rows(lapply(out, attr, "samples_dropped"))
+  aggregated.stats <- aggregated.stats[[1L]]
+  dropped.samples <- lapply(out, attr, "samples_dropped") |> dplyr::bind_rows()
   
   if (length(out) == 1L) {
     out <- out[[1L]]
@@ -123,6 +147,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
   }
   
   attr(out, "samples_dropped") <- dropped.samples
+  attr(out, "aggregated") <- aggregated.stats
   out
 }
 

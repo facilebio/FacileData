@@ -473,10 +473,16 @@ validate.fdata <- function(x, ...) {
   # Ensure required columns are there, and that they are of the right type
   for (cname in names(req.cols)) {
     vals <- x[[cname]]
-    is.fn <- getFunction(paste0("is.", req.cols[cname]))
-    if (is.null(vals)) {
-      stop("Missing required fData column: ", cname)
+    if (is.null(vals)) stop("Missing required fData column: ", cname)
+
+    fn.name <- paste0("is.", req.cols[cname])
+    if (fn.name == "is.character" && is.factor(vals)) {
+      msg <- sprintf("Converting fData `%s` column from factor to character",
+                     cname)
+      warning(msg)
+      vals <- as.character(vals)
     }
+    is.fn <- getFunction(fn.name)
     if (!is.fn(vals)) {
       stop("'", cname, "' fData column not correct class: ", req.cols[cname])
     }
