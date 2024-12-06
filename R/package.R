@@ -1,5 +1,6 @@
 #' @import checkmate
 #' @import dplyr
+#' @import rlang
 #' @import methods
 #' @importFrom utils read.csv
 "_PACKAGE"

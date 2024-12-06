@@ -8,7 +8,7 @@ addFacileAssaySet(
   x,
   datasets,
   facile_assay_name,
-  facile_assay_type = .assay.types,
+  facile_assay_type,
   facile_feature_type = NULL,
   facile_assay_description = NULL,
   facile_feature_info,

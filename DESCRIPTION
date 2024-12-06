@@ -1,7 +1,7 @@
 Package: FacileData
 Type: Package
 Title: A fluent API for accessing multi-assay high-throughput genomics data
-Version: 0.98.102
+Version: 0.98.103
 Authors@R: c(
     person("Steve", "Lianoglou", , "slianoglou@gmail.com", c("aut", "cre"),
       comment = c(ORCID = "0000-0002-0924-1754")),
@@ -36,11 +36,13 @@ Imports:
   edgeR,
   jsonlite,
   lazyeval,
+  lifecycle,
   limma,
   methods,
   sparrow,
   reshape2,
   rhdf5,
+  rlang,
   RSQLite,
   qs,
   survival,
@@ -62,6 +64,6 @@ Suggests:
   testthat (>= 1.0.2),
   tidyr
 VignetteBuilder: knitr
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 Encoding: UTF-8
