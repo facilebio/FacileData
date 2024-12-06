@@ -85,7 +85,8 @@ group_map..data.frame <- function (
 #' # nonames
 #' isplit <- dplyr::group_split(iris, Species)
 #' # names
-#' isplit <- group_split.(iris, Species)
+#' dsplit <- group_split.(iris, Species)
+#' gsplit <- iris |> group_by(Species) |> group_split.()
 group_split. <- function(.tbl, ..., .keep = TRUE) {
   lifecycle::signal_stage("experimental", "group_split()")
   UseMethod("group_split.")
@@ -95,15 +96,22 @@ group_split. <- function(.tbl, ..., .keep = TRUE) {
 #' @export
 #' @method group_split. data.frame
 group_split..data.frame <- function(.tbl, ..., .keep = TRUE,  .sep = " / ") {
-  if (dplyr::is_grouped_df(.tbl)) {
-    grouped <- .tbl
-  } else {
-    grouped <- dplyr::group_by(.tbl, ...)
-  }
+  assert_string(.sep)
+  .tbl |> 
+    dplyr::group_by(...) |> 
+    group_split.(.keep = .keep, .sep = .sep)
+}
+
+
+#' @noRd
+#' @export
+#' @method group_split. grouped_df
+group_split..grouped_df <- function(.tbl, ..., .keep = TRUE,  .sep = " / ") {
+  assert_string(.sep)
+  assert_flag(.keep)
+  nms <- rlang::inject(paste(!!!dplyr::group_keys(.tbl), sep = .sep))
   
-  nms <- rlang::inject(paste(!!!dplyr::group_keys(grouped), sep = .sep))
-  
-  grouped |> 
+  .tbl |> 
     dplyr::group_split() |> 
     rlang::set_names(nms)
 }
