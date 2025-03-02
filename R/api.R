@@ -235,7 +235,7 @@ has_assay <- function(x, assay_name = NULL, ...) {
 #'     `FacileData:::.assay.types` vector
 #'   * `feature_type <chr>`: A string indicating the feature type to retrieve.
 #'      we can use any name for a feature type, but `"ensgid"`, `"enstid"`,
-#'      `"entrez"`, have special meaning.
+#'      `"entrez"`, `"uniprot"` have special meaning.
 #'   * `description <chr>`: string description
 #'   * `nfeatures <int>`: number of features we have info for
 #'   * `storage_mode <chr>`: `"integer"`, `"numeric"`
