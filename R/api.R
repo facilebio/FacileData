@@ -196,6 +196,7 @@ assay_units.FacileDataStore <- function(x, assay_name = default_assay(x),
                   rnaseq = "log2(counts per million)",
                   isoseq = "log2(counts per million)",
                   normcounts = "log2(normalized counts)",
+                  lognorm = "log2(normalized)",
                   "values")
     if (abbreviate) {
       out <- sub("counts per million", "CPM", out)
@@ -205,6 +206,7 @@ assay_units.FacileDataStore <- function(x, assay_name = default_assay(x),
                   rnaseq = "counts",
                   isoseq = "counts",
                   normcounts = "normalized counts",
+                  lognorm = "log normalized data",
                   "values")
   }
 
