@@ -14,6 +14,9 @@
 #'
 #' dplyr::group_map returns an unnamed list, but a named list is often handy
 #' https://github.com/tidyverse/dplyr/issues/4223#issuecomment-469269857
+#' 
+#' We have also changed the default value for `.keep` to be `TRUE`, since
+#' I find that almost always use it this way anway.
 #'
 #' @export
 #' @param .data a grouped tibble
@@ -33,7 +36,7 @@
 #' 
 #' # with names
 #' iris |> group_by(Species) |> group_map.(~ nrow(.x))
-group_map. <- function(.data, .f, ..., .keep = FALSE) {
+group_map. <- function(.data, .f, ..., .keep = TRUE) {
   lifecycle::signal_stage("experimental", "group_map.()")
   UseMethod("group_map.")
 }
@@ -43,8 +46,8 @@ group_map. <- function(.data, .f, ..., .keep = FALSE) {
 #' @method group_map. data.frame
 group_map..data.frame <- function (
     .data, .f, ...,
-    .keep = FALSE, keep = deprecated(),
-    .sep = " / ") {
+    .keep = TRUE, keep = deprecated(),
+    .sep = "__") {
   assert_string(.sep)
   if (!missing(keep)) {
     lifecycle::deprecate_warn("1.0.0", "group_map(keep = )", 
@@ -95,7 +98,7 @@ group_split. <- function(.tbl, ..., .keep = TRUE) {
 #' @noRd
 #' @export
 #' @method group_split. data.frame
-group_split..data.frame <- function(.tbl, ..., .keep = TRUE,  .sep = " / ") {
+group_split..data.frame <- function(.tbl, ..., .keep = TRUE,  .sep = "__") {
   assert_string(.sep)
   .tbl |> 
     dplyr::group_by(...) |> 
@@ -106,7 +109,7 @@ group_split..data.frame <- function(.tbl, ..., .keep = TRUE,  .sep = " / ") {
 #' @noRd
 #' @export
 #' @method group_split. grouped_df
-group_split..grouped_df <- function(.tbl, ..., .keep = TRUE,  .sep = " / ") {
+group_split..grouped_df <- function(.tbl, ..., .keep = TRUE,  .sep = "__") {
   assert_string(.sep)
   assert_flag(.keep)
   nms <- rlang::inject(paste(!!!dplyr::group_keys(.tbl), sep = .sep))
