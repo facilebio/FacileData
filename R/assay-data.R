@@ -16,9 +16,6 @@ fetch_assay_data.facile_frame <- function(x, features = NULL, samples = NULL,
     warning("`samples` ignored when fetching assay_data from a facile_frame",
             immediate. = TRUE)
   }
-  if (is.null(assay_name)) {
-    assay_name <- default_assay(fds.)
-  }
 
   fetch_assay_data(fds., features = features, samples = x,
                    assay_name = assay_name, normalized = normalized,

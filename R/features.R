@@ -156,14 +156,16 @@ feature_name_map <- function(x, feature_type) {
 #' 
 #' @export
 #' @param x FacileDataSet
-#' @param features a character string of fearture ids (requires assay_name)
+#' @param features a character string of feature ids (requires assay_name)
 #'   or a data.frame with feature_id column.
 #' @param assay_name the assay to get the featurespace from. if this is provided,
 #'   it will trump an already existing assay_name column in \code{features}
 #' @return a feature descriptor with feature_id and assay_name, which can be
 #'   used to absolutely find features
-create_assay_feature_descriptor <- function(x, features = NULL,
-                                            assay_name = NULL) {
+create_assay_feature_descriptor <- function(
+    x, 
+    features = NULL,
+    assay_name = NULL) {
   # TODO: Refactor the code inside `fetch_assay_data` to use this.
   assert_facile_data_store(x)
   if (is.null(assay_name)) assay_name <- default_assay(x)
@@ -186,7 +188,7 @@ create_assay_feature_descriptor <- function(x, features = NULL,
   } else if (is.data.frame(features) && is.null(features[["assay"]])) {
     features[["assay"]] <- assay_name
   }
-  
+  features <- dplyr::distinct(features, .data$feature_id, .data$assay)
   assert_assay_feature_descriptor(features, x)
   features
 }

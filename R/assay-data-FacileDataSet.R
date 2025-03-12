@@ -27,29 +27,15 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     }
   }
   
-  if (is.null(assay_name)) {
-    assay_name <- default_assay(x)
-  } else {
-    assert_string(assay_name)
-    assert_choice(assay_name, assay_names(x))
-  }
+  features <- x |> 
+    create_assay_feature_descriptor(
+      features,
+      assay_name = assay_name) |> 
+    dplyr::distinct(feature_id, assay)
+  assay_name <- unique(features$assay)
   
-  if (missing(features) || is.null(features)) {
-    assert_string(assay_name)
-    features <- FacileData::features(x, assay_name) |> collect(n=Inf)
-  } else {
-    if (is.factor(features)) features <- as.character(features)
-    if (is.character(features)) {
-      features <- tibble(feature_id=features, assay=assay_name)
-    }
-    stopifnot(is(features, 'tbl') || is(features, 'data.frame'))
-    if (!'assay' %in% colnames(features) || !is.character(features$assay)) {
-      features <- collect(features, n = Inf)
-      features[["assay"]] <- assay_name
-    }
-    assert_assay_feature_descriptor(features)
-  }
-  features <- distinct(features, feature_id, .keep_all = TRUE)
+  assert_string(assay_name)
+  assert_choice(assay_name, assay_names(x))
   
   # This was added in 2024-11-22, because I don't know why I thought we'd ask
   # for multiple assay retrieval. These should be different calls to fetch_*

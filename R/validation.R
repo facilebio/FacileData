@@ -223,14 +223,17 @@ assert_assay_feature_descriptor <- function(x, .fds=NULL) {
 
 #' @export
 #' @rdname assertions
-is_assay_feature_descriptor <- function(x, .fds=NULL) {
+is_assay_feature_descriptor <- function(x, .fds = NULL) {
   if (!(is(x, 'tbl') || is(x, 'data.frame'))) return(FALSE)
   if (!has_columns(x, c('assay', 'feature_id'))) return(FALSE)
+  if (!is.character(x[["assay"]])) return(FALSE)
+  if (!is.character(x[["feature_id"]])) return(FALSE)
+  
   if (!is.null(.fds)) {
     assert_facile_data_store(.fds)
-    bad.assay <- setdiff(x[['assay']], assay_names(.fds))
+    bad.assay <- setdiff(x[["assay"]], assay_names(.fds))
     if (length(bad.assay)) {
-      stop("Assay(s) in assay_feature_descriptor not found: ",
+      stop("Assay in assay_feature_descriptor not found in FacileDataStore: ",
            paste(bad.assay, collapse=','))
     }
   }
