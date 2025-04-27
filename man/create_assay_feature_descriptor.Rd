@@ -9,7 +9,7 @@ create_assay_feature_descriptor(x, features = NULL, assay_name = NULL)
 \arguments{
 \item{x}{FacileDataSet}
 
-\item{features}{a character string of fearture ids (requires assay_name)
+\item{features}{a character string of feature ids (requires assay_name)
 or a data.frame with feature_id column.}
 
 \item{assay_name}{the assay to get the featurespace from. if this is provided,

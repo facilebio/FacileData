@@ -27,13 +27,9 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     }
   }
   
-  features <- x |> 
-    create_assay_feature_descriptor(
-      features,
-      assay_name = assay_name) |> 
-    dplyr::distinct(feature_id, assay)
+  features <- create_assay_feature_descriptor(x, features, assay_name = assay_name)
   assay_name <- unique(features$assay)
-  
+
   assert_string(assay_name)
   assert_choice(assay_name, assay_names(x))
   
@@ -76,8 +72,7 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     return(samples)
   }
   
-  assays <- unique(features$assay)
-  n.assays <- length(assays)
+  n.assays <- length(all.assays)
   if (n.assays > 1L && as.matrix) {
     stop("Fetching from multiple assays requires return in melted form")
   }
@@ -92,13 +87,16 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
     }
   }
   
-  out <- sapply(assays, function(a) {
+  out <- sapply(all.assays, function(a) {
     f <- filter(features, .data$assay == .env$a)
     .fetch_assay_data(x, a, f$feature_id, samples, normalized,
                       batch, main, as.matrix, drop_samples,
                       subset.threshold, aggregate, aggregate.by, ...,
                       verbose = verbose)
   }, simplify = FALSE)
+  
+  ftype <- features$feature_type[1L]
+  atype <- features$assay_type[1L]
   
   aggregated.stats <- lapply(out, function(xx) {
     agg <- attr(xx, "aggregated")
@@ -132,6 +130,9 @@ fetch_assay_data.FacileDataSet <- function(x, features, samples = NULL,
       sample_id = sapply(info, "[[", 2L))
   }
   
+  attr(out, "assay_name") <- assay_name
+  attr(out, "feature_type") <- ftype
+  attr(out, "assay_type") <- atype
   attr(out, "samples_dropped") <- dropped.samples
   attr(out, "aggregated") <- aggregated.stats
   out

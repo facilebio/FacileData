@@ -23,6 +23,6 @@ https://github.com/tidyverse/dplyr/issues/4223#issuecomment-469269857
 # nonames
 isplit <- dplyr::group_split(iris, Species)
 # names
-nsplit <- group_split.(iris, Species)
+dsplit <- group_split.(iris, Species)
 gsplit <- iris |> group_by(Species) |> group_split.()
 }

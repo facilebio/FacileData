@@ -4,14 +4,14 @@ if (!exists("afds")) afds <- an_fds()
 .fids.good <- c("ENSG00000000460", "ENSG00000001167", "ENSG00000000005")
 .fids.bad <- c("ESNG002", "ENS00004")
 
-expect_that("undefined assay_name uses default_assay", {
+test_that("undefined assay_name uses default_assay", {
   # If we don't specify an assay_name, the default_assay will be returned
   fd <- create_assay_feature_descriptor(afds, .fids.good)
   expect_setequal(fd$feature_id, .fids.good)
   expect_equal(unique(fd$assay), default_assay(afds))
 })
 
-expect_that("duplicated feature_ids/assay_name are removed", {
+test_that("duplicated feature_ids/assay_name are removed", {
   # Duplicated 
   fd <- create_assay_feature_descriptor(afds, rep(.fids.good, 2))
   expect_equal(nrow(fd), length(.fids.good))
@@ -28,7 +28,7 @@ expect_that("duplicated feature_ids/assay_name are removed", {
     paste(fids.aname$feature_id, fids.aname$assay))
 })
 
-expect_that("alternate assay_name supporrted", {
+test_that("alternate assay_name supporrted", {
   alt.assay <- setdiff(assay_names(afds), default_assay(afds))[1]
   fd <- create_assay_feature_descriptor(
     afds,
@@ -40,7 +40,7 @@ expect_that("alternate assay_name supporrted", {
   expect_false(unique(fd$assay) == default_assay(afds))
 })
 
-expect_that("no defined feature_id returns all features for assay", {
+test_that("no defined feature_id returns all features for assay", {
   fids.default <- create_assay_feature_descriptor(afds)
   expected.default <- features(afds)
   expect_setequal(fids.default$feature_id, expected.default$feature_id)

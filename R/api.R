@@ -682,3 +682,41 @@ with_sample_covariates.default <- function(x, covariates = NULL, na.rm = FALSE,
   stop("with_sample_covariates not defined for class: ", class(x)[1])
 }
 
+#' What was the assay_name this result was run on?
+#' @export
+#' @param x the facile object
+assay_name <- function(x, ...) {
+  UseMethod("assay_name", x)
+}
+
+#' @noRd
+#' @export
+assay_name.default <- function(x, ...) {
+  attr(x, "assay_name")
+}
+
+#' The assay type this result was run on
+#' @export
+#' @param x the facile object
+assay_type <- function(x, ...) {
+  UseMethod("assay_type", x)
+}
+
+#' @noRd
+#' @export
+assay_type.default <- function(x, ...) {
+  attr(x, "assay_type")
+}
+
+#' What was the feature_type result was run on?
+#' @export
+#' @param x the facile object
+feature_type <- function(x, ...) {
+  UseMethod("feature_type", x)
+}
+
+#' @noRd
+#' @export
+feature_type.default <- function(x, ...) {
+  attr(x, "feature_type")
+}

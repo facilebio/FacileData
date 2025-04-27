@@ -20,7 +20,7 @@ columns:
 \code{FacileData:::.assay.types} vector
 \item \verb{feature_type <chr>}: A string indicating the feature type to retrieve.
 we can use any name for a feature type, but \code{"ensgid"}, \code{"enstid"},
-\code{"entrez"}, have special meaning.
+\code{"entrez"}, \code{"uniprot"} have special meaning.
 \item \verb{description <chr>}: string description
 \item \verb{nfeatures <int>}: number of features we have info for
 \item \verb{storage_mode <chr>}: \code{"integer"}, \code{"numeric"}

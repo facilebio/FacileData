@@ -176,19 +176,34 @@ create_assay_feature_descriptor <- function(
     assert_choice(assay_name, assay_names(x))
   }
   
+  ainfo <- assay_info(x, assay_name)
+  
   if (is.null(features)) {
     features <- collect(features(x, assay_name), n = Inf)
   } else if (is.character(features)) {
-    features <- tibble(feature_id = features, assay = assay_name)
+    features <- tibble(
+      feature_id = features, 
+      assay = assay_name
+    )
   } else if (is(features, 'tbl_sql')) {
     features <- mutate(collect(features, n = Inf))
     if (is.null(features[["assay"]])) {
       features[["assay"]] <- assay_name
     }
-  } else if (is.data.frame(features) && is.null(features[["assay"]])) {
-    features[["assay"]] <- assay_name
   }
-  features <- dplyr::distinct(features, .data$feature_id, .data$assay)
+  
+  add.cols <- setdiff(c("assay", "assay_type", "feature_type"), colnames(features))  
+  for (add in add.cols) {
+    features[[add]] <- ainfo[[add]]
+  }
+
+  features <- dplyr::distinct(
+    features, 
+    .data$feature_id, 
+    .data$assay,
+    .data$assay_type,
+    .data$feature_type)
+  
   assert_assay_feature_descriptor(features, x)
   features
 }

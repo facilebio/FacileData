@@ -4,7 +4,7 @@
 \alias{group_map.}
 \title{A version of group_map that provides a named list in return}
 \usage{
-group_map.(.data, .f, ..., .keep = FALSE)
+group_map.(.data, .f, ..., .keep = TRUE)
 }
 \arguments{
 \item{.data}{a grouped tibble}
@@ -25,6 +25,10 @@ a list of elemnts returned by \code{.f} over the grouped elements in
 \description{
 dplyr::group_map returns an unnamed list, but a named list is often handy
 https://github.com/tidyverse/dplyr/issues/4223#issuecomment-469269857
+}
+\details{
+We have also changed the default value for \code{.keep} to be \code{TRUE}, since
+I find that almost always use it this way anway.
 }
 \examples{
 # no names
