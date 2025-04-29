@@ -44,7 +44,6 @@ Imports:
   rhdf5,
   rlang,
   RSQLite,
-  qs,
   survival,
   utils,
   yaml
