@@ -25,6 +25,22 @@ an_fds <- function() {
   FacileDataSet(fn)
 }
 
+#' Creates a list of SummarizedExperiment to turn into an_fds FDS
+#' @export
+#' @return list of names SummarizedExperiemnts
+an_se_list <- function() {
+  fds. <- an_fds()
+  samples(fds.) |> 
+    with_sample_covariates() |> 
+    group_by(dataset) |> 
+    group_map.(~ {
+      se <- suppressWarnings(biocbox(.x, class = "SummarizedExperiment"))
+      colnames(se) <- sub(".*?__", "", colnames(se))
+      SummarizedExperiment::rowData(se)$hdf5_index <- NULL
+      se
+    })
+}
+
 #' A set of features that show variable expression across some_celltypes()
 #' 
 #' These features had strong ANOVA hits across [some_celltypes()]

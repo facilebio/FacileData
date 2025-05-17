@@ -67,7 +67,8 @@ FacileDataSet <- function(path, data.fn = NULL, sqlite.fn = NULL,
                           hdf5.fn = NULL, meta.fn = NULL, anno.dir = NULL,
                           cache_size = 80000,
                           db.loc = c('reference', 'temporary', 'memory'),
-                          ...) {
+                          ...,
+                          validate_metadata = TRUE) {
   db.loc <- match.arg(db.loc)
 
   if (is.null(data.fn)) data.fn <- file.path(path, 'data.sqlite')
@@ -76,8 +77,16 @@ FacileDataSet <- function(path, data.fn = NULL, sqlite.fn = NULL,
   if (is.null(meta.fn)) meta.fn <- file.path(path, 'meta.yaml')
   if (is.null(anno.dir)) anno.dir <- file.path(path, 'custom-annotation')
 
-  paths <- validate.facile.dirs(path, data.fn, sqlite.fn, hdf5.fn, meta.fn,
-                                anno.dir)
+  paths <- validate.facile.dirs(
+    path,
+    data.fn,
+    sqlite.fn,
+    hdf5.fn,
+    meta.fn,
+    anno.dir,
+    validate_metadata = validate_metadata
+  )
+
   ## Update some parameters in the connection for increased speed
   ## http://stackoverflow.com/questions/1711631
   ##
@@ -123,7 +132,7 @@ FacileDataSet <- function(path, data.fn = NULL, sqlite.fn = NULL,
   ## meta information
   class(out) <- c("FacileDataSet", "FacileDataStore")
 
-  mi <- meta_info(out)
+  mi <- meta_info(out, validate_metadata = validate_metadata)
   out['organism'] <- mi$organism
 
   if (is.null(mi$default_assay)) {
@@ -212,9 +221,9 @@ meta_file <- function(x) {
 #' @rdname meta-info
 #' @param fn The path to the `meta.yaml` file.
 #' @return The `meta.yaml` file parsed into a list-of-lists representation
-meta_info <- function(x, fn = meta_file(x)) {
+meta_info <- function(x, fn = meta_file(x), validate_metadata = TRUE) {
   assert_facile_data_set(x)
-  out <- assert_valid_meta_file(fn, as.list = TRUE)
+  out <- assert_valid_meta_file(fn, as.list = TRUE, validate = validate_metadata)
   out
 }
 

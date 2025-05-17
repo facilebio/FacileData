@@ -210,7 +210,7 @@ sample_info_tbl.FacileDataSet <- function(x) {
 #' Validates the bits required in a legit FacileDataSet directory.
 #' @noRd
 validate.facile.dirs <- function(path, data.fn, sqlite.fn, hdf5.fn, meta.fn,
-                                 anno.dir) {
+                                 anno.dir, ..., validate_metadata = TRUE) {
   if (!dir.exists(path)) {
     stop("Top level FacileData directory does not exist: ", path)
   }
@@ -239,7 +239,11 @@ validate.facile.dirs <- function(path, data.fn, sqlite.fn, hdf5.fn, meta.fn,
       warning("HDF5 file is not under parent directory", immediate.=TRUE)
     }
   }
-  meta.fn <- assert_valid_meta_file(meta.fn) |> normalizePath()
+  if (validate_metadata) {
+    assert_valid_meta_file(meta.fn)
+  }
+  meta.fn <- normalizePath(meta.fn)
+  
   if (!dir.exists(anno.dir)) {
     stop("Directory for custom annotations does not exist: ", anno.dir)
   } else {

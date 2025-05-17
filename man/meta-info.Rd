@@ -9,7 +9,7 @@
 \usage{
 meta_file(x)
 
-meta_info(x, fn = meta_file(x))
+meta_info(x, fn = meta_file(x), validate_metadata = TRUE)
 
 \method{default_assay}{FacileDataSet}(x)
 
