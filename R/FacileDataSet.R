@@ -135,7 +135,7 @@ FacileDataSet <- function(path, data.fn = NULL, sqlite.fn = NULL,
   mi <- meta_info(out, validate_metadata = validate_metadata)
   out['organism'] <- mi$organism
 
-  if (is.null(mi$default_assay)) {
+  if (is.null(mi$default_assay) && length(assay_names(out)) > 0L) {
     mi$default_assay <- assay_names(out)[1L]
   }
   out['default_assay'] <- mi$default_assay

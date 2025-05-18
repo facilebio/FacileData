@@ -36,17 +36,53 @@
 #'   Recall that dataset,sample_id (ie. dataset,colnames(assay_matrix)) are
 #'   the primary key's of the data in `x`
 #' @param ... stuff
+#' @param add_samples if TRUE (default) the dataset,sample combinations are
+#'   added to the sample_info table
 #' @param missing_value what to fill in to the internal hdf5 assay matrix for
 #'   features that are not present in `assay_matrix` but exist in the
 #'   `assay_name` feature space. Default is 0
-fds_add_assay_data <- function(x, assay_matrix, assay_name, dataset_name, ...,
-                               missing_value = 0L) {
+fds_add_assay_data <- function(
+    x,
+    assay_matrix,
+    assay_name,
+    dataset_name,
+    ...,
+    add_samples = TRUE,
+    missing_value = 0L,
+    chunk_rows = 5000,
+    chunk_cols = "ncol",
+    chunk_compression = 4
+) {
   checkmate::assert_class(x, "FacileDataSet")
-  checkmate::assert_multi_class(assay_matrix, c("matrix", "Matrix"))
+  checkmate::assert_string(assay_name)
+  checkmate::assert_string(dataset_name)
+  checkmate::assert_flag(add_samples)
+  
+  # for some reason tximport creates SummarizedExperiments with `assay()` matrices
+  # as actual data.frames
+  checkmate::assert_multi_class(assay_matrix, c("matrix", "Matrix", "data.frame"))
   checkmate::assert_character(rownames(assay_matrix))
   checkmate::assert_character(colnames(assay_matrix))
-  checkmate::test_string(assay_name)
-  checkmate::test_string(assay_type)
+  
+  sample_id <- checkmate::assert_character(
+    colnames(assay_matrix),
+    len = ncol(assay_matrix),
+    unique = TRUE)
+  feature_id <- checkmate::assert_character(
+    rownames(assay_matrix),
+    len = nrow(assay_matrix),
+    unique = TRUE)
+  
+  samples.data <- tibble(
+    assay = assay_name,
+    dataset = dataset_name,
+    sample_id = sample_id
+  )
+  
+  features.data <- tibble(
+    feature_id = feature_id,
+    data_index = seq_along(feature_id)
+  )
   
   assays_all <- assay_info(x)
   ainfo <- filter(assay_info(x), .data$assay == .env$assay_name)
@@ -69,35 +105,102 @@ fds_add_assay_data <- function(x, assay_matrix, assay_name, dataset_name, ...,
     collect()
   
   stopifnot(
-    "hdf5_index is not sequential" = {
+    "hdf5_index is not sequential [this should be impossible]" = {
       all.equal(1:nrow(features.fds), features.fds$hdf5_index)
     }
   )
   
-  features.data <- tibble(
-    feature_id = checkmate::assert_character(rownames(assay_matrix)),
-    data_index = seq(n())
-  )
   
   # universe of features, ones that are registered and ones that are in the
   # assay matrix
   features.universe <- full_join(features.fds, features.data, by = "feature_id")
   features.unknown <- filter(features.universe, is.na(hdf5_index))
   features.missing <- filter(features.universe, is.na(data_index))
-  
-  a.go <- matrix(
-    missing_value, 
-    nrow = nrow(ffeatures), 
-    ncol = ncol(assay_matrix),
-    dimnames = list(ffeatures$feature_id, colnames(assay_matrix)))
+  features.go <- filter(features.universe, !is.na(data_index))
   
   assay_matrix <- as.matrix(assay_matrix)
+  if (storage.mode(assay_matrix) == "logical") {
+    storage.mode(assay_matrix) <- "integer"
+  }
+  checkmate::assert_choice(storage.mode(assay_matrix), c("integer", "double"))
+  
   if (ainfo$storage_mode == "integer" && storage.mode(assay_matrix) != "integer") {
     assay_matrix <- round(assay_matrix)
     storage.mode(assay_matrix) <- "integer"
   }
-  checkmate::assert_choice()
-  assay_registered <- assay_info()  
+  
+  a.go <- matrix(
+    missing_value, 
+    nrow = nrow(features.fds), 
+    ncol = ncol(assay_matrix),
+    dimnames = list(features.fds$feature_id, samples.data$sample_id)
+  )
+  
+  if (is.character(chunk_cols) && chunk_cols == "ncol") {
+    xchunk.cols <- ncol(a.go)
+  } else if (is.integer(chunk_cols)) {
+    xchunk.cols <- min(chunk_cols, ncol(a.go))
+  } else {
+    stop("Unrecognized value for chunk.cols: ", chunk_cols)
+  }
+  
+  xchunk.rows <- min(chunk_rows = 5000, nrow(a.go))
+  chunk <- c(xchunk.rows, xchunk.cols)
+  dname <- sprintf('assay/%s/%s', assay_name, dataset_name)
+  
+  a.go[features.go$hdf5_index, ] <- assay_matrix[features.go$data_index,]
+  
+  if (chunk_compression == 0) {
+    rhdf5::h5createDataset(
+      hdf5fn(x),
+      dname,,
+      dim(a.go),
+      storage.mode = ainfo$storage_mode,
+      level = 0,
+      filter = "NONE"
+    )
+  } else {
+    rhdf5::h5createDataset(
+      hdf5fn(x),
+      dname,
+      dim(a.go),
+      storage.mode = ainfo$storage_mode,
+      chunk = chunk,
+      level = chunk_compression
+    )
+  }
+
+  rhdf5::h5write(a.go, file = hdf5fn(x), name = dname)
+  
+  if (ainfo$assay_type %in% c("rnaseq", "isoseq", "pseudobulk")) {
+    libsize <- colSums(a.go)
+    normfactor <- edgeR::calcNormFactors(a.go, lib.size = libsize)
+  } else {
+    libsize <- -1
+    normfactor <- -1
+  }
+
+  asi <- samples.data |> 
+    mutate(
+      hdf5_index = seq(ncol(a.go)),
+      libsize = libsize,
+      normfactor = normfactor
+    ) |> 
+    append_facile_table(x, "assay_sample_info")
+  
+  if (add_samples) {
+    samples_added <- samples.data |> 
+      distinct(dataset, sample_id) |> 
+      mutate(parent_id = "") |> 
+      append_facile_table(x, "sample_info")
+  } else {
+    samples_added <- tibble(
+      dataset = character(), 
+      sample_id = character(),
+      parent_id = character())
+  }
+  
+  invisible(list(assay_sample_info = asi, samples_added = samples_added))
 }
 
 #' Register a new assay to a feature space
@@ -114,8 +217,10 @@ fds_register_assay <- function(
     x, 
     assay_name, 
     assay_type, 
-    feature_type, ...,
-    storage_mode = c("numeric", "integer")
+    feature_type, 
+    description = NULL, 
+    storage_mode = c("numeric", "integer"),
+    ...
 ) {
   checkmate::assert_class(x, "FacileDataSet")
   checkmate::assert_string(assay_name)
@@ -127,39 +232,49 @@ fds_register_assay <- function(
   if (assay_name %in% assay_names(x)) {
     stop("Assay name already exists: ", assay_name)
   }
-  
-  fspace <- feature_space(x) |> 
-    filter(.data$feature_type == .env$feature_type)
-  
-  if (nrow(fspace) != 1L) {
-    stop("feature_type `", feature_type, "` not registered in dataset, ",
-         "consider running fds_add_feature_space()")
+  if (!feature_type %in% feature_types(x)) {
+    stop(sprintf("feature_type `%s` not registered", feature_type))
   }
+  
+  assay_features <- features(x, feature_type = feature_type) |> 
+    arrange(feature_id) |> 
+    collect() |> 
+    transmute(
+      assay = assay_name,
+      feature_id,
+      hdf5_index = seq(n())
+    )
+  
+  if (is.null(description)) {
+    description <- sprintf(
+      "`%s` [%s] assay for `%s` features",
+      assay_name,
+      assay_type,
+      feature_type
+    )
+  }
+  checkmate::assert_string(description)
   
   # add to assay_info table
   ainfo <- tibble(
     assay = assay_name,
     assay_type = assay_type,
     feature_type = feature_type,
-    nfeatures = fspace$n,
+    description = description,
+    nfeatures = nrow(assay_features),
     storage_mode = storage_mode
   )
   
   ai <- append_facile_table(ainfo, x, "assay_info")
+  af <- append_facile_table(assay_features, x, "assay_feature_info")
   
-  afeatures <- fspace |> 
-    transmute(
-      assay = assay_name,
-      feature_id,
-      hdf5_index = seq(n())
-    ) |> 
-    append_facile_table(x, "assay_feature_info")
+  # add new subdirectory in hdf5 file
+  h5name <- sprintf("assay/%s", assay_name)
+  stopifnot(
+    "hdf5 assay creation success" = rhdf5::h5createGroup(hdf5fn(x), h5name)
+  )
   
-  list(
-    assay_info = ainfo,
-    features = afeatures
-  )  
-  # add map to assay_feature_info table to map feature_id <> hd5 idx
+  invisible(list(assay_info = ai, features = af))
 }
 
 #' Add a new feature space to add assay data for
@@ -186,7 +301,6 @@ fds_add_feature_space <- function(
     feature_info,
     description = NULL,
     feature_type = NULL,
-    assays = NULL,
     ...) {
   checkmate::assert_class(x, "FacileDataSet")
   checkmate::assert_data_frame(feature_info, min.rows = 1L)
@@ -202,17 +316,8 @@ fds_add_feature_space <- function(
   
   dupes <- feature_info[duplicated(feature_info),]
   if (nrow(dupes) > 0) {
-    stop("Duplicated features in feature_info")
+    stop(nrow(dupes), " duplicated features found in feature_info")
   }
-  
-  if (is.null(description)) {
-    description <- sprintf(
-      "%d row feature-space for `%s` feature_type",
-      nrow(feature_info),
-      ftype
-    )
-  }
-  checkmate::assert_string(description)
   
   if (feature_type %in% feature_types(x)) {
     stop("Feature type `", feature_type, "` already registered")

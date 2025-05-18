@@ -49,13 +49,13 @@ append_facile_table <- function(dat, x, table_name, warn_existing = FALSE) {
     }
     add.me <- anti_join(dat, skip, by=pk)
     if (nrow(add.me)) {
-      dbWriteTable(x$con, table_name, add.me, append=TRUE)
+      DBI::dbWriteTable(x$con, table_name, add.me, append=TRUE)
       add.me$added <- TRUE
     }
     dat <- bind_rows(add.me, skip)
   } else {
     dat$added <- TRUE
-    dbWriteTable(x$con, table_name, dat, append=TRUE)
+    DBI::dbWriteTable(x$con, table_name, dat, append=TRUE)
   }
 
   invisible(dat)

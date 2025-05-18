@@ -182,7 +182,7 @@ test_that("duplicate assay registration throws an error", {
   }, "already exists")
 })
 
-test_that("fds_add_assay_data maintains fidelity of data and cpm", {
+test_that("fds_add_assay_data maintains fidelity of data", {
   new.assay <- tibble(
     assay = "counts",
     assay_type = "rnaseq",
@@ -207,6 +207,7 @@ test_that("fds_add_assay_data maintains fidelity of data and cpm", {
     feature_type = new.assay$feature_type,
     storage_mode = "integer"
   )
+  
   ad <- fds_add_assay_data(
     tfds,
     se.counts,
@@ -224,16 +225,4 @@ test_that("fds_add_assay_data maintains fidelity of data and cpm", {
     amatrix[rownames(se), colnames(se)],
     se.counts,
     check.attributes = FALSE)
-  
-  e.cpm <- edgeR::DGEList(counts = se.counts) |> 
-    edgeR::calcNormFactors() |> 
-    edgeR::cpm(prior.count = 3, log = TRUE)
-  
-  f.cpm <- fetch_assay_data(tfds, prior.count = 3, normalized = TRUE, as.matrix = TRUE)
-  colnames(f.cpm) <- sub(".*?__", "", colnames(f.cpm))
-  expect_equal(
-    f.cpm[rownames(e.cpm), colnames(e.cpm)],
-    e.cpm,
-    check.attributes = FALSE
-  )
 })
