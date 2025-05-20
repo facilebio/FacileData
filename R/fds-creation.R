@@ -116,9 +116,19 @@ fds_add_assay_data <- function(
   features.universe <- full_join(features.fds, features.data, by = "feature_id")
   features.unknown <- filter(features.universe, is.na(hdf5_index))
   features.missing <- filter(features.universe, is.na(data_index))
-  features.go <- filter(features.universe, !is.na(data_index))
   
-  assay_matrix <- as.matrix(assay_matrix)
+  if (nrow(features.unknown) > 0) {
+    warning(nrow(features.unknown), " input features not registered: ignoring")
+  }
+  
+  features.go <- features.universe |> 
+    filter(!is.na(data_index), !is.na(hdf5_index))
+  if (nrow(features.go) == 0) {
+    stop("No features in assay_matrix match the features in registered assay")
+  }
+  
+  assay_matrix.all <- as.matrix(assay_matrix)
+  assay_matrix <- assay_matrix.all[features.go$data_index,,drop = FALSE]
   if (storage.mode(assay_matrix) == "logical") {
     storage.mode(assay_matrix) <- "integer"
   }
@@ -127,6 +137,16 @@ fds_add_assay_data <- function(
   if (ainfo$storage_mode == "integer" && storage.mode(assay_matrix) != "integer") {
     assay_matrix <- round(assay_matrix)
     storage.mode(assay_matrix) <- "integer"
+  }
+  
+  # This probably shouldn't be here, but this whole universe was built with
+  # initial assumption that we really only care about NGS data
+  if (ainfo$assay_type %in% c("rnaseq", "isoseq", "pseudobulk")) {
+    libsize <- colSums(assay_matrix)
+    normfactor <- edgeR::calcNormFactors(assay_matrix, lib.size = libsize)
+  } else {
+    libsize <- -1
+    normfactor <- -1
   }
   
   a.go <- matrix(
@@ -148,7 +168,7 @@ fds_add_assay_data <- function(
   chunk <- c(xchunk.rows, xchunk.cols)
   dname <- sprintf('assay/%s/%s', assay_name, dataset_name)
   
-  a.go[features.go$hdf5_index, ] <- assay_matrix[features.go$data_index,]
+  a.go[features.go$hdf5_index, ] <- assay_matrix
   
   if (chunk_compression == 0) {
     rhdf5::h5createDataset(
@@ -172,14 +192,6 @@ fds_add_assay_data <- function(
 
   rhdf5::h5write(a.go, file = hdf5fn(x), name = dname)
   
-  if (ainfo$assay_type %in% c("rnaseq", "isoseq", "pseudobulk")) {
-    libsize <- colSums(a.go)
-    normfactor <- edgeR::calcNormFactors(a.go, lib.size = libsize)
-  } else {
-    libsize <- -1
-    normfactor <- -1
-  }
-
   asi <- samples.data |> 
     mutate(
       hdf5_index = seq(ncol(a.go)),
@@ -200,7 +212,12 @@ fds_add_assay_data <- function(
       parent_id = character())
   }
   
-  invisible(list(assay_sample_info = asi, samples_added = samples_added))
+  out <- list(
+    assay_sample_info = asi,
+    samples_added = samples_added,
+    features_unknoun = features.universe,
+    reatures_missing = features.missing)
+  invisible(out)
 }
 
 #' Register a new assay to a feature space

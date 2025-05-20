@@ -58,7 +58,7 @@ append_facile_table <- function(dat, x, table_name, warn_existing = FALSE) {
     DBI::dbWriteTable(x$con, table_name, dat, append=TRUE)
   }
 
-  invisible(dat)
+  invisible(dplyr::as_tibble(dat))
 }
 
 # Database Table Accessors =====================================================

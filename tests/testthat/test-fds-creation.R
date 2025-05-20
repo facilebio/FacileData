@@ -6,6 +6,12 @@ if (!exists("se.list")) {
     arrange(feature_id)
 }
 
+.new.assay <- tibble(
+  assay = "counts",
+  assay_type = "rnaseq",
+  feature_type = "ensgid"
+)
+
 cleanup_fds <- function(fds.dir, fds.name = "tfds", ..., verbose = FALSE) {
   if (exists(fds.name, parent.frame())) {
     if (verbose) message("Cleaning up temp fds: ", fds.name)
@@ -89,11 +95,6 @@ test_that("same feature space can't be added twice", {
 
 # Assay insertion ==============================================================
 test_that("assay registration works", {
-  new.assay <- tibble(
-    assay = "counts",
-    assay_type = "rnaseq",
-    feature_type = "ensgid"
-  )
   on.exit(cleanup_fds(fds.dir, "tfds"))
   
   fds.dir <- tempfile("tes_fdsdir__")
@@ -112,9 +113,9 @@ test_that("assay registration works", {
 
   fds_register_assay(
     tfds,
-    assay_name = new.assay$assay,
-    assay_type = new.assay$assay_type,
-    feature_type = new.assay$feature_type,
+    assay_name = .new.assay$assay,
+    assay_type = .new.assay$assay_type,
+    feature_type = .new.assay$feature_type,
     storage_mode = "integer"
   )
   
@@ -129,11 +130,11 @@ test_that("assay registration works", {
   ainfo <- assay_info(tfds)
   expect_data_frame(ainfo, nrows = 1L)
   expect_equal(
-    select(ainfo, all_of(colnames(new.assay))),
-    new.assay, 
+    select(ainfo, all_of(colnames(.new.assay))),
+    .new.assay, 
     check.attributes = FALSE)
   
-  afeatures <- features(tfds, assay = new.assay$assay)
+  afeatures <- features(tfds, assay = .new.assay$assay)
   expect_data_frame(afeatures, nrows = nrow(ensembl_genes))
   
   # ensure entire 1:nrow() sequential space covered by hdf5_index column
@@ -146,11 +147,6 @@ test_that("assay registration works", {
 })
 
 test_that("duplicate assay registration throws an error", {
-  new.assay <- tibble(
-    assay = "counts",
-    assay_type = "rnaseq",
-    feature_type = "ensgid"
-  )
   on.exit(cleanup_fds(fds.dir, "tfds"))
   
   fds.dir <- tempfile("tes_fdsdir__")
@@ -165,29 +161,24 @@ test_that("duplicate assay registration throws an error", {
   
   fds_register_assay(
     tfds,
-    assay_name = new.assay$assay,
-    assay_type = new.assay$assay_type,
-    feature_type = new.assay$feature_type,
+    assay_name = .new.assay$assay,
+    assay_type = .new.assay$assay_type,
+    feature_type = .new.assay$feature_type,
     storage_mode = "integer"
   )
   
   expect_error({
     fds_register_assay(
       tfds,
-      assay_name = new.assay$assay,
-      assay_type = new.assay$assay_type,
-      feature_type = new.assay$feature_type,
+      assay_name = .new.assay$assay,
+      assay_type = .new.assay$assay_type,
+      feature_type = .new.assay$feature_type,
       storage_mode = "integer"
     )
   }, "already exists")
 })
 
 test_that("fds_add_assay_data maintains fidelity of data and cpm", {
-  new.assay <- tibble(
-    assay = "counts",
-    assay_type = "rnaseq",
-    feature_type = "ensgid"
-  )
   se <- se.list[[1]]
   se.counts <- SummarizedExperiment::assay(se, "counts")
   
@@ -202,15 +193,15 @@ test_that("fds_add_assay_data maintains fidelity of data and cpm", {
   )
   rassay <- fds_register_assay(
     tfds,
-    assay_name = new.assay$assay,
-    assay_type = new.assay$assay_type,
-    feature_type = new.assay$feature_type,
+    assay_name = .new.assay$assay,
+    assay_type = .new.assay$assay_type,
+    feature_type = .new.assay$feature_type,
     storage_mode = "integer"
   )
   ad <- fds_add_assay_data(
     tfds,
     se.counts,
-    assay_name = new.assay$assay,
+    assay_name = .new.assay$assay,
     dataset_name = se$dataset[1]
   )
   
@@ -226,6 +217,115 @@ test_that("fds_add_assay_data maintains fidelity of data and cpm", {
     check.attributes = FALSE)
   
   e.cpm <- edgeR::DGEList(counts = se.counts) |> 
+    edgeR::calcNormFactors() |> 
+    edgeR::cpm(prior.count = 3, log = TRUE)
+  
+  f.cpm <- fetch_assay_data(tfds, prior.count = 3, normalized = TRUE, as.matrix = TRUE)
+  colnames(f.cpm) <- sub(".*?__", "", colnames(f.cpm))
+  expect_equal(
+    f.cpm[rownames(e.cpm), colnames(e.cpm)],
+    e.cpm,
+    check.attributes = FALSE
+  )
+})
+
+test_that("fds_add_assay handles non 1:1 input featurespace vs registered featurespace", {
+  on.exit(cleanup_fds(fds.dir, "tfds"))
+  
+  se <- se.list[[1]]
+  se.counts.all <- SummarizedExperiment::assay(se, "counts")
+  take <- sample(nrow(se.counts.all), 500)
+  se.counts <- se.counts.all[take,]
+  missing.val <- -1L
+  
+  fds.dir <- tempfile("tes_fdsdir__")
+  tfds <- fds_initialize(fds.dir, "human")
+  fspace <- fds_add_feature_space(
+    tfds, 
+    feature_info = ensembl_genes,
+    feature_type = "ensgid",
+    description = "example ensembl gene universe"
+  )
+  rassay <- fds_register_assay(
+    tfds,
+    assay_name = .new.assay$assay,
+    assay_type = .new.assay$assay_type,
+    feature_type = .new.assay$feature_type,
+    storage_mode = "integer"
+  )
+  ad <- fds_add_assay_data(
+    tfds,
+    se.counts,
+    assay_name = .new.assay$assay,
+    dataset_name = se$dataset[1],
+    missing_value = missing.val
+  )
+  
+  amatrix <- fetch_assay_data(tfds, as.matrix = TRUE)
+  colnames(amatrix) <- sub(".*?__", "", colnames(amatrix))
+  expect_equal(nrow(amatrix), nrow(fspace))
+  expect_equal(
+    amatrix[rownames(se.counts), colnames(se.counts)],
+    se.counts,
+    check.attributes = FALSE)
+  # all rownames returned that are not
+  expect_setequal(
+    amatrix[!rownames(amatrix) %in% rownames(se.counts), ] |> as.vector(),
+    missing.val
+  )
+})
+
+test_that("adding assay data with unkown features properly warns caller", {
+  on.exit(cleanup_fds(fds.dir, "tfds"))
+  
+  se <- se.list[[1]]
+  se.counts.all <- SummarizedExperiment::assay(se, "counts")
+  
+  take <- sample(nrow(se.counts.all), 500)
+  se.counts <- se.counts.all[take,]
+  rename <- sample(nrow(se.counts), 10)
+  rownames(se.counts)[rename] <- sample(letters, length(rename))
+  expected.counts <- se.counts[-rename,]
+  
+  fds.dir <- tempfile("tes_fdsdir__")
+  tfds <- fds_initialize(fds.dir, "human")
+  fspace <- fds_add_feature_space(
+    tfds, 
+    feature_info = ensembl_genes,
+    feature_type = "ensgid",
+    description = "example ensembl gene universe"
+  )
+  rassay <- fds_register_assay(
+    tfds,
+    assay_name = .new.assay$assay,
+    assay_type = .new.assay$assay_type,
+    feature_type = .new.assay$feature_type,
+    storage_mode = "integer"
+  )
+  
+  expect_warning({
+    ad <- fds_add_assay_data(
+      tfds,
+      se.counts,
+      assay_name = .new.assay$assay,
+      dataset_name = se$dataset[1]
+    )
+  }, sprintf("%d.*features not registered", length(rename)))
+  
+  amatrix <- fetch_assay_data(tfds, as.matrix = TRUE)
+  colnames(amatrix) <- sub(".*?__", "", colnames(amatrix))
+  expect_equal(nrow(amatrix), nrow(fspace))
+  
+  expect_equal(
+    amatrix[rownames(expected.counts), colnames(expected.counts)],
+    expected.counts,
+    check.attributes = FALSE)
+  expect_setequal(
+    amatrix[!rownames(amatrix) %in% rownames(expected.counts), ] |> as.vector(),
+    0
+  )
+  
+  e.cpm <- edgeR::DGEList(counts = expected.counts) |> 
     edgeR::calcNormFactors() |> 
     edgeR::cpm(prior.count = 3, log = TRUE)
   
