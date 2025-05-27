@@ -87,9 +87,17 @@ supported.assay.container <- function(x) {
   any(is(x) %in% supported)
 }
 
-extract.assay <- function(x, assay_name=NULL) {
+extract.assay <- function(x, assay_name = NULL) {
   if (is(x, 'DGEList')) {
-    out <- x$counts
+    if (is.null(assay_name)) {
+      assay_name <- "counts"
+    }
+    out <- x[[assay_name]]
+    checkmate::assert_matrix(out, nrows = nrow(x), ncols = ncol(x))
+    stopifnot(
+      "concordant rows" = all.equal(rownames(out), rownames(x)),
+      "concordant cols" = all.equal(clnames(out), colnames(x))
+    )
   } else if (is(x, "EList")) {
     out <- x$E
   } else if (is(x, 'eSet')) {
