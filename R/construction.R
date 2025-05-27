@@ -96,7 +96,7 @@ extract.assay <- function(x, assay_name = NULL) {
     checkmate::assert_matrix(out, nrows = nrow(x), ncols = ncol(x))
     stopifnot(
       "concordant rows" = all.equal(rownames(out), rownames(x)),
-      "concordant cols" = all.equal(clnames(out), colnames(x))
+      "concordant cols" = all.equal(colnames(out), colnames(x))
     )
   } else if (is(x, "EList")) {
     out <- x$E
