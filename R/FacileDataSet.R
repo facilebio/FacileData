@@ -263,14 +263,15 @@ default_assay.FacileDataSet <- function(x) {
 #' @param as.list boolean, if `FALSE` (default) returns a list, otherwise
 #'   summarizes results into a tibble.
 #' @return meta information about the datasets in `x` as a `list` or `tibble`
-dataset_definitions <- function(x, as.list=TRUE) {
-  defs <- meta_info(x)$datasets
+dataset_definitions <- function(x, as.list = TRUE, validate_metadata = TRUE) {
+  defs <- meta_info(x, validate_metadata = validate_metadata)$datasets
   if (!as.list) {
     defs <- lapply(names(defs), function(ds) {
-      i <- defs[[ds]]
-      tibble(dataset=ds, url=i$url, description=i$description)
+      defs[[ds]] |> 
+        dplyr::as_tibble() |> 
+        dplyr::mutate(dataset = ds, .before = 1L)
     })
-    defs <- bind_rows(defs)
+    defs <- dplyr::bind_rows(defs)
   }
   defs
 }
@@ -278,8 +279,17 @@ dataset_definitions <- function(x, as.list=TRUE) {
 #' @noRd
 #' @export
 #' @importFrom yaml yaml.load_file
-covariate_definitions.FacileDataSet <- function(x, as.list = TRUE, ...) {
-  out <- meta_info(x)$sample_covariates
+covariate_definitions.FacileDataSet <- function(
+    x, 
+    as.list = TRUE, 
+    ...,
+    validate_metadata = TRUE) {
+  out <- meta_info(x, validate_metadata = validate_metadata)$sample_covariates
+  if (is.null(out)) {
+    warning("No sample covariate definitions defined")
+    return(NULL)
+  }
+  
   if (!as.list) {
     out <- lapply(names(out), function(name) {
       i <- out[[name]]

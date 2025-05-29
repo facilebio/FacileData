@@ -10,7 +10,13 @@ fds_add_assay_data(
   assay_name,
   dataset_name,
   ...,
-  missing_value = 0L
+  dataset_description = "No dataset description provided",
+  dataset_url = "No dataset url provided",
+  add_samples = TRUE,
+  missing_value = 0L,
+  chunk_rows = 5000,
+  chunk_cols = "ncol",
+  chunk_compression = 4
 )
 }
 \arguments{
@@ -23,6 +29,9 @@ Recall that dataset,sample_id (ie. dataset,colnames(assay_matrix)) are
 the primary key's of the data in \code{x}}
 
 \item{...}{stuff}
+
+\item{add_samples}{if TRUE (default) the dataset,sample combinations are
+added to the sample_info table}
 
 \item{missing_value}{what to fill in to the internal hdf5 assay matrix for
 features that are not present in \code{assay_matrix} but exist in the

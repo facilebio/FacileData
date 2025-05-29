@@ -18,6 +18,58 @@
 #    a. add assa daya to an assay already added in (2)
 #    b. this will add sample-metadata if these are bioc data containers
 
+#' Add (or update?) sample level metadata
+#' @export
+#' @param x a FacileDataSet
+#' @param sample_data a tibble of data,sample_id,... columns
+#' @param update If FALSE (default), any covariates that already exist for
+#'   samples in the database will not be updated
+fds_add_sample_data <- function(
+  x,
+  sample_data,
+  update = FALSE,
+  covariate_def = NULL,
+  parents = NULL,
+  ...,
+  validate_metadata = TRUE
+) {
+  checkmate::assert_class(x, "FacileDataSet")
+  checkmate::assert_data_frame(sample_data, min.cols = 3)
+  checkmate::assert_subset(c("dataset", "sample_id"), colnames(sample_data))
+  checkmate::assert_list(covariate_def, names = "unique", null.ok = TRUE)
+  if (!is.null(parents)) {
+    warning("we don't manage sample hierarchy yet")
+  }
+  
+  sample_data <- .prepare_sample_data(sample_data, ...)
+  
+  eav = as.EAVtable(pdat, covariate_def = covariate_def)
+  
+  # We need to update the faciledataset meta.yaml with these covariates
+  eav_meta <- attr(eav, "covariate_def")
+  fds_meta <- meta_info(x, validate_metadata = validate_metadata)
+  
+  
+  # Check for duplicates entries in the eav table here, otherwise injecting it
+  # into the database will raise an error
+  stopifnot(
+    nrow(distinct(eav, dataset, sample_id, variable)) == nrow(eav))
+  
+  samples <- eav |>
+    distinct(dataset, sample_id) |>
+    mutate(parent_id = "")
+  
+}
+
+.prepare_sample_data <- function(sample_data, ...) {
+  # we used to really care about survival data
+  for (cname in colnames(sample_data)) {
+    vals <- sample_data[[cname]]
+    if (is(vals, "Surv")) sample_data[[cname]] <- as_cSurv(vals)
+  }
+  sample_data
+}
+
 #' Add an assay matrix to a pre-registered assay in an FDS.
 #'
 #' This functions adds data to an already registered assay. The rownames() of
@@ -53,6 +105,7 @@ fds_add_assay_data <- function(
   chunk_cols = "ncol",
   chunk_compression = 4
 ) {
+  # TODO: add entry to meta::dataset section
   checkmate::assert_class(x, "FacileDataSet")
   checkmate::assert_string(assay_name)
   checkmate::assert_string(dataset_name)
@@ -77,7 +130,7 @@ fds_add_assay_data <- function(
     len = nrow(assay_matrix),
     unique = TRUE
   )
-
+  
   samples.data <- tibble(
     assay = assay_name,
     dataset = dataset_name,
@@ -216,7 +269,9 @@ fds_add_assay_data <- function(
       parent_id = character()
     )
   }
-
+  
+  fds_modify_meta_dataset(x, dataset_name, ...)
+  
   out <- list(
     assay_sample_info = asi,
     samples_added = samples_added,
@@ -224,6 +279,77 @@ fds_add_assay_data <- function(
     reatures_missing = features.missing
   )
   invisible(out)
+}
+
+#' Adds dataset-level metadata to a FacileDataSet
+#' 
+#' Extracts all named arguments with dataset_* prefix that are strings and adds
+#' it to the meta.yamll::datasets
+#' 
+#' @export
+#' @param x a faciledataset
+#' @param dataset_name the name (string) of the dataset
+#' @param ... metadata variable to write to the meta.yaml file. arguments that
+#'   are strings and are prefixed with `dataset_` will be added. The `dataset_`
+#'   prefix is removed when serialized so `dataset_description` will be saved
+#'   as datasets.<dataset_name>.description in the yaml file
+#' @param .nowrite even if there are changes to be made to the yaml file, we
+#'   won't reserialize it. this is used for testingn purposes so we don't
+#'   overwrite a the meta.yaml files when testing/debugging
+#' @return a named list of dataset metadata variables that were changed as a
+#'   result of this function call
+fds_modify_meta_dataset <- function(x, dataset_name, ..., .nowrite = FALSE) {
+  checkmate::assert_class(x, "FacileDataSet")
+  checkmate::assert_string(dataset_name)
+  update <- FALSE
+  
+  args.all <- list(...)
+  args.name <- grepl("dataset_[a-zA-Z]", names(args.all))
+  args.string <- vapply(args.all, checkmate::test_string, FALSE)
+  args.keep <- args.name & args.string
+  
+  args <- args.all[args.keep]
+  names(args) <- sub("dataset_", "", names(args))
+  
+  meta.list <- meta_info(x, validate_metadata = FALSE)
+  if (is.null(meta.list$datasets)) {
+    update <- TRUE
+    meta.list$datasets <- list()
+  }
+  
+  out <- list()
+  dinfo <- meta.list$datasets[[dataset_name]]
+  
+  if (is.null(dinfo)) {
+    update <- TRUE
+    dinfo <- list()
+    if (length(args) == 0L) {
+      warning(
+        "A new dataset is being added and no metadata was provided, ",
+        "making defaults")
+      args$description <- "No description provided"
+      args$url <- "No URL provided"
+    }
+  } else if (length(args) == 0) {
+    message("no op performed: no dataset_* args provided for metadata update")
+    return(list())
+  }
+  
+  for (aname in names(args)) {
+    aval <- args[[aname]]
+    if (!identical(dinfo[[aname]], aval)) {
+      update <- TRUE
+      dinfo[[aname]] <- aval
+      out[[aname]] <- aval
+    }
+  }
+  
+  if (update && !isTRUE(.nowrite)) {
+    meta.list$datasets[[dataset_name]] <- dinfo
+    yaml::write_yaml(meta.list, meta_file(x))
+  }
+  
+  out
 }
 
 #' Register a new assay to a feature space

@@ -9,7 +9,6 @@ fds_add_feature_space(
   feature_info,
   description = NULL,
   feature_type = NULL,
-  assays = NULL,
   ...
 )
 }

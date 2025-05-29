@@ -9,8 +9,9 @@ fds_register_assay(
   assay_name,
   assay_type,
   feature_type,
-  ...,
-  storage_mode = c("numeric", "integer")
+  description = NULL,
+  storage_mode = c("numeric", "integer"),
+  ...
 )
 }
 \arguments{

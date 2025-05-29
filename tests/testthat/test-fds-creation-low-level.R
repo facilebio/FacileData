@@ -79,17 +79,14 @@ test_that("same feature space can't be added twice", {
     description = "example ensembl gene universe"
   )
 
-  expect_error(
-    {
-      fds_add_feature_space(
-        tfds,
-        feature_info = ensembl_genes,
-        feature_type = "ensgid",
-        description = "example ensembl gene universe"
-      )
-    },
-    "already registered"
-  )
+  expect_error(regexp = "already registered", {
+    fds_add_feature_space(
+      tfds,
+      feature_info = ensembl_genes,
+      feature_type = "ensgid",
+      description = "example ensembl gene universe"
+    )
+  })
 })
 
 # Assay insertion ==============================================================
@@ -125,12 +122,10 @@ test_that("assay registration works", {
 
   # check that the assay group was created in the hdf5 file
   fid <- rhdf5::H5Fopen(hdf5fn(tfds))
-  info <- tryCatch(
-    {
-      rhdf5::H5Gget_info_by_name(fid, "/assay/counts")
-    },
-    error = function(x) NULL
-  )
+  info <- tryCatch(error = function(x) NULL, {
+    rhdf5::H5Gget_info_by_name(fid, "/assay/counts")
+  })
+
   expect_list(info, names = "unique")
 
   # check db tables setup
@@ -180,18 +175,15 @@ test_that("duplicate assay registration throws an error", {
     storage_mode = "integer"
   )
 
-  expect_error(
-    {
-      fds_register_assay(
-        tfds,
-        assay_name = new.assay$assay,
-        assay_type = new.assay$assay_type,
-        feature_type = new.assay$feature_type,
-        storage_mode = "integer"
-      )
-    },
-    "already exists"
-  )
+  expect_error(regexp = "already exists", {
+    fds_register_assay(
+      tfds,
+      assay_name = new.assay$assay,
+      assay_type = new.assay$assay_type,
+      feature_type = new.assay$feature_type,
+      storage_mode = "integer"
+    )
+  })
 })
 
 test_that("fds_add_assay_data maintains fidelity of data", {
@@ -219,14 +211,35 @@ test_that("fds_add_assay_data maintains fidelity of data", {
     feature_type = new.assay$feature_type,
     storage_mode = "integer"
   )
-
+  
+  dname <- se$dataset[1]
   ad <- fds_add_assay_data(
     tfds,
     se.counts,
     assay_name = new.assay$assay,
-    dataset_name = se$dataset[1]
+    dataset_name = dname,
+    dataset_description = "Testing first dataset"
   )
+  
+  # meta.yaml should have been updated
+  dinfo <- dataset_definitions(tfds, validate_metadata = FALSE)
+  expect_list(dinfo, len = 1L, names = "unique")
+  expect_equal(names(dinfo), dname)
 
+  minfo <- expect_list(dinfo[[dname]], len = 1L)
+  expect_equal(minfo$description, "Testing first dataset")
+  
+  # check hdf5 internal files
+  h5info <- rhdf5::h5ls(hdf5fn(tfds)) |> 
+    filter(group == "/assay/counts", .data$name == .env$dname)
+  expect_data_frame(h5info, nrows = 1)
+  expect_equal(h5info$otype, "H5I_DATASET")
+  expect_equal(tolower(h5info$dclass), "integer")
+  expect_equal(
+    sprintf("%d x %d", nrow(se), ncol(se)),
+    h5info$dim
+  )
+  
   amatrix <- fetch_assay_data(tfds, as.matrix = TRUE)
   colnames(amatrix) <- sub(".*?__", "", colnames(amatrix))
 
@@ -239,3 +252,4 @@ test_that("fds_add_assay_data maintains fidelity of data", {
     check.attributes = FALSE
   )
 })
+

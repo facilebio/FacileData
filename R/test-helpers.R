@@ -37,7 +37,7 @@ an_se_list <- function() {
       se <- suppressWarnings(biocbox(.x, class = "SummarizedExperiment"))
       colnames(se) <- sub(".*?__", "", colnames(se))
       SummarizedExperiment::rowData(se)$hdf5_index <- NULL
-      se
+      SummarizedExperiment::`assayNames<-`(se, value = "counts")
     })
 }
 
