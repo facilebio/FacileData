@@ -1,4 +1,5 @@
 if (!exists("se.list")) {
+  afds <- an_fds()
   se.list <- an_se_list()
   ensembl_genes <- SummarizedExperiment::rowData(se.list[[1L]]) |>
     as_tibble() |>
@@ -253,3 +254,43 @@ test_that("fds_add_assay_data maintains fidelity of data", {
   )
 })
 
+test_that("new sample covariate metadata merge with predefined ones in fds", {
+  covariates.original <- samples(afds) |> with_sample_covariates()
+  covariates.new <- covariates.original |> 
+    distinct(dataset, sample_id) |> 
+    mutate(
+      avar = sample(letters, length(dataset), replace = TRUE),
+      bvar = rnorm(length(dataset))
+    )
+  
+  all.vars <- c("avar", "bvar", colnames(covariates.original))
+  all.vars <- setdiff(all.vars, c("dataset", "sample_id"))
+  
+  mm <- .merge_meta_sample_covariates(afds, covariates.new)
+  expect_subset(names(mm$eav_meta), all.vars)
+  minfo.fds <- meta_info(afds)$sample_covariates
+  
+  # The original sample covariate information should not be changed
+  eav.orig <- mm$eav_meta[names(minfo.fds)]
+  expect_equal(eav.orig, minfo.fds)
+  
+  # check the new covariates
+  expected.defs <- list(
+    avar = list(
+      arguments= list(x = "avar"),
+      class = "categorical",
+      label = "avar",
+      description = "avar",
+      type = "general"
+    ),
+    bvar = list(
+      arguments = list(x = "bvar"),
+      class = "real",
+      label = "bvar",
+      description = "bvar",
+      type = "general"
+    )
+  )
+  
+  expect_equal(mm$eav_meta[names(expected.defs)], expected.defs)
+})

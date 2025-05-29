@@ -42,13 +42,15 @@ fds_add_sample_data <- function(
   }
   
   sample_data <- .prepare_sample_data(sample_data, ...)
+  sample_data_meta <- .merge_meta_sample_covariates(
+    x, 
+    sample_data,
+    covariate_def = covariate_def
+  )
   
-  eav = as.EAVtable(pdat, covariate_def = covariate_def)
   
-  # We need to update the faciledataset meta.yaml with these covariates
-  eav_meta <- attr(eav, "covariate_def")
-  fds_meta <- meta_info(x, validate_metadata = validate_metadata)
   
+
   
   # Check for duplicates entries in the eav table here, otherwise injecting it
   # into the database will raise an error
@@ -59,6 +61,81 @@ fds_add_sample_data <- function(
     distinct(dataset, sample_id) |>
     mutate(parent_id = "")
   
+}
+
+.merge_meta_sample_covariates <- function(
+    x, 
+    sample_data,
+    covariate_def = NULL, 
+    ...
+) {
+  sample_data <- .prepare_sample_data(sample_data, ...)
+  eav <-  as.EAVtable(sample_data, covariate_def = covariate_def)
+  eav_meta <- attr(eav, "covariate_def")
+  update <- FALSE
+  
+  meta.list <- meta_info(x, validate_metadata = FALSE)
+  sc <- meta.list$sample_covariates
+  if (is.null(sc)) {
+    sc <- list()
+  }
+  
+  updates <- list()
+  out <- list()
+  
+  # compare the variable definitions for the new `sample_data` to what is
+  # already stored in the FacileDataSet
+  for (varname in names(eav_meta)) {
+    vupdates <- list(varname = varname, status = "unadjusted")
+    vareav <- eav_meta[[varname]]
+    if (!varname %in% names(sc)) {
+      vupdates$status <- "new"
+    } else {
+      sceav <- sc[[varname]]
+      if (sceav$class != vareav$class) {
+        stop("Mismatch metadata class for `", varname, "`. Trying to add a `",
+        vareav$class, "`, when it is already a `", sceav$class, "`")
+      }
+      lvls <- vareav$levels # this is defined if `varname` is a factor
+      if (checkmate::test_character(lvls)) {
+        sclvls <- sceav$levels
+        if (is.null(sclvls)) {
+          warning("Original covariate `", varname, "` is not a factor, ",
+                  "downgrading new variable to character")
+          vupdates$status <- "factor-downcast-to-character"
+          vareav$levels <- NULL
+        } else {
+          # merge levels of fds factor and new covariate. the levels in the
+          # FDS take precedence
+          if (!setequal(lvls, sclvls)) {
+            vupdates$status <- "updated_levels"
+            vareav$levels <- union(sclvls, lvls)
+          }
+        }
+      }
+    }
+    if (vupdates$status != "unadjusted") {
+      out[[varname]] <- vareav
+    }
+    updates[[varname]] <- dplyr::as_tibble(vupdates)
+  }
+  
+  # Create tibble-report of what new variables need to be updated in the
+  # meta.yaml file, and what variables from the fds were not specified in
+  # these new sample covariates
+  updates <- dplyr::bind_rows(updates)
+  undefined <- dplyr::tibble(
+    varname = setdiff(names(sc), updates$varname),
+    status = rep("undefined", length(varname))
+  )
+  
+  status <- dplyr::bind_rows(updates, undefined)
+  add.me <- status |> 
+    dplyr::filter(status %in% c("unadjusted", "undefined")) |> 
+    dplyr::distinct(varname)
+  out <- c(out, sc[add.me$varname])
+  
+  list(eav_meta = out, status = status)
 }
 
 .prepare_sample_data <- function(sample_data, ...) {
@@ -284,7 +361,7 @@ fds_add_assay_data <- function(
 #' Adds dataset-level metadata to a FacileDataSet
 #' 
 #' Extracts all named arguments with dataset_* prefix that are strings and adds
-#' it to the meta.yamll::datasets
+#' it to the meta.yamll::datasets section for a dataset
 #' 
 #' @export
 #' @param x a faciledataset
@@ -326,7 +403,7 @@ fds_modify_meta_dataset <- function(x, dataset_name, ..., .nowrite = FALSE) {
     if (length(args) == 0L) {
       warning(
         "A new dataset is being added and no metadata was provided, ",
-        "making defaults")
+        "providing default description and url")
       args$description <- "No description provided"
       args$url <- "No URL provided"
     }
