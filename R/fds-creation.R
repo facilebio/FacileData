@@ -271,7 +271,12 @@ fds_add_assay_data <- function(
     assay_matrix <- round(assay_matrix)
     storage.mode(assay_matrix) <- "integer"
   }
-
+  
+  if (ainfo$storage_mode == "numeric") {
+    warning("You are storing `storage_mode` in sqlite db as numeric, but it should be double")
+    stopifnot(is(assay_matrix[1], "numeric"))
+    ainfo$storage_mode <- "double"
+  }
   # This probably shouldn't be here, but this whole universe was built with
   # initial assumption that we really only care about NGS data
   if (ainfo$assay_type %in% c("rnaseq", "isoseq", "pseudobulk")) {
