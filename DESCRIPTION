@@ -32,6 +32,7 @@ Imports:
   data.table,
   dbplyr (>= 1.4.0),
   dplyr (>= 1.1.1),
+  tidyr, 
   glue,
   edgeR,
   jsonlite,
