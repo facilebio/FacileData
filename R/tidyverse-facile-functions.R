@@ -1,14 +1,6 @@
-# dplyr extensions
+# dplyr extensions -------------------------------------------------------------
 # for facile_frames and other useful things in the tidyverse
 
-#' Retrieves the extra class information that might be ahead of the root
-#' `"facile_frame` entry, so we can spank this back on to the outgoing result
-#' @noRd
-.extra_classes <- function(x, ..., .root = "facile_frame") {
-  classes <- class(x)
-  root.idx <- match(.root, classes)
-  if (is.na(root.idx)) character() else utils::head(classes, root.idx - 1L)
-}
 
 #' A version of group_map that provides a named list in return
 #'
@@ -322,32 +314,6 @@ ungroup.facile_frame <- function(x, ..., .facilitate = NULL) {
 # heuristics to try and upcast again after the fact. I fear this is going to
 # cause all sorts of problems, but let's see ...
 
-#' @noRd
-downcast_ff <- function(x, ...) {
-  oclass <- class(x)[1L]
-  class(x) <- class(x)[-1]
-  attr(x, "cast_info") <- list(
-    original_class = oclass,
-    down_class = class(x)[1L])
-  x
-}
-
-#' @noRd
-upcast_ff <- function(x, downcasted, .facilitate = FALSE, ...) {
-  cast_info <- attr(downcasted, "cast_info")
-  assert_list(cast_info, min.len = 2L)
-  assert_flag(.facilitate)
-  
-  original_class <- assert_string(cast_info[["original_class"]])
-  down_class <- assert_string(cast_info[["down_class"]])
-  if (isTRUE(class(x)[1L] == down_class) && 
-      !(.facilitate && original_class == "facile_frame")) {
-    class(x) <- c(original_class, class(x))
-  }
-  attr(x, "cast_info") <- NULL
-  x
-}
-
 #' @export
 #' @noRd
 inner_join.facile_frame <- function(x, y, by = NULL, copy = FALSE,
@@ -485,5 +451,50 @@ nest_join.facile_frame <- function(x, y, by = NULL, copy = FALSE, keep = NULL,
   res
 }
 
+# tidyr ------------------------------------------------------------------------
+
+# tidyr::separate_wider_delim is not an S3 method
+# 
+# @importFrom tidyr separate_wider_delim
+# @export
+# separate_wider_delim.facile_frame <- 
+
 # bind =========================================================================
 # No can do, the first param in these methods is `...`, which you can S3ize
+
+# internal utility -------------------------------------------------------------
+
+#' Retrieves the extra class information that might be ahead of the root
+#' `"facile_frame` entry, so we can spank this back on to the outgoing result
+#' @noRd
+.extra_classes <- function(x, ..., .root = "facile_frame") {
+  classes <- class(x)
+  root.idx <- match(.root, classes)
+  if (is.na(root.idx)) character() else utils::head(classes, root.idx - 1L)
+}
+
+#' @noRd
+downcast_ff <- function(x, ...) {
+  oclass <- class(x)[1L]
+  class(x) <- class(x)[-1]
+  attr(x, "cast_info") <- list(
+    original_class = oclass,
+    down_class = class(x)[1L])
+  x
+}
+
+#' @noRd
+upcast_ff <- function(x, downcasted, .facilitate = FALSE, ...) {
+  cast_info <- attr(downcasted, "cast_info")
+  assert_list(cast_info, min.len = 2L)
+  assert_flag(.facilitate)
+  
+  original_class <- assert_string(cast_info[["original_class"]])
+  down_class <- assert_string(cast_info[["down_class"]])
+  if (isTRUE(class(x)[1L] == down_class) && 
+      !(.facilitate && original_class == "facile_frame")) {
+    class(x) <- c(original_class, class(x))
+  }
+  attr(x, "cast_info") <- NULL
+  x
+}

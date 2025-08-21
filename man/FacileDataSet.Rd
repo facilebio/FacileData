@@ -13,7 +13,8 @@ FacileDataSet(
   anno.dir = NULL,
   cache_size = 80000,
   db.loc = c("reference", "temporary", "memory"),
-  ...
+  ...,
+  validate_metadata = TRUE
 )
 }
 \arguments{

@@ -1,3 +1,14 @@
+#' Summary of feature spaces in the FacileDataSet
+#' 
+#' @export
+feature_space <- function(x, ...) {
+  checkmate::assert_class(x, "FacileDataSet")
+  x |> 
+    feature_info_tbl() |> 
+    count(feature_type) |> 
+    collect()
+}
+
 #' Materializes a table with all feature information for a given assay.
 #'
 #' DEBUG: This logic is unnecessarily complex because I make sure to collect

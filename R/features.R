@@ -77,11 +77,20 @@ with_feature_info.data.frame <- function(x, covariates = NULL, ...,
 #'
 #' @export
 #' @param x A \code{FacileDataSet}
-feature_types <- function(x) {
+feature_types <- function(x, with_assay_data_only = FALSE, ...) {
   assert_class(x, "FacileDataStore")
-  assay_info(x) |> 
-    distinct(feature_type) |> 
-    pull(feature_type)
+  if (with_assay_data_only) {
+    out <- assay_info(x) |>
+      distinct(feature_type) |>
+      collect() |> 
+      pull(feature_type)
+  } else {
+    out <- feature_info_tbl(x) |> 
+      distinct(feature_type) |> 
+      collect() |> 
+      pull(feature_type)
+  }
+  out
 }
 
 #' Test if a given feature type is stored in a FacileDataSet

@@ -1,0 +1,667 @@
+# Second take on faciledataset construction. This will enable more memory
+# efficient construction of larger datasets, and more easily allow the addition
+# of newer data into an already built faciledataset.
+#
+# First initialize the faciledataset with the feature/assay universe that we
+# want to load it up with, then add data.
+#
+# Note that this requires an initial metadata (organism)
+#
+# 1. fds_initialize(directory, species):
+#    a. create new directory structure
+#    b. initialize sql db,
+#    c. create initial hdf5 file structure
+#    d. provide firsdt assay/feature map
+# 2. fds_add_assay(fds, assay_info)
+#    a. create assay map from feature descriptor and feature universe
+# 3. fds_add_assay_data(fds, assay_name, data)
+#    a. add assa daya to an assay already added in (2)
+#    b. this will add sample-metadata if these are bioc data containers
+
+#' Add (or update?) sample level metadata
+#' @export
+#' @param x a FacileDataSet
+#' @param sample_data a tibble of data,sample_id,... columns
+#' @param update If FALSE (default), any covariates that already exist for
+#'   samples in the database will not be updated
+fds_add_sample_data <- function(
+  x,
+  sample_data,
+  update = FALSE,
+  covariate_def = NULL,
+  parents = NULL,
+  ...,
+  validate_metadata = TRUE
+) {
+  checkmate::assert_class(x, "FacileDataSet")
+  checkmate::assert_data_frame(sample_data, min.cols = 3)
+  checkmate::assert_subset(c("dataset", "sample_id"), colnames(sample_data))
+  checkmate::assert_list(covariate_def, names = "unique", null.ok = TRUE)
+  if (!is.null(parents)) {
+    warning("we don't manage sample hierarchy yet")
+  }
+  
+  sample_data <- .prepare_sample_data(sample_data, ...)
+  sample_data_meta <- .merge_meta_sample_covariates(
+    x, 
+    sample_data,
+    covariate_def = covariate_def
+  )
+  
+  
+  
+
+  
+  # Check for duplicates entries in the eav table here, otherwise injecting it
+  # into the database will raise an error
+  stopifnot(
+    nrow(distinct(eav, dataset, sample_id, variable)) == nrow(eav))
+  
+  samples <- eav |>
+    distinct(dataset, sample_id) |>
+    mutate(parent_id = "")
+  
+}
+
+.merge_meta_sample_covariates <- function(
+    x, 
+    sample_data,
+    covariate_def = NULL, 
+    ...
+) {
+  sample_data <- .prepare_sample_data(sample_data, ...)
+  eav <-  as.EAVtable(sample_data, covariate_def = covariate_def)
+  eav_meta <- attr(eav, "covariate_def")
+  update <- FALSE
+  
+  meta.list <- meta_info(x, validate_metadata = FALSE)
+  sc <- meta.list$sample_covariates
+  if (is.null(sc)) {
+    sc <- list()
+  }
+  
+  updates <- list()
+  out <- list()
+  
+  # compare the variable definitions for the new `sample_data` to what is
+  # already stored in the FacileDataSet
+  for (varname in names(eav_meta)) {
+    vupdates <- list(varname = varname, status = "unadjusted")
+    vareav <- eav_meta[[varname]]
+    if (!varname %in% names(sc)) {
+      vupdates$status <- "new"
+    } else {
+      sceav <- sc[[varname]]
+      if (sceav$class != vareav$class) {
+        stop("Mismatch metadata class for `", varname, "`. Trying to add a `",
+        vareav$class, "`, when it is already a `", sceav$class, "`")
+      }
+      lvls <- vareav$levels # this is defined if `varname` is a factor
+      if (checkmate::test_character(lvls)) {
+        sclvls <- sceav$levels
+        if (is.null(sclvls)) {
+          warning("Original covariate `", varname, "` is not a factor, ",
+                  "downgrading new variable to character")
+          vupdates$status <- "factor-downcast-to-character"
+          vareav$levels <- NULL
+        } else {
+          # merge levels of fds factor and new covariate. the levels in the
+          # FDS take precedence
+          if (!setequal(lvls, sclvls)) {
+            vupdates$status <- "updated_levels"
+            vareav$levels <- union(sclvls, lvls)
+          }
+        }
+      }
+    }
+    if (vupdates$status != "unadjusted") {
+      out[[varname]] <- vareav
+    }
+    updates[[varname]] <- dplyr::as_tibble(vupdates)
+  }
+  
+  # Create tibble-report of what new variables need to be updated in the
+  # meta.yaml file, and what variables from the fds were not specified in
+  # these new sample covariates
+  updates <- dplyr::bind_rows(updates)
+  undefined <- dplyr::tibble(
+    varname = setdiff(names(sc), updates$varname),
+    status = rep("undefined", length(varname))
+  )
+  
+  status <- dplyr::bind_rows(updates, undefined)
+  add.me <- status |> 
+    dplyr::filter(status %in% c("unadjusted", "undefined")) |> 
+    dplyr::distinct(varname)
+  out <- c(out, sc[add.me$varname])
+  
+  list(eav_meta = out, status = status)
+}
+
+.prepare_sample_data <- function(sample_data, ...) {
+  # we used to really care about survival data
+  for (cname in colnames(sample_data)) {
+    vals <- sample_data[[cname]]
+    if (is(vals, "Surv")) sample_data[[cname]] <- as_cSurv(vals)
+  }
+  sample_data
+}
+
+#' Add an assay matrix to a pre-registered assay in an FDS.
+#'
+#' This functions adds data to an already registered assay. The rownames() of
+#' the assay data must already exist in the feature space that is assigned to
+#' the assay.
+#'
+#' Rows in `assay_matrix` that do not exist in the registered feature space
+#' will be ignored.
+#'
+#' @export
+#' @param x a FacileDataSet
+#' @param data_matrix the matrix of assay_data to add. `rownames(data_matrix)`
+#'   must be already existing `feature_id`s in the registered `assay_name`
+#' @param assay_name the name of a pre-registered assay in `x`
+#' @param dataset_name a string indicating the `dataset` value for this data.
+#'   Recall that dataset,sample_id (ie. dataset,colnames(assay_matrix)) are
+#'   the primary key's of the data in `x`
+#' @param ... stuff
+#' @param add_samples if TRUE (default) the dataset,sample combinations are
+#'   added to the sample_info table
+#' @param missing_value what to fill in to the internal hdf5 assay matrix for
+#'   features that are not present in `assay_matrix` but exist in the
+#'   `assay_name` feature space. Default is 0
+fds_add_assay_data <- function(
+  x,
+  assay_matrix,
+  assay_name,
+  dataset_name,
+  ...,
+  add_samples = TRUE,
+  missing_value = 0L,
+  chunk_rows = 5000,
+  chunk_cols = "ncol",
+  chunk_compression = 4
+) {
+  # TODO: add entry to meta::dataset section
+  checkmate::assert_class(x, "FacileDataSet")
+  checkmate::assert_string(assay_name)
+  checkmate::assert_string(dataset_name)
+  checkmate::assert_flag(add_samples)
+
+  # for some reason tximport creates SummarizedExperiments with `assay()` matrices
+  # as actual data.frames
+  checkmate::assert_multi_class(
+    assay_matrix,
+    c("matrix", "Matrix", "data.frame")
+  )
+  checkmate::assert_character(rownames(assay_matrix))
+  checkmate::assert_character(colnames(assay_matrix))
+
+  sample_id <- checkmate::assert_character(
+    colnames(assay_matrix),
+    len = ncol(assay_matrix),
+    unique = TRUE
+  )
+  feature_id <- checkmate::assert_character(
+    rownames(assay_matrix),
+    len = nrow(assay_matrix),
+    unique = TRUE
+  )
+  
+  samples.data <- tibble(
+    assay = assay_name,
+    dataset = dataset_name,
+    sample_id = sample_id
+  )
+
+  features.data <- tibble(
+    feature_id = feature_id,
+    data_index = seq_along(feature_id)
+  )
+
+  assays_all <- assay_info(x)
+  ainfo <- filter(assay_info(x), .data$assay == .env$assay_name)
+  stopifnot('assay_name found' = nrow(ainfo) == 1L)
+
+  if (ainfo$storage_mode == "integer") {
+    missing_value <- as.integer(missing_value)
+  } else {
+    missing_value <- as.numeric(missing_value)
+  }
+
+  # feature logic
+  features.fds <- x |>
+    assay_feature_info_tbl() |>
+    filter(.data$assay == ainfo$assay) |>
+    select(feature_id, hdf5_index) |>
+    arrange(.data$hdf5_index) |>
+    collect()
+
+  stopifnot("hdf5_index is not sequential [this should be impossible]" = {
+    all.equal(1:nrow(features.fds), features.fds$hdf5_index)
+  })
+
+  # universe of features, ones that are registered and ones that are in the
+  # assay matrix
+  features.universe <- full_join(features.fds, features.data, by = "feature_id")
+  features.unknown <- filter(features.universe, is.na(hdf5_index))
+  features.missing <- filter(features.universe, is.na(data_index))
+
+  if (nrow(features.unknown) > 0) {
+    warning(nrow(features.unknown), " input features not registered: ignoring")
+  }
+
+  features.go <- features.universe |>
+    filter(!is.na(data_index), !is.na(hdf5_index))
+  if (nrow(features.go) == 0) {
+    stop("No features in assay_matrix match the features in registered assay")
+  }
+
+  assay_matrix.all <- as.matrix(assay_matrix)
+  assay_matrix <- assay_matrix.all[features.go$data_index, , drop = FALSE]
+  if (storage.mode(assay_matrix) == "logical") {
+    storage.mode(assay_matrix) <- "integer"
+  }
+  checkmate::assert_choice(storage.mode(assay_matrix), c("integer", "double"))
+
+  if (
+    ainfo$storage_mode == "integer" &&
+      storage.mode(assay_matrix) != "integer"
+  ) {
+    assay_matrix <- round(assay_matrix)
+    storage.mode(assay_matrix) <- "integer"
+  }
+  
+  if (ainfo$storage_mode == "numeric") {
+    warning("You are storing `storage_mode` in sqlite db as numeric, but it should be double")
+    stopifnot(is(assay_matrix[1], "numeric"))
+    ainfo$storage_mode <- "double"
+  }
+  # This probably shouldn't be here, but this whole universe was built with
+  # initial assumption that we really only care about NGS data
+  if (ainfo$assay_type %in% c("rnaseq", "isoseq", "pseudobulk")) {
+    libsize <- colSums(assay_matrix)
+    normfactor <- edgeR::calcNormFactors(assay_matrix, lib.size = libsize)
+  } else {
+    libsize <- -1
+    normfactor <- -1
+  }
+
+  a.go <- matrix(
+    missing_value,
+    nrow = nrow(features.fds),
+    ncol = ncol(assay_matrix),
+    dimnames = list(features.fds$feature_id, samples.data$sample_id)
+  )
+
+  if (is.character(chunk_cols) && chunk_cols == "ncol") {
+    xchunk.cols <- ncol(a.go)
+  } else if (is.integer(chunk_cols)) {
+    xchunk.cols <- min(chunk_cols, ncol(a.go))
+  } else {
+    stop("Unrecognized value for chunk.cols: ", chunk_cols)
+  }
+
+  xchunk.rows <- min(chunk_rows = 5000, nrow(a.go))
+  chunk <- c(xchunk.rows, xchunk.cols)
+  dname <- sprintf('assay/%s/%s', assay_name, dataset_name)
+
+  a.go[features.go$hdf5_index, ] <- assay_matrix
+
+  if (chunk_compression == 0) {
+    rhdf5::h5createDataset(
+      hdf5fn(x),
+      dname,
+      ,
+      dim(a.go),
+      storage.mode = ainfo$storage_mode,
+      level = 0,
+      filter = "NONE"
+    )
+  } else {
+    rhdf5::h5createDataset(
+      hdf5fn(x),
+      dname,
+      dim(a.go),
+      storage.mode = ainfo$storage_mode,
+      chunk = chunk,
+      level = chunk_compression
+    )
+  }
+
+  rhdf5::h5write(a.go, file = hdf5fn(x), name = dname)
+
+  asi <- samples.data |>
+    mutate(
+      hdf5_index = seq(ncol(a.go)),
+      libsize = libsize,
+      normfactor = normfactor
+    ) |>
+    append_facile_table(x, "assay_sample_info")
+
+  if (add_samples) {
+    samples_added <- samples.data |>
+      distinct(dataset, sample_id) |>
+      mutate(parent_id = "") |>
+      append_facile_table(x, "sample_info")
+  } else {
+    samples_added <- tibble(
+      dataset = character(),
+      sample_id = character(),
+      parent_id = character()
+    )
+  }
+  
+  fds_modify_meta_dataset(x, dataset_name, ...)
+  
+  out <- list(
+    assay_sample_info = asi,
+    samples_added = samples_added,
+    features_unknoun = features.universe,
+    reatures_missing = features.missing
+  )
+  invisible(out)
+}
+
+#' Adds dataset-level metadata to a FacileDataSet
+#' 
+#' Extracts all named arguments with dataset_* prefix that are strings and adds
+#' it to the meta.yamll::datasets section for a dataset
+#' 
+#' @export
+#' @param x a faciledataset
+#' @param dataset_name the name (string) of the dataset
+#' @param ... metadata variable to write to the meta.yaml file. arguments that
+#'   are strings and are prefixed with `dataset_` will be added. The `dataset_`
+#'   prefix is removed when serialized so `dataset_description` will be saved
+#'   as datasets.<dataset_name>.description in the yaml file
+#' @param .nowrite even if there are changes to be made to the yaml file, we
+#'   won't reserialize it. this is used for testingn purposes so we don't
+#'   overwrite a the meta.yaml files when testing/debugging
+#' @return a named list of dataset metadata variables that were changed as a
+#'   result of this function call
+fds_modify_meta_dataset <- function(x, dataset_name, ..., .nowrite = FALSE) {
+  checkmate::assert_class(x, "FacileDataSet")
+  checkmate::assert_string(dataset_name)
+  update <- FALSE
+  
+  args.all <- list(...)
+  args.name <- grepl("dataset_[a-zA-Z]", names(args.all))
+  args.string <- vapply(args.all, checkmate::test_string, FALSE)
+  args.keep <- args.name & args.string
+  
+  args <- args.all[args.keep]
+  names(args) <- sub("dataset_", "", names(args))
+  
+  meta.list <- meta_info(x, validate_metadata = FALSE)
+  if (is.null(meta.list$datasets)) {
+    update <- TRUE
+    meta.list$datasets <- list()
+  }
+  
+  out <- list()
+  dinfo <- meta.list$datasets[[dataset_name]]
+  
+  if (is.null(dinfo)) {
+    update <- TRUE
+    dinfo <- list()
+    if (length(args) == 0L) {
+      warning(
+        "A new dataset is being added and no metadata was provided, ",
+        "providing default description and url")
+      args$description <- "No description provided"
+      args$url <- "No URL provided"
+    }
+  } else if (length(args) == 0) {
+    message("no op performed: no dataset_* args provided for metadata update")
+    return(list())
+  }
+  
+  for (aname in names(args)) {
+    aval <- args[[aname]]
+    if (!identical(dinfo[[aname]], aval)) {
+      update <- TRUE
+      dinfo[[aname]] <- aval
+      out[[aname]] <- aval
+    }
+  }
+  
+  if (update && !isTRUE(.nowrite)) {
+    meta.list$datasets[[dataset_name]] <- dinfo
+    yaml::write_yaml(meta.list, meta_file(x))
+  }
+  
+  out
+}
+
+#' Register a new assay to a feature space
+#'
+#' @export
+#' @param x FacileDataSet
+#' @param assay_name the name of the new assay to register
+#' @param assay_type the type of assay (rnaseq, lognorm, etc.)
+#' @param feature_type the identifer of one of the featurespaces in
+#'   `feature_space()`
+#' @examples
+#' fds_register_assay(x, "counts", "rnaseq", "ensgid")
+fds_register_assay <- function(
+  x,
+  assay_name,
+  assay_type,
+  feature_type,
+  description = NULL,
+  storage_mode = c("numeric", "integer"),
+  ...
+) {
+  checkmate::assert_class(x, "FacileDataSet")
+  checkmate::assert_string(assay_name)
+  checkmate::assert_string(assay_type)
+  checkmate::assert_string(feature_type)
+  storage_mode <- match.arg(storage_mode)
+
+  # already exists?
+  if (assay_name %in% assay_names(x)) {
+    stop("Assay name already exists: ", assay_name)
+  }
+  if (!feature_type %in% feature_types(x)) {
+    stop(sprintf("feature_type `%s` not registered", feature_type))
+  }
+
+  assay_features <- features(x, feature_type = feature_type) |>
+    arrange(feature_id) |>
+    collect() |>
+    transmute(assay = assay_name, feature_id, hdf5_index = seq(n()))
+
+  if (is.null(description)) {
+    description <- sprintf(
+      "`%s` [%s] assay for `%s` features",
+      assay_name,
+      assay_type,
+      feature_type
+    )
+  }
+  checkmate::assert_string(description)
+
+  # add to assay_info table
+  ainfo <- tibble(
+    assay = assay_name,
+    assay_type = assay_type,
+    feature_type = feature_type,
+    description = description,
+    nfeatures = nrow(assay_features),
+    storage_mode = storage_mode
+  )
+
+  ai <- append_facile_table(ainfo, x, "assay_info")
+  af <- append_facile_table(assay_features, x, "assay_feature_info")
+
+  # add new subdirectory in hdf5 file
+  h5name <- sprintf("assay/%s", assay_name)
+  stopifnot(
+    "hdf5 assay creation success" = rhdf5::h5createGroup(hdf5fn(x), h5name)
+  )
+
+  invisible(list(assay_info = ai, features = af))
+}
+
+#' Add a new feature space to add assay data for
+#' @export
+#' @param x a faciledataset
+#' @param feature_info a tibble of the feature universe, minimally must contain
+#'   `feature_id`, `name`, `meta` columns. If `feature_type` is not a column,
+#'   you can specify it from the `feature_type` parameter.
+#' @param feature_type if provided, it will overvide the value in `feature_info`
+#'   If not provided (default), function will fail if `feature_type` is not
+#'   provided as a coloumn in `feature_info`
+#' @param assays if provided, this needs to be a tibble with `assay_name`,
+#'   `assay_type`, (and optional `description`) columns -- this will auto
+#'   register this feature space with the enumerated assays.
+#' @examples
+#' afds <- an_fds()
+#' fdir <- tempfile("fds__")
+#' afeatures <- features(afds)
+#'
+#' xfds <- fds_initialize(fdir, "human")
+#' fnew <- fds_add_feature_space(xfds, afeatures)
+fds_add_feature_space <- function(
+  x,
+  feature_info,
+  description = NULL,
+  feature_type = NULL,
+  ...
+) {
+  checkmate::assert_class(x, "FacileDataSet")
+  checkmate::assert_data_frame(feature_info, min.rows = 1L)
+  req.cols <- c("feature_id", "name", "meta")
+  checkmate::assert_subset(req.cols, colnames(feature_info))
+
+  if (is.null(feature_type)) {
+    feature_type <- checkmate::assert_character(feature_info[["feature_type"]])
+    feature_type <- unique(feature_type)
+  }
+  checkmate::assert_string(feature_type)
+  feature_info[["feature_type"]] <- feature_type
+
+  dupes <- feature_info[duplicated(feature_info), ]
+  if (nrow(dupes) > 0) {
+    stop(nrow(dupes), " duplicated features found in feature_info")
+  }
+
+  if (feature_type %in% feature_types(x)) {
+    stop("Feature type `", feature_type, "` already registered")
+  }
+
+  append_facile_feature_info(x, feature_info)
+}
+
+# Initialization ===============================================================
+
+#' Initialize a new home for a FacileDataSet
+#' @export
+#' @examples
+#' fdir <- tempfile("fds__")
+#' xfds <- fds_initialize(fdir, "human")
+fds_initialize <- function(directory, species, name = NULL, ...) {
+  dirs <- .fds_initialize_directory_structure(directory, ...)
+  meta <- .fds_initialize_meta_file(dirs, species, name, ...)
+  db <- .fds_initialize_db(dirs, meta, ...)
+  h5 <- .fds_initialize_hdf5(dirs, meta, db, ...)
+
+  FacileDataSet(
+    dirs$directory,
+    data.fn = db$fn,
+    sqlite.fn = db$fn,
+    hdf5.fn = h5,
+    meta.fn = meta$fn,
+    anno.dir = dirs$annotation,
+    validate_metadata = FALSE
+  )
+}
+
+#' Helper function to create the HDF5 file
+#' @noRd
+.fds_initialize_hdf5 <- function(dirs, meta, con, ...) {
+  hd5.fn <- file.path(dirs$directory, "data.h5")
+  rhdf5::h5createFile(hd5.fn)
+  rhdf5::h5createGroup(hd5.fn, "assay")
+  hd5.fn
+}
+
+#' Helper function to create and intialize sqlite database.
+#' @noRd
+.fds_initialize_db <- function(
+  dirs,
+  meta,
+  ...,
+  page_size = 2**12,
+  cache_size = 2e5
+) {
+  db.fn <- file.path(dirs$directory, 'data.sqlite')
+  con <- RSQLite::dbConnect(RSQLite::SQLite(), db.fn)
+  RSQLite::dbExecute(con, "pragma temp_store=MEMORY;")
+  RSQLite::dbExecute(con, sprintf("pragma page_size=%d", page_size))
+  RSQLite::dbExecute(con, sprintf("pragma cache_size=%d;", cache_size))
+  sql.fn <- system.file(
+    "extdata",
+    "init",
+    "faciledataset.sql",
+    package = "FacileData"
+  )
+  db.sql <- sqlFromFile(sql.fn)
+  executeSQL(con, db.sql)
+  list(con = con, fn = db.fn)
+}
+
+#' Helper function to create a barebones meta.yaml file
+#' @noRd
+.fds_initialize_meta_file <- function(
+  dirs,
+  species,
+  name = NULL,
+  meta_file = NULL,
+  ...
+) {
+  checkmate::assert_list(dirs, names = "unique")
+  if (is.null(meta_file)) {
+    meta_file <- file.path(dirs$directory, "meta.yaml")
+  }
+  checkmate::assert_directory_exists(dirname(meta_file), "w")
+
+  sinfo <- sparrow::species_info(species)
+  if (is.null(name)) {
+    name <- basename(dirs$directory)
+  }
+  checkmate::assert_string(name)
+
+  meta <- list(name = name, organism = sinfo$species)
+
+  yaml::write_yaml(meta, file = meta_file)
+  attr(meta, "path") <- meta_file
+  list(meta = meta, fn = meta_file)
+}
+
+#' Helper function to initialize the empty directory structure for FacileDataSet
+#' @noRd
+.fds_initialize_directory_structure <- function(
+  directory,
+  annotation_dir = file.path(directory, "custom-annotation"),
+  ...
+) {
+  if (checkmate::test_directory_exists(directory)) {
+    stop("FDS directory already exists: ", directory)
+  }
+  pdir <- checkmate::assert_directory_exists(dirname(directory), "w")
+  directory <- normalizePath(directory, mustWork = FALSE)
+
+  out <- list(directory = directory, annotation = annotation_dir)
+  for (dname in names(out)) {
+    d <- out[[dname]]
+    dgood <- dir.create(d)
+    if (!dgood) {
+      stop("Failed to create `", dname, "` facile directory: ", d)
+    }
+  }
+
+  out$parent <- pdir
+  out
+}

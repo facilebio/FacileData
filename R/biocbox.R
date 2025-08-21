@@ -124,6 +124,9 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
   out <- bb.info[["fn"]](A, features., samples., fds.,
                          update_libsizes = update_libsizes,
                          update_normfactors = update_normfactors, ...)
+  if (is(out, "SummarizedExperiment")) {
+    out <- SummarizedExperiment::`assayNames<-`(out, value = assay_name)
+  }
   if (!with_fds) {
     out <- set_fds(out, NULL)
   }
@@ -142,7 +145,9 @@ biocbox.facile_frame <- function(x, class = NULL, assay_name = NULL,
   "rnaseq",        "SummarizedExperiment",   "SummarizedExperiment",
   "rnaseq",        "ExpressionSet",          "Biobase",
   "pseudobulk",    "DGEList",                "edgeR",
-  "lognorm",       "EList",                  "limma")
+  "pseudobulk",    "SummarizedExperiment",   "SummarizedExperiment",
+  "lognorm",       "EList",                  "limma",
+  "lognorm",       "SummarizedExperiment",   "SummarizedExperiment")
 
 #' Returns the class info to use to instantiate the right biocbox class
 #'

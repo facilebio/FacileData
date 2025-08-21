@@ -57,18 +57,20 @@ initializeFacileDataSet <- function(path, meta_file,
 
 #' @export
 #' @importFrom tools file_ext
-assert_valid_meta_file <- function(fn, as.list = FALSE) {
+assert_valid_meta_file <- function(fn, as.list = FALSE, validate = TRUE) {
   assert_file(fn)
   if (!tolower(file_ext(fn)) ==  'yaml') {
     stop("meta file must be a yaml file")
   }
   dat <- yaml.load_file(fn)
-  req.toplevel <- c('name', 'organism', 'datasets', 'sample_covariates',
-                    'default_assay')
-  miss.toplevel <- setdiff(req.toplevel, names(dat))
-  if (length(miss.toplevel)) {
-    stop("Missing the following definitions in meta file: ",
-         paste(miss.toplevel, collapse=","))
+  if (validate) {
+    req.toplevel <- c('name', 'organism', 'datasets', 'sample_covariates',
+                      'default_assay')
+    miss.toplevel <- setdiff(req.toplevel, names(dat))
+    if (length(miss.toplevel)) {
+      stop("Missing the following definitions in meta file: ",
+           paste(miss.toplevel, collapse=","))
+    }
   }
   if (as.list) dat else fn
 }
@@ -85,9 +87,17 @@ supported.assay.container <- function(x) {
   any(is(x) %in% supported)
 }
 
-extract.assay <- function(x, assay_name=NULL) {
+extract.assay <- function(x, assay_name = NULL) {
   if (is(x, 'DGEList')) {
-    out <- x$counts
+    if (is.null(assay_name)) {
+      assay_name <- "counts"
+    }
+    out <- x[[assay_name]]
+    checkmate::assert_matrix(out, nrows = nrow(x), ncols = ncol(x))
+    stopifnot(
+      "concordant rows" = all.equal(rownames(out), rownames(x)),
+      "concordant cols" = all.equal(colnames(out), colnames(x))
+    )
   } else if (is(x, "EList")) {
     out <- x$E
   } else if (is(x, 'eSet')) {
@@ -429,6 +439,7 @@ append_facile_feature_info <- function(x, feature_info,
   
   added <- feature_info |>
     distinct(feature_type, feature_id, .keep_all = TRUE) |>
-    append_facile_table(x, 'feature_info', warn_existing = warn_existing)
+    append_facile_table(x, 'feature_info', warn_existing = warn_existing) |> 
+    as_tibble()
   invisible(added)
 }

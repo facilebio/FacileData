@@ -1,0 +1,95 @@
+---
+title: "Modularized FacileDataSet Construction"
+author: "Steve Lianoglou"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('FacileData')`"
+output:
+  BiocStyle::html_document:
+    highlight: pygments
+    toc: true
+    fig_width: 5
+    css: custom.css
+vignette: >
+  %\VignetteIndexEntry{Modularized FacileDataSet Construction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding[utf8]{inputenc}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+An improved way to build faciledatasets -- less memory intensive, and can be
+done piecemeal.
+
+We'll start with an example list of SummarizedExperiments to ingest.
+
+```{r}
+se.list <- "list of SummarizedExperiments to create a FDS from"
+finfo <- SummarizedExperiment::rowData(se.list[[1L]]) |> 
+  as_tibble() |> 
+  transmute(feature_id, name, meta, feature_type, source = "example fds") |> 
+  arrange(feature_id)
+```
+
+## FacileDataSet Creations Steps
+
+Initialize.
+
+```{r}
+fds.dir <- tempfile("tes_fdsdir__")
+tfds <- fds_initialize(fds.dir, "human")
+```
+
+Add a feature space to begin adding assay data to
+
+```{r}
+fds_add_feature_space(
+  tfds, 
+  feature_info = ensembl_genes,
+  feature_type = "ensgid",
+  description = "example ensembl gene universe"
+)
+```
+
+Register an assay to that feature space
+
+```{r}
+fds_register_assay(
+  tfds,
+  assay_name = "counts",
+  assay_type = "rnaseq",
+  feature_type = "ensgid",
+  storage_mode = "integer"
+)
+```
+
+Add assay and sample data from summarized experiments
+
+```{r}
+for (se in se.list) {
+  fds_add_assay_data(
+    xfds,
+    assay(se, "counts"),
+    dataset_name = se$dataset[1],
+    assay_name = "counts",
+  )
+  # fds_add_assay_data(
+  #   xfds,
+  #   assay(se, "abundance"),
+  #   dataset_name = se$dataset[1],
+  #   assay_name = "abundance",
+  # )
+  fds_add_sample_data(
+    xfds,
+    colData(se),
+    dataset_name = se$dataset[1]
+  )
+}
+```
+

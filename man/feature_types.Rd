@@ -4,7 +4,7 @@
 \alias{feature_types}
 \title{Enumerate the types of feature stored in a FacileDataSet}
 \usage{
-feature_types(x)
+feature_types(x, with_assay_data_only = FALSE, ...)
 }
 \arguments{
 \item{x}{A \code{FacileDataSet}}

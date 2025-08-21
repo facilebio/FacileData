@@ -405,6 +405,11 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
   covs <- fetch_sample_covariates(.fds, covariates = covariates,
                                   samples = samples,
                                   custom_key = custom_key, ...)
+  if (nrow(covs) == 0L) {
+    warning("No sample covariates found.")
+    return(samples)
+  }
+  
   covs <- spread_covariates(covs, .fds, ...)
   if (!is.null(covariates) && !is.null(names(covariates))) {
     covs <- rename(covs, !!covariates)

@@ -167,12 +167,15 @@ as.FacileDataSet.list <- function(
 
   # All elements in list must be the same class, and a legit class at that!
   first <- x[[1L]]
+  legit.class <- sapply(legit.as.classes[["class"]], function(bioc.class) {
+    is(first, bioc.class)
+  })
+  stopifnot(any(legit.class))
+  
   fclass <- class(first)[1L]
   # ... same class
   same.classes <- sapply(x, function(xx) class(xx)[1L] == fclass)
   stopifnot(all(same.classes))
-  # ... legit class
-  stopifnot(fclass %in% legit.as.classes[["class"]])
 
   # load required namespace to deal with object of type `fclass`
   pkg <- local({

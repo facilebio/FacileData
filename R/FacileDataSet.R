@@ -67,7 +67,8 @@ FacileDataSet <- function(path, data.fn = NULL, sqlite.fn = NULL,
                           hdf5.fn = NULL, meta.fn = NULL, anno.dir = NULL,
                           cache_size = 80000,
                           db.loc = c('reference', 'temporary', 'memory'),
-                          ...) {
+                          ...,
+                          validate_metadata = TRUE) {
   db.loc <- match.arg(db.loc)
 
   if (is.null(data.fn)) data.fn <- file.path(path, 'data.sqlite')
@@ -76,8 +77,16 @@ FacileDataSet <- function(path, data.fn = NULL, sqlite.fn = NULL,
   if (is.null(meta.fn)) meta.fn <- file.path(path, 'meta.yaml')
   if (is.null(anno.dir)) anno.dir <- file.path(path, 'custom-annotation')
 
-  paths <- validate.facile.dirs(path, data.fn, sqlite.fn, hdf5.fn, meta.fn,
-                                anno.dir)
+  paths <- validate.facile.dirs(
+    path,
+    data.fn,
+    sqlite.fn,
+    hdf5.fn,
+    meta.fn,
+    anno.dir,
+    validate_metadata = validate_metadata
+  )
+
   ## Update some parameters in the connection for increased speed
   ## http://stackoverflow.com/questions/1711631
   ##
@@ -123,10 +132,10 @@ FacileDataSet <- function(path, data.fn = NULL, sqlite.fn = NULL,
   ## meta information
   class(out) <- c("FacileDataSet", "FacileDataStore")
 
-  mi <- meta_info(out)
+  mi <- meta_info(out, validate_metadata = validate_metadata)
   out['organism'] <- mi$organism
 
-  if (is.null(mi$default_assay)) {
+  if (is.null(mi$default_assay) && length(assay_names(out)) > 0L) {
     mi$default_assay <- assay_names(out)[1L]
   }
   out['default_assay'] <- mi$default_assay
@@ -212,9 +221,9 @@ meta_file <- function(x) {
 #' @rdname meta-info
 #' @param fn The path to the `meta.yaml` file.
 #' @return The `meta.yaml` file parsed into a list-of-lists representation
-meta_info <- function(x, fn = meta_file(x)) {
+meta_info <- function(x, fn = meta_file(x), validate_metadata = TRUE) {
   assert_facile_data_set(x)
-  out <- assert_valid_meta_file(fn, as.list = TRUE)
+  out <- assert_valid_meta_file(fn, as.list = TRUE, validate = validate_metadata)
   out
 }
 
@@ -254,14 +263,15 @@ default_assay.FacileDataSet <- function(x) {
 #' @param as.list boolean, if `FALSE` (default) returns a list, otherwise
 #'   summarizes results into a tibble.
 #' @return meta information about the datasets in `x` as a `list` or `tibble`
-dataset_definitions <- function(x, as.list=TRUE) {
-  defs <- meta_info(x)$datasets
+dataset_definitions <- function(x, as.list = TRUE, validate_metadata = TRUE) {
+  defs <- meta_info(x, validate_metadata = validate_metadata)$datasets
   if (!as.list) {
     defs <- lapply(names(defs), function(ds) {
-      i <- defs[[ds]]
-      tibble(dataset=ds, url=i$url, description=i$description)
+      defs[[ds]] |> 
+        dplyr::as_tibble() |> 
+        dplyr::mutate(dataset = ds, .before = 1L)
     })
-    defs <- bind_rows(defs)
+    defs <- dplyr::bind_rows(defs)
   }
   defs
 }
@@ -269,8 +279,17 @@ dataset_definitions <- function(x, as.list=TRUE) {
 #' @noRd
 #' @export
 #' @importFrom yaml yaml.load_file
-covariate_definitions.FacileDataSet <- function(x, as.list = TRUE, ...) {
-  out <- meta_info(x)$sample_covariates
+covariate_definitions.FacileDataSet <- function(
+    x, 
+    as.list = TRUE, 
+    ...,
+    validate_metadata = TRUE) {
+  out <- meta_info(x, validate_metadata = validate_metadata)$sample_covariates
+  if (is.null(out)) {
+    warning("No sample covariate definitions defined")
+    return(NULL)
+  }
+  
   if (!as.list) {
     out <- lapply(names(out), function(name) {
       i <- out[[name]]
