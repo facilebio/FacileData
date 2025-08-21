@@ -139,7 +139,7 @@ assay_summary.facile_frame <- function(x, ...) {
   bind_rows(info) |> 
     filter(.data$nsamples > 0L) |> 
     left_join(
-      select(assay_info(fds.), -description, -storage_mode),
+      select(assay_info(fds.), -any_of(c("description", "storage_mode"))),
       by = "assay")
 }
 
