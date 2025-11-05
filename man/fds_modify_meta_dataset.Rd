@@ -26,5 +26,5 @@ result of this function call
 }
 \description{
 Extracts all named arguments with dataset_* prefix that are strings and adds
-it to the meta.yamll::datasets
+it to the meta.yamll::datasets section for a dataset
 }

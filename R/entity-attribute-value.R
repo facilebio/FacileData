@@ -634,6 +634,10 @@ as.EAVtable <- function(x, ignore = c("dataset", "sample_id"),
   for (cname in colnames(dat)) {
     vals <- dat[[cname]]
     if (is(vals, "Surv")) dat[[cname]] <- as_cSurv(vals)
+    # adding special-casing of date objects
+    if (is(vals, "Date")) {
+      dat[[cname]] <- format(vals, "%Y-%m-%d")
+    }
   }
 
   eav_metadata <- eav_metadata_create(dat, ignore = NULL,

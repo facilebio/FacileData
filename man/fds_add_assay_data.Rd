@@ -10,8 +10,6 @@ fds_add_assay_data(
   assay_name,
   dataset_name,
   ...,
-  dataset_description = "No dataset description provided",
-  dataset_url = "No dataset url provided",
   add_samples = TRUE,
   missing_value = 0L,
   chunk_rows = 5000,

@@ -7,22 +7,19 @@
 \alias{fds<-}
 \alias{fds<-.tbl}
 \alias{fds<-.data.frame}
-\alias{set_fds}
 \title{Get or set the FacileDataStore for an object}
 \usage{
 fds(x, ...)
 
 \method{fds}{FacileDataStore}(x)
 
-\method{fds}{default}(x, ...)
+\method{fds}{default}(x, ..., warn = TRUE)
 
 fds(x) <- value
 
 \method{fds}{tbl}(x) <- value
 
 \method{fds}{data.frame}(x) <- value
-
-set_fds(x, value)
 }
 \arguments{
 \item{x}{the object}

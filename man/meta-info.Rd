@@ -13,7 +13,7 @@ meta_info(x, fn = meta_file(x), validate_metadata = TRUE)
 
 \method{default_assay}{FacileDataSet}(x)
 
-dataset_definitions(x, as.list = TRUE)
+dataset_definitions(x, as.list = TRUE, validate_metadata = TRUE)
 }
 \arguments{
 \item{x}{A \code{FacileDataSet}}

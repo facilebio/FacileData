@@ -92,9 +92,9 @@ fds.FacileDataStore <- function(x) {
 
 #' @export
 #' @rdname fds
-fds.default <- function(x, ...) {
+fds.default <- function(x, ..., warn = TRUE) {
   out <- attr(x, 'fds')
-  if (is.null(out)) {
+  if (is.null(out) && warn) {
     warning("No FacileDataStore found in x (", class(x)[1L], ")",
             immediate.=TRUE)
   }
@@ -128,9 +128,16 @@ fds.default <- function(x, ...) {
   x
 }
 
-#' @rdname fds
+#' Set the faciledatastore for an object
+#' 
 #' @export
 set_fds <- function(x, value) {
+  UseMethod("set_fds", x)
+}
+
+#' @noRd
+#' @export
+set_fds.default <- function(x, value) {
   attr(x, "fds") <- value
   x
 }

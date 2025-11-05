@@ -106,9 +106,11 @@ group_split..grouped_df <- function(.tbl, ..., .keep = TRUE,  .sep = "__") {
   assert_flag(.keep)
   nms <- rlang::inject(paste(!!!dplyr::group_keys(.tbl), sep = .sep))
   
-  .tbl |> 
+  out <- .tbl |> 
     dplyr::group_split() |> 
     rlang::set_names(nms)
+  
+  out
 }
 
 #' @export
@@ -165,31 +167,6 @@ filter.facile_frame <- function(.data, ..., .facilitate = NULL) {
     res <- as_facile_frame(res, fds(.data), .extra_classes(.data),
                            .valid_sample_check = FALSE)
   }
-  res
-}
-
-#' @noRd
-#' @export
-#' @examples
-#' xx <- samples(an_fds()) |> with_sample_covariates()
-#' xx |> 
-#'   group_by(cell_type) |> 
-#'   summarize(avg = mean(ncells))
-group_by.facile_frame <- function(.data, ..., add = FALSE,
-                                  # .drop = group_by_drop_default(.data),
-                                  .drop = TRUE,
-                                  .facilitate = NULL) {
-  # fds. <- fds(.data)
-  # groups <- group_by_prepare(.data, ..., add = add)
-  # groups[["data"]] <- lapply(groups[["data"]], set_fds, fds.)
-  # # set_fds(grouped_df(groups$data, groups$group_names, .drop), fds.)
-  # set_fds(grouped_ff(groups$data, groups$group_names, .drop), fds.)
-  
-  # if (.warn) {
-  #   warning("group_by with facile_frames may get weird")
-  # }
-  res <- NextMethod()
-  # set_fds(res, fds.)
   res
 }
 
@@ -283,7 +260,7 @@ group_by.facile_frame <- function(
     .drop = group_by_drop_default(.data)) {
   fds. <- fds(.data)
   res <- NextMethod()
-  as_facile_frame(res, fds., .extra_classes(res), .valid_sample_check = FALSE)
+  as_facile_frame(res, fds., .extra_classes(.data), .valid_sample_check = FALSE)
 }
 
 #' 
@@ -292,7 +269,7 @@ group_by.facile_frame <- function(
 ungroup.facile_frame <- function(x, ..., .facilitate = NULL) {
   fds. <- fds(x)
   res <- NextMethod()
-  as_facile_frame(res, fds., .extra_classes(res), .valid_sample_check = FALSE)
+  as_facile_frame(res, fds., .extra_classes(x), .valid_sample_check = FALSE)
 }
 
 # Joins ========================================================================

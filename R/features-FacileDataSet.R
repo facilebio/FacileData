@@ -54,7 +54,7 @@ features.FacileDataSet <- function(x, assay_name = NULL, feature_type = NULL,
   if (query_type == "feature_type") {
     out <- filter(feature_info_tbl(x), feature_type == query_value)
     if (!is.null(feature_ids) && length(feature_ids) > 0) {
-      out <- filter(out, feature_id %in% feautre_ids)
+      out <- filter(out, feature_id %in% feature_ids)
     }
     out <- collect(out, n = Inf)
   } else {

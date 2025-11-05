@@ -13,7 +13,7 @@
 #'   recursion in the call to `assert_sample_subset`.
 as_facile_frame <- function(x, datastore = fds(x), classes = NULL, ...,
                             .valid_sample_check = TRUE) {
-  assert_class(datastore, "FacileDataStore")
+  assert_class(datastore, "FacileDataStore", null.ok = TRUE)
   assert_multi_class(x, c("tbl", "data.frame"))
 
   .valid_sample_check <- .valid_sample_check &&
@@ -21,8 +21,14 @@ as_facile_frame <- function(x, datastore = fds(x), classes = NULL, ...,
   if (.valid_sample_check) {
     assert_sample_subset(x, datastore)
   }
-
+  
+  if (is.null(datastore)) {
+    warning("No FacileDataStore provided, abortin facile_frame conversion")
+    return(x)
+  }
+  
   if (!is.null(classes)) assert_character(classes)
+
   if (!is(x, "facile_frame")) {
     classes <- c(classes, "facile_frame")
   }
