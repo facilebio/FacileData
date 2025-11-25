@@ -14,75 +14,91 @@ genes <- c(
   PRF1='5551',
   GZMA='3001',
   CD274='29126',
-  TIGIT='201633')
+  TIGIT='201633'
+)
 
 features <- tibble(assay='rnaseq', feature_id=genes)
 
-test_that("batch effect correction mimics limma::removeBatchEffect", {
+test_that("remove_batch_effect works like limma::removeBatchEffect", {
   smpls <- FDS |>
     filter_samples(indication == "BLCA") |>
     with_sample_covariates() |>
-    mutate(sample_key = paste(dataset, sample_id, sep = "__"))
-
+    mutate(sample_key = paste(dataset, sample_id, sep = "__"), .before = 1L)
+  
   dat <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
                           as.matrix = TRUE)
+  attr(dat, "fds") <- NULL
+  attr(dat, "samples_dropped") <- NULL
+  attr(dat, "samples") <- NULL
+  
   expect_equal(smpls$sample_key, colnames(dat))
+  
+  # one factor covariate normalization .........................................
+  norm.sex <- remove_batch_effect(dat, smpls, batch = "sex")
+  norm.sexf <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
+                                batch = "sex", as.matrix = TRUE)
+  limma.sex <- expect_message({
+    limma::removeBatchEffect(dat, batch = smpls$sex)
+  }, ".*not specified")
+  
+  expect_equal(norm.sex, limma.sex)
+  expect_equal(norm.sexf, limma.sex, check.attributes = FALSE)
 
-  # Normalize by one batch covaraite ...........................................
-  dat.norm1 <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
-                                as.matrix = TRUE, batch = "sex",
-                                maintain.rowmeans = FALSE)
-  e.norm1 <- limma::removeBatchEffect(dat, batch = smpls$sex)
-  expect_equal(dat.norm1, e.norm1)
+  # two factor coavariate normaliation .........................................
+  # note that facile handles NA values in covariates and assigns them to an
+  # outgroup (for better or for worse), and limma does not do that, so let's
+  # manualy fix (subtype_tcga has NA values)
+  set.seed(0xBEEF)
+  smpls <- mutate(smpls, b2 = sample(c("a", "b"), nrow(smpls), replace = TRUE))
+  norm.2 <- remove_batch_effect(dat, smpls, batch = c("sex", "b2"))
+  norm.2f <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
+                              batch = c("sex", "b2"), as.matrix = TRUE)
+  limm.2 <- expect_message({
+    limma::removeBatchEffect(
+      dat,
+      batch = smpls$sex,
+      batch2 = smpls$b2
+    )    
+  }, ".*not specified")
 
-  # the fixed expression matrix has shifted rowMeans. ..........................
-  expect_true(!isTRUE(all.equal(rowMeans(dat.norm1), rowMeans(dat))))
+  expect_equal(norm.2, limm.2)
+  expect_equal(norm.2f, limm.2, check.attributes = FALSE)
 
-  # We can maintain the rowmeans by setting saintain.rowmanes = TRUE
-  # which is the default.
-  same.mean <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
-                                as.matrix = TRUE, batch = "sex",
-                                maintain.rowmeans = TRUE)
-  expect_equal(rowMeans(same.mean), rowMeans(dat))
+  # include a main effect to maintain ..........................................
+  fbatch <- remove_batch_effect(dat, smpls, batch = "sex", main = "sample_type")
+  f2 <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
+                         batch = "sex", main = "sample_type", as.matrix = TRUE)
+  lbatch <- limma::removeBatchEffect(
+    dat,
+    batch = smpls$sex,
+    group = smpls$sample_type
+  )
+  expect_equal(fbatch, lbatch)
+  expect_equal(fbatch, f2, check.attributes = FALSE)
 
-  # Normalize by two batch covaraites ..........................................
-  set.seed(123)
-  smpls$dummy <- sample(c("a", "b"), nrow(smpls), replace = TRUE)
-  dat.norm2 <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
-                                as.matrix = TRUE, batch = c("sex", "dummy"),
-                                maintain.rowmeans = FALSE)
-  e.norm2 <- limma::removeBatchEffect(dat, batch = smpls$sex,
-                                      batch2 = smpls$dummy)
-  expect_equal(dat.norm2, e.norm2)
-
-  # Normalize with a real valued covariate .....................................
-  smpls$real <- rnorm(nrow(smpls), mean = 0)
-  smpls$real[1:7] <- rnorm(7, mean = 1)
-  dat.normR <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
-                                as.matrix = TRUE, batch = c("real"),
-                                maintain.rowmeans = FALSE)
-  e.normR <- limma::removeBatchEffect(dat, covariates = smpls$real)
-  expect_equal(dat.normR, e.normR)
+  # use a numeric covariate ....................................................
+  set.seed(0xBEEF)
+  smpls <- mutate(smpls, rn = rnorm(nrow(smpls)))
+  fbatch <- remove_batch_effect(dat, smpls, batch = "rn")
+  fb <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
+                         batch = "rn", as.matrix = TRUE)
+  lbatch <- expect_message({
+    limma::removeBatchEffect(dat, covariates = smpls$rn)
+  }, ".*not specified")
+  
+  expect_equal(fbatch, lbatch)
+  expect_equal(fbatch, fb, check.attributes = FALSE)
 
   # full bore ..................................................................
   dat.norm.uber <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
-                                    as.matrix = TRUE, batch = c("sex", "real"),
-                                    main = "sample_type",
-                                    maintain.rowmeans = FALSE)
-
-  des <- model.matrix(~ sample_type + sex + real, smpls)
-  e.norm.uber <- limma::removeBatchEffect(dat, design = des[, 1:2],
-                                          covariates = des[, -(1:2)])
-  expect_equal(dat.norm.uber, e.norm.uber)
-
-  # Final check for equal rowmeans functionality ...............................
-  expect_true(!isTRUE(all.equal(rowMeans(dat.norm.uber), rowMeans(dat))))
-  d2 <- fetch_assay_data(FDS, features, smpls, normalized = TRUE,
-                         as.matrix = TRUE, batch = c("sex", "real"),
-                         main = "sample_type",
-                         maintain.rowmeans = TRUE)
-  expect_equal(rowMeans(d2), rowMeans(dat))
+                                    as.matrix = TRUE, batch = c("sex", "rn"),
+                                    main = "sample_type")
+  e.norm.uber <- limma::removeBatchEffect(dat, group = smpls$sample_type,
+                                          batch = smpls$sex,
+                                          covariates = smpls$rn)
+  expect_equal(dat.norm.uber, e.norm.uber, check.attributes = FALSE)
 })
+
 
 test_that("batch correction using 'facile' covariate works", {
   smpls <- FDS |>

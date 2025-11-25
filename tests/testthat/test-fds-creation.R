@@ -198,12 +198,15 @@ test_that("fds_add_assay_data maintains fidelity of data and cpm", {
     feature_type = .new.assay$feature_type,
     storage_mode = "integer"
   )
-  ad <- fds_add_assay_data(
-    tfds,
-    se.counts,
-    assay_name = .new.assay$assay,
-    dataset_name = se$dataset[1]
-  )
+  
+  ad <- expect_warning({
+    fds_add_assay_data(
+      tfds,
+      se.counts,
+      assay_name = .new.assay$assay,
+      dataset_name = se$dataset[1]
+    )
+  }, "no metadata")
   
   amatrix <- fetch_assay_data(tfds, as.matrix = TRUE)
   colnames(amatrix) <- sub(".*?__", "", colnames(amatrix))
@@ -253,13 +256,15 @@ test_that("fds_add_assay handles non 1:1 input featurespace vs registered featur
     feature_type = .new.assay$feature_type,
     storage_mode = "integer"
   )
-  ad <- fds_add_assay_data(
-    tfds,
-    se.counts,
-    assay_name = .new.assay$assay,
-    dataset_name = se$dataset[1],
-    missing_value = missing.val
-  )
+  ad <- expect_warning({
+    fds_add_assay_data(
+      tfds,
+      se.counts,
+      assay_name = .new.assay$assay,
+      dataset_name = se$dataset[1],
+      missing_value = missing.val
+    )
+  }, "no metadata")
   
   amatrix <- fetch_assay_data(tfds, as.matrix = TRUE)
   colnames(amatrix) <- sub(".*?__", "", colnames(amatrix))

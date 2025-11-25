@@ -121,7 +121,8 @@ test_that("Supports addition of second assay to original feature new features", 
       facile_assay_description = ai2$description,
       facile_feature_info = ad2[[1]]$genes,
       storage_mode = ai2$storage_mode,
-      assay_name = ai2$assay_name)
+      assay_name = NULL #ai2$assay_name
+    )
   }, regexp = "source.*column.*unspecified")
   
   f.universe <- features(fds, feature_type = "ensgid")

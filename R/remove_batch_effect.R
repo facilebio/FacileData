@@ -77,10 +77,10 @@ remove_batch_effect <- function(x, sample_info, batch = NULL, main = NULL,
   if (!nrow(sample_info) == ncol(x)) {
     stop("rows in sample_info do not match columns in x")
   }
-
+  
   if (is.character(main) && length(main) == 0L) main <- NULL
   if (!is.null(main)) assert_string(main)
-
+  
   retrieve.covs <- setdiff(c(batch, main), colnames(sample_info))
   if (length(retrieve.covs)) {
     fds. <- fds(sample_info)
@@ -90,7 +90,7 @@ remove_batch_effect <- function(x, sample_info, batch = NULL, main = NULL,
       stop("batch covariates missing in sample_info, and sample_info is not ",
            "attached to a FacileDataStore")
     }
-
+    
     sample_info <- try({
       with_sample_covariates(sample_info, retrieve.covs, .fds = fds.)
     }, silent = TRUE)
@@ -99,17 +99,17 @@ remove_batch_effect <- function(x, sample_info, batch = NULL, main = NULL,
            paste(retrieve.covs, collapse = ","))
     }
   }
-
+  
   # At this point, the rows of sample_info should match the columns of
   # `x`. Let's triple-check that, so we don't mistakenly correct batches
   # for mismatched samples.
   if (!samples_look_concordant(colnames(x), sample_info)) {
     stop("the sample_info data.frame doesn't look to match the sample ids")
   }
-
+  
   # Let's QC our batch covariates to make sure that our code can go smoothly
   batch.df <- droplevels(sample_info[, c(main, batch), drop = FALSE])
-
+  
   # Missing values in the batch correction code below will hose us with an
   # unhelpful error message.
   #
@@ -117,48 +117,53 @@ remove_batch_effect <- function(x, sample_info, batch = NULL, main = NULL,
   # it to an "outgroup" level. If there are NA values in a numeric covariate,
   # we will just fail.
   batch.df <- freplace_na(batch.df, ...)
-
+  
   # It's possible that the main and batch covariates are all singular,
   # ie. all factors with the same level, or whatever. Let's protect against
   # that before we removeBatchEffect
   is.singular <- sapply(batch.df, function(vals) length(unique(vals)) == 1L)
-
+  
   if (!is.null(main) && is.singular[main]) main <- NULL
   batch <- setdiff(batch, names(is.singular)[is.singular])
-
+  
   if (length(batch)) {
     is.num <- sapply(batch.df[, batch, drop = FALSE], is.numeric)
-    if (is.null(main)) {
-      if (any(!is.num)) {
-        cat.mats <- lapply(batch[!is.num], function(bcov) {
-          # in limma we trust (code taken from limma::removeBatchEffect)
-          batch. <- droplevels(as.factor(batch.df[[bcov]]))
-          contrasts(batch.) <- contr.sum(levels(batch.))
-          model.matrix(~ batch.)[, -1L, drop = FALSE]
-        })
-        cat.mats <- do.call(cbind, cat.mats)
-      } else {
-        cat.mats <- matrix(0, nrow = nrow(batch.df), ncol = 0)
-      }
-      num.mats <- batch.df[, batch[is.num], drop = FALSE]
-      batch.design <- cbind(cat.mats, num.mats)
-      treatment.design <- matrix(1, nrow(batch.df), 1)
+    is.cat <- !is.num
+    batch.cat <- NULL
+    batch.num <- NULL
+    if (any(is.num)) {
+      batch.num <- batch.df[, batch[is.num], drop = FALSE]
+      # numeric covariates are centered in limma::removeBatchEffect since
+      # version 3.65.1 (feb 2025)
+      batch.num <- t(t(batch.num) - colMeans(batch.num))
+    }
+    if (any(is.cat)) {
+      batch.cat <- lapply(batch[is.cat], function(bcov) {
+        # in limma we trust (code taken from limma::removeBatchEffect)
+        # https://support.bioconductor.org/p/85202/#85231
+        batch. <- droplevels(as.factor(batch.df[[bcov]]))
+        contrasts(batch.) <- contr.sum(levels(batch.))
+        model.matrix(~ batch.)[, -1L, drop = FALSE]
+      })
+      batch.cat <- do.call(cbind, batch.cat)
+    }
+    batch.X <- cbind(batch.cat, batch.num)
+
+    if (!is.null(main)) {
+      des.formula <- paste("~", main)
+      des <- model.matrix(formula(des.formula), data = batch.df)
     } else {
-      batch.formula <- paste(batch, collapse = " + ")
-      des.formula <- paste("~", main, "+", batch.formula)
-      des.matrix <- model.matrix(formula(des.formula), data = batch.df)
-      main.cols <- c(1, grep(sprintf("^%s", main), colnames(des.matrix)))
-      treatment.design <- des.matrix[, main.cols, drop = FALSE]
-      batch.design <- des.matrix[, -(main.cols), drop = FALSE]
+      des <- matrix(1, nrow(batch.df), ncol = 1L)
     }
-    if (maintain.rowmeans) {
-      batch.design <- scale(batch.design)
-    }
-    x <- suppressWarnings({
-      # partial match of 'coef' to 'coefficients'
-      removeBatchEffect(x, design = treatment.design,
-                        covariates = batch.design)
-    })
+    
+    dfull <- cbind(des, batch.X)
+    fit <- limma::lmFit(x, dfull, ...)
+    
+    beta <- fit$coefficients[, -(1:ncol(des)), drop = FALSE]
+    beta[is.na(beta)] <- 0
+    out <- x - beta %*% t(batch.X)
+  } else {
+    out <- x
   }
-  x
+  out
 }
