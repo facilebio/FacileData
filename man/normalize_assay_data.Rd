@@ -29,7 +29,7 @@ type, and the rows here match 1:1 the rows in \code{x}.}
 \item{samples}{a sample descriptor for the columns in \code{x}. Rows here
 should match columns in \code{x} 1:1.}
 
-\item{batch, main}{parameters sent to \code{\link[=remove_batch_effects]{remove_batch_effects()}} after assay
+\item{batch, main}{parameters sent to \code{\link[=remove_batch_effect]{remove_batch_effect()}} after assay
 data has been materialized.}
 }
 \description{

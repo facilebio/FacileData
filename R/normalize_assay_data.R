@@ -13,7 +13,7 @@
 #'   type, and the rows here match 1:1 the rows in `x`.
 #' @param samples a sample descriptor for the columns in `x`. Rows here
 #'   should match columns in `x` 1:1.
-#' @param batch,main parameters sent to [remove_batch_effects()] after assay
+#' @param batch,main parameters sent to [remove_batch_effect()] after assay
 #'   data has been materialized.
 normalize_assay_data <- function(x, features, samples, batch = NULL,
                                  log = TRUE, prior.count = 0.1,

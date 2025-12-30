@@ -632,6 +632,7 @@ fetch_custom_sample_covariates.default <- function(x, covariates = NULL,
   stop("fetch_custom_sample_covariates not defined for class: ", class(x)[1])
 }
 
+#' Append assay data to a facile_frame
 #' @export
 #' @family FacileInterface
 with_assay_data <- function(x, features, assay_name = NULL,

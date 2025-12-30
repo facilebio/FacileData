@@ -16,6 +16,7 @@ Other FacileInterface:
 \code{\link{facet_frame.FacileDataSet}()},
 \code{\link{fetch_assay_score}()},
 \code{\link{fetch_sample_covariates}()},
-\code{\link{samples}()}
+\code{\link{samples}()},
+\code{\link{with_assay_data}()}
 }
 \concept{FacileInterface}

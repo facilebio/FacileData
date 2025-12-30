@@ -307,6 +307,27 @@ covariate_definitions.FacileDataSet <- function(
 
 #' @noRd
 #' @export
+#' @importFrom yaml yaml.load_file
+covariate_definitions.facile_frame <- function(
+  x,
+  as.list = TRUE,
+  ...,
+  validate_metadata = TRUE
+) {
+  out <- attr(x, "covariate_definitions")
+  if (is.null(out)) {
+    out <- covariate_definitions(
+      fds(x),
+      as.list = as.list,
+      ...,
+      validate_metadata = validate_metadata
+    )
+  }
+  out
+}
+    
+#' @noRd
+#' @export
 name.FacileDataSet <- function(x, ...) {
   name. <- assert_string(meta_info(x)[["name"]])
   name.

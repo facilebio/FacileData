@@ -22,6 +22,7 @@ Other FacileInterface:
 \code{\link{facet_frame.FacileDataSet}()},
 \code{\link{fetch_sample_covariates}()},
 \code{\link{fetch_sample_statistics}()},
-\code{\link{samples}()}
+\code{\link{samples}()},
+\code{\link{with_assay_data}()}
 }
 \concept{FacileInterface}

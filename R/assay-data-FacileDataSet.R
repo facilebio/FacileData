@@ -102,10 +102,18 @@ fetch_assay_data.FacileDataSet <- function(x, features = NULL, samples = NULL,
     agg <- attr(xx, "aggregated")
     if (is.list(agg)) {
       agg$method <- aggregate.by
-      agg$weights <- dplyr::tibble(
-        feature_id = names(agg$weights),
-        weight = unname(agg$weights)) |> 
-        dplyr::arrange(dplyr::desc(weight))
+      if (aggregate.by == "zscore") {
+        agg$stats <- dplyr::tibble(
+          feature_id = names(agg$center),
+          center = unname(agg$center),
+          scale = unname(agg$scale)
+        )
+      } else {
+        agg$stats <- dplyr::tibble(
+          feature_id = names(agg$weights),
+          weight = unname(agg$weights)
+        ) |> dplyr::arrange(dplyr::desc(weight))
+      }
     }
     agg
   })

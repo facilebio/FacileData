@@ -82,7 +82,8 @@ Other FacileInterface:
 \code{\link{facet_frame.FacileDataSet}()},
 \code{\link{fetch_assay_score}()},
 \code{\link{fetch_sample_statistics}()},
-\code{\link{samples}()}
+\code{\link{samples}()},
+\code{\link{with_assay_data}()}
 
 Other API: 
 \code{\link{fetch_assay_score.FacileDataSet}()},
@@ -98,7 +99,8 @@ Other FacileInterface:
 \code{\link{facet_frame.FacileDataSet}()},
 \code{\link{fetch_assay_score}()},
 \code{\link{fetch_sample_statistics}()},
-\code{\link{samples}()}
+\code{\link{samples}()},
+\code{\link{with_assay_data}()}
 
 Other API: 
 \code{\link{fetch_assay_score.FacileDataSet}()},
