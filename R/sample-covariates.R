@@ -359,6 +359,7 @@ save_custom_sample_covariates <- function(x, annotation, name = NULL,
 with_sample_covariates.facile_frame <- function(x, covariates = NULL,
                                                 na.rm = FALSE,
                                                 custom_key = Sys.getenv("USER"),
+                                                cov.def = covariate_definitions(x),
                                                 .fds = fds(x), ...) {
   x <- collect(x, n = Inf)
   .fds <- assert_facile_data_store(.fds)
@@ -370,10 +371,12 @@ with_sample_covariates.facile_frame <- function(x, covariates = NULL,
 with_sample_covariates.tbl <- function(x, covariates = NULL,
                                        na.rm = FALSE,
                                        custom_key = Sys.getenv("USER"),
+                                       cov.def = covariate_definitions(x),
                                        .fds = NULL, ...) {
   with_sample_covariates.data.frame(collect(x, n = Inf),
                                     covariates = covariates,
                                     na.rm = na.rm, custom_key = custom_key,
+                                    cov.def = cov.def,
                                     .fds = .fds, ...)
 }
 
@@ -388,6 +391,7 @@ with_sample_covariates.tbl <- function(x, covariates = NULL,
 with_sample_covariates.data.frame <- function(x, covariates = NULL,
                                               na.rm = FALSE,
                                               custom_key = Sys.getenv("USER"),
+                                              cov.def = covariate_definitions(x),
                                               .fds = NULL, ...) {
   assert_facile_data_store(.fds)
   x <- assert_sample_subset(x) |> collect(n=Inf)
@@ -410,7 +414,7 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
     return(samples)
   }
   
-  covs <- spread_covariates(covs, .fds, ...)
+  covs <- spread_covariates(covs, .fds, cov.def = cov.def, ...)
   if (!is.null(covariates) && !is.null(names(covariates))) {
     covs <- rename(covs, !!covariates)
   }

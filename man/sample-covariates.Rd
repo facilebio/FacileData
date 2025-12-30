@@ -21,6 +21,7 @@ with_sample_covariates(
   covariates = NULL,
   na.rm = FALSE,
   custom_key = Sys.getenv("USER"),
+  cov.def = NULL,
   .fds = NULL,
   ...
 )

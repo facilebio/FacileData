@@ -678,7 +678,7 @@ with_assay_data.default <- function(x, features, assay_name = NULL,
 #' @rdname sample-covariates
 with_sample_covariates <- function(x, covariates = NULL, na.rm = FALSE,
                                    custom_key = Sys.getenv("USER"),
-                                   .fds = NULL, ...) {
+                                   cov.def = NULL, .fds = NULL, ...) {
   UseMethod("with_sample_covariates", x)
 }
 
