@@ -278,7 +278,16 @@ dataset_definitions <- function(x, as.list = TRUE, validate_metadata = TRUE) {
 
 #' @noRd
 #' @export
-#' @importFrom yaml yaml.load_file
+covariate_definitions.default <- function(
+    x, 
+    as.list = TRUE, 
+    ...,
+    validate_metadata = TRUE) {
+  NULL
+}
+
+#' @noRd
+#' @export
 covariate_definitions.FacileDataSet <- function(
     x, 
     as.list = TRUE, 
@@ -307,7 +316,6 @@ covariate_definitions.FacileDataSet <- function(
 
 #' @noRd
 #' @export
-#' @importFrom yaml yaml.load_file
 covariate_definitions.facile_frame <- function(
   x,
   as.list = TRUE,

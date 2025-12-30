@@ -440,7 +440,7 @@ with_sample_covariates.data.frame <- function(x, covariates = NULL,
 #' @param x output from \code{fetch_sample_covariates}
 #' @param .fds A \code{FacileDataSet} object
 #' @return a wide \code{tbl_df}-like object
-spread_covariates <- function(x, .fds = fds(x), cov.def = NULL, ...) {
+spread_covariates <- function(x, .fds = fds(x), cov.def = covariate_definitions(x), ...) {
   assert_facile_data_store(.fds)
   x <- assert_sample_covariates(x) |>
     collect(n=Inf)

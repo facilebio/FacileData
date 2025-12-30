@@ -62,7 +62,7 @@ assert_valid_meta_file <- function(fn, as.list = FALSE, validate = TRUE) {
   if (!tolower(file_ext(fn)) ==  'yaml') {
     stop("meta file must be a yaml file")
   }
-  dat <- yaml.load_file(fn)
+  dat <- yaml::yaml.load_file(fn)
   if (validate) {
     req.toplevel <- c('name', 'organism', 'datasets', 'sample_covariates',
                       'default_assay')

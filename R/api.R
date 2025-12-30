@@ -678,7 +678,8 @@ with_assay_data.default <- function(x, features, assay_name = NULL,
 #' @rdname sample-covariates
 with_sample_covariates <- function(x, covariates = NULL, na.rm = FALSE,
                                    custom_key = Sys.getenv("USER"),
-                                   cov.def = NULL, .fds = NULL, ...) {
+                                   cov.def = covariate_definitions(x),
+                                   .fds = NULL, ...) {
   UseMethod("with_sample_covariates", x)
 }
 
@@ -686,6 +687,7 @@ with_sample_covariates <- function(x, covariates = NULL, na.rm = FALSE,
 #' @family FacileInterface
 with_sample_covariates.default <- function(x, covariates = NULL, na.rm = FALSE,
                                            custom_key = Sys.getenv("USER"),
+                                           cov.def = covariate_definitions(x),
                                            .fds = NULL, ...) {
   stop("with_sample_covariates not defined for class: ", class(x)[1])
 }
