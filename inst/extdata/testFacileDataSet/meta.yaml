@@ -1,4 +1,4 @@
-name: testFacileDataSet
+name: testKPMPFacileDataSet
 organism: Homo sapiens
 default_assay: scrnaseq
 datasets:

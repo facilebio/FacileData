@@ -1,0 +1,13 @@
+datasets:
+  default: testFacileDataSet
+  groups:
+    "Example Data Sets":
+      - exampleFacileDataSet
+      - testFacileDataSet
+genesets:
+  default:
+    - Hallmark
+    - KEGG
+    - Reactome
+    - ISR
+    - ISR groom
