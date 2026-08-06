@@ -209,3 +209,30 @@ test_that("covariate summary is robust to sparse numeric vectors", {
   expect_s3_class(wpdat, "facile_frame")
   expect_s3_class(lpdat, "facile_frame")
 })
+
+test_that("wide covariate summary handles numeric vectors without values", {
+  efds <- exampleFacileDataSet()
+  wide <- samples(efds) |> with_sample_covariates()
+  numeric.cols <- names(wide)[vapply(wide, is.numeric, logical(1L))]
+  expect_gt(length(numeric.cols), 0L)
+  
+  empty <- wide[0L, ]
+  empty.expanded <- summary(empty, expanded = TRUE)
+  empty.compact <- summary(empty, expanded = FALSE)
+  expect_s3_class(empty.expanded, "facile_frame")
+  expect_s3_class(empty.compact, "facile_frame")
+  # The previous assertion did not account for retained categorical levels:
+  # expect_equal(nrow(empty.expanded), 0L)
+  expect_true(all(empty.expanded$ninlevel == 0L))
+  expect_false(any(numeric.cols %in% empty.expanded$variable))
+  expect_true(all(empty.compact$nsamples == 0L))
+  
+  numeric.col <- numeric.cols[[1L]]
+  wide[[numeric.col]] <- NA_real_
+  all.na.expanded <- summary(wide, expanded = TRUE)
+  all.na.compact <- summary(wide, expanded = FALSE) |>
+    filter(variable == numeric.col)
+  expect_false(numeric.col %in% all.na.expanded$variable)
+  expect_equal(all.na.compact$nsamples, 0L)
+  expect_true(is.na(all.na.compact$IQR))
+})

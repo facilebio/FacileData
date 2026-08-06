@@ -77,7 +77,8 @@ build_assay_list_file_path <- function(assay_name) {
     stop("no information found for assay_name: ", assay_name)
   }
   outdir <- system.file("extdata", "assay-data", package = "FacileData")
-  file.path(outdir, paste0(ainfo$assay_name, "-assay-list.qs"))
+  # file.path(outdir, paste0(ainfo$assay_name, "-assay-list.qs"))
+  file.path(outdir, paste0(ainfo$assay_name, "-assay-list.rds"))
 }
 
 #' Loads an assay list object
@@ -85,5 +86,6 @@ build_assay_list_file_path <- function(assay_name) {
 #' @inheritParams build_assay_list_file_path
 build_assay_lists_load <- function(assay_name) {
   fn <- build_assay_list_file_path(assay_name)
-  qs::qread(fn)
+  # qs::qread(fn)
+  readRDS(fn)
 }

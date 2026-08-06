@@ -139,14 +139,19 @@ summary.wide_covariates <- function(object, ..., expanded = FALSE,
       nlevels <- length(vtally)
     } else if (vclass == "real") {
       iqr <- IQR(vals)
-      # small vectors, or those with a lot of NAs produce quantiles that
-      # are not unique, and throw errors
-      qtl <- unique(quantile(vals))
-      if (length(qtl) == 1L) {
-        qtl <- sort(c(qtl - 1, qtl))
+      if (length(vals) == 0L) {
+        iqr <- NA_real_
+        vtally <- table(vals)
+      } else {
+        # small vectors, or those with a lot of NAs produce quantiles that
+        # are not unique, and throw errors
+        qtl <- unique(quantile(vals))
+        if (length(qtl) == 1L) {
+          qtl <- sort(c(qtl - 1, qtl))
+        }
+        bins <- cut(vals, qtl, include.lowest = TRUE)
+        vtally <- table(bins)
       }
-      bins <- cut(vals, qtl, include.lowest = TRUE)
-      vtally <- table(bins)
       nlevels <- NA_integer_
     }
   
